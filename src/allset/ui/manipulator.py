@@ -339,6 +339,8 @@ def tool_kind(context):
     tool = active_tool(context)
     if tool is None or tool.widget != GROUP:
         return None
+    if tool.idname == 'builtin.rotate' and pivot_edit(context):
+        return 'TRANSLATE'
     return TOOLS.get(tool.idname)
 
 
@@ -708,7 +710,7 @@ def _find_item(mode, idname):
     return None
 
 
-def resetup(tool, mode):
+def resetup(tool, mode, widget=None):
     """Set ``tool`` (a WorkSpaceTool of ``mode``) up again from the current ToolDef: the gizmo
     group a tool uses is copied at activation, so a swapped ToolDef needs this."""
     item = _find_item(mode, tool.idname)
@@ -720,10 +722,17 @@ def resetup(tool, mode):
         keymap_fallback += " (fallback)"
     tool.setup(idname=item.idname, keymap=item.keymap[0] if item.keymap is not None else "",
                cursor=item.cursor or 'DEFAULT', options=item.options or set(),
-               gizmo_group=item.widget or "", brush_type=item.brush_type or 'ANY',
+               gizmo_group=(item.widget or "") if widget is None else widget, brush_type=item.brush_type or 'ANY',
                data_block=item.data_block or "", operator=item.operator or "", index=tool.index,
                idname_fallback=tool.idname_fallback, keymap_fallback=keymap_fallback)
     return True
+
+
+def refresh_pivot_tool(context):
+    """Rotate uses the pivot edit handles during D / Insert, then its normal rings again."""
+    tool = active_tool(context)
+    if context.mode == 'OBJECT' and tool is not None and tool.idname == 'builtin.rotate':
+        resetup(tool, context.mode, widget=GROUP if pivot_edit(context) else None)
 
 
 def stale(tool, patched):
@@ -742,6 +751,15 @@ def ensure_tools(patched=True):
             try:
                 tool = ws.tools.from_space_view3d_mode(mode, create=False)
             except (TypeError, RuntimeError):
+                continue
+            if tool is not None and tool.idname == 'builtin.rotate':
+                editing = (patched and mode == 'OBJECT' and ws == bpy.context.workspace
+                           and bpy.context.scene.tool_settings.use_transform_data_origin)
+                if (tool.widget == GROUP) != editing:
+                    try:
+                        done += resetup(tool, mode, widget=GROUP if editing else None)
+                    except (TypeError, RuntimeError, AttributeError) as ex:
+                        print("allset: pivot tool setup failed", tool.idname, ex)
                 continue
             if stale(tool, patched):
                 try:

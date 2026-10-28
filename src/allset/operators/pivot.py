@@ -18,7 +18,7 @@ Affect Only Parents, so children stay); Blender then writes the new origin into 
 location / rotation channels. ``watch()`` waits for each such transform to end and
 rewrites the result the Maya way: channels back, the new pivot position into
 ``delta_location``, a new pivot orientation into the "Maya Pivot" transform orientation
-(the Move tool's Custom axis), geometry and children where they are.
+(the Move and Rotate tools' Custom axes), geometry and children where they are.
 """
 
 import bpy
@@ -32,6 +32,8 @@ ORIENT_NAME = "Maya Pivot"
 # Object-space orientation (quaternion w, x, y, z) of the object's custom pivot (Bake Pivot input).
 PROP = "allset_pivot_orient"
 MOVE_SLOT = 1
+ROTATE_SLOT = 2
+PIVOT_SLOTS = (MOVE_SLOT, ROTATE_SLOT)
 EPS = 1e-6
 POLL = 0.1
 
@@ -155,7 +157,7 @@ def match_pivot(ob, world_point):
     return True
 
 
-# --- the "Maya Pivot" transform orientation (Move tool Custom axis, P8) ------------------------
+# --- the "Maya Pivot" transform orientation (Move and Rotate Custom axes) --------------------
 
 def _find_view3d(context):
     for window in context.window_manager.windows:
@@ -168,7 +170,7 @@ def _find_view3d(context):
 
 
 def set_custom_orientation(context, axes):
-    """Create / update the "Maya Pivot" orientation with world ``axes`` and use it for Move."""
+    """Create / update the picked pivot axes for both Move and Rotate."""
     scene = context.scene
     slots = scene.transform_orientation_slots
     orient = _orientation(scene)
@@ -193,7 +195,8 @@ def set_custom_orientation(context, axes):
         if orient is None:
             return False
     orient.matrix = axes
-    slots[MOVE_SLOT].type = ORIENT_NAME
+    for index in PIVOT_SLOTS:
+        slots[index].type = ORIENT_NAME
     return True
 
 
@@ -214,9 +217,10 @@ def _orientation(scene):
 
 
 def leave_custom_orientation(scene, to='GLOBAL'):
-    slot = scene.transform_orientation_slots[MOVE_SLOT]
-    if slot.type == ORIENT_NAME:
-        slot.type = to
+    for index in PIVOT_SLOTS:
+        slot = scene.transform_orientation_slots[index]
+        if slot.type == ORIENT_NAME:
+            slot.type = to
 
 
 # --- watcher ---------------------------------------------------------------------------------
@@ -323,7 +327,7 @@ _last_lead = [None]
 
 
 def follow_lead(context, scene):
-    """The "Maya Pivot" Move axis belongs to the object whose pivot was turned (Maya keeps pivot axes per object):
+    """The "Maya Pivot" axes belong to the object whose pivot was turned (Maya keeps pivot axes per object):
     a new lead with a turned pivot gets its own axes, one without goes back to Object axes (step 97: the next
     object was moved along the previous object's pivot axes)."""
     ob = context.view_layer.objects.active if context.mode == 'OBJECT' else None
@@ -331,7 +335,7 @@ def follow_lead(context, scene):
     if key == _last_lead[0]:
         return
     _last_lead[0] = key
-    if ob is None or scene.transform_orientation_slots[MOVE_SLOT].type != ORIENT_NAME:
+    if ob is None or not any(scene.transform_orientation_slots[index].type == ORIENT_NAME for index in PIVOT_SLOTS):
         return
     if PROP in ob:
         orient = _orientation(scene)

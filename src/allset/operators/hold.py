@@ -71,11 +71,15 @@ class PivotGroup(HoldGroup):
 
     def restore(self, ts, state):
         ts.use_transform_data_origin, ts.use_transform_skip_children = state
+        from ..ui import manipulator
+        manipulator.refresh_pivot_tool(bpy.context)
 
 
 def set_pivot_mode(ts, on):
     ts.use_transform_data_origin = on
     ts.use_transform_skip_children = on
+    from ..ui import manipulator
+    manipulator.refresh_pivot_tool(bpy.context)
     if on:
         from . import pivot
         pivot.watch()
@@ -98,6 +102,8 @@ def toggle_object_pivot(ts):
     if ts.use_transform_data_origin:
         if _object_toggle_saved is not None:
             ts.use_transform_data_origin, ts.use_transform_skip_children = _object_toggle_saved
+            from ..ui import manipulator
+            manipulator.refresh_pivot_tool(bpy.context)
         else:
             set_pivot_mode(ts, False)
         _object_toggle_saved = None
@@ -616,5 +622,7 @@ def unregister_cleanup():
     _state.clear()
     if scene is not None and _object_toggle_saved is not None:
         scene.tool_settings.use_transform_data_origin, scene.tool_settings.use_transform_skip_children = _object_toggle_saved
+        from ..ui import manipulator
+        manipulator.refresh_pivot_tool(bpy.context)
     _object_toggle_saved = None
     unregister_component()

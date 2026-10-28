@@ -21,6 +21,12 @@ components and world geometry intact. The existing cursor tool can also drag the
 The resulting custom pivot remains available for transforms.
 Object Mode preserves transform channels, world geometry and child positions.
 
+The picked orientation is shared by **Move (W)** and **Rotate (E)**. With Rotate
+active in Object Mode, **D / Insert** temporarily shows the pivot move/orientation
+handles so the rotation rings do not intercept component picks. Finishing pivot
+editing restores the normal Rotate rings at the picked pivot, using its new axes.
+In mesh Edit Mode, finishing restores the previous tool, including Rotate.
+
 The component frame uses X along an incident edge and Z along the surface normal.
 At vertices or faces with several incident edges, the longest world-space edge
 supplies X. This gives a stable right-handed frame under nonuniform object scale.

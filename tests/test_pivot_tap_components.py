@@ -211,3 +211,43 @@ def test_ctrl_shift_aims_the_active_axis_without_moving_the_pivot():
     finally:
         manip.HANDLES['TRANSLATE'] = saved
         hold.COMPONENT.finish(bpy.context)
+
+
+def test_component_pivot_orientation_applies_to_rotate_and_reset():
+    ob = _cube(edit=True)
+    before, selected = _world(ob), _selection(ob)
+    hold.COMPONENT.start(bpy.context)
+    axes = Euler((.2, -.4, .6)).to_matrix()
+    pick.apply_component(bpy.context, (1, 0, 0), axes)
+    hold.COMPONENT.finish(bpy.context)
+    slots = bpy.context.scene.transform_orientation_slots
+    assert slots[pivot.ROTATE_SLOT].type == pivot.ORIENT_NAME
+    assert not hold.turned(slots[pivot.ROTATE_SLOT].custom_orientation.matrix, axes)
+    assert _selection(ob) == selected and all((a-b).length < 1e-6 for a, b in zip(before, _world(ob)))
+    hold.COMPONENT.reset(bpy.context, position=False, orientation=True)
+    assert all(slots[index].type != pivot.ORIENT_NAME for index in pivot.PIVOT_SLOTS)
+
+
+def test_rotate_custom_axes_follow_the_lead_even_with_move_in_world_mode():
+    ob = _cube()
+    axes = Euler((.1, .3, -.4)).to_matrix()
+    hold.toggle_object_pivot(bpy.context.tool_settings)
+    pick.apply_component(bpy.context, (1, 0, 0), axes)
+    hold.toggle_object_pivot(bpy.context.tool_settings)
+    slots = bpy.context.scene.transform_orientation_slots
+    assert slots[pivot.ROTATE_SLOT].type == pivot.ORIENT_NAME
+    slots[pivot.MOVE_SLOT].type = 'GLOBAL'
+    other = bpy.data.objects.new('OtherPivot', None)
+    bpy.context.collection.objects.link(other)
+    other[pivot.PROP] = tuple(Euler((-.3, .2, .7)).to_quaternion())
+    bpy.context.view_layer.objects.active = other
+    pivot._last_lead[0] = None
+    pivot.follow_lead(bpy.context, bpy.context.scene)
+    expected = pick.pivot_axes(bpy.context, other)
+    assert not hold.turned(slots[pivot.ROTATE_SLOT].custom_orientation.matrix, expected)
+    assert slots[pivot.MOVE_SLOT].type == 'GLOBAL'
+    del other[pivot.PROP]
+    pivot._last_lead[0] = None
+    pivot.follow_lead(bpy.context, bpy.context.scene)
+    assert slots[pivot.ROTATE_SLOT].type == 'LOCAL'
+    assert slots[pivot.MOVE_SLOT].type == 'GLOBAL'
