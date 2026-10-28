@@ -5,7 +5,8 @@ Maya highlights the component under the mouse before you click (``preSelectHilit
 research/maya/interaction.md:73, defaults.json:96), following the select mode, also while the
 Move / Rotate / Scale tool is active (measured in research/maya/screens/pre/): a vertex = 5 px red
 square, an edge = 2 px red line (an edge also near its vertices), a face = red outline + red stipple.
-Maya 2022 doesn't highlight objects in object mode (pre_01), so neither does the kit.
+Maya 2022 doesn't highlight objects in object mode (pre_01), so neither does the kit,
+except for component targets while editing a custom pivot.
 
 Blender's ``GIZMO_GT_mesh_preselect_elem_3d`` (step 30) picks the nearest vertex in every select
 mode (measured, step_74.md), so this is a Python gizmo with its own picking:
@@ -121,14 +122,18 @@ def near_handles(mouse, center, tips, center_half, reach):
 # --- per-object cache ---------------------------------------------------------------------------------
 
 class MeshCache:
-    """World vertex positions, edges, visible-face BVH and (lazily) selection of one edit mesh.
+    """World vertex positions, edges, visible-face BVH and (lazily) selection of one mesh.
     Rebuilt after geometry / transform updates only (selection updates keep it, step_74.md)."""
 
     def __init__(self, ob):
         import bmesh
         self.ob_ptr = ob.as_pointer()
         self.name = ob.name
-        self.bm = bm = bmesh.from_edit_mesh(ob.data)
+        self.editing = ob.mode == 'EDIT'
+        self.bm = bm = bmesh.from_edit_mesh(ob.data) if self.editing else bmesh.new()
+        if not self.editing:
+            bm.from_mesh(ob.data)
+            bm.normal_update()
         bm.verts.ensure_lookup_table()
         bm.edges.ensure_lookup_table()
         bm.faces.ensure_lookup_table()
@@ -152,6 +157,11 @@ class MeshCache:
                                             [self.face_verts(i) for i in vis]) if vis else None
         self._sel = None
 
+    def __del__(self):
+        bm = getattr(self, "bm", None)
+        if not getattr(self, "editing", True) and bm is not None and bm.is_valid:
+            bm.free()
+
     def face_verts(self, i):
         return tuple(v.index for v in self.bm.faces[i].verts)
 
@@ -166,6 +176,9 @@ class MeshCache:
         if self._sel is None:
             import bmesh
             bm, mw = self.bm, self.mw
+            if not self.editing:
+                self._sel = ([mw.translation.copy()], mw.translation.copy())
+                return self._sel
             pts = [mw @ v.co for v in bm.verts if v.select and not v.hide]
             el, active = bm.select_history.active, None
             if isinstance(el, bmesh.types.BMVert):
@@ -191,11 +204,17 @@ class MeshCache:
 
 def caches(context):
     out = []
-    for ob in context.objects_in_mode_unique_data or ():
+    objects = context.selected_objects if context.mode == 'OBJECT' else context.objects_in_mode_unique_data or ()
+    for ob in objects:
         if ob is None or ob.type != 'MESH':
             continue
+        if context.mode == 'OBJECT':
+            space = getattr(context, "space_data", None)
+            viewport = {"viewport": space} if space is not None and space.type == 'VIEW_3D' else {}
+            if not ob.visible_get(**viewport):
+                continue
         c = _cache.get(ob.as_pointer())
-        if c is None or c.name != ob.name:
+        if c is None or c.name != ob.name or c.editing != (ob.mode == 'EDIT'):
             c = _cache[ob.as_pointer()] = MeshCache(ob)
         out.append((ob, c))
     return out
@@ -233,6 +252,9 @@ def _enabled(context):
             return False
     except KeyError:
         return False
+    from .pivot_menu import pivot_editing
+    if context.mode in {'OBJECT', 'EDIT_MESH'} and pivot_editing(context):
+        return True
     if context.mode not in MODES:
         return False
     tid = tool_id(context)
@@ -244,16 +266,21 @@ def _xray(space):
     return shading.show_xray_wireframe if shading.type == 'WIREFRAME' else shading.show_xray
 
 
+def pivot_picking(context):
+    from .pivot_menu import pivot_editing
+    return context.mode in {'OBJECT', 'EDIT_MESH'} and pivot_editing(context)
+
+
 def _handles_block(context, region, rv3d, mouse, cs):
     """The mouse is over the transform manipulator of the active tool."""
-    kind = TRANSFORM_TOOLS.get(tool_id(context))
+    from ..ui import manipulator
+    kind = manipulator.tool_kind(context) or TRANSFORM_TOOLS.get(tool_id(context))
     if kind is None:
         return False
     sels = [c.selection() for _ob, c in cs]
     pts = [p for s_ in sels for p in s_[0]]
     if not pts:
         return False
-    from ..ui import manipulator
     act = next((s_[1] for s_ in sels if s_[1] is not None), None)
     ts = context.scene.tool_settings
     center = manipulator.center_of(pts, act, ts.transform_pivot_point, context.scene.cursor.location)
@@ -270,7 +297,8 @@ def _handles_block(context, region, rv3d, mouse, cs):
     px_per_world = (p1 - c2).length if p1 is not None else 0.0
     tips = []
     if px_per_world > 1e-9:
-        frame = manipulator.axes_of(context, manipulator.slot_type(context.scene, kind), rv3d)
+        frame = manipulator.axes_of(context, 'CURSOR' if context.mode == 'EDIT_MESH' and pivot_picking(context)
+                                     else manipulator.slot_type(context.scene, kind), rv3d)
         for i in range(3):
             t = view3d_utils.location_3d_to_region_2d(region, rv3d, center + frame.col[i] * (length_px / px_per_world))
             if t is not None:
@@ -306,7 +334,8 @@ def pick(context, region, rv3d, mouse):
     if not cs or _handles_block(context, region, rv3d, mouse, cs) or _extrude_block(context, region, rv3d, mouse):
         return None
     ts = context.tool_settings
-    vmode, emode, fmode = tuple(ts.mesh_select_mode)
+    multi = pivot_picking(context)
+    vmode, emode, fmode = (True, True, True) if multi else tuple(ts.mesh_select_mode)
     xray = _xray(context.space_data)
     scale = context.preferences.system.ui_scale or 1.0
     radius = RADIUS_PX * scale
@@ -346,10 +375,10 @@ def pick(context, region, rv3d, mouse):
             i = pick_vert(xy, c.vok & front, mouse, radius, lambda i, c=c: not occluded(Vector(c.co[i])))
             if i is not None:
                 d = math.hypot(xy[i, 0] - mouse[0], xy[i, 1] - mouse[1])
-                if best is None or d < best[0]:
+                if best is None or best[1][1] != 'VERT' or d < best[0]:
                     best = (d, (c.ob_ptr, 'VERT', i))
-        elif emode:
-            fallback = c.face_edges(hit[2]) if hit is not None and hit[1] is c else ()
+        if emode and (not vmode or multi) and (best is None or best[1][1] != 'VERT'):
+            fallback = c.face_edges(hit[2]) if not multi and hit is not None and hit[1] is c else ()
             ok = c.eok & front[c.edges[:, 0]] & front[c.edges[:, 1]] if len(c.edges) else c.eok
 
             def vis(i, t, c=c):
@@ -361,7 +390,9 @@ def pick(context, region, rv3d, mouse):
                 d = float(d[0]) if i not in fallback else radius + 1.0
                 if best is None or d < best[0]:
                     best = (d, (c.ob_ptr, 'EDGE', i))
-    return None if best is None else best[1]
+    if best is not None:
+        return best[1]
+    return (hit[1].ob_ptr, 'FACE', hit[2]) if multi and hit is not None else None
 
 
 # --- the gizmo ----------------------------------------------------------------------------------------

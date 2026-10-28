@@ -178,6 +178,7 @@ _STACKS = {"3D View": _VIEW3D_STACK, "Object Mode": _OBJECT_MODE_STACK,
            **{km: (km,) for km in maya_patches.SELECT_DRAG_KEYMAPS},
            # Step 76: the Tweak tool keymap (only active with that tool, ahead of the editor keymaps).
            "3D View Tool: Tweak": ("3D View Tool: Tweak",),
+           "3D View Tool: Cursor": ("3D View Tool: Cursor",),
            # Step 66: the UV Editor (an Image Editor in UV mode).
            maya_patches.UV_KM: ("Window", "Screen", "Frames", maya_patches.UV_KM, "Image", "Image Generic", "View2D"),
            # Step 84: the scrub strip of the Dope Sheet / Graph Editor / Time Slider (its own keymap, kit-made).

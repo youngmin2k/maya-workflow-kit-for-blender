@@ -7,6 +7,7 @@ import os
 import sys
 
 import bpy
+import bmesh
 from bpy_extras import view3d_utils
 from mathutils import Vector
 
@@ -92,6 +93,10 @@ def s_insert_on():
 def s_insert_check():
     check(f"Insert: cursor tool ({tool_id()}) and cursor pivot ({ts().transform_pivot_point})",
           tool_id() == "builtin.cursor" and ts().transform_pivot_point == 'CURSOR')
+    ob = bpy.context.edit_object
+    bm = bmesh.from_edit_mesh(ob.data)
+    C['world'] = [ob.matrix_world @ v.co for v in bm.verts]
+    C['selection'] = tuple(tuple(e.index for e in elements if e.select) for elements in (bm.verts, bm.edges, bm.faces))
     click(screen_xy(Vector((1.0, -0.3, 0.2))))          # the +X side face
 
 
@@ -128,6 +133,11 @@ def s_drag_release():
 def s_dragged():
     moved = (cursor().location - C["loc"]).length > 1e-3
     check(f"Insert + drag moves the pivot ({tuple(round(v, 2) for v in cursor().location)})", moved)
+    ob = bpy.context.edit_object
+    bm = bmesh.from_edit_mesh(ob.data)
+    selection = tuple(tuple(e.index for e in elements if e.select) for elements in (bm.verts, bm.edges, bm.faces))
+    check("component pivot dragging preserves selection and world geometry",
+          selection == C['selection'] and all((p-ob.matrix_world @ v.co).length < 1e-5 for p, v in zip(C['world'], bm.verts)))
     hover(C["mid"])
     tap('INSERT')
 

@@ -22,7 +22,7 @@ ADDED = []
 
 # Operators that return PASS_THROUGH when they don't apply, so they may sit in
 # front of another item with the same event in the same keymap.
-PASS_THROUGH_FIRST = ("allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_press",
+PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_press",
                       "allset.select_priority", "allset.select_through", "allset.toolbox_guard", "allset.time_scrub",
                       "allset.time_slider_menu", "allset.outliner_set_click", "allset.outliner_set_menu",
                       "allset.graph_channel_click", "allset.graph_channel_scroll", "allset.script_run",
@@ -241,6 +241,9 @@ def patch_tap_hold_and_pivot(kd):
     kd.remove("Object Mode", "wm.tool_set_by_id", type="D")              # IC:121 annotate
     _add(kd, "Object Mode", "allset.hold", make_event("D"), {"name": "pivot"})
     _add(kd, "Object Mode", "allset.pivot_toggle", make_event("INSERT"))
+    # Pivot picking precedes normal/cursor selection only during custom pivot edit.
+    for km in ("3D View", "3D View Tool: Cursor"):
+        _add(kd, km, "allset.pivot_pick", make_event("LEFTMOUSE", any=True), first=True)
 
 
 # --- 8. Arrow-key pick-walk (object mode) -----------------------------------

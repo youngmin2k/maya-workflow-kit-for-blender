@@ -85,8 +85,8 @@ class ALLSET_OT_pivot_exit(bpy.types.Operator):
         from . import hold
         if context.mode == hold.EDIT_MODE:
             hold.COMPONENT.finish(context)
-        else:
-            hold.set_pivot_mode(context.scene.tool_settings, False)
+        elif context.scene.tool_settings.use_transform_data_origin:
+            hold.toggle_object_pivot(context.scene.tool_settings)
         hold._redraw()
         return {'FINISHED'}
 

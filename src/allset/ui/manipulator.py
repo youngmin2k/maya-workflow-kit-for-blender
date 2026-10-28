@@ -527,7 +527,7 @@ class ALLSET_GGT_xform(GizmoGroup):
         self._built_for = (kind, pivot)
         self._ops_for = None
 
-    def _bind_ops(self, kind, otype):
+    def _bind_ops(self, kind, otype, frame=None):
         """Point each handle at Blender's transform with its constraint and orientation."""
         op = {'TRANSLATE': "transform.translate", 'RESIZE': "transform.resize"}[kind]
         for gz, role, data in self.handles:
@@ -535,12 +535,12 @@ class ALLSET_GGT_xform(GizmoGroup):
                 axes = tuple(a == data for a in 'XYZ')
                 props = gz.target_set_operator(op)
                 props.constraint_axis = axes
-                props.orient_type = otype
+                self._orient(props, otype, frame)
                 props.release_confirm = True
             elif role == 'PLANE':
                 props = gz.target_set_operator(op)
                 props.constraint_axis = PLANES[data][0]
-                props.orient_type = otype
+                self._orient(props, otype, frame)
                 props.release_confirm = True
             elif role == 'CENTER':
                 props = gz.target_set_operator(op)
@@ -554,6 +554,15 @@ class ALLSET_GGT_xform(GizmoGroup):
                 props.release_confirm = True
         self._ops_for = (kind, otype)
 
+    @staticmethod
+    def _orient(props, otype, frame):
+        # Gizmo operator properties expose built-in enum values on Blender 5.2.
+        # Supply the picked component axes explicitly for custom orientations.
+        builtin = {'GLOBAL', 'LOCAL', 'NORMAL', 'GIMBAL', 'VIEW', 'CURSOR', 'PARENT'}
+        props.orient_type = otype if otype in builtin else 'GLOBAL'
+        props.orient_matrix_type = 'GLOBAL'
+        props.orient_matrix = Matrix.Identity(3) if otype in builtin else frame
+
     def draw_prepare(self, context):
         kind = tool_kind(context)
         if kind is None:
@@ -563,16 +572,16 @@ class ALLSET_GGT_xform(GizmoGroup):
             self._build(context, kind, pivot)
         scene = context.scene
         otype = slot_type(scene, kind)
-        if self._ops_for != (kind, otype):
-            self._bind_ops(kind, otype)
+        rv3d = context.region_data
+        frame = axes_of(context, otype, rv3d)
+        if self._ops_for != (kind, otype) or otype not in {'GLOBAL', 'LOCAL', 'NORMAL', 'GIMBAL', 'VIEW', 'CURSOR', 'PARENT'}:
+            self._bind_ops(kind, otype, frame=frame)
         if context.mode == 'EDIT_MESH':
             pts, act = _edit_points(context)
         else:
             pts, act = _object_points(context)
         center = center_of(pts, act, scene.tool_settings.transform_pivot_point, scene.cursor.location)
         hide = center is None
-        rv3d = context.region_data
-        frame = axes_of(context, otype, rv3d)
         view = rv3d.view_rotation.to_matrix() if rv3d is not None else Matrix.Identity(3)
         colours = axis_colours()
         s = scale_basis(context)

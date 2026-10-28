@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya "only while held" keys: X/C/V/J snapping, D pivot editing.
+"""Maya X/C/V/J hold snapping and D tap-toggle / hold pivot editing.
 
 research/maya/interaction.md §0 (press/release hotkeys), §4 (D hold /
 Insert), §5 (X grid, C curve, V point); hotkeys_default.json j =
@@ -8,9 +8,11 @@ docs/steps/step_3.md 「계획」 1-4.
 
 ``begin``/``end`` are plain functions (headless-testable). The operator
 ``allset.hold`` wraps them in a modal that waits for the key's RELEASE.
+A short, unused D press latches pivot editing until D / Insert is pressed again.
 """
 
 import bpy
+import time
 
 from .. import live_refs
 from . import keystate
@@ -79,8 +81,34 @@ def set_pivot_mode(ts, on):
         pivot.watch()
 
 
+_object_toggle_saved = None
+PIVOT_TAP_SECONDS = 0.3
+
+
+def latch_object_pivot(ts):
+    """Detach a short D press from its hold, keeping the original flags for D / Insert to restore."""
+    global _object_toggle_saved
+    state = _state.pop("pivot", None)
+    if state is not None:
+        _object_toggle_saved = state["saved"]
+
+
+def toggle_object_pivot(ts):
+    global _object_toggle_saved
+    if ts.use_transform_data_origin:
+        if _object_toggle_saved is not None:
+            ts.use_transform_data_origin, ts.use_transform_skip_children = _object_toggle_saved
+        else:
+            set_pivot_mode(ts, False)
+        _object_toggle_saved = None
+    else:
+        _object_toggle_saved = GROUPS["pivot"].capture(ts)
+        set_pivot_mode(ts, True)
+    _redraw()
+
+
 class ComponentPivotGroup(HoldGroup):
-    """D hold in mesh edit mode: the 3D cursor is the pivot while held (step 18 「계획」 1)."""
+    """D in mesh edit mode: the 3D cursor is the temporary or toggled pivot."""
 
     def capture(self, ts):
         return ts.transform_pivot_point
@@ -235,10 +263,17 @@ class ComponentPivotEdit:
         self.area_ptr = live_refs.pointer(context.area)   # a pointer: the timer may run after its window closed (#36)
         self.tool = tool.idname if tool and tool.idname != CURSOR_TOOL else "builtin.select_box"
         self.pivot = ts.transform_pivot_point
+        self.previous_cursor = cursor.matrix.copy()
+        if self.pivot != 'CURSOR':
+            centre = selection_center(context)
+            if centre is not None:
+                cursor.location = centre
         self.location = cursor.location.copy()
         self.rotation = cursor.matrix.to_3x3()
+        self.select_mode = tuple(ts.mesh_select_mode)
         self.on, self.toggled, self.pending_tool = True, toggled, None
         ts.transform_pivot_point = 'CURSOR'
+        ts.mesh_select_mode = (True, True, True)
         # the pivot is the 3D cursor: the Maya layout hides it (Maya has none, #59), show it while it is edited
         self.cursors |= show_cursors()
         _tool_set(context, CURSOR_TOOL, self.area_ptr)
@@ -258,14 +293,18 @@ class ComponentPivotEdit:
         cursor = context.scene.cursor
         moved = (cursor.location - self.location).length > 1e-6
         rot = cursor.matrix.to_3x3()
-        ts.transform_pivot_point = component_pivot_after(self.pivot, moved)
+        rotated = turned(self.rotation, rot)
+        ts.mesh_select_mode = self.select_mode
+        ts.transform_pivot_point = component_pivot_after(self.pivot, moved or rotated)
         self.custom = ts.transform_pivot_point == 'CURSOR'
         self.sel_sig = selection_signature(context) if self.custom else None
         if self.orientation is not None and _active_tool(context) == CURSOR_TOOL:
             _set_cursor_orientation(context, self.orientation)
-        if moved and turned(self.rotation, rot):
+        if rotated:
             from . import pivot
             pivot.set_custom_orientation(context, rot)
+        if not moved and not rotated:
+            cursor.matrix = self.previous_cursor
         if context.mode == EDIT_MODE:
             _tool_set(context, self.tool, self.area_ptr)
         else:
@@ -456,13 +495,13 @@ _HOLD_ITEMS = (
     ("curve", "Curve Snap", "Maya C: snap to curves/edges while held"),
     ("point", "Point Snap", "Maya V: snap to vertices while held"),
     ("step", "Step Snap", "Maya J: incremental snap while held"),
-    ("pivot", "Pivot Edit", "Maya D: affect only origins while held"),
-    ("component_pivot", "Component Pivot", "Maya D in edit mode: place the pivot (3D cursor) while held"),
+    ("pivot", "Pivot Edit", "Maya D: tap to toggle pivot editing, or hold temporarily"),
+    ("component_pivot", "Component Pivot", "Maya D: tap to toggle component pivot editing, or hold temporarily"),
     ("preserve_children", "Preserve Children", "Maya D on joints: move the joint only, its children stay"),
 )
 
 class ALLSET_OT_hold(bpy.types.Operator):
-    """Enable a Maya hold mode while the key is held, restore on release"""
+    """Enable a Maya hold mode; tap D to toggle custom pivot editing"""
     bl_idname = "allset.hold"
     bl_label = "Maya Hold Key"
     bl_options = {'INTERNAL'}
@@ -476,11 +515,17 @@ class ALLSET_OT_hold(bpy.types.Operator):
             return {'CANCELLED'}
         self._key = event.type
         self._ts = context.scene.tool_settings
+        self._pivot_tap = self.name in {"pivot", "component_pivot"}
+        self._pressed_at = time.monotonic()
+        self._used = False
         if self.name == "component_pivot":
             if COMPONENT.on:          # D while the Insert pivot edit is on: leave it (Maya D tap toggles [I])
                 COMPONENT.finish(context)
                 return {'FINISHED'}
             COMPONENT.start(context)
+        elif self.name == "pivot" and self._ts.use_transform_data_origin:
+            toggle_object_pivot(self._ts)
+            return {'FINISHED'}
         else:
             begin(self._ts, self.name)
         self._timer = context.window_manager.event_timer_add(self._POLL_INTERVAL, window=context.window)
@@ -495,9 +540,22 @@ class ALLSET_OT_hold(bpy.types.Operator):
         context.window_manager.event_timer_remove(self._timer)
         return {'FINISHED'}
 
+    def _latch(self, context):
+        if self.name == "component_pivot":
+            COMPONENT.toggled = True
+            watch_component()
+        else:
+            latch_object_pivot(self._ts)
+        context.window_manager.event_timer_remove(self._timer)
+        _redraw()
+        return {'FINISHED'}
+
     def modal(self, context, event):
         if event.type == self._key:
             if event.value == 'RELEASE':
+                if (getattr(self, "_pivot_tap", False) and not self._used
+                        and time.monotonic() - self._pressed_at < PIVOT_TAP_SECONDS):
+                    return self._latch(context)
                 return self._finish(context)
             if event.is_repeat:
                 # Step 265 (Issue #178): the OS repeats a held key (~30 / s). A *handled* key event cancels the
@@ -508,6 +566,8 @@ class ALLSET_OT_hold(bpy.types.Operator):
                 # :3683, and kit hold items ignore repeats), so pass it on.
                 return {'PASS_THROUGH'}
             return {'RUNNING_MODAL'}
+        if event.type in {'LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE'} and event.value == 'PRESS':
+            self._used = True
         if event.type == 'TIMER' and keystate.is_down(self._key) is False:
             # RELEASE was consumed by another modal (e.g. a transform drag). Wait for that
             # transform to end: it writes its snap state back to the tool settings when it
@@ -540,8 +600,7 @@ class ALLSET_OT_pivot_toggle(bpy.types.Operator):
                 watch_component()
             return {'FINISHED'}
         ts = context.scene.tool_settings
-        set_pivot_mode(ts, not ts.use_transform_data_origin)
-        _redraw()
+        toggle_object_pivot(ts)
         return {'FINISHED'}
 
 
@@ -550,8 +609,12 @@ classes = (ALLSET_OT_hold, ALLSET_OT_pivot_toggle)
 
 def unregister_cleanup():
     """Restore held states if the add-on is disabled mid-hold."""
+    global _object_toggle_saved
     scene = getattr(bpy.context, "scene", None)
     if scene is not None and _state:
         end_all(scene.tool_settings)
     _state.clear()
+    if scene is not None and _object_toggle_saved is not None:
+        scene.tool_settings.use_transform_data_origin, scene.tool_settings.use_transform_skip_children = _object_toggle_saved
+    _object_toggle_saved = None
     unregister_component()

@@ -120,8 +120,8 @@ class ALLSET_MT_command_history(bpy.types.Menu):
 # Maya shows the tool's help in the Help Line when a tool is active (ui_layout.md:295-298).
 TOOL_HELP = {
     "builtin.select": "Select Tool: click or drag to select. Shift toggles, Ctrl deselects, Ctrl+Shift adds",
-    "builtin.move": "Move Tool: drag the manipulator. Hold X/C/V to snap to grid/curve/point, D to move the pivot",
-    "builtin.rotate": "Rotate Tool: drag a ring to rotate. Hold J to snap rotation, D to move the pivot",
+    "builtin.move": "Move Tool: drag the manipulator. Hold X/C/V to snap to grid/curve/point. Tap D to edit the pivot; click a vertex/edge/face; D again to finish",
+    "builtin.rotate": "Rotate Tool: drag a ring to rotate. Hold J to snap rotation. Tap D to edit the pivot; D again to finish",
     "builtin.scale": "Scale Tool: drag a handle to scale, the centre scales uniformly",
     "builtin.transform": "Universal Manipulator: move, rotate and scale with one manipulator",
     "allset.multi_cut_tool": ("Multi-Cut: click edges / faces to place points, Enter or right-click to cut. "
