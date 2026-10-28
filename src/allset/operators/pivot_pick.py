@@ -69,10 +69,7 @@ def _current_frame(context):
 
 
 def pivot_axes(context, ob):
-    if pivot.PROP in ob:
-        from mathutils import Quaternion
-        return ob.matrix_world.to_quaternion().to_matrix() @ Quaternion(ob[pivot.PROP]).to_matrix()
-    return ob.matrix_world.to_3x3().normalized()
+    return pivot.axes_for(ob)
 
 
 def apply_component(context, point, axes, shift=False, ctrl=False):

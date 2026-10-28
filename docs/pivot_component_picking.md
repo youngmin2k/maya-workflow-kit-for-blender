@@ -27,6 +27,14 @@ handles so the rotation rings do not intercept component picks. Finishing pivot
 editing restores the normal Rotate rings at the picked pivot, using its new axes.
 In mesh Edit Mode, finishing restores the previous tool, including Rotate.
 
+In Object Mode, the pivot orientation rings and move arrows use the same custom
+frame. Dragging a ring rotates the arrows immediately, including after a component
+has aligned the pivot. Repeated rotations accumulate from the displayed axes;
+releasing the mouse keeps the last preview. **Esc / right-click** cancels the drag
+and restores its initial frame. Object channels, mesh geometry and children stay
+fixed throughout the gesture. **J** step snapping and numeric angle entry in
+degrees are supported while rotating the pivot.
+
 The component frame uses X along an incident edge and Z along the surface normal.
 At vertices or faces with several incident edges, the longest world-space edge
 supplies X. This gives a stable right-handed frame under nonuniform object scale.

@@ -42,6 +42,14 @@ POLL = 0.1
 MAYA_PIVOT_POINT = {'OBJECT': 'ACTIVE_ELEMENT', 'EDIT_MESH': 'BOUNDING_BOX_CENTER'}
 
 
+def axes_for(ob):
+    """Orthonormal world axes of an object's pivot, including its saved custom rotation."""
+    rotation = ob.matrix_world.to_quaternion()
+    if PROP in ob:
+        rotation = rotation @ Quaternion(ob[PROP])
+    return rotation.to_matrix()
+
+
 # --- pure helpers (headless-testable) ---------------------------------------------------------
 
 def snapshot(ob):

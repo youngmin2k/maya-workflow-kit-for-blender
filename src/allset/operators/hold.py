@@ -580,6 +580,7 @@ class ALLSET_OT_hold(bpy.types.Operator):
             # finishes, which would undo a restore made during the drag (step 59).
             window = context.window
             if window is not None and any(op.bl_idname.startswith("TRANSFORM_OT_")
+                                          or op.bl_idname == 'ALLSET_OT_pivot_rotate'
                                           for op in window.modal_operators):
                 return {'PASS_THROUGH'}
             return self._finish(context)

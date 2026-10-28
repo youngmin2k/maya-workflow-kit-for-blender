@@ -246,6 +246,9 @@ def pivot_frame(context, kind):
     else:
         pts, act = _object_points(context)
     center = center_of(pts, act, scene.tool_settings.transform_pivot_point, scene.cursor.location)
+    if pivot_edit(context) and context.active_object is not None:
+        from ..operators import pivot
+        return center, pivot.axes_for(context.active_object), pivot.ORIENT_NAME
     return center, axes_of(context, otype, context.region_data), otype
 
 
@@ -442,6 +445,30 @@ class ALLSET_GT_maya_handle(Gizmo):
 # Maya = / - (operators/manip.ALLSET_OT_manip_size): the kit manipulator's own size factor for this session. Not
 # Blender's gizmo_size preference, which the kit never writes (step 130).
 SIZE = [1.0]
+PIVOT_RING_CACHE = {}  # region pointer -> (plain numeric signature, projected ring paths)
+_PIVOT_RING_POINTS = tuple(Vector(p) for p in _ring(1.0, 48)[::2])
+
+
+def _cache_pivot_rings(context, handles, editing):
+    """Share the rendered ring strokes with preselect; keep no live UI references."""
+    key = context.region.as_pointer()
+    if not editing:
+        PIVOT_RING_CACHE.pop(key, None)
+        return
+    matrices = [gz.matrix_world.copy() for gz, role, _axis in handles if role == 'PIVOT_RING']
+    region, projection = context.region, context.region_data.perspective_matrix
+    signature = (region.width, region.height, tuple(v for row in projection for v in row),
+                 tuple(v for matrix in matrices for row in matrix for v in row))
+    previous = PIVOT_RING_CACHE.get(key)
+    if previous is not None and previous[0] == signature:
+        return
+    from ..operators import preselect
+    paths = []
+    for matrix in matrices:
+        xy, front = preselect.project([matrix @ p for p in _PIVOT_RING_POINTS], projection, region.width, region.height)
+        if front.all():
+            paths.append(xy)
+    PIVOT_RING_CACHE[key] = (signature, paths)
 
 
 def scale_basis(context):
@@ -548,13 +575,9 @@ class ALLSET_GGT_xform(GizmoGroup):
                 props = gz.target_set_operator(op)
                 props.release_confirm = True
             elif role == 'PIVOT_RING':
-                # D mode: turn the pivot about its own axes (Maya pivot orientation handle, M7)
-                props = gz.target_set_operator("transform.rotate")
-                props.orient_axis = data
-                props.orient_type = 'LOCAL'
-                props.constraint_axis = tuple(a == data for a in 'XYZ')
-                props.release_confirm = True
-        self._ops_for = (kind, otype)
+                props = gz.target_set_operator("allset.pivot_rotate")
+                props.axis = data
+        self._ops_for = (kind, otype, tuple(v for row in frame for v in row))
 
     @staticmethod
     def _orient(props, otype, frame):
@@ -576,7 +599,11 @@ class ALLSET_GGT_xform(GizmoGroup):
         otype = slot_type(scene, kind)
         rv3d = context.region_data
         frame = axes_of(context, otype, rv3d)
-        if self._ops_for != (kind, otype) or otype not in {'GLOBAL', 'LOCAL', 'NORMAL', 'GIMBAL', 'VIEW', 'CURSOR', 'PARENT'}:
+        if pivot and context.active_object is not None:
+            from ..operators import pivot as pivot_ops
+            frame, otype = pivot_ops.axes_for(context.active_object), pivot_ops.ORIENT_NAME
+        signature = (kind, otype, tuple(v for row in frame for v in row))
+        if self._ops_for != signature and not any(gz.is_modal for gz, _role, _data in self.handles):
             self._bind_ops(kind, otype, frame=frame)
         if context.mode == 'EDIT_MESH':
             pts, act = _edit_points(context)
@@ -606,10 +633,11 @@ class ALLSET_GGT_xform(GizmoGroup):
                 rot = frame if kind == 'RESIZE' else view
                 gz.color = ACTIVE if _is_active(kind, None) else CENTER_IDLE
             else:   # PIVOT_RING
-                rot = axes_of(context, 'LOCAL', rv3d) @ _axis_rot(data)
+                rot = frame @ _axis_rot(data)
                 gz.color = colours[data]
                 gz.scale_basis = s * PIVOT_RING_R
             gz.matrix_basis = Matrix.Translation(center) @ rot.to_4x4()
+        _cache_pivot_rings(context, self.handles, pivot and not hide)
 
 
 classes = (ALLSET_GT_maya_handle, ALLSET_GGT_xform)
@@ -794,6 +822,7 @@ def register():
 
 def unregister():
     SIZE[0] = 1.0
+    PIVOT_RING_CACHE.clear()
     if _on_load_post in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(_on_load_post)
     if bpy.app.timers.is_registered(_ensure_timer):

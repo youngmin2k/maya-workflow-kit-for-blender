@@ -93,13 +93,16 @@ def s_vertex():
 
 @step
 def s_click_edge():
-    click((1, 0, 1))
+    ob = bpy.data.objects['Cube']
+    C['object_edge'] = available([tuple(ob.matrix_world @ ((ob.data.vertices[e.vertices[0]].co+
+                                 ob.data.vertices[e.vertices[1]].co)/2)) for e in ob.data.edges], 'EDGE')
+    click(C['object_edge'])
 
 
 @step
 def s_edge():
     ob = bpy.data.objects['Cube']
-    check('object pivot snaps exactly to edge midpoint', (ob.matrix_world.translation-Vector((1, 0, 1))).length < 1e-5)
+    check('object pivot snaps exactly to edge midpoint', (ob.matrix_world.translation-Vector(C['object_edge'])).length < 1e-5)
     check('edge pick preserves world geometry', geometry_stays())
     with override():
         bpy.ops.allset.reset_pivot()

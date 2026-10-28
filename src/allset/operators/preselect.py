@@ -292,6 +292,12 @@ def _handles_block(context, region, rv3d, mouse, cs):
     if kind in ('ROTATE', 'TRANSFORM'):
         return math.hypot(mouse[0] - c2.x, mouse[1] - c2.y) <= size / 2.0 * scale * ROTATE_RING
     length_px = manipulator.ARROW_PX * size / 75.0 * scale
+    if context.mode == 'OBJECT' and pivot_picking(context):
+        cached = manipulator.PIVOT_RING_CACHE.get(region.as_pointer())
+        for xy in cached[1] if cached is not None else ():
+            distances, _t = segment_distance(mouse, xy, np.roll(xy, -1, axis=0))
+            if bool((distances <= 3.0*scale).any()):
+                return True
     right = rv3d.view_rotation @ Vector((1.0, 0.0, 0.0))
     p1 = view3d_utils.location_3d_to_region_2d(region, rv3d, center + right)
     px_per_world = (p1 - c2).length if p1 is not None else 0.0
@@ -299,6 +305,9 @@ def _handles_block(context, region, rv3d, mouse, cs):
     if px_per_world > 1e-9:
         frame = manipulator.axes_of(context, 'CURSOR' if context.mode == 'EDIT_MESH' and pivot_picking(context)
                                      else manipulator.slot_type(context.scene, kind), rv3d)
+        if context.mode == 'OBJECT' and pivot_picking(context) and context.active_object is not None:
+            from . import pivot
+            frame = pivot.axes_for(context.active_object)
         for i in range(3):
             t = view3d_utils.location_3d_to_region_2d(region, rv3d, center + frame.col[i] * (length_px / px_per_world))
             if t is not None:
