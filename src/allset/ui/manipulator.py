@@ -559,21 +559,27 @@ class ALLSET_GGT_xform(GizmoGroup):
     def _bind_ops(self, kind, otype, frame=None):
         """Point each handle at Blender's transform with its constraint and orientation."""
         op = {'TRANSLATE': "transform.translate", 'RESIZE': "transform.resize"}[kind]
+        editing = self._built_for == ('TRANSLATE', True)
+        if editing:
+            op = "allset.pivot_translate"
         for gz, role, data in self.handles:
             if role == 'AXIS':
                 axes = tuple(a == data for a in 'XYZ')
                 props = gz.target_set_operator(op)
                 props.constraint_axis = axes
-                self._orient(props, otype, frame)
-                props.release_confirm = True
+                if not editing:
+                    self._orient(props, otype, frame)
+                    props.release_confirm = True
             elif role == 'PLANE':
                 props = gz.target_set_operator(op)
                 props.constraint_axis = PLANES[data][0]
-                self._orient(props, otype, frame)
-                props.release_confirm = True
+                if not editing:
+                    self._orient(props, otype, frame)
+                    props.release_confirm = True
             elif role == 'CENTER':
                 props = gz.target_set_operator(op)
-                props.release_confirm = True
+                if not editing:
+                    props.release_confirm = True
             elif role == 'PIVOT_RING':
                 props = gz.target_set_operator("allset.pivot_rotate")
                 props.axis = data

@@ -146,7 +146,8 @@ def _last_op():
 
 
 def _transform_running(window):
-    return any(op.bl_idname.startswith("TRANSFORM_OT_") for op in window.modal_operators)
+    return any(op.bl_idname.startswith("TRANSFORM_OT_") or op.bl_idname in
+               {'ALLSET_OT_pivot_translate', 'ALLSET_OT_pivot_rotate'} for op in window.modal_operators)
 
 
 # --- the active handle (Maya MMB drag anywhere), step 28 -------------------------------
@@ -160,6 +161,11 @@ OP_KINDS = {"TRANSFORM_OT_translate": 'TRANSLATE', "TRANSFORM_OT_rotate": 'ROTAT
 
 def handle_from_op(bl_idname, props):
     """(kind, handle) for a transform the manipulator ran; handle None = free (centre)."""
+    if bl_idname == 'ALLSET_OT_pivot_translate':
+        from ..ui import manipulator
+        axes = tuple(bool(a) for a in props.constraint_axis)
+        return 'TRANSLATE', ({'constraint_axis': axes,
+                             'orient_type': manipulator.slot_type(bpy.context.scene, 'TRANSLATE')} if any(axes) else None)
     kind = OP_KINDS.get(bl_idname)
     if kind is None:
         return None, None

@@ -197,6 +197,7 @@ def s_snap():
 def s_d_released_during_drag():
     check('releasing held D waits for the active ring drag', bpy.context.tool_settings.use_transform_data_origin
           and any(op.bl_idname == 'ALLSET_OT_pivot_rotate' for op in win().modal_operators))
+    C['preview'] = axes().copy()
     ev('LEFTMOUSE', 'RELEASE')
 
 

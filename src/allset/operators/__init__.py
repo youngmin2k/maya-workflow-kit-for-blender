@@ -17,10 +17,12 @@ from . import ik_rp  # step 245 (#162): Maya ikRPsolver pole vector / twist
 from . import joint_edit  # step 243 (#160): joint moves keep Maya frames, Preserve Children, Edit-mode Translate
 from . import pivot_pick
 from . import pivot_rotate
+from . import pivot_translate
 
 classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pivot_pick.classes,
            *pivot_rotate.classes,
+           *pivot_translate.classes,
            *pickwalk.classes, *view.classes, *freeze.classes, *parenting.classes,
            *duplicate.classes, *history.classes, *create.classes, *visibility.classes,
            *component.classes, *manip.classes, *material.classes,

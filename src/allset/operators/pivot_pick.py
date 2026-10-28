@@ -139,9 +139,9 @@ class ALLSET_OT_pivot_pick(bpy.types.Operator):
                 point, axes = component_frame(ob, cache.bm, target[1], target[2])
                 apply_component(context, point, axes, event.shift, event.ctrl)
                 if context.mode == 'EDIT_MESH':
-                    # Start on the press so native cursor translation receives
+                    # Start on the press so cursor translation receives
                     # the first drag motion. A click simply confirms this placement.
-                    bpy.ops.transform.translate('INVOKE_DEFAULT', cursor_transform=True, release_confirm=True)
+                    bpy.ops.allset.pivot_translate('INVOKE_DEFAULT')
                 return {'FINISHED'}
         return {'CANCELLED'}
 

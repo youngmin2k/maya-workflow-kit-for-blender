@@ -37,6 +37,15 @@ class ALLSET_OT_pivot_rotate(bpy.types.Operator):
         self._slot_types = tuple(slot.type for slot in context.scene.transform_orientation_slots)
         orientation = pivot._orientation(context.scene)
         self._previous_axes = orientation.matrix.copy() if orientation is not None else None
+        self._step_held, self._baseline_step = hold.step_state(context.tool_settings, 'ROTATE')
+
+    def _drag_value(self, context, event):
+        angle = self._drag_angle
+        if self._step_held or (self._baseline_step != event.ctrl):
+            increment = context.tool_settings.snap_angle_increment_3d
+            if increment > 1e-6:
+                angle = round(angle/increment)*increment
+        return angle
 
     def _apply(self, context, angle):
         self.angle = angle
@@ -105,6 +114,12 @@ class ALLSET_OT_pivot_rotate(bpy.types.Operator):
             # Like a native transform, consume D until the gesture ends. The
             # hold timer restores temporary pivot mode after the mouse release.
             return {'RUNNING_MODAL'}
+        if event.type == 'J' and event.value in {'PRESS', 'RELEASE'}:
+            if not event.is_repeat:
+                self._step_held = event.value == 'PRESS'
+                if not self._text:
+                    self._apply(context, self._drag_value(context, event))
+            return {'RUNNING_MODAL'}
         if event.type == 'MOUSEMOVE':
             mouse = (event.mouse_region_x, event.mouse_region_y)
             if mouse == self._mouse:
@@ -117,13 +132,7 @@ class ALLSET_OT_pivot_rotate(bpy.types.Operator):
             self._last, self._mouse = vector, mouse
             self._drag_angle += step * (.1 if event.shift else 1.0)
             if not self._text:
-                angle = self._drag_angle
-                ts = context.tool_settings
-                if (ts.use_snap != event.ctrl) and 'INCREMENT' in ts.snap_elements:
-                    increment = ts.snap_angle_increment_3d
-                    if increment > 1e-6:
-                        angle = round(angle/increment)*increment
-                self._apply(context, angle)
+                self._apply(context, self._drag_value(context, event))
             return {'RUNNING_MODAL'}
         if event.value == 'PRESS':
             char = getattr(event, 'unicode', '')

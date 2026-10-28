@@ -35,6 +35,13 @@ and restores its initial frame. Object channels, mesh geometry and children stay
 fixed throughout the gesture. **J** step snapping and numeric angle entry in
 degrees are supported while rotating the pivot.
 
+Hold **J** before or during a pivot handle drag to enable discrete steps; release
+**J** during the drag to return to free movement. Translation steps are one scene
+length unit along the pivot axes, relative to the starting pivot (or absolute
+world steps when Move Absolute is selected). Rotation uses the configured angular
+increment. The temporary J state preserves the previous snap preferences. Cursor
+dragging in mesh component pivot editing also supports J translation steps.
+
 The component frame uses X along an incident edge and Z along the surface normal.
 At vertices or faces with several incident edges, the longest world-space edge
 supplies X. This gives a stable right-handed frame under nonuniform object scale.
