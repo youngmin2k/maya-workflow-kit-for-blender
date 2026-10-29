@@ -530,7 +530,7 @@ def topology_preview(context,ob):
 
 def clear_topology_preview():
     global _topology_preview
-    _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None
+    _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None;STATE['topology_preview']=None
     from . import quad_draw_overlay
     quad_draw_overlay.clear_symmetry()
 
@@ -704,6 +704,19 @@ def fill_plan(context, region, rv3d, mouse, ob):
     if context.scene.allset_symmetry.on and context.scene.allset_symmetry.about=='TOPOLOGY':
         info=topology_preview(context,ob)
         if info and any(c.bm.verts[i].link_faces and i not in info['pairs'] for i in ring):return None
+        from . import quad_draw_reference
+        points=[]
+        try:
+            for i in ring:
+                other=info['pairs'].get(i) if info else None
+                points.append(ob.matrix_world@c.bm.verts[other].co if other is not None else
+                              ob.matrix_world@quad_draw_reference.point(context,ob,c.bm.verts[i].co,'XYZ'.index(context.scene.allset_symmetry.axis)))
+        except quad_draw_symmetry.SymmetryError as ex:
+            if info:info['message']=str(ex)
+            STATE['topology_preview']=None
+            return None
+        STATE['topology_preview']=('FILL',points)
+
     return list(ring),[Vector(c.co[i]) for i in ring]
 
 
@@ -832,6 +845,9 @@ def _draw_view():
         pv = STATE["preview"]
         _points([tuple(p) for p in STATE["snap"]], FILL_RGB, DOT_SIZE*1.5*scale)
         previews=[pv] if pv is not None else []
+        if pv is not None and pv[0]=='FILL' and context.scene.allset_symmetry.on and context.scene.allset_symmetry.about=='TOPOLOGY':
+            mirrored=STATE.get('topology_preview')
+            if mirrored is not None:previews.append(mirrored)
         ob=edit_object(context)
         sym=context.scene.allset_symmetry
         ob=edit_object(context)
@@ -945,7 +961,7 @@ def update_hover(context, region, rv3d, mouse, ctrl, shift, tab=False):
     ob = edit_object(context)
     STATE["preview"] = None
     STATE['hover_component'] = None
-    STATE['topology_hover']=None
+    STATE['topology_hover']=None;STATE['topology_preview']=None
     STATE['delete_edges']=None;STATE['relax_area']=None
     if ob is None:
         return
@@ -1060,7 +1076,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         self._moved = False
         self._grab = None
         self._relax=None
-        if not _begin_symmetry(self,context,ob,coordinate_only=not event.ctrl or self.middle and event.shift):return {'CANCELLED'}
+        if not _begin_symmetry(self,context,ob,coordinate_only=True):return {'CANCELLED'}
         # Maya's Keyboard/Mouse Shortcuts
         if event.ctrl and event.shift and self.middle:
             self._mode = 'MOVE'                 # Ctrl+Shift+MMB: drag an edge = tweak its edge loop
@@ -1210,6 +1226,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             if comp[0]=='VERT':vertices={v for f in vertices for v in f.verts}|{bm.verts[comp[1]]}
             elif comp[0]=='FACE':vertices=list(bm.faces[comp[1]].verts)
             else:vertices={v for e in component_loop(bm.edges[comp[1]]) for f in e.link_faces for v in f.verts}
+            sym.prepare_topology(local=True,vertices=vertices)
             try:sym.require(vertices)
             except quad_draw_symmetry.SymmetryError as ex:
                 self.report({'WARNING'},str(ex));return None
@@ -1259,9 +1276,11 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         try:
             plan=quad_draw_cut.Plan(bm,bm.edges[comp[1]],t,self._sym)
             if self._sym is None:backup=bm.copy()
+            else:self._sym.prepare_backup()
             mw=ob.matrix_world;inv=mw.inverted_safe()
             project=(lambda co:inv@project_point(context,mw@co,self._refs,region,rv3d)) if self._refs else None
             plan.apply(project)
+            if self._sym is not None:self._sym.check_seam()
         except (quad_draw_symmetry.SymmetryError,ValueError,ReferenceError,RuntimeError) as ex:
             if self._sym is not None:self._sym.rollback();self._sym=None
             elif backup is not None:
@@ -1273,7 +1292,11 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         finally:
             if backup is not None:backup.free()
         _indices(bm)
-        if not _sync_symmetry(self,context,finish=True):return {'CANCELLED'}
+        # Plan has already applied and validated both halves by exact edge pairs.
+        # Replaying a second global topology diff would only repeat that work.
+        if self._sym is not None and self._sym.disabled_reason:
+            self.report({'WARNING'},self._sym.disabled_reason)
+        _close_symmetry(self)
         bmesh.update_edit_mesh(ob.data)
         preselect.invalidate()
         STATE["preview"] = None
@@ -1717,13 +1740,14 @@ class ALLSET_OT_quad_draw_pick_seam(bpy.types.Operator):
     bl_idname='allset.quad_draw_pick_seam'
     bl_label='Pick Topology Seam'
     bl_options={'REGISTER','UNDO'}
+    reference: BoolProperty(default=False,options={'HIDDEN','SKIP_SAVE'})
 
     @classmethod
     def poll(cls,context):return tool_active(context)
 
     def invoke(self,context,event):
         self._ob=context.edit_object.name
-        context.workspace.status_text_set('Topology symmetry: click a manifold seam edge; Esc cancels')
+        context.workspace.status_text_set('Topology symmetry: click a manifold '+('live reference' if self.reference else 'retopology')+' seam edge; Esc cancels')
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 
@@ -1741,6 +1765,21 @@ class ALLSET_OT_quad_draw_pick_seam(bpy.types.Operator):
         if region is None:return {'RUNNING_MODAL'}
         with context.temp_override(area=area,region=region):
             ctx=bpy.context;mouse=(event.mouse_x-region.x,event.mouse_y-region.y)
+            if self.reference:
+                from . import quad_draw_reference
+                picked=quad_draw_reference.pick(ctx,region,ctx.region_data,mouse)
+                STATE['preview']=('TAB',picked[2]) if picked else None
+                _redraw(ctx)
+                if event.type=='LEFTMOUSE' and event.value=='PRESS' and picked:
+                    reference,edge,_points=picked
+                    try:quad_draw_reference.bind(ctx,reference,edge,'XYZ'.index(ctx.scene.allset_symmetry.axis),ctx.scene.allset_symmetry.allow_partial)
+                    except quad_draw_symmetry.SymmetryError as ex:
+                        self.report({'WARNING'},str(ex));return {'RUNNING_MODAL'}
+                    from . import symmetry
+                    sym=symmetry.state(ctx.scene);sym.on=True;sym.about='TOPOLOGY';sym.last='TOPOLOGY';symmetry.apply(sym,[ob])
+                    _geometry_reset(None);self.report({'INFO'},'Reference seam bound: '+reference.name)
+                    return self._end(ctx,{'FINISHED'})
+                return {'RUNNING_MODAL'}
             comp=component_at(ctx,region,ctx.region_data,mouse,ob,edges_only=True)
             STATE['preview']=('TAB',_component_points(ob,comp)) if comp else None
             _redraw(ctx)
@@ -1989,12 +2028,14 @@ def _restore_overlays():
     _component_loop_cache=None
     _pick_projection = None
     _fill_projection = None
-    _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None
+    _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None;STATE['topology_preview']=None
     STATE["snap"] = []
     from . import quad_draw_overlay
     quad_draw_overlay.clear()
     from . import quad_draw_relax
     quad_draw_relax.clear();STATE['relax_area']=None;STATE['delete_edges']=None
+    from . import quad_draw_reference
+    quad_draw_reference.clear()
     preselect.invalidate()
 
 
@@ -2181,12 +2222,14 @@ def _geometry_reset(_dummy):
     global _pick_projection,_fill_projection,_topology_preview,_component_loop_cache
     _component_loop_cache=None
     _pick_projection=_fill_projection=None
-    _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None
+    _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None;STATE['topology_preview']=None
     STATE['preview']=None;STATE['snap']=[]
     from . import quad_draw_overlay
     quad_draw_overlay.clear();preselect.invalidate()
     from . import quad_draw_relax
     quad_draw_relax.clear();STATE['relax_area']=None;STATE['delete_edges']=None
+    from . import quad_draw_reference
+    quad_draw_reference.clear()
 
 
 @bpy.app.handlers.persistent

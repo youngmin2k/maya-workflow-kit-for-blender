@@ -91,7 +91,8 @@ class ScreenFill:
             if self.world is not None:
                 world=self.world[indices]
                 normals=np.cross(world[:,1]-world[:,0],world[:,2]-world[:,0])
-                normals/=np.maximum(np.linalg.norm(normals,axis=1)[:,None],1e-12)
+                lengths=np.linalg.norm(normals,axis=1)
+                normals/=np.maximum(lengths[:,None],np.finfo(float).tiny)
                 following_ids=np.roll(indices,-1,axis=1)
                 for k in range(n):
                     aa,bb=indices[:,k],following_ids[:,k]
@@ -125,7 +126,8 @@ class ScreenFill:
             p=self.world[list(ring)]
             normals=np.cross(p[1:-1]-p[0],p[2:]-p[0])
             lengths=np.linalg.norm(normals,axis=1)
-            if np.any(lengths<1e-12):
+            span2=float(np.max(np.sum((np.roll(p,-1,axis=0)-p)**2,axis=1)))
+            if np.any(lengths<=max(span2*1e-10,np.finfo(float).tiny)):
                 return False
             normals/=lengths[:,None]
             # A screen-space polygon can connect folded or opposite-facing sheets.
@@ -174,7 +176,19 @@ class ScreenFill:
                     if size>1e-6:
                         flow.append(1-max(abs(float(delta@unit[k]))/size,
                                           abs(float(delta@unit[k-1]))/size))
-        return float(corner)+aspect*.2+(sum(flow)/len(flow)*.35 if flow else 0)
+        cost=float(corner)+aspect*.2+(sum(flow)/len(flow)*.35 if flow else 0)
+        if self.world is not None:
+            # Foreshortening can make a long/deep folded candidate look square.
+            # Use dimensionless surface shape too; scene units and zoom do not
+            # change this evidence, and smooth curved patches remain inexpensive.
+            points=self.world[list(ring)]
+            edges3=np.roll(points,-1,axis=0)-points
+            lengths3=np.linalg.norm(edges3,axis=1)
+            unit3=edges3/np.maximum(lengths3[:,None],np.finfo(float).tiny)
+            corner3=np.abs(np.sum(unit3*np.roll(unit3,1,axis=0),axis=1)).mean()
+            aspect3=math.log(max(float(lengths3.max()/max(lengths3.min(),np.finfo(float).tiny)),1.0))
+            cost+=float(corner3)*.35+aspect3*.3
+        return cost
 
     def plan(self, mouse, visible=lambda i:True):
         from .preselect import segment_distance

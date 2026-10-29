@@ -94,8 +94,12 @@ valid seam correspondence, or a disconnected target without a usable pairing, re
 unsupported operation. It does not silently substitute geometric symmetry. Establish the seam on matching topology
 before using this mode; Object/World symmetry is simpler for new, geometrically symmetric retopology. New-point
 reference correspondence currently requires a local-axis seam on the evaluated live reference; Pick Seam binds
-the retopology target. Topology mode previews existing paired components; a mirrored new-face preview is currently
-available for Object/World modes only.
+the retopology target. For a posed live reference whose center has moved away from the local axis, use
+**Pick Reference Seam** and click a manifold edge between its matching halves. The binding uses evaluated mesh
+connectivity; changing connectivity requires picking it again. Moving/deforming the reference retains the binding
+and rebuilds its cached correspondence. Topology mode shows the mirrored new-face preview using the same
+reference mapping as the committed points; unavailable correspondence suppresses the fill instead of reflecting
+through an unrelated geometric plane. Partial Symmetry applies to both target and reference correspondence.
 
 Hover caches retain one mesh/view projection, while each drag owns a spatial target index and local topology
 snapshot. These are released on tool exit or drag completion/cancellation. The live reference BVH remains shared.
@@ -105,8 +109,11 @@ invalidate this path. Symmetry coordinate strokes find counterparts lazily; full
 until an operation creates, deletes or welds components.
 Large edited meshes copy coordinates/connectivity through bulk mesh arrays; temporary mesh IDs are immediately
 released. Fill candidates use grouped polygon arrays instead of Python objects for every interior face.
-Additive symmetry edits record detailed rings only around touched components and retain a native BMesh rollback
-copy. Cut/delete use a conservative full snapshot; their cost can still grow with total mesh size.
+Additive and delete symmetry edits record detailed rings around touched components and retain a native BMesh
+rollback copy. Exact paired loop cuts avoid a redundant global topology replay. Initialization, the native rollback
+copy, paired traversal and mesh updates can still grow with total mesh size. Posed-reference correspondence is
+shared across strokes, bounded to four entries and two million paired triangles, and released on tool exit,
+Undo/Redo and file changes. Larger references can be queried but are not retained in this correspondence cache.
 Loop traversal is cached per geometry revision and target edge; hover, delete and loop tweak share its topology
 rules. Relax uses numeric local one-ring kernels and vectorized brush queries rather than projecting every
 vertex in Python per event. A reversible MMB stroke retains at most 17 local smoothing checkpoints, released
@@ -137,6 +144,10 @@ Older files may already contain a stuck Retopology overlay, which can make compo
 the background. In that affected viewport use **Shading > Restore Modeling Display**, then save normally. This
 explicit repair turns off Retopology in that view and leaves geometry, materials and other views unchanged;
 unowned settings are never automatically guessed or reset on load.
+
+Fill proposals rank both projected shape and dimensionless 3D corner/aspect quality so a deeply stretched patch
+does not win merely because its projection is square. Small multi-point welds choose compatible targets jointly;
+longer strips reassign competing targets and retain topology validation before welding.
 
 Fill proposals are bounded local heuristics. Deep folds, disconnected sheets and ambiguous layouts can require
 another view or explicit point placement. Autodesk publishes tool behavior and context options; its internal

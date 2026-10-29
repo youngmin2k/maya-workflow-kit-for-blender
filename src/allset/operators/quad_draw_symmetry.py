@@ -176,10 +176,14 @@ class Stroke:
         self.seam_edges=[tuple(e.verts) for e in bm.edges if all(self.pairs.get(v) is v for v in e.verts)] if self.about=='TOPOLOGY' else []
         self.disabled_reason=None
 
+    def prepare_backup(self):
+        """Native atomic rollback without a Python copy of every face/edge ring."""
+        if self.want_backup and self.backup is None:self.backup=self.bm.copy()
+
     def prepare_topology(self,local=False,vertices=()):
         if not self.topology_ready:
             self.topology_ready=True;self.local=local
-            self.backup=self.bm.copy() if self.want_backup else None
+            self.prepare_backup()
             if local:
                 self.face_refs=set(self.bm.faces);self.edge_refs=set(self.bm.edges)
             else:
@@ -292,45 +296,9 @@ class Stroke:
         self.generated_face_keys={frozenset(v[layer] for v in f.verts) for f in self.generated_faces if f.is_valid}
 
     def _topology_point(self,co):
-        """Map a new surface point through paired reference triangles (posed meshes)."""
-        from . import quad_draw,live
-        from mathutils.bvhtree import BVHTree
-        from mathutils.geometry import barycentric_transform
-        if self.reference is None:
-            refs=[]
-            for ob in quad_draw.reference_objects(self.context):
-                evaluated=ob.evaluated_get(self.context.evaluated_depsgraph_get())
-                mesh=evaluated.to_mesh()
-                bm=bmesh.new()
-                try:bm.from_mesh(mesh)
-                finally:evaluated.to_mesh_clear()
-                # The reference seam may be selected independently in the saved mesh.
-                eps=max(ob.dimensions)*1e-5+1e-8
-                seeds=[e for e in bm.edges if len(e.link_faces)==2 and all(abs(v.co[self.axis])<=eps for v in e.verts)]
-                pairs=topology_pairs(bm,seeds)
-                triangles=bm.calc_loop_triangles()
-                source=[];target=[]
-                for tri in triangles:
-                    vs=[l.vert for l in tri]
-                    if all(v in pairs for v in vs):
-                        source.append([ob.matrix_world@v.co for v in vs])
-                        target.append([ob.matrix_world@pairs[v].co for v in vs])
-                bm.free()
-                if source:
-                    tree=BVHTree.FromPolygons([p for t in source for p in t],[(i*3,i*3+1,i*3+2) for i in range(len(source))],all_triangles=True)
-                    refs.append((tree,source,target))
-            self.reference=refs
-        w=self.mw@co
-        best=None
-        for tree,source,target in self.reference:
-            p,normal,i,distance=tree.find_nearest(w)
-            if p is not None and (best is None or distance<best[0]):
-                mapped=barycentric_transform(p,*source[i],*target[i])
-                # Offset follows the destination surface normal, not the camera ray.
-                n=(target[i][2]-target[i][0]).cross(target[i][1]-target[i][0]).normalized()
-                best=distance,mapped+n*quad_draw.surface_offset(self.context)
-        if best is not None:return self.inv@best[1]
-        raise SymmetryError('Topology symmetry: no paired live reference surface for new points')
+        """Use the same posed-reference correspondence as the visible preview."""
+        from . import quad_draw_reference
+        return quad_draw_reference.point(self.context,self.ob,co,self.axis)
 
     def point(self,co):
         if self.about=='TOPOLOGY':return self._topology_point(co)
@@ -523,10 +491,8 @@ class Stroke:
                 raise SymmetryError('Symmetry weld would reverse adjacent face winding')
         return len(targets)
 
-    def sync(self):
-        """Replay the operation's changed faces/edges, reversing reflected winding."""
+    def check_seam(self):
         bm=self.bm
-        self._refresh()
         if self.about=='TOPOLOGY' and any(not all(v.is_valid for v in ends) or (e:=bm.edges.get(ends)) is None or len(e.link_faces)!=2 for ends in self.seam_edges):
             from . import symmetry
             state=symmetry.state(self.context.scene);state.on=False;symmetry.apply(state,[self.ob])
@@ -535,7 +501,14 @@ class Stroke:
             if flags is not None:
                 for v in bm.verts:v[flags]=0
             self.disabled_reason='Topology symmetry disabled because a seam edge was modified; pick the seam again'
-            return
+            return True
+        return False
+
+    def sync(self):
+        """Replay the operation's changed faces/edges, reversing reflected winding."""
+        bm=self.bm
+        self._refresh()
+        if self.check_seam():return
         if self.local:
             current={key:f for key,ring in self.faces.items() if all(v.is_valid for v in ring) and (f:=bm.faces.get(ring)) is not None}
             new_faces={f for f in bm.faces if f not in self.face_refs and f not in self.generated_faces}

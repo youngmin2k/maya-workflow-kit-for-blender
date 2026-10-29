@@ -97,6 +97,7 @@ def draw_quad_draw(layout, context, header=False):
     if sym.about=='TOPOLOGY':
         row=layout.row(align=True);row.operator('allset.quad_draw_pick_seam',text='Pick Seam',icon='EYEDROPPER')
         row.prop(sym,'allow_partial',text='Partial')
+        layout.operator('allset.quad_draw_pick_seam',text='Pick Reference Seam',icon='EYEDROPPER').reference=True
         if not sym.on:
             layout.label(text='Symmetry off; pick a seam to enable',icon='INFO')
             return

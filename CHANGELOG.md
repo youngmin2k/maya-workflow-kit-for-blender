@@ -6,6 +6,10 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
 ## [Unreleased]
 
 ### Fixed
+- **Quad Draw surface inference and symmetry**: rank candidate quads in 3D as well as screen space; resolve
+  competing snap targets across multi-point strips. Pick Reference Seam supports posed live meshes away from an
+  axis, with a mirrored Topology fill preview matching committed points and shared, bounded correspondence caches.
+  Paired cuts skip duplicate topology replay; deletes capture local rings while retaining full native rollback.
 - **Component shading after reopening Quad Draw files**: save native viewport settings instead of temporary
   Retopology overrides; restore each owned view on tool/mode/workspace changes and failed saves. Shading >
   Restore Modeling Display repairs the affected viewport in older files without editing the mesh or materials.

@@ -75,6 +75,46 @@ class Topology:
         return True
 
 
+def choose_pairs(options, proposed, valid):
+    """Joint choices for small tweaks, bounded reassignment for extended strips."""
+    sources=list(proposed)
+    def key(pairs):
+        return -len(pairs),sum(options[i].index(t) for i,t in pairs.items())
+    if len(sources)<=4:
+        ranked=[]
+        for targets in itertools.product(*(options[i]+[None] for i in sources)):
+            pairs={i:t for i,t in zip(sources,targets) if t is not None}
+            if len(set(pairs.values()))==len(pairs):ranked.append(pairs)
+        for pairs in sorted(ranked,key=key):
+            if valid(pairs,proposed):return pairs
+        return {}
+    # An augmenting path can move an earlier greedy choice to its second
+    # target instead of starving the next endpoint. Candidate lists stay <=3.
+    assigned={};owner={};order={source:i for i,source in enumerate(sources)}
+    def place(source):
+        queue=[source];parents={source:None};seen=set()
+        for current in queue:
+            for target in options[current]:
+                if target in seen:continue
+                seen.add(target);previous=owner.get(target)
+                if previous is None:
+                    while True:
+                        assigned[current]=target;owner[target]=current
+                        if current==source:return
+                        current,target=parents[current]
+                if previous not in parents:parents[previous]=(current,target);queue.append(previous)
+    for source in sorted(sources,key=lambda i:(len(options[i]),order[i])):place(source)
+    if valid(assigned,proposed):return assigned
+    # Keep the topology-checked greedy path as a safe fallback when the
+    # maximum-cardinality screen assignment has incompatible mesh topology.
+    best={}
+    for source in sources:
+        for target in options[source]:
+            pairs={**best,source:target}
+            if valid(pairs,proposed):best=pairs;break
+    return best
+
+
 class Magnet:
     """One stroke owns one snapshot; a radius-sized grid avoids per-event full-mesh scans."""
     def __init__(self, context, ob, moving, extra=(), extra_faces=(), exclude=()):
@@ -175,25 +215,7 @@ class Magnet:
                     if len(candidates)>=3:
                         break
             options[source]=candidates
-        sources=list(proposed)
-        best={}
-        if len(sources)<=2:
-            choices=itertools.product(*(options[i]+[None] for i in sources))
-            ranked=[]
-            for targets in choices:
-                pairs={i:t for i,t in zip(sources,targets) if t is not None}
-                ranked.append((-len(pairs),sum(options[i].index(t) for i,t in pairs.items()),pairs))
-            for _,_,pairs in sorted(ranked,key=lambda x:x[:2]):
-                if self.topology.valid(pairs,proposed):
-                    best=pairs
-                    break
-        else:
-            for i in sources:
-                for target in options[i]:
-                    candidate={**best,i:target}
-                    if self.topology.valid(candidate,proposed):
-                        best=candidate
-                        break
+        best=choose_pairs(options,proposed,self.topology.valid)
         self.pairs=best
         result=dict(proposed)
         for i,target in best.items():
