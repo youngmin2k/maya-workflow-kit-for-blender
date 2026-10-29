@@ -150,6 +150,9 @@ def cache_and_occlusion():
         pd.settings().qd_mesh_color=(1,0,0)
         pd.settings().qd_mesh_alpha=1
         pd.settings().qd_wire_color=(1,0,0)
+        # A saved offset must not make the new cage-depth handling paint through
+        # an unrelated foreground object.
+        a.spaces.active.overlay.retopology_offset=.6
         bpy.ops.allset.quad_draw_start()
         cache=mod('operators.quad_draw_overlay')
         first=cache.batches(ctx)

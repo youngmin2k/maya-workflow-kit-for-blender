@@ -1455,16 +1455,35 @@ def _retopology_on(context):
     sync_overlays()
 
 
-def sync_overlays():
-    """Suppress the native blue face fill while the custom tint is enabled; restore on exit."""
+def sync_overlays(context=None):
+    """Keep the native cage depth behind the custom display; restore on exit."""
     from .. import live_refs
-    for ptr, (_shown, faces, _offset) in STATE["overlays"].items():
+    if context is not None and context.space_data.as_pointer() not in STATE['overlays']:
+        # A .blend may reopen with Quad Draw already active, bypassing Start.
+        # Capture that viewport before changing it, and arm normal exit cleanup.
+        _retopology_on(context)
+        ob = edit_object(context)
+        name = ob.name if ob else None
+        if STATE['ob'] != name:
+            STATE['created'] = None
+        STATE.update(ob=name, timer=True)
+        if not bpy.app.timers.is_registered(_watch):
+            bpy.app.timers.register(_watch, first_interval=0.5)
+        return
+    for ptr, (_shown, faces, offset) in STATE["overlays"].items():
         _w, _a, space = live_refs.find_space(ptr)
         if space is not None:
             ov = space.overlay
             wanted = faces and not poly_draw.settings().qd_mesh_color_on
             if ov.show_faces != wanted:
                 ov.show_faces = wanted
+            # Older scenes may retain the large offset used by the previous
+            # renderer. Its native depth prepass then clips our expanded wires.
+            # Keep native clearance small; the compositor retains the saved
+            # offset independently, and _restore_overlays puts it back on exit.
+            native_offset = min(offset, 0.01)
+            if abs(ov.retopology_offset-native_offset) > 1e-6:
+                ov.retopology_offset = native_offset
 
 
 def _restore_overlays():

@@ -177,13 +177,16 @@ def _hover_batches(c, comp):
 
 
 def _bind(context, kind, color, width=1.8, cull=False):
+    from . import quad_draw
     sh = shader(kind)
     rv = context.region_data
     sh.bind()
     sh.uniform_float('mvp',rv.perspective_matrix)
     sh.uniform_float('view_z',rv.view_matrix[2])
     p = rv.window_matrix
-    sh.uniform_float('depth_params',(p[2][2],p[2][3],p[3][3],context.space_data.overlay.retopology_offset))
+    saved = quad_draw.STATE['overlays'].get(context.space_data.as_pointer())
+    offset = saved[2] if saved is not None else context.space_data.overlay.retopology_offset
+    sh.uniform_float('depth_params',(p[2][2],p[2][3],p[3][3],offset))
     sh.uniform_float('color',color)
     if kind == 'FACE':
         sh.uniform_bool('cull_faces',cull)
@@ -195,7 +198,7 @@ def _bind(context, kind, color, width=1.8, cull=False):
 
 def draw(context):
     from . import quad_draw
-    quad_draw.sync_overlays()
+    quad_draw.sync_overlays(context)
     if context.region_data is None:
         return
     s = poly_draw.settings(context)

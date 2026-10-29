@@ -31,8 +31,11 @@ Hover caches retain one mesh/view projection, while each drag owns a spatial tar
 snapshot. These are released on tool exit or drag completion/cancellation. The live reference BVH remains shared.
 
 The display tint and antialiased pixel-width strokes use cached GPU batches. Temporary display clearance follows
-nearby faces, so an unrelated long edge does not raise the entire mesh. Native retopology offset, materials and theme
-are preserved. Depth-tested strokes are composed after native edit overlays to cover intermittent native cyan wires
+nearby faces, so an unrelated long edge does not raise the entire mesh. Materials and theme are preserved.
+During Quad Draw the native cage offset is limited to 0.01, while the compositor keeps the original saved offset.
+This prevents a large offset retained by an older scene from clipping the custom strokes; the native offset returns
+on tool exit. A workspace reopened with Quad Draw already active initializes the same display and cleanup state.
+Depth-tested strokes are composed after native edit overlays to cover intermittent native cyan wires
 on curved references; the Maya Tool Box column is excluded. Orbit/zoom update uniforms without rebuilding geometry.
 Display clearance is separate from Surface Offset and never moves vertices.
 
