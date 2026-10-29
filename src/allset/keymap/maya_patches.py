@@ -285,7 +285,13 @@ def patch_camera(kd):
     # Step 17: Maya fit (factor 0.95, sidebar excluded) for F and Ctrl+Shift+F (with children);
     # A tap goes through taphold.SelectAllBinding.
     kd.remove("3D View", "view3d.view_selected", type="F")                  # IC:681
-    _add(kd, "3D View", "allset.frame", make_event("F"), {"selected": True})
+    # Mode keymaps run before the general 3D View keymap. Another addon's
+    # Object/Mesh F menu would consume the key before Frame Selection runs.
+    # Mode-local aliases also participate in the existing Maya priority watcher;
+    # the foreign bindings remain available when Maya mode is turned off.
+    frame_maps = ("3D View", "Object Mode", "Mesh")
+    for km in frame_maps:
+        _add(kd, km, "allset.frame", make_event("F"), {"selected": True}, shadows=frame_maps)
     _add(kd, "3D View", "allset.frame_all_views", make_event("F", shift=True, ctrl=True),
          {"selected": True, "children": True})
     kd.remove("3D View", "view3d.view_all", type="A", shift=True)

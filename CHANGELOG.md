@@ -6,6 +6,8 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
 ## [Unreleased]
 
 ### Fixed
+- **Frame Selection (F)**: Object and mesh component modes keep Maya's framing shortcut ahead of another
+  addon's mode-specific F menu. Turning Maya mode off restores that menu without changing its binding.
 - **Quad Draw surface inference and symmetry**: rank candidate quads in 3D as well as screen space; resolve
   competing snap targets across multi-point strips. Pick Reference Seam supports posed live meshes away from an
   axis, with a mirrored Topology fill preview matching committed points and shared, bounded correspondence caches.
