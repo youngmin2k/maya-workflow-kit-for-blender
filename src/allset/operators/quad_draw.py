@@ -814,6 +814,11 @@ def _draw_view():
     context = bpy.context
     try:
         if not tool_active(context):
+            # Give native shading back on the first inactive-view redraw, rather
+            # than waiting for the slower mesh/dot cleanup timer.
+            if not _overlay_saving and context.space_data is not None and context.space_data.type == 'VIEW_3D':
+                if _release_overlay(context.space_data) and context.area is not None:
+                    context.area.tag_redraw()
             return
         from ..ui import toolbox
         if toolbox.is_toolbox(context.space_data):
@@ -1767,6 +1772,30 @@ class ALLSET_OT_quad_draw_exit(bpy.types.Operator):
     def execute(self, context):
         STATE["preview"] = None
         bpy.ops.wm.tool_set_by_id(name="builtin.select_box", space_type='VIEW_3D')
+        _restore_inactive_overlays()
+        return {'FINISHED'}
+
+
+class ALLSET_OT_restore_modeling_display(bpy.types.Operator):
+    """Turn off a persisted Retopology overlay in this viewport to restore ordinary component shading"""
+    bl_idname = 'allset.restore_modeling_display'
+    bl_label = 'Restore Modeling Display'
+    bl_options = {'INTERNAL'}
+
+    @classmethod
+    def poll(cls, context):
+        from ..ui import toolbox
+        return context.space_data is not None and context.space_data.type == 'VIEW_3D' and not toolbox.is_toolbox(context.space_data)
+
+    def execute(self, context):
+        if tool_active(context):
+            bpy.ops.wm.tool_set_by_id(name='builtin.select_box', space_type='VIEW_3D')
+        space = context.space_data
+        ptr = space.as_pointer()
+        original = STATE['overlays'].pop(ptr, _overlay_values(space))
+        _overlay_save_runtime.pop(ptr, None)
+        _set_overlay_values(space, (False, original[1], original[2]))
+        context.area.tag_redraw()
         return {'FINISHED'}
 
 
@@ -1798,63 +1827,164 @@ class ALLSET_OT_quad_draw_options(bpy.types.Operator):
 
 # --- start: the mesh to edit, the view, the watcher -----------------------------------------------------
 
+# Save the user's overlay values, never the tool's temporary display in a .blend.
+_overlay_saving = False
+_overlay_save_runtime = {}
+
+
+def _overlay_values(space):
+    ov = space.overlay
+    return ov.show_retopology, ov.show_faces, ov.retopology_offset
+
+
+def _set_overlay_values(space, values):
+    ov = space.overlay
+    for name, value in zip(('show_retopology', 'show_faces', 'retopology_offset'), values):
+        if getattr(ov, name) != value:
+            setattr(ov, name, value)
+
+
+def _release_overlay(space):
+    ptr = space.as_pointer()
+    original = STATE['overlays'].pop(ptr, None)
+    _overlay_save_runtime.pop(ptr, None)
+    if original is None:
+        return False
+    _set_overlay_values(space, original)
+    return True
+
+
+def _overlay_space(ptr):
+    # A workspace may have become inactive since the snapshot was captured.
+    # Resolve pointers again; retaining RNA references across file/window changes is unsafe.
+    for screen in bpy.data.screens:
+        for area in screen.areas:
+            for space in area.spaces:
+                if space.type == 'VIEW_3D' and space.as_pointer() == ptr:
+                    return space
+    return None
+
+
+def _window_uses_quad_draw(win):
+    ob = win.view_layer.objects.active
+    if ob is None or ob.type != 'MESH' or ob.mode != 'EDIT':
+        return False
+    tool = win.workspace.tools.from_space_view3d_mode('EDIT_MESH', create=False)
+    return tool is not None and tool.idname == TOOL
+
+
+def _overlay_owner_active(ptr):
+    from ..ui import toolbox
+    for win in bpy.context.window_manager.windows:
+        if not _window_uses_quad_draw(win):
+            continue
+        for area in win.screen.areas:
+            space = area.spaces.active
+            if area.type == 'VIEW_3D' and space.as_pointer() == ptr and not toolbox.is_toolbox(space):
+                return True
+    return False
+
+
+def _apply_overlay(space, original):
+    faces = original[1] and not poly_draw.settings().qd_mesh_color_on
+    _set_overlay_values(space, (True, faces, 0.0))
+
+
 def _retopology_on(context):
-    """Show the edited mesh over the surface (Blender's Retopology overlay) in this window's 3D views; the previous
-    value comes back when the tool is left (``_watch``)."""
-    from .. import live_refs
+    """Own only the real 3D views in this window, preserving their native settings."""
+    from ..ui import toolbox
     screen = context.window.screen if context.window else None
     for area in screen.areas if screen else ():
-        if area.type != 'VIEW_3D':
+        if area.type != 'VIEW_3D' or toolbox.is_toolbox(area.spaces.active):
             continue
         space = area.spaces.active
-        ov = space.overlay
-        if not hasattr(ov, "show_retopology"):
-            return
-        ptr = live_refs.pointer(space)
-        if ptr not in STATE["overlays"]:
-            STATE["overlays"][ptr] = ov.show_retopology, ov.show_faces, ov.retopology_offset
-        ov.show_retopology = True
+        ptr = space.as_pointer()
+        if ptr not in STATE['overlays']:
+            STATE['overlays'][ptr] = _overlay_values(space)
     sync_overlays()
 
 
 def sync_overlays(context=None):
-    """Keep the native cage depth behind the custom display; restore on exit."""
-    from .. import live_refs
-    if context is not None and context.space_data.as_pointer() not in STATE['overlays']:
-        # A .blend may reopen with Quad Draw already active, bypassing Start.
-        # Capture that viewport before changing it, and arm normal exit cleanup.
-        _retopology_on(context)
-        ob = edit_object(context)
-        name = ob.name if ob else None
-        if STATE['ob'] != name:
-            STATE['created'] = None
-        STATE.update(ob=name, timer=True)
-        if not bpy.app.timers.is_registered(_watch):
-            bpy.app.timers.register(_watch, first_interval=0.5)
+    """Apply display overrides only while drawing; save handlers suspend them."""
+    if _overlay_saving:
         return
-    for ptr, (_shown, faces, offset) in STATE["overlays"].items():
-        _w, _a, space = live_refs.find_space(ptr)
+    if context is not None:
+        from ..ui import toolbox
+        if not tool_active(context) or toolbox.is_toolbox(context.space_data):
+            return
+        space = context.space_data
+        ptr = space.as_pointer()
+        if ptr not in STATE['overlays']:
+            # A saved workspace can resume Quad Draw without invoking Start.
+            STATE['overlays'][ptr] = _overlay_values(space)
+            ob = edit_object(context)
+            name = ob.name if ob else None
+            if STATE['ob'] != name:
+                STATE['created'] = None
+            STATE.update(ob=name, timer=True)
+            if not bpy.app.timers.is_registered(_watch):
+                bpy.app.timers.register(_watch, first_interval=0.5)
+        _apply_overlay(space, STATE['overlays'][ptr])
+        return
+    for ptr, original in STATE['overlays'].items():
+        space = _overlay_space(ptr)
         if space is not None:
-            ov = space.overlay
-            wanted = faces and not poly_draw.settings().qd_mesh_color_on
-            if ov.show_faces != wanted:
-                ov.show_faces = wanted
-            # Even 0.01 is large on centimetre-scale meshes. An unshifted native
-            # prepass avoids competing with the custom display at every scale.
-            # The compositor retains the saved offset; exit restores it below.
-            if ov.retopology_offset != 0.0:
-                ov.retopology_offset = 0.0
+            _apply_overlay(space, original)
+
+
+@bpy.app.handlers.persistent
+def _overlay_save_pre(*_args):
+    global _overlay_saving
+    if _overlay_saving:
+        return
+    _overlay_saving = True
+    _overlay_save_runtime.clear()
+    for ptr, original in STATE['overlays'].items():
+        space = _overlay_space(ptr)
+        if space is not None:
+            _overlay_save_runtime[ptr] = _overlay_values(space)
+            _set_overlay_values(space, original)
+
+
+@bpy.app.handlers.persistent
+def _overlay_save_post(*_args):
+    """Resume the visible tool after successful saves and save failures alike."""
+    global _overlay_saving
+    pending = dict(_overlay_save_runtime)
+    _overlay_save_runtime.clear()
+    _overlay_saving = False
+    for ptr, runtime in pending.items():
+        space = _overlay_space(ptr)
+        original = STATE['overlays'].get(ptr)
+        if space is None or original is None:
+            continue
+        if _overlay_owner_active(ptr):
+            _set_overlay_values(space, runtime)
+        else:
+            _set_overlay_values(space, original)
+            STATE['overlays'].pop(ptr, None)
+
+
+def _restore_inactive_overlays():
+    for ptr, original in list(STATE['overlays'].items()):
+        if _overlay_owner_active(ptr):
+            continue
+        space = _overlay_space(ptr)
+        if space is not None:
+            _set_overlay_values(space, original)
+        STATE['overlays'].pop(ptr, None)
+        _overlay_save_runtime.pop(ptr, None)
 
 
 def _restore_overlays():
-    from .. import live_refs
-    for ptr, (shown, faces, offset) in list(STATE["overlays"].items()):
-        _w, _a, space = live_refs.find_space(ptr)
+    global _overlay_saving
+    for ptr, original in list(STATE['overlays'].items()):
+        space = _overlay_space(ptr)
         if space is not None:
-            space.overlay.show_retopology = shown
-            space.overlay.show_faces = faces
-            space.overlay.retopology_offset = offset
-    STATE["overlays"].clear()
+            _set_overlay_values(space, original)
+    STATE['overlays'].clear()
+    _overlay_save_runtime.clear()
+    _overlay_saving = False
     global _pick_projection, _fill_projection, _topology_preview,_component_loop_cache
     _component_loop_cache=None
     _pick_projection = None
@@ -1869,20 +1999,22 @@ def _restore_overlays():
 
 
 def _active_anywhere():
+    from ..ui import toolbox
     wm = bpy.context.window_manager
     for win in wm.windows if wm else ():
-        try:
-            tool = win.workspace.tools.from_space_view3d_mode('EDIT_MESH', create=False)
-        except (AttributeError, TypeError, RuntimeError):
-            continue
-        if tool is not None and tool.idname == TOOL and bpy.context.mode == 'EDIT_MESH':
+        if _window_uses_quad_draw(win) and any(
+                area.type == 'VIEW_3D' and not toolbox.is_toolbox(area.spaces.active)
+                for area in win.screen.areas):
             return True
     return False
 
 
 def _watch():
     """While Quad Draw is the tool, nothing; once left: overlays back, an untouched new mesh removed, dots gone."""
+    if _overlay_saving:
+        return 0.5
     try:
+        _restore_inactive_overlays()
         if _active_anywhere():
             return 0.5
     except (ReferenceError, AttributeError):
@@ -2009,7 +2141,7 @@ class ALLSET_OT_quad_draw_start(bpy.types.Operator):
 
 
 classes = (ALLSET_OT_quad_draw_hover, ALLSET_OT_quad_draw, ALLSET_OT_quad_draw_tab, ALLSET_OT_quad_draw_clear_dots,
-           ALLSET_OT_quad_draw_exit, ALLSET_OT_quad_draw_start,ALLSET_MT_quad_draw_options,ALLSET_OT_quad_draw_options,ALLSET_OT_quad_draw_pick_seam)
+           ALLSET_OT_quad_draw_exit, ALLSET_OT_restore_modeling_display, ALLSET_OT_quad_draw_start,ALLSET_MT_quad_draw_options,ALLSET_OT_quad_draw_options,ALLSET_OT_quad_draw_pick_seam)
 
 
 def register_handlers():
@@ -2019,11 +2151,19 @@ def register_handlers():
     if _geometry_reset not in bpy.app.handlers.undo_pre:bpy.app.handlers.undo_pre.append(_geometry_reset)
     if _geometry_reset not in bpy.app.handlers.redo_pre:bpy.app.handlers.redo_pre.append(_geometry_reset)
     if _file_reset not in bpy.app.handlers.load_pre:bpy.app.handlers.load_pre.append(_file_reset)
+    for name, fn in (('save_pre', _overlay_save_pre), ('save_post', _overlay_save_post), ('save_post_fail', _overlay_save_post)):
+        handlers = getattr(bpy.app.handlers, name, None)
+        if handlers is not None and fn not in handlers:
+            handlers.append(fn)
     for handlers in (bpy.app.handlers.undo_post,bpy.app.handlers.redo_post):
         if _restore_topology_state not in handlers:handlers.append(_restore_topology_state)
 
 
 def unregister_handlers():
+    for name, fn in (('save_pre', _overlay_save_pre), ('save_post', _overlay_save_post), ('save_post_fail', _overlay_save_post)):
+        handlers = getattr(bpy.app.handlers, name, ())
+        if fn in handlers:
+            handlers.remove(fn)
     for handlers,fn in ((bpy.app.handlers.undo_pre,_geometry_reset),(bpy.app.handlers.redo_pre,_geometry_reset),(bpy.app.handlers.load_pre,_file_reset)):
         if fn in handlers:handlers.remove(fn)
     for handlers in (bpy.app.handlers.undo_post,bpy.app.handlers.redo_post):

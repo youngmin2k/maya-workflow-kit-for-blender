@@ -6,6 +6,9 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
 ## [Unreleased]
 
 ### Fixed
+- **Component shading after reopening Quad Draw files**: save native viewport settings instead of temporary
+  Retopology overrides; restore each owned view on tool/mode/workspace changes and failed saves. Shading >
+  Restore Modeling Display repairs the affected viewport in older files without editing the mesh or materials.
 - **Quad Draw connections**: Shift previews use boundary edges and reject overlapping faces, skipped boundary
   vertices and non-manifold edges. Auto-weld previews vertex/edge targets while dragging, then welds the same targets
   on release, including Tab extensions. Escape cancels without merging; tolerance uses actual screen pixels.

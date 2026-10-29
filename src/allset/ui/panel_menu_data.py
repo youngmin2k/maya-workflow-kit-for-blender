@@ -96,6 +96,8 @@ SHADING = [
     ("prop", "shading", "use_dof", "Depth of Field"),
     _sep(),
     ("set", "APPLY_ALL", "Apply Current to All"),
+    _sep(),
+    _run("Restore Modeling Display", "allset.restore_modeling_display"),
 ]
 
 LIGHTING = [

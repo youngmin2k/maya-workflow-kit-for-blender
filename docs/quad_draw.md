@@ -126,6 +126,18 @@ Preselection uses a small red ring for a vertex, a thin red stroke for an edge, 
 interior. Hover and press share a picker; vertex zones shrink around short projected edges to keep small faces and
 edge midpoints accessible. Components behind the live reference are excluded. The hover marker clears while dragging.
 
+Display overrides belong to each actual Quad Draw viewport, excluding the Maya Tool Box column. Leaving the tool,
+changing mode/workspace/editor, closing a window or disabling the addon restores that view's original Retopology,
+face-overlay and offset settings. Other windows can use different scenes and modes independently.
+Before saving, only owned views temporarily return to their native values so a .blend never stores the tool's
+temporary depth override. The live display resumes after a successful or failed save. A reopened Quad Draw tool
+captures those saved native values again. Manually enabled native Retopology and custom offsets are preserved.
+
+Older files may already contain a stuck Retopology overlay, which can make component-mode faces disappear into
+the background. In that affected viewport use **Shading > Restore Modeling Display**, then save normally. This
+explicit repair turns off Retopology in that view and leaves geometry, materials and other views unchanged;
+unowned settings are never automatically guessed or reset on load.
+
 Fill proposals are bounded local heuristics. Deep folds, disconnected sheets and ambiguous layouts can require
 another view or explicit point placement. Autodesk publishes tool behavior and context options; its internal
 inference algorithm is not publicly specified.
