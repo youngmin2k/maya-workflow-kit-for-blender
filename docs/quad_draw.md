@@ -12,7 +12,10 @@ Activate **Mesh Tools > Quad Draw**, the shelf button or **Ctrl+Shift+Q**. The M
 - Extend offers Edge, Loop (the boundary chain up to a corner/pole), and Border (the connected border).
 - Quad Strip Width sets the width in pixels. Clear Dots removes unfinished dots; Reset Settings restores defaults.
 - Live Constraint Options controls the wire overlay/color, mesh tint, opacity, surface offset and backface snapping.
-  The default cyan tint is chosen to match the supplied Maya reference; Autodesk does not document a fixed RGB value.
+  The default base tint matches the supplied Maya picker swatch, display sRGB `#008BD4`, stored as linear RGB
+  `(0, 0.258183, 0.658375)`. The reference picker uses ACEScg; its HSV numbers are not Blender's RGB values.
+  Opacity, the surface underneath and hover highlighting change the final blended face color. Existing custom
+  scene colors remain available; Autodesk does not document a universal fixed RGB value.
 
 Only Make Live meshes are reference surfaces. Without one, dots use the construction plane, even if other objects
 are visible. Component drags preserve the initial screen offset; leaving a live surface keeps the last valid position.

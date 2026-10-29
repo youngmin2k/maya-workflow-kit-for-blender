@@ -68,8 +68,8 @@ def surface():
 def options_and_tint():
     check('Quad Draw automatically raises Modeling Toolkit', bpy.context.window_manager.allset_dock == 'MODELING_TOOLKIT')
     data=image_crop('quad_draw_cyan')
-    cyan=(data[...,0]<.3)&(data[...,1]>.4)&(data[...,2]>.5)
-    check('retopology faces have a clearly visible cyan fill', int(cyan.sum())>500)
+    blue=(data[...,0]<.5)&(data[...,1]>.35)&(data[...,2]>data[...,1]*1.15)
+    check('retopology faces have the reference blue fill', int(blue.sum())>500)
     ob=bpy.context.edit_object
     check('display tint leaves mesh materials and theme unchanged', list(ob.data.materials)==C['materials'] and tuple(bpy.context.preferences.themes[0].view_3d.face_retopology)==C['theme'])
     s=mod('operators.poly_draw').settings()

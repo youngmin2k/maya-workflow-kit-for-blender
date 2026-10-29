@@ -2,7 +2,7 @@
 from importlib import import_module
 import bmesh
 import bpy
-from mathutils import Vector
+from mathutils import Color, Vector
 import kit
 
 qd = import_module(kit.MODULE + '.operators.quad_draw')
@@ -38,7 +38,8 @@ def test_offset_is_applied_along_surface_normal_and_resets():
     s.qd_mesh_color, s.qd_mesh_alpha, s.qd_wire_overlay = (1, 0, 0), .2, False
     pd.reset_settings(s, 'QUAD_DRAW')
     assert not s.qd_offset_on and s.qd_mesh_alpha == .75 and s.qd_wire_overlay
-    assert abs(s.qd_mesh_color[1] - .72) < 1e-5
+    display=Color(s.qd_mesh_color).from_scene_linear_to_srgb()
+    assert tuple(round(v*255) for v in display)==(0,139,212),tuple(display)
 
 
 def test_all_relax_includes_interior_and_boundary_neighbours():
