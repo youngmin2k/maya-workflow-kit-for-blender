@@ -15,14 +15,17 @@ _topology = None
 _revision = -1
 _diagnostics = None
 _diagnostic_bytes = 0
+_delete_preview=None
+_relax_preview=None
 
 
 def clear():
-    global _cached, _hover, _bias, _bytes, _topology, _revision
+    global _cached, _hover, _bias, _bytes, _topology, _revision,_delete_preview,_relax_preview
     _cached = _hover = _bias = None
     _bytes = 0
     _topology=None;_revision=-1
     clear_symmetry()
+    _delete_preview=_relax_preview=None
 
 
 def clear_symmetry():
@@ -32,7 +35,8 @@ def clear_symmetry():
 
 def buffer_bytes():
     """Retained geometry payload (driver allocation overhead excluded)."""
-    return _bytes+_diagnostic_bytes
+    extra=(_delete_preview[-1] if _delete_preview else 0)+(_relax_preview[-1] if _relax_preview else 0)
+    return _bytes+_diagnostic_bytes+extra
 
 
 _DEPTH = '''
@@ -62,10 +66,22 @@ def shader(kind='FACE'):
     info.vertex_in(0, 'VEC3', 'pos')
     info.vertex_in(1, 'FLOAT', 'bias')
     info.fragment_out(0, 'VEC4', 'fragColor')
-    if kind == 'FACE':
+    if kind in {'FACE','AREA'}:
         info.push_constant('BOOL', 'cull_faces')
-        info.vertex_source(_DEPTH + 'void main() { gl_Position = project_point(pos, bias); }')
-        info.fragment_source('''void main() {
+        if kind=='AREA':
+            info.vertex_in(2,'FLOAT','weight')
+            interface=gpu.types.GPUStageInterfaceInfo('qd_area');interface.smooth('FLOAT','influence');info.vertex_out(interface)
+            info.vertex_source(_DEPTH+'void main() { gl_Position = project_point(pos,bias); influence=weight; }')
+            info.fragment_source('''void main() {
+                if (cull_faces && !gl_FrontFacing) discard;
+                float w=clamp(influence,0.0,1.0);
+                if (w<=0.0) discard;
+                vec3 ramp=w<0.5 ? vec3(w*2.0,0.0,0.0) : vec3(1.0,(w-0.5)*2.0,0.0);
+                fragColor=vec4(ramp,w*color.a);
+            }''')
+        else:
+            info.vertex_source(_DEPTH + 'void main() { gl_Position = project_point(pos, bias); }')
+            info.fragment_source('''void main() {
             if (cull_faces && !gl_FrontFacing) discard;
             fragColor = color;
         }''')
@@ -205,7 +221,7 @@ def _bind(context, kind, color, width=1.8, cull=False):
     offset = saved[2] if saved is not None else context.space_data.overlay.retopology_offset
     sh.uniform_float('depth_params',(p[2][2],p[2][3],p[3][3],offset))
     sh.uniform_float('color',color)
-    if kind == 'FACE':
+    if kind in {'FACE','AREA'}:
         sh.uniform_bool('cull_faces',cull)
     else:
         sh.uniform_float('viewport',(context.region.width,context.region.height,
@@ -241,6 +257,47 @@ def _draw_symmetry(context,c):
         point=comp[1]=='VERT';_diagnostics[4].draw(_bind(context,'POINT' if point else 'WIRE',(.15,1,.4,1),8 if point else 2.2))
 
 
+def _draw_delete_loop(context,c):
+    global _delete_preview
+    from . import quad_draw as q
+    data=q.STATE.get('delete_edges');pv=q.STATE.get('preview')
+    if not pv or pv[0]!='DELETE_LOOP' or not data or data[0]!=c.name:
+        _delete_preview=None;return
+    sym=context.scene.allset_symmetry;info=q.STATE.get('topology_info')
+    key=(c,c.revision,data[1],sym.on,sym.about,sym.axis,id(info))
+    if _delete_preview is None or _delete_preview[0]!=key:
+        edges=c.edges[list(data[1])];points=c.co[edges].reshape(-1,3)
+        bias=_bias[0][edges].max(axis=1)
+        if sym.on and sym.about!='TOPOLOGY':
+            ob=context.edit_object
+            matrix=np.asarray(ob.matrix_world@q.quad_draw_symmetry.reflection(ob,sym.about,'XYZ'.index(sym.axis))@ob.matrix_world.inverted_safe())
+            points=np.concatenate((points,points@matrix[:3,:3].T+matrix[:3,3]));bias=np.tile(bias,2)
+        elif sym.on and info:
+            pairs=info['pairs'];mirrored=np.asarray([(pairs[a],pairs[b]) for a,b in edges if a in pairs and b in pairs],dtype='int32').reshape(-1,2)
+            if len(mirrored):points=np.concatenate((points,c.co[mirrored].reshape(-1,3)));bias=np.r_[bias,_bias[0][mirrored].max(axis=1)]
+        segments=np.arange(len(points),dtype='int32').reshape(-1,2)
+        _delete_preview=key,_wire(points,segments,bias),len(segments)*168
+    if _delete_preview[1] is not None:_delete_preview[1].draw(_bind(context,'WIRE',(1,.055,.035,1),2.2))
+
+
+def _draw_relax_area(context,c):
+    global _relax_preview
+    from . import quad_draw as q
+    area=q.STATE.get('relax_area')
+    if not context.scene.allset_soft_select or not area or area['cache'] is not c:
+        _relax_preview=None;return
+    weights=area['weights'];key=(c,c.revision,id(weights))
+    if _relax_preview is None or _relax_preview[0]!=key:
+        ids=_topology[6];faces=_topology[5]
+        mask=(weights[ids]>0).any(axis=1);triangles=ids[mask].ravel()
+        batch=None
+        if len(triangles):
+            bias=np.repeat(_bias[1][faces[mask]],3)
+            batch=batch_for_shader(shader('AREA'),'TRIS',{'pos':c.co[triangles].astype('float32'),'bias':bias.astype('float32'),'weight':weights[triangles].astype('float32')})
+        _relax_preview=key,weights,batch,weights.nbytes+len(triangles)*20
+    if _relax_preview[2] is not None:_relax_preview[2].draw(_bind(context,'AREA',(1,1,1,.9),cull=True))
+
+
 def draw(context):
     from . import quad_draw
     quad_draw.sync_overlays(context)
@@ -258,6 +315,7 @@ def draw(context):
         gpu.state.blend_set('ALPHA')
         if faces is not None and s.qd_mesh_color_on and s.qd_mesh_alpha > 0:
             faces.draw(_bind(context,'FACE',(*s.qd_mesh_color,s.qd_mesh_alpha),cull=True))
+        _draw_relax_area(context,_cached[0])
     finally:
         gpu.state.depth_test_set(depth)
         gpu.state.depth_mask_set(mask)
@@ -284,6 +342,7 @@ def draw_front(context):
         wires = _cached[2]
         if wires is not None and s.qd_wire_overlay:
             wires.draw(_bind(context,'WIRE',(*s.qd_wire_color,1)))
+        _draw_delete_loop(context,_cached[0])
         _draw_symmetry(context,_cached[0])
         if not pv or pv[0] != 'HOVER' or not comp:
             return

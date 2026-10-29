@@ -120,4 +120,28 @@ def reopened_binding():
   if ob.mode!='EDIT':bpy.ops.object.mode_set(mode='EDIT')
   b=bm();sy=mod('quad_draw_symmetry')
   check('saved and reopened file retains stable seam binding and pairs',tuple(ob.data[sy.SEED])==C['saved_ids'] and bool(sy.topology_mapping(ob,b,bpy.context.scene.allset_symmetry)))
+  bpy.ops.allset.quad_draw_start()
+  edge=min((e for e in b.edges if e.is_boundary),key=lambda e:sum(v.co.y for v in e.verts)+abs(sum(v.co.x for v in e.verts))*.01)
+  C['border_mid']=sum((v.co for v in edge.verts),Vector())*.5;C['before_border']=len(b.faces)
+ move(C['border_mid'],ctrl=True,shift=True)
+@step
+def loaded_border_settle():move(C['border_mid'],ctrl=True,shift=True)
+@step
+def delete_bound_border():
+ with override():
+  a,r=view3d();x,y=xy(C['border_mid']);q=mod('quad_draw')
+  comp=q.component_at(bpy.context,r,a.spaces.active.region_3d,(x-r.x,y-r.y),bpy.context.edit_object)
+  print('BOUND_BORDER_TARGET',q.tool_active(bpy.context),comp,q.STATE['preview'],flush=True)
+ move(C['border_mid'],ctrl=True,shift=True);ev('LEFTMOUSE','PRESS',ctrl=True,shift=True)
+@step
+def release_bound_border():ev('LEFTMOUSE','RELEASE',ctrl=True,shift=True)
+@step
+def bound_border_removed():
+ print('BOUND_BORDER_RESULT',C['before_border'],len(bm().faces),bpy.context.scene.allset_symmetry.on,flush=True)
+ check('deleting a border loop crossing the seam retains its complete strip edit',len(bm().faces)==C['before_border']-4)
+ check('a border strip that removes a seam edge disables topology symmetry',not bpy.context.scene.allset_symmetry.on)
+ with override():bpy.ops.ed.undo()
+@step
+def border_undone():
+ check('Undo of the border strip restores topology symmetry and the seam',len(bm().faces)==C['before_border'] and bpy.context.scene.allset_symmetry.on and mod('quad_draw_symmetry').SEED in bpy.context.edit_object.data)
 run()

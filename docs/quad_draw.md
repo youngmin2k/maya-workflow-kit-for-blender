@@ -9,6 +9,20 @@ Activate **Mesh Tools > Quad Draw**, the shelf button or **Ctrl+Shift+Q**. The M
   A small release margin keeps an acquired target from flickering as the mouse jitters near the tolerance boundary.
 - Relax offers Auto-Lock, Interior Vertices, Border Vertices and All Vertices. Auto-Lock chooses the nearest
   vertex type at the start of a stroke and keeps it until release.
+- Ctrl+Shift+click an interior edge dissolves its quad loop; on a boundary it removes the loop's adjacent
+  face strip. Ctrl+Shift hover previews the complete loop in red. Hidden edges, corners, poles and non-quad
+  junctions stop traversal; non-manifold edge targets are refused. Ctrl+Shift+MMB tweaks the same loop,
+  including a straight boundary chain. Face deletion and loose-dot deletion remain available.
+- Shift+LMB paints relaxation. Border / Auto-Lock border strokes stay on the continuous visible boundary
+  where the stroke began, so a nearby disconnected border is not moved by the same stroke.
+- With Soft Selection enabled (B), Relax uses its radius and Volume / Surface / projected mode. Hover shows
+  a smooth red-to-yellow influence preview. Relax applies equal smoothing strength within the influence
+  area; the falloff curve affects the preview rather than weighting the smoothing operation.
+- Shift+MMB holds the component / Soft Selection area captured at press. Drag right to increase relaxation,
+  left to reduce it; returning to the press position restores the original geometry. This reverses the
+  current stroke, not older committed strokes. Without Soft Selection, it holds the highlighted component.
+  Escape restores both brush and MMB strokes, including when symmetry is off. One Undo/Redo covers the
+  complete accepted stroke. Points continue to project onto the live surface.
 - Extend offers Edge, Loop (the boundary chain up to a corner/pole), and Border (the connected border).
 - Quad Strip Width sets the width in pixels. Clear Dots removes unfinished dots; Reset Settings restores defaults.
 - Hold Tab and middle-drag outside the retopo mesh to resize strips; Escape restores the previous width.
@@ -85,6 +99,10 @@ Large edited meshes copy coordinates/connectivity through bulk mesh arrays; temp
 released. Fill candidates use grouped polygon arrays instead of Python objects for every interior face.
 Additive symmetry edits record detailed rings only around touched components and retain a native BMesh rollback
 copy. Cut/delete use a conservative full snapshot; their cost can still grow with total mesh size.
+Loop traversal is cached per geometry revision and target edge; hover, delete and loop tweak share its topology
+rules. Relax uses numeric local one-ring kernels and vectorized brush queries rather than projecting every
+vertex in Python per event. A reversible MMB stroke retains at most 17 local smoothing checkpoints, released
+on completion/cancel; tool exit, Undo and file changes clear influence and loop display caches.
 
 The display tint and antialiased pixel-width strokes use cached GPU batches. Temporary display clearance follows
 nearby faces, so an unrelated long edge does not raise the entire mesh. Materials and theme are preserved.
@@ -112,6 +130,9 @@ Interaction references: [Extend](https://help.autodesk.com/cloudhelp/2026/ENU/Ma
 [Strips](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-868805BC-CED5-4262-826E-203EE914B71E.htm),
 [Topological symmetry](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-EC3CCAFA-DBEB-4733-AF50-467B9EE8B65B.htm),
 and [Partial symmetry](https://help.autodesk.com/cloudhelp/2023/ENU/Maya-Modeling/files/GUID-0CE4C064-EA74-4871-971F-08308DC60264.htm).
+[Delete components](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-6A14EBB4-6770-48D9-9F42-EB4200971433.htm),
+[Relax vertices](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-171B1A46-C616-4D92-83D8-C6440A51264C.htm),
+and [Quad Draw hotkeys](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-ED28E6BC-6141-491C-8C1B-2AE6FC813284.htm).
 
 Display references: [Maya preselection highlighting](https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Customizing/files/GUID-8C8BA1F4-59EE-4A02-BFE7-9193C0D6F5BE.htm),
 [viewport antialiasing](https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Basics/files/GUID-9BBB6035-2A02-41BB-AF2D-99D9BEE580F1.htm),

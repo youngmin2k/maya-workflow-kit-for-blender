@@ -146,9 +146,10 @@ def edge_loop(edge):
     for start in edge.verts:
         e, cur = edge, start
         while len(cur.link_edges) == 4:
+            if any(f.hide or len(f.verts)!=4 for f in cur.link_faces):break
             faces = set(e.link_faces)
             nxt = [x for x in cur.link_edges if x is not e and not set(x.link_faces) & faces]
-            if len(nxt) != 1 or nxt[0] in seen:
+            if len(nxt) != 1 or nxt[0] in seen or nxt[0].hide or any(v.hide for v in nxt[0].verts):
                 break
             e = nxt[0]
             seen.add(e)
@@ -176,7 +177,7 @@ def border_chain(edge):
     for start in edge.verts:
         cur, previous = start, edge
         while len(cur.link_edges) == 3:
-            candidates = [e for e in cur.link_edges if e.is_boundary and e is not previous]
+            candidates = [e for e in cur.link_edges if e.is_boundary and e is not previous and not e.hide and not any(v.hide for v in e.verts)]
             if len(candidates) != 1 or candidates[0] in seen:
                 break
             previous = candidates[0]
@@ -184,6 +185,12 @@ def border_chain(edge):
             out.append(previous)
             cur = previous.other_vert(cur)
     return out
+
+
+def component_loop(edge):
+    """The editable loop: a boundary chain or a regular interior quad loop."""
+    if edge.hide or any(v.hide for v in edge.verts) or len(edge.link_faces)>2:return []
+    return border_chain(edge) if edge.is_boundary else edge_loop(edge)
 
 
 def extend_edges(bm, edges, offset, positions=None, created=None):
@@ -375,9 +382,15 @@ def delete_loop(bm, edge_index):
     """Ctrl+Shift+click an edge: its edge loop goes (inner edges dissolve; a border edge takes its faces)."""
     bm.edges.ensure_lookup_table()
     edge = bm.edges[edge_index]
+    if edge.hide or any(v.hide for v in edge.verts) or len(edge.link_faces)>2:return False
+    if edge.is_boundary:
+        faces={f for e in component_loop(edge) for f in e.link_faces if not f.hide}
+        if not faces:return False
+        bmesh.ops.delete(bm,geom=list(faces),context='FACES');_indices(bm)
+        return True
     if len(edge.link_faces) != 2:
         return delete_at(bm, 'EDGE', edge_index)
-    loop = [e for e in edge_loop(edge) if len(e.link_faces) == 2]
+    loop = [e for e in component_loop(edge) if len(e.link_faces) == 2]
     bmesh.ops.dissolve_edges(bm, edges=loop, use_verts=True)
     _indices(bm)
     return True
@@ -468,6 +481,22 @@ STATE = {"ob": None, "preview": None, "snap": [], "created": None, "overlays": {
 _topology_preview=None
 _pick_projection = None
 _fill_projection = None
+_component_loop_cache=None
+
+
+def loop_plan(context,ob,index):
+    """Share one loop traversal between hover, delete and loop tweak."""
+    global _component_loop_cache
+    c=next((c for candidate,c in preselect.caches(context) if candidate==ob),None)
+    if c is None:return None
+    key=(c,c.revision,index)
+    if _component_loop_cache is not None and _component_loop_cache[0]==key:return _component_loop_cache[1]
+    edges=component_loop(c.bm.edges[index])
+    plan={'edges':tuple(e.index for e in edges),'verts':tuple(sorted({v.index for e in edges for v in e.verts})),
+          'faces':tuple(sorted({f.index for e in edges for f in e.link_faces})),
+          'points':[tuple(c.co[v.index]) for e in edges for v in e.verts]}
+    _component_loop_cache=key,plan
+    return plan
 
 
 def reset_preview():
@@ -737,6 +766,12 @@ def _close_symmetry(operator):
     operator._sym=None
 
 
+def _close_relax(operator):
+    session=getattr(operator,'_relax',None)
+    if session is not None:session.close()
+    operator._relax=None;STATE['relax_area']=None
+
+
 def _commit_weld(operator,bm,magnet,source):
     sym=getattr(operator,'_sym',None)
     if sym is None:return magnet.commit(bm,source)
@@ -906,10 +941,14 @@ def update_hover(context, region, rv3d, mouse, ctrl, shift, tab=False):
     STATE["preview"] = None
     STATE['hover_component'] = None
     STATE['topology_hover']=None
+    STATE['delete_edges']=None;STATE['relax_area']=None
     if ob is None:
         return
     info=topology_preview(context,ob)
     if info is not None:info['hover_supported']=None
+    if context.scene.allset_soft_select and not ctrl and not tab:
+        from . import quad_draw_relax
+        quad_draw_relax.preview(context,ob,mouse)
     if tab:
         vi = corner_vertex_at(context, region, rv3d, mouse, ob)
         if vi is not None:
@@ -934,6 +973,9 @@ def update_hover(context, region, rv3d, mouse, ctrl, shift, tab=False):
     comp = component_at(context, region, rv3d, mouse, ob)
     if comp is not None:
         STATE["preview"] = ('DELETE' if ctrl else 'HOVER', _component_points(ob, comp))
+        if ctrl and comp[0]=='EDGE':
+            plan=loop_plan(context,ob,comp[1])
+            STATE['preview']=('DELETE_LOOP',plan['points']);STATE['delete_edges']=(ob.name,plan['edges'])
         STATE['hover_component'] = (ob.name, *comp[:2])
         if info is not None:
             bm=bmesh.from_edit_mesh(ob.data);bm.verts.ensure_lookup_table();bm.edges.ensure_lookup_table();bm.faces.ensure_lookup_table()
@@ -1011,23 +1053,30 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         self._refs = reference_objects(context)
         self._moved = False
         self._grab = None
+        self._relax=None
         if not _begin_symmetry(self,context,ob,coordinate_only=not event.ctrl or self.middle and event.shift):return {'CANCELLED'}
         # Maya's Keyboard/Mouse Shortcuts
         if event.ctrl and event.shift and self.middle:
             self._mode = 'MOVE'                 # Ctrl+Shift+MMB: drag an edge = tweak its edge loop
             self._grab = self._grab_loop(context, mouse)
             if self._grab is None:
+                _close_symmetry(self)
                 return {'PASS_THROUGH'}
             self._new_dot = False
         elif event.ctrl and event.shift:
             self._mode = 'DELETE'               # click / drag across faces = delete; an edge = its edge loop
             if self._delete(context, mouse) is None:
+                _close_symmetry(self)
                 return {'CANCELLED'}
         elif event.ctrl:
             return self._loop(context, mouse, center=self.middle)   # Ctrl+MMB = centred loop
         elif event.shift:
             self._mode = 'SHIFT'                # click = fill (LMB), drag = relax (MMB: the highlighted points)
             self._fill_plan=fill_plan(context,region,rv3d,mouse,ob) if not self.middle else None
+            from . import quad_draw_relax
+            try:self._relax=quad_draw_relax.Session(context,self,mouse)
+            except quad_draw_symmetry.SymmetryError as ex:
+                self.report({'WARNING'},str(ex));_close_symmetry(self);return {'CANCELLED'}
         else:
             self._mode = 'MOVE'
             self._grab = self._grab_at(context, mouse)
@@ -1053,6 +1102,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         # moves, so the hover operator cannot refresh that marker while dragging.
         STATE["preview"] = None
         STATE["snap"] = []
+        STATE['delete_edges']=None
         STATE['topology_hover']=None
         self._snap = None
         if self._grab is not None and _weld_px(context) is not None:
@@ -1153,12 +1203,13 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             vertices=list(bm.verts[comp[1]].link_faces) if comp[0]=='VERT' else []
             if comp[0]=='VERT':vertices={v for f in vertices for v in f.verts}|{bm.verts[comp[1]]}
             elif comp[0]=='FACE':vertices=list(bm.faces[comp[1]].verts)
-            else:vertices={v for e in edge_loop(bm.edges[comp[1]]) for f in e.link_faces for v in f.verts}
+            else:vertices={v for e in component_loop(bm.edges[comp[1]]) for f in e.link_faces for v in f.verts}
             try:sym.require(vertices)
             except quad_draw_symmetry.SymmetryError as ex:
                 self.report({'WARNING'},str(ex));return None
         if comp[0] == 'EDGE':
-            delete_loop(bm, comp[1])
+            if not delete_loop(bm, comp[1]):
+                self.report({'INFO'},'Quad Draw: choose a visible manifold edge loop');return None
         else:
             delete_at(bm, comp[0], comp[1])
         if not _sync_symmetry(self,context):return None
@@ -1177,7 +1228,9 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             return None
         bm = bmesh.from_edit_mesh(ob.data)
         bm.edges.ensure_lookup_table()
-        verts = list({v for e in edge_loop(bm.edges[comp[1]]) for v in e.verts})
+        plan=loop_plan(context,ob,comp[1]);bm.verts.ensure_lookup_table()
+        if not plan or not plan['verts']:return None
+        verts = [bm.verts[i] for i in plan['verts']]
         mw = ob.matrix_world
         start = surface_hit(context, region, rv3d, mouse, self._refs) if self._refs else None
         if start is None:
@@ -1214,42 +1267,10 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         return {'FINISHED'}
 
     def _relax_at(self, context, mouse):
-        region, rv3d = context.region, context.region_data
-        ob = bpy.data.objects[self._ob]
-        bm = bmesh.from_edit_mesh(ob.data)
-        mw, inv = ob.matrix_world, ob.matrix_world.inverted_safe()
-        r = BRUSH_PX * _ui_scale(context)
-        verts = []
-        if self.middle:      # Shift+MMB: only the highlighted component's points
-            comp = component_at(context, region, rv3d, mouse, ob)
-            if comp is not None:
-                for kind, seq in (('VERT', bm.verts), ('EDGE', bm.edges), ('FACE', bm.faces)):
-                    if comp[0] == kind:
-                        seq.ensure_lookup_table()
-                        el = seq[comp[1]]
-                        verts = [el] if kind == 'VERT' else list(el.verts)
-        else:
-            for v in bm.verts:
-                xy = _screen_xy(region, rv3d, mw @ v.co)
-                if xy is not None and math.hypot(xy[0] - mouse[0], xy[1] - mouse[1]) <= r:
-                    verts.append(v)
-        refs = self._refs
-
-        def project(co):
-            return inv @ project_point(context, mw @ co, refs, region, rv3d) if refs else co
-        mode = poly_draw.settings(context).qd_relax
-        if mode == 'AUTO_LOCK':
-            if verts and not hasattr(self, '_relax_lock'):
-                seed = min(verts, key=lambda v: (Vector(_screen_xy(region, rv3d, mw @ v.co))-Vector(mouse)).length_squared)
-                self._relax_lock = 'BORDER' if seed.is_boundary else 'INTERIOR'
-            mode = getattr(self, '_relax_lock', 'AUTO_LOCK')
-        moved=relax(bm, verts, mode, project=project)
-        sym=getattr(self,'_sym',None)
-        if sym is not None:sym.move(moved)
-        changed=moved+([sym.pairs[v] for v in moved if v in sym.pairs and sym.pairs[v].is_valid] if sym else [])
-        preselect.coordinates_changed(ob,changed)
-        bmesh.update_edit_mesh(ob.data, loop_triangles=False, destructive=False)
-        STATE["preview"] = ('BRUSH', (mouse[0], mouse[1], r))
+        from . import quad_draw_relax
+        session=getattr(self,'_relax',None)
+        if session is None:self._relax=session=quad_draw_relax.Session(context,self,getattr(self,'_press',mouse))
+        session.apply(context,mouse)
 
     # -- modal
     def modal(self, context, event):
@@ -1257,6 +1278,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             STATE["preview"] = None
             STATE["snap"] = []
             self._snap = None
+            _close_relax(self)
             _close_symmetry(self);preselect.invalidate()
             return {'CANCELLED'}
         mouse = _mouse(event)
@@ -1287,6 +1309,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             _close_symmetry(self)
             return {'FINISHED'}
         if self._mode == 'SHIFT':
+            _close_relax(self)
             if self._moved or self.middle:
                 if not self._moved:
                     _close_symmetry(self)
@@ -1340,6 +1363,9 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         self._snap = None
         self._surface_anchors = None
         ob = bpy.data.objects.get(self._ob)
+        session=getattr(self,'_relax',None)
+        if session is not None:session.restore()
+        _close_relax(self)
         sym=getattr(self,'_sym',None)
         if sym is not None:
             sym.rollback();self._sym=None
@@ -1820,13 +1846,16 @@ def _restore_overlays():
             space.overlay.show_faces = faces
             space.overlay.retopology_offset = offset
     STATE["overlays"].clear()
-    global _pick_projection, _fill_projection, _topology_preview
+    global _pick_projection, _fill_projection, _topology_preview,_component_loop_cache
+    _component_loop_cache=None
     _pick_projection = None
     _fill_projection = None
     _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None
     STATE["snap"] = []
     from . import quad_draw_overlay
     quad_draw_overlay.clear()
+    from . import quad_draw_relax
+    quad_draw_relax.clear();STATE['relax_area']=None;STATE['delete_edges']=None
     preselect.invalidate()
 
 
@@ -2000,12 +2029,15 @@ def unregister_handlers():
 
 @bpy.app.handlers.persistent
 def _geometry_reset(_dummy):
-    global _pick_projection,_fill_projection,_topology_preview
+    global _pick_projection,_fill_projection,_topology_preview,_component_loop_cache
+    _component_loop_cache=None
     _pick_projection=_fill_projection=None
     _topology_preview=None;STATE['topology_info']=None;STATE['topology_hover']=None
     STATE['preview']=None;STATE['snap']=[]
     from . import quad_draw_overlay
     quad_draw_overlay.clear();preselect.invalidate()
+    from . import quad_draw_relax
+    quad_draw_relax.clear();STATE['relax_area']=None;STATE['delete_edges']=None
 
 
 @bpy.app.handlers.persistent
