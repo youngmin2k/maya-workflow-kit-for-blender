@@ -885,6 +885,9 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
                 self._new_dot = True
             else:
                 self._new_dot = False
+        # Hover owns a snapshot of the pre-press coordinates. The modal consumes mouse
+        # moves, so the hover operator cannot refresh that marker while dragging.
+        STATE["preview"] = None
         context.window_manager.modal_handler_add(self)
         _redraw(context)
         return {'RUNNING_MODAL'}
@@ -914,6 +917,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         return ('MESH', [v.index for v in verts], [mw @ v.co for v in verts], start)
 
     def _drag_to(self, context, mouse):
+        STATE["preview"] = None
         region, rv3d = context.region, context.region_data
         _k, idx, starts, start = self._grab
         ob = bpy.data.objects[self._ob]
