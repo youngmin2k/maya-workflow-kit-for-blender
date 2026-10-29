@@ -11,17 +11,28 @@ _cached = None
 _hover = None
 _bias = None
 _bytes = 0
+_topology = None
+_revision = -1
+_diagnostics = None
+_diagnostic_bytes = 0
 
 
 def clear():
-    global _cached, _hover, _bias, _bytes
+    global _cached, _hover, _bias, _bytes, _topology, _revision
     _cached = _hover = _bias = None
     _bytes = 0
+    _topology=None;_revision=-1
+    clear_symmetry()
+
+
+def clear_symmetry():
+    global _diagnostics,_diagnostic_bytes
+    _diagnostics=None;_diagnostic_bytes=0
 
 
 def buffer_bytes():
     """Retained geometry payload (driver allocation overhead excluded)."""
-    return _bytes
+    return _bytes+_diagnostic_bytes
 
 
 _DEPTH = '''
@@ -110,33 +121,38 @@ def _wire(points, edges, bias, kind='WIRE'):
 
 
 def batches(context):
-    global _cached, _hover, _bias, _bytes
+    global _cached, _hover, _bias, _bytes, _topology, _revision
     ob = context.edit_object
     c = next((c for candidate,c in preselect.caches(context) if candidate == ob), None)
     if c is None:
         return None
-    if _cached is None or _cached[0] is not c:
+    changed=_cached is None or _cached[0] is not c
+    revision=getattr(c,'revision',0)
+    if changed or _revision!=revision:
         positions = c.co.astype('float32')
         edges = c.edges[c.eok].astype('int32')
         face_bias = np.zeros(len(c.bm.faces), dtype='float32')
         vertex_bias = np.zeros(len(c.co), dtype='float32')
         # Coarse faces need clearance above curved references. Local bias prevents
         # one long, unrelated edge from lifting the entire mesh over occluders.
-        visible = [f for f in c.bm.faces if not f.hide]
-        if visible:
+        if changed:
+            visible = [f for f in c.bm.faces if not f.hide]
             sizes = np.fromiter((len(f.verts) for f in visible),dtype='int32',count=len(visible))
             face_ids = np.fromiter((f.index for f in visible),dtype='int32',count=len(visible))
-            starts = np.r_[0,np.cumsum(sizes)[:-1]]
+            starts = np.r_[0,np.cumsum(sizes)[:-1]] if len(sizes) else np.empty(0,dtype='int32')
             vertex_ids = np.fromiter((v.index for f in visible for v in f.verts),dtype='int32',count=int(sizes.sum()))
             following = np.roll(vertex_ids,-1)
-            following[np.cumsum(sizes)-1] = vertex_ids[starts]
+            if len(sizes):following[np.cumsum(sizes)-1] = vertex_ids[starts]
+            triangles = c.bm.calc_loop_triangles()
+            tri_faces = np.fromiter((tri[0].face.index for tri in triangles),dtype='int32',count=len(triangles))
+            ids = np.fromiter((loop.vert.index for tri in triangles for loop in tri),dtype='int32',count=len(triangles)*3).reshape(-1,3)
+            _topology=sizes,face_ids,starts,vertex_ids,following,tri_faces,ids
+        sizes,face_ids,starts,vertex_ids,following,tri_faces,ids=_topology
+        if len(sizes):
             lengths = np.linalg.norm(positions[vertex_ids]-positions[following],axis=1)
             biases = np.maximum.reduceat(lengths,starts)*.5
             face_bias[face_ids] = biases
             np.maximum.at(vertex_bias,vertex_ids,np.repeat(biases,sizes))
-        triangles = c.bm.calc_loop_triangles()
-        tri_faces = np.fromiter((tri[0].face.index for tri in triangles),dtype='int32',count=len(triangles))
-        ids = np.fromiter((loop.vert.index for tri in triangles for loop in tri),dtype='int32',count=len(triangles)*3).reshape(-1,3)
         shown = face_bias[tri_faces]>0
         ids = ids[shown].ravel()
         values = np.repeat(face_bias[tri_faces[shown]],3)
@@ -147,6 +163,7 @@ def batches(context):
         _bias = vertex_bias, face_bias
         _hover = None
         _cached = c, faces, wires, float(face_bias.max()) if len(face_bias) else 0
+        _revision=revision
     return _cached[1:]
 
 
@@ -196,6 +213,34 @@ def _bind(context, kind, color, width=1.8, cull=False):
     return sh
 
 
+def _draw_symmetry(context,c):
+    """Draw cached seam/counterpart strokes after the base wire, with the same depth clearance."""
+    global _diagnostics,_diagnostic_bytes
+    from . import quad_draw
+    sym=context.scene.allset_symmetry;info=quad_draw.STATE.get('topology_info')
+    if not sym.on or sym.about!='TOPOLOGY' or not info or info['object']!=c.name:return
+    if _diagnostics is None or _diagnostics[0] is not c or _diagnostics[1] is not info or _diagnostics[7]!=_revision:
+        edges=np.asarray(info.get('seam_ids',()),dtype='int32').reshape(-1,2)
+        seam=_wire(c.co,edges,_bias[0][edges].max(axis=1)) if len(edges) else None
+        _diagnostics=[c,info,seam,None,None,0,len(edges)*168,_revision]
+    comp=quad_draw.STATE.get('hover_component') if quad_draw.STATE.get('topology_hover') else None
+    key=tuple(comp) if comp else None
+    if _diagnostics[3]!=key:
+        _diagnostics[3]=key;_diagnostics[4]=None;_diagnostics[5]=0
+        if comp and comp[0]==c.name:
+            kind,i=comp[1:];pairs=info['pairs']
+            ids=[i] if kind=='VERT' else [v.index for v in (c.bm.edges[i].verts if kind=='EDGE' else c.bm.faces[i].verts)]
+            if all(i in pairs for i in ids):
+                ids=[pairs[i] for i in ids]
+                edges=np.asarray([(ids[0],ids[0])] if kind=='VERT' else list(zip(ids,ids[1:]+ids[:1])) if kind=='FACE' else [ids],dtype='int32')
+                _diagnostics[4]=_wire(c.co,edges,_bias[0][edges].max(axis=1),'POINT' if kind=='VERT' else 'WIRE')
+                _diagnostics[5]=len(edges)*168
+    _diagnostic_bytes=_diagnostics[6]+_diagnostics[5]
+    if _diagnostics[2] is not None:_diagnostics[2].draw(_bind(context,'WIRE',(1,.75,.12,1),2.2))
+    if _diagnostics[4] is not None:
+        point=comp[1]=='VERT';_diagnostics[4].draw(_bind(context,'POINT' if point else 'WIRE',(.15,1,.4,1),8 if point else 2.2))
+
+
 def draw(context):
     from . import quad_draw
     quad_draw.sync_overlays(context)
@@ -239,6 +284,7 @@ def draw_front(context):
         wires = _cached[2]
         if wires is not None and s.qd_wire_overlay:
             wires.draw(_bind(context,'WIRE',(*s.qd_wire_color,1)))
+        _draw_symmetry(context,_cached[0])
         if not pv or pv[0] != 'HOVER' or not comp:
             return
         if context.edit_object is None or comp[0] != context.edit_object.name:

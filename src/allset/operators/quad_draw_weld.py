@@ -18,8 +18,8 @@ def normal(points):
 
 
 class Topology:
-    def __init__(self, co, faces):
-        self.co=[Vector(p) for p in co]
+    def __init__(self, co, faces, share=False):
+        self.co=co if share else [Vector(p) for p in co]
         self.faces=[tuple(f) for f in faces]
         self.links=defaultdict(set)
         self.edges=defaultdict(set)
@@ -77,7 +77,7 @@ class Topology:
 
 class Magnet:
     """One stroke owns one snapshot; a radius-sized grid avoids per-event full-mesh scans."""
-    def __init__(self, context, ob, moving, extra=(), extra_faces=()):
+    def __init__(self, context, ob, moving, extra=(), extra_faces=(), exclude=()):
         import bmesh
         from . import quad_draw
         bm=bmesh.from_edit_mesh(ob.data)
@@ -85,22 +85,33 @@ class Magnet:
         mw=ob.matrix_world.copy()
         self.co=[mw@v.co for v in bm.verts]+[Vector(p) for p in extra]
         self.moving=set(moving)
+        excluded=set(exclude)
         self.radius=quad_draw._weld_px(context)
         self.refs=quad_draw.reference_objects(context)
-        self.allowed=[v.index for v in bm.verts if v.index not in self.moving and not v.hide and (v.is_boundary or not v.link_faces)]
+        self.allowed=[v.index for v in bm.verts if v.index not in self.moving and v.index not in excluded and not v.hide and (v.is_boundary or not v.link_faces)]
         # Every changed or duplicate face touches a source/target. Include its edge
         # neighbours too, so edge incidence remains exact without copying all mesh topology.
-        relevant=set(self.allowed)|self.moving
+        relevant=set(self.allowed)|self.moving|excluded
         touched={f for i in relevant if i<len(bm.verts) for f in bm.verts[i].link_faces}
         neighbours=touched|{other for f in touched for e in f.edges for other in e.link_faces}
         faces=[tuple(v.index for v in f.verts) for f in neighbours]
-        self.topology=Topology(self.co,faces+list(extra_faces))
+        self.base_count=len(bm.verts);self.base_faces=faces
+        self.topology=Topology(self.co,faces+list(extra_faces),share=True)
+        self.virtual_faces=list(extra_faces)
         self._bm=bm
         self.bvh=None
         self.key=None
         self.pairs={}
         self.visibility={}
         self.grid={}
+
+    def set_virtual(self,points,faces):
+        """Grow a strip without re-reading every existing mesh vertex."""
+        self.co[self.base_count:]=[Vector(p) for p in points]
+        faces=list(faces)
+        if faces!=self.virtual_faces:
+            self.topology=Topology(self.co,self.base_faces+faces,share=True)
+            self.virtual_faces=faces
 
     def project(self, context, region, rv3d):
         from . import preselect

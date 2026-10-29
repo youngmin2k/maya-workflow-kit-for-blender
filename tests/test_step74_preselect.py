@@ -131,3 +131,46 @@ def test_cache_kept_on_selection_dropped_on_geometry():
     assert not pre._cache
     assert pre.invalidate in bpy.app.handlers.depsgraph_update_post
     bpy.ops.object.mode_set(mode='OBJECT')
+
+
+def test_coordinate_modal_retains_topology_refreshes_bvh_and_resets_on_transform():
+    import bmesh
+    ob=_cube();bpy.ops.object.mode_set(mode='EDIT')
+    c=pre._cache[ob.as_pointer()]=pre.MeshCache(ob)
+    old_bvh=c.bvh;edges=c.edges
+    bm=bmesh.from_edit_mesh(ob.data);bm.verts.ensure_lookup_table()
+    v=bm.verts[0];v.co.z+=.3
+    pre.coordinates_changed(ob,[v])
+    pre.invalidate(None,_Depsgraph(_Update(ob.data,geometry=True)))
+    assert pre._cache[ob.as_pointer()] is c and c.edges is edges
+    assert abs(c.co[0,2]-(ob.matrix_world@v.co).z)<1e-7
+    assert c.revision==1 and c._bvh_dirty
+    assert c.bvh is not old_bvh and not c._bvh_dirty
+    pre.invalidate(None,_Depsgraph(_Update(ob,transform=True)))
+    assert not pre._cache and pre._coordinate_session is None
+    bpy.ops.object.mode_set(mode='OBJECT')
+
+
+def test_bulk_edit_cache_matches_bmesh_with_hidden_and_loose_geometry():
+    import bmesh
+    import numpy as np
+    if bpy.context.mode!='OBJECT':bpy.ops.object.mode_set(mode='OBJECT')
+    me=bpy.data.meshes.new('bulk_cache');ob=bpy.data.objects.new('bulk_cache',me)
+    bpy.context.scene.collection.objects.link(ob)
+    source=bmesh.new();bmesh.ops.create_grid(source,x_segments=64,y_segments=32,size=2)
+    a=source.verts.new((10,0,0));b=source.verts.new((11,0,0));source.edges.new((a,b))
+    source.to_mesh(me);source.free();ob.select_set(True);bpy.context.view_layer.objects.active=ob
+    bpy.ops.object.mode_set(mode='EDIT');bm=bmesh.from_edit_mesh(me)
+    bm.verts.ensure_lookup_table();bm.edges.ensure_lookup_table();bm.faces.ensure_lookup_table()
+    bm.verts[0].hide=True;bm.edges[0].hide=True;bm.faces[0].hide=True
+    count=len(bpy.data.meshes)
+    c=pre.MeshCache(ob)
+    assert c.arrays is not None and len(bpy.data.meshes)==count
+    assert np.allclose(c.co,[ob.matrix_world@v.co for v in bm.verts])
+    assert c.vok.tolist()==[not v.hide for v in bm.verts]
+    assert c.eok.tolist()==[not e.hide for e in bm.edges]
+    assert c.arrays[4].tolist()==[len(e.link_faces) for e in bm.edges]
+    assert c.arrays[5].tolist()==[v.is_boundary or not v.link_faces for v in bm.verts]
+    assert c.arrays[6].tolist()==[not f.hide for f in bm.faces]
+    assert all(tuple(ring)==tuple(v.index for v in bm.faces[i].verts) for ids,rings in c.arrays[7] for i,ring in zip(ids,rings))
+    bpy.ops.object.mode_set(mode='OBJECT');pre.invalidate()

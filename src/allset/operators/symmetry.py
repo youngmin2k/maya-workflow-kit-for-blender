@@ -42,7 +42,13 @@ PARTS = (("ON", "Symmetry", "Symmetry on/off"),
 _EPS = 1e-4
 
 
+def _partial_changed(_self,_context):
+    from . import quad_draw
+    quad_draw.clear_topology_preview()
+
+
 class ALLSET_PG_symmetry(bpy.types.PropertyGroup):
+    allow_partial: BoolProperty(name="Allow partial symmetry",default=True,description="Use matched regions for Quad Draw topology symmetry",update=_partial_changed)
     on: BoolProperty(name="Symmetry", default=False)
     about: EnumProperty(name="About", items=ABOUT, default="OBJECT")
     axis: EnumProperty(name="Axis", items=[(a, a, f"{a} axis") for a in AXES], default="X")
@@ -236,12 +242,24 @@ class ALLSET_OT_symmetry(bpy.types.Operator):
             sym.last = mode_of(sym)
         objects = edit_meshes(context.scene)
         apply(sym, objects)
+        # Edit Undo records custom data, but not Scene properties. Keep the
+        # bound seam's active bit consistent with explicit mode changes.
+        from . import quad_draw_symmetry
+        import bmesh
+        for ob in objects:
+            bm=bmesh.from_edit_mesh(ob.data)
+            layer=bm.verts.layers.int.get(quad_draw_symmetry.SEED_LAYER)
+            if layer is not None:
+                active=2 if sym.on and sym.about=='TOPOLOGY' else 0
+                for v in bm.verts:
+                    if v[layer]:v[layer]=1|active
         # Maya selects the mirrored side when symmetry is switched on.
         if sym.on and (not was_on or mode in dict(MODES)):
             symmetrize_selection(context, sym)
         if sym.on and sym.about == 'WORLD':
             off = [ob.name for ob in objects if not world_fit(ob, sym)]
-            if off:
+            from . import quad_draw
+            if off and not quad_draw.tool_active(context):
                 self.report({'WARNING'}, f"World symmetry mirrors through the object origin: {', '.join(off)} "
                                          f"is not centred on the world {sym.axis} plane")
         return {'FINISHED'}

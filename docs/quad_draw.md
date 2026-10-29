@@ -11,6 +11,9 @@ Activate **Mesh Tools > Quad Draw**, the shelf button or **Ctrl+Shift+Q**. The M
   vertex type at the start of a stroke and keeps it until release.
 - Extend offers Edge, Loop (the boundary chain up to a corner/pole), and Border (the connected border).
 - Quad Strip Width sets the width in pixels. Clear Dots removes unfinished dots; Reset Settings restores defaults.
+- Hold Tab and middle-drag outside the retopo mesh to resize strips; Escape restores the previous width.
+  Tab+MMB over a border edge still extends its loop. Ctrl+Shift+RMB opens the Quad Draw options pie menu;
+  its Auto-weld, Extend, Relax and width controls share the Modeling Toolkit settings.
 - Live Constraint Options controls the wire overlay/color, mesh tint, opacity, surface offset and backface snapping.
   The default base tint is display sRGB `#01ACFF`, stored as linear RGB
   `(0.000303527, 0.412543, 1)`. Display swatches and linear color values use different encodings.
@@ -34,8 +37,54 @@ reject folded triangles and proposals opposing adjacent face normals. Existing f
 skipped boundary vertices and edges already used by two faces cannot be covered by a new face. Dots can still be combined with existing boundary vertices.
 Snap targets come only from the edited mesh; hidden vertices and points behind the live surface are excluded.
 
+Fill ranking combines local cursor distance, corner shape, adjacent edge flow and shared border connections.
+A distant three-edge proposal cannot automatically override a small dot-to-border quad, as can happen at eyelids.
+Point queries use a cached spatial index; candidate searches and border traversal stay bounded. Preview and click
+use the same proposal. Invalid fills report that no valid local face exists rather than silently adding dots.
+
+Quad Draw follows the Status Line symmetry setting for its own mesh edits, including dots, fill, tweak, relax,
+loop cuts, delete, extension and weld. Object X/Y/Z reflects about the target object's local origin; World X/Y/Z
+uses the actual world plane even when the target is translated or rotated. Existing paired vertices are reused,
+new faces reverse winding, and welding opposite dots creates one vertex on the seam. Changing symmetry does not
+automatically copy geometry that was already drawn on one side. Escape and Undo restore both sides of a stroke.
+With Object/World symmetry and Auto-weld enabled, dragging border points, an edge, or a Tab extension near the symmetry plane
+captures the plane using the same pixel tolerance as Auto-weld. Both sides meet in the preview; release welds
+their counterparts into shared seam vertices. Moving counterparts are excluded from the static target list,
+so the preview cannot jump to their old positions. The target releases outside a small hysteresis margin.
+Escape restores both sides. Auto-weld off or Soft Selection disables plane capture. A depth-distance cap
+prevents a side view from pulling distant components through the live object.
+Strip previews project onto the live surface and use the same plane capture and positions as the committed strip.
+Extension toward a source edge's own mirror prefers the nearby center plane over that mirror's old position;
+other stationary vertex targets retain precedence. Duplicated extension endpoints exclude the source anchors
+from weld targets, so a short drag cannot collapse the new quad back into its source edge.
+A Tab click without a drag creates no geometry.
+
+For Topology symmetry, use **Pick Seam** in Quad Draw Options, then click a manifold edge between matching halves.
+An active selected seam edge can also be bound when entering Quad Draw. Stable vertex identities preserve the binding
+across index changes, tool exit and file saving. The seam is yellow and a matched hovered component is green;
+the primary preselection remains red. **Partial** is enabled by default: propagation stops at unmatched branches,
+and operations outside the matched region report a warning. Turning Partial off requires the traversed region to match.
+Editing a seam edge disables topology symmetry while retaining the actual edit; Undo/Redo restores this binding/state.
+Seam vertices follow their original seam polyline, including on posed meshes away from a geometric axis.
+Without an explicit binding, the active edge or an unambiguous local-axis seam can provide initial correspondence.
+A posed live reference can map new dots through corresponding evaluated triangles. A reference without a
+valid seam correspondence, or a disconnected target without a usable pairing, reports a warning and cancels the
+unsupported operation. It does not silently substitute geometric symmetry. Establish the seam on matching topology
+before using this mode; Object/World symmetry is simpler for new, geometrically symmetric retopology. New-point
+reference correspondence currently requires a local-axis seam on the evaluated live reference; Pick Seam binds
+the retopology target. Topology mode previews existing paired components; a mirrored new-face preview is currently
+available for Object/World modes only.
+
 Hover caches retain one mesh/view projection, while each drag owns a spatial target index and local topology
 snapshot. These are released on tool exit or drag completion/cancellation. The live reference BVH remains shared.
+Coordinate-only drags retain edge indices and display triangulation. They update changed world coordinates and
+refresh the selection BVH lazily when a pick needs it. Topology operations, transforms, Undo and file loading
+invalidate this path. Symmetry coordinate strokes find counterparts lazily; full topology snapshots are deferred
+until an operation creates, deletes or welds components.
+Large edited meshes copy coordinates/connectivity through bulk mesh arrays; temporary mesh IDs are immediately
+released. Fill candidates use grouped polygon arrays instead of Python objects for every interior face.
+Additive symmetry edits record detailed rings only around touched components and retain a native BMesh rollback
+copy. Cut/delete use a conservative full snapshot; their cost can still grow with total mesh size.
 
 The display tint and antialiased pixel-width strokes use cached GPU batches. Temporary display clearance follows
 nearby faces, so an unrelated long edge does not raise the entire mesh. Materials and theme are preserved.
@@ -55,11 +104,14 @@ Fill proposals are bounded local heuristics. Deep folds, disconnected sheets and
 another view or explicit point placement. Autodesk publishes tool behavior and context options; its internal
 inference algorithm is not publicly specified.
 
-Mesh references are supported; Maya's NURBS/GPU-cache references are not. The options marking-menu gesture and
-Tab+MMB strip resizing remain unavailable and are labelled in the shortcut list.
+Mesh references are supported; Maya's NURBS/GPU-cache references are not.
 
 References: Autodesk Maya 2025 [Quad Draw Tool Options](https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Modeling/files/GUID-35D650EE-C840-4E4B-8E5C-DC5FFE4DA53A.htm),
 [Set a reference mesh](https://help.autodesk.com/cloudhelp/2024/ENU/Maya-Modeling/files/GUID-8917D2ED-8927-4FFF-8CA6-164906F6585F.htm).
+Interaction references: [Extend](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-AD1DB294-3E91-4E91-8B8C-993F83634220.htm),
+[Strips](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-868805BC-CED5-4262-826E-203EE914B71E.htm),
+[Topological symmetry](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Modeling/files/GUID-EC3CCAFA-DBEB-4733-AF50-467B9EE8B65B.htm),
+and [Partial symmetry](https://help.autodesk.com/cloudhelp/2023/ENU/Maya-Modeling/files/GUID-0CE4C064-EA74-4871-971F-08308DC60264.htm).
 
 Display references: [Maya preselection highlighting](https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Customizing/files/GUID-8C8BA1F4-59EE-4A02-BFE7-9193C0D6F5BE.htm),
 [viewport antialiasing](https://help.autodesk.com/cloudhelp/2025/ENU/Maya-Basics/files/GUID-9BBB6035-2A02-41BB-AF2D-99D9BEE580F1.htm),

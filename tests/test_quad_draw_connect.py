@@ -118,3 +118,20 @@ def test_weld_rejects_a_third_face_and_inconsistent_winding():
     assert not topology.valid({1:4,2:7},{})
     topology=weld.Topology(CO,[FACES[0],tuple(reversed(FACES[1]))])
     assert not topology.valid({1:4,2:7},{})
+
+
+def test_eyelid_prefers_two_local_dots_over_a_large_boundary_only_face():
+    import json
+    from pathlib import Path
+    pre=import_module(kit.MODULE+'.operators.preselect')
+    data=json.loads((Path(__file__).parent/'fixtures/quad_draw_eyelid.json').read_text())
+    width,height=data['size']
+    for scale in (.5,1,2):
+        xy,front=pre.project(data['co'],data['projection'],width*scale,height*scale)
+        boundary={v for e,n in zip(data['edges'],data['counts']) if n==1 for v in e}
+        allowed=[i in boundary or i>=44 for i in range(len(xy))]
+        s=fill.ScreenFill(xy,allowed,data['edges'],data['counts'],data['faces'],world=data['co'])
+        ids=[2,3,44,45];mouse=xy[ids].mean(axis=0)
+        assert set(s.plan(mouse))==set(ids),s.plan(mouse)
+        for delta in (-.2,.2):
+            assert set(s.plan(mouse+delta))==set(ids)

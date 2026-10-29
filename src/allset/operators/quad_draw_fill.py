@@ -4,6 +4,14 @@ import itertools
 import math
 from collections import defaultdict
 import numpy as np
+from mathutils.kdtree import KDTree
+
+
+def nearest_ids(values, ids, count):
+    """Bounded partial selection, with deterministic ordering on ties."""
+    if len(ids)>count:
+        ids=ids[np.argpartition(values[ids],count-1)[:count]]
+    return ids[np.lexsort((ids,values[ids]))]
 
 
 def area(poly):
@@ -45,11 +53,12 @@ def overlaps(a,b):
 
 class ScreenFill:
     """One bounded projection cache; queries examine nearby boundary edges and points."""
-    def __init__(self, xy, allowed, edges, edge_counts, faces, world=None):
+    def __init__(self, xy, allowed, edges, edge_counts, faces, world=None, groups=None):
         self.xy=np.asarray(xy,dtype=float).reshape(-1,2)
         self.allowed=np.asarray(allowed,dtype=bool)
         self.edges=np.asarray(edges,dtype=np.int32).reshape(-1,2)
-        self.counts={tuple(sorted(e)):int(n) for e,n in zip(self.edges.tolist(),edge_counts)}
+        usable=self.allowed[self.edges[:,0]]&self.allowed[self.edges[:,1]]
+        self.counts={tuple(sorted(e)):int(n) for e,n in zip(self.edges[usable].tolist(),np.asarray(edge_counts)[usable])}
         self.boundary=self.edges[np.asarray(edge_counts)==1]
         self.world=None if world is None else np.asarray(world,dtype=float)
         self.previous=None
@@ -60,36 +69,44 @@ class ScreenFill:
         connected=np.zeros(len(self.xy),dtype=bool)
         connected[self.edges.ravel()]=True
         self.connected=np.flatnonzero(connected)
-        faces=[tuple(f) for f in faces]
-        self.face_sets={frozenset(f) for f in faces}
-        self.normals={}
-        groups=defaultdict(list)
-        for i,f in enumerate(faces):
-            groups[len(f)].append(i)
-        boxes=np.empty((len(faces),4),dtype=float)
-        front=np.zeros(len(faces),dtype=bool)
-        self.directions=set()
-        for n,ids in groups.items():
-            indices=np.asarray([faces[i] for i in ids],dtype=np.int32)
+        self.connected=self.connected[self.allowed[self.connected]]
+        eligible=np.flatnonzero(self.allowed)
+        self.loose_ids=eligible[~connected[eligible]]
+        self.tree=KDTree(len(eligible))
+        for i in eligible:
+            self.tree.insert((*self.xy[i],0),int(i))
+        self.tree.balance()
+        if groups is None:
+            by_size=defaultdict(list)
+            for f in faces:by_size[len(f)].append(tuple(f))
+            groups=[np.asarray(fs,dtype=np.int32) for fs in by_size.values()]
+        self.face_sets=set();self.normals={};self.directions=set()
+        self.faces=[];boxes=[]
+        for indices in groups:
+            if not len(indices):continue
+            n=indices.shape[1]
+            permitted=self.allowed[indices].all(axis=1)
+            self.face_sets.update(map(frozenset,indices[permitted].tolist()))
             points=self.xy[indices]
             if self.world is not None:
                 world=self.world[indices]
                 normals=np.cross(world[:,1]-world[:,0],world[:,2]-world[:,0])
                 normals/=np.maximum(np.linalg.norm(normals,axis=1)[:,None],1e-12)
-                for f,normal in zip(indices.tolist(),normals):
-                    for a,b in zip(f,f[1:]+f[:1]):
-                        edge=tuple(sorted((a,b)))
-                        if self.counts.get(edge)==1:
-                            self.normals[edge]=normal
+                following_ids=np.roll(indices,-1,axis=1)
+                for k in range(n):
+                    aa,bb=indices[:,k],following_ids[:,k]
+                    mask=self.allowed[aa]&self.allowed[bb]
+                    for a,b,normal in zip(aa[mask],bb[mask],normals[mask]):
+                        edge=(min(int(a),int(b)),max(int(a),int(b)))
+                        if self.counts.get(edge)==1:self.normals[edge]=normal
             following=np.roll(points,-1,axis=1)
             visible=np.sum(points[:,:,0]*following[:,:,1]-points[:,:,1]*following[:,:,0],axis=1)>1e-5
-            front[ids]=visible
-            boxes[ids,:2]=points.min(axis=1)
-            boxes[ids,2:]=points.max(axis=1)
+            boxes.append(np.column_stack((points[visible].min(axis=1),points[visible].max(axis=1))))
+            self.faces.extend(indices[visible].tolist())
             directed=np.stack((indices[visible],np.roll(indices[visible],-1,axis=1)),axis=-1).reshape(-1,2)
+            directed=directed[self.allowed[directed[:,0]]&self.allowed[directed[:,1]]]
             self.directions.update(map(tuple,directed.tolist()))
-        self.faces=[f for i,f in enumerate(faces) if front[i]]
-        self.boxes=boxes[front]
+        self.boxes=np.concatenate(boxes) if boxes else np.empty((0,4))
 
     def polygon(self,i):
         return self.xy[list(self.faces[i])].tolist()
@@ -168,7 +185,8 @@ class ScreenFill:
         # immutable for this cache generation; only visibility needs refreshing.
         if previous and len(previous)==4 and all(self.counts.get(tuple(sorted(e)))==1
                 for e in zip(previous,previous[1:]+previous[:1])):
-            if inside([tuple(self.xy[i]) for i in previous],mouse) and all(visible(i) for i in previous):
+            poly=[tuple(self.xy[i]) for i in previous]
+            if inside(poly,mouse) and not any(inside(poly,tuple(self.xy[i])) for i in self.loose_ids) and all(visible(i) for i in previous):
                 return previous
         if len(self.boxes):
             b=self.boxes
@@ -180,14 +198,14 @@ class ScreenFill:
         eligible=np.flatnonzero(self.allowed)
         if not len(eligible):
             return None
-        nearest=eligible[np.argsort(distance[eligible])[:8]]
+        nearest=np.asarray([i for _,i,_ in self.tree.find_n((*mouse,0),min(8,len(eligible)))],dtype=int)
         proposals={frozenset(map(int,c)) for n in (4,3) for c in itertools.combinations(nearest,n)}
         edges=self.boundary
         if len(edges):
             distances,_=segment_distance(mouse,self.xy[edges[:,0]],self.xy[edges[:,1]])
             ok=self.allowed[edges[:,0]]&self.allowed[edges[:,1]]
             ids=np.flatnonzero(ok)
-            close=edges[ids[np.argsort(distances[ids])[:12]]]
+            close=edges[nearest_ids(distances,ids,12)]
             # Opposing edges can be farther apart than the nearest eight vertices.
             proposals.update(frozenset(map(int,(*a,*b))) for a,b in itertools.combinations(close,2))
             # Follow local border paths as well as proximity. A short nearby edge
@@ -208,22 +226,32 @@ class ScreenFill:
             if not inside(poly,mouse):
                 continue
             shared=sum(self.counts.get(tuple(sorted((a,b))),0)==1 for a,b in zip(ring,ring[1:]+ring[:1]))
-            ordered.append((len(ring)!=4,-shared,abs(area(poly)),ring))
+            size=abs(area(poly))
+            # Closed holes and opposing edges give useful evidence, but cannot
+            # override a much more local dot-to-border quad (eyelids, lips).
+            radius2=float(distance[list(ring)].mean())
+            ordered.append((len(ring)!=4, shared, size, radius2,ring))
+        if not ordered:
+            self.previous=None
+            return None
+        local=min(row[3] for row in ordered if row[0]==min(r[0] for r in ordered))
+        ranked=[]
+        for triangle,shared,size,radius2,ring in ordered:
+            locality=math.log(max(radius2/max(local,1e-9),1))
+            # Two opposing shared edges stay stronger than incidental nearby
+            # dots, while distant three-edge proposals no longer swallow them.
+            context_bonus=(.55 if shared>=2 else .2 if shared else 0)
+            score=self.quality(ring)+1.3*locality-context_bonus-(.08 if ring==previous else 0)
+            ranked.append((triangle,score,size,ring))
         visibility={}
-        for _,group in itertools.groupby(sorted(ordered),key=lambda row:row[:2]):
-            # Score only the best topology class first. Most hole queries have a
-            # single four-boundary-edge candidate; nearby unrelated combinations
-            # must not add per-event shape work.
-            ranked=[(self.quality(ring)-(.08 if ring==previous else 0),size,ring)
-                    for _,_,size,ring in group]
-            for *_,ring in sorted(ranked):
-                if not self.valid(ring):
-                    continue
-                for i in ring:
-                    if i not in visibility:
-                        visibility[i]=visible(i)
-                if all(visibility[i] for i in ring):
-                    self.previous=ring
-                    return ring
+        for *_,ring in sorted(ranked):
+            if not self.valid(ring):
+                continue
+            for i in ring:
+                if i not in visibility:
+                    visibility[i]=visible(i)
+            if all(visibility[i] for i in ring):
+                self.previous=ring
+                return ring
         self.previous=None
         return None

@@ -133,6 +133,13 @@ def dot_in_flight():
 def cancelled():
     dots=qd().dots(bmesh.from_edit_mesh(bpy.context.edit_object.data))
     check('Escape restores the loose dot and clears preview',len(dots)==1 and (dots[0].co-Vector((0,-1,0))).length<1e-5 and qd().STATE['preview'] is None)
+    a,r=view3d()
+    with bpy.context.temp_override(window=win(),area=a,region=r):
+        ob=bpy.context.edit_object
+        pre=import_module(MODULE+'.operators.preselect')
+        c=next(c for candidate,c in pre.caches(bpy.context) if candidate==ob)
+        b=bmesh.from_edit_mesh(ob.data)
+        check('Escape refreshes cached display and picking coordinates',all((Vector(c.co[v.index])-ob.matrix_world@v.co).length<1e-6 for v in b.verts) and pre._coordinate_session is None)
 
 
 run()

@@ -46,6 +46,7 @@ ROTATE_RING = 1.25                  # Rotate (Blender's gizmo): disc of gizmo_si
 
 _last = []    # the live group (tests read its gizmo)
 _cache = {}   # object pointer -> MeshCache
+_coordinate_session = None  # Quad Draw modal: topology is fixed until release
 
 
 # --- pure helpers (tests/test_step74_preselect.py) ----------------------------------------------------
@@ -121,6 +122,33 @@ def near_handles(mouse, center, tips, center_half, reach):
 
 # --- per-object cache ---------------------------------------------------------------------------------
 
+def mesh_arrays(bm):
+    """Read edit topology through Blender's bulk API, releasing the temporary ID.
+
+    BMesh has no foreach_get. A native copy avoids hundreds of thousands of
+    Python corner wrappers on dense retopology, without touching the real mesh.
+    """
+    mesh=bpy.data.meshes.new('_allset_mesh_cache')
+    try:
+        bm.to_mesh(mesh)
+        def read(collection,name,size,dtype):
+            data=np.empty(size,dtype=dtype);collection.foreach_get(name,data);return data
+        co=read(mesh.vertices,'co',len(mesh.vertices)*3,'float64').reshape(-1,3)
+        edges=read(mesh.edges,'vertices',len(mesh.edges)*2,'int32').reshape(-1,2)
+        vok=~read(mesh.vertices,'hide',len(mesh.vertices),'bool')
+        eok=~read(mesh.edges,'hide',len(mesh.edges),'bool')
+        sizes=read(mesh.polygons,'loop_total',len(mesh.polygons),'int32')
+        starts=read(mesh.polygons,'loop_start',len(mesh.polygons),'int32')
+        shown=~read(mesh.polygons,'hide',len(mesh.polygons),'bool')
+        corners=read(mesh.loops,'vertex_index',len(mesh.loops),'int32')
+        loop_edges=read(mesh.loops,'edge_index',len(mesh.loops),'int32')
+        counts=np.bincount(loop_edges,minlength=len(edges))
+        face_vertex=np.zeros(len(co),dtype=bool);face_vertex[corners]=True
+        border=np.zeros(len(co),dtype=bool);border[edges[counts==1].ravel()]=True
+        groups=[(np.flatnonzero(sizes==n),corners[starts[sizes==n,None]+np.arange(n)]) for n in np.unique(sizes)]
+        return co,edges,vok,eok,counts,border|~face_vertex,shown,groups
+    finally:bpy.data.meshes.remove(mesh)
+
 class MeshCache:
     """World vertex positions, edges, visible-face BVH and (lazily) selection of one mesh.
     Rebuilt after geometry / transform updates only (selection updates keep it, step_74.md)."""
@@ -128,6 +156,7 @@ class MeshCache:
     def __init__(self, ob):
         import bmesh
         self.ob_ptr = ob.as_pointer()
+        self.revision = 0
         self.name = ob.name
         self.editing = ob.mode == 'EDIT'
         self.bm = bm = bmesh.from_edit_mesh(ob.data) if self.editing else bmesh.new()
@@ -140,22 +169,37 @@ class MeshCache:
         self.mw = ob.matrix_world.copy()
         self.inv = self.mw.inverted_safe()
         m = np.array(self.mw, dtype=np.float64)
-        local = np.array([v.co[:] for v in bm.verts], dtype=np.float64).reshape(-1, 3)
+        self.arrays=None
+        if self.editing and len(bm.verts)>=2048:
+            self.arrays=mesh_arrays(bm)
+            local,self.edges,self.vok,self.eok,*_=self.arrays
+        else:
+            local = np.array([v.co[:] for v in bm.verts], dtype=np.float64).reshape(-1, 3)
+            self.vok = np.array([not v.hide for v in bm.verts], dtype=bool)
+            self.edges = np.array([(e.verts[0].index, e.verts[1].index) for e in bm.edges],dtype=np.int64).reshape(-1,2)
+            self.eok = np.array([not e.hide for e in bm.edges], dtype=bool)
         self.co = local @ m[:3, :3].T + m[:3, 3]
-        self.vok = np.array([not v.hide for v in bm.verts], dtype=bool)
-        self.edges = np.array([(e.verts[0].index, e.verts[1].index) for e in bm.edges],
-                              dtype=np.int64).reshape(-1, 2)
-        self.eok = np.array([not e.hide for e in bm.edges], dtype=bool)
-        hidden = [f.index for f in bm.faces if f.hide]
+        hidden = np.flatnonzero(~self.arrays[6]).tolist() if self.arrays else [f.index for f in bm.faces if f.hide]
         if not hidden:
             self.bvh_map = None                         # BVH index = face index
-            self.bvh = BVHTree.FromBMesh(bm) if len(bm.faces) else None
+            self._bvh = BVHTree.FromBMesh(bm) if len(bm.faces) else None
         else:
             vis = [f.index for f in bm.faces if not f.hide]
             self.bvh_map = vis
-            self.bvh = BVHTree.FromPolygons([v.co.copy() for v in bm.verts],
+            self._bvh = BVHTree.FromPolygons([v.co.copy() for v in bm.verts],
                                             [self.face_verts(i) for i in vis]) if vis else None
         self._sel = None
+        self._bvh_dirty = False
+
+    @property
+    def bvh(self):
+        if self._bvh_dirty:
+            if self.bvh_map is None:
+                self._bvh=BVHTree.FromBMesh(self.bm) if len(self.bm.faces) else None
+            else:
+                self._bvh=BVHTree.FromPolygons([v.co.copy() for v in self.bm.verts],[self.face_verts(i) for i in self.bvh_map])
+            self._bvh_dirty=False
+        return self._bvh
 
     def __del__(self):
         bm = getattr(self, "bm", None)
@@ -224,15 +268,35 @@ def caches(context):
 def invalidate(_scene=None, depsgraph=None):
     """depsgraph_update_post: drop the caches on a geometry / transform change; a selection-only change
     keeps them and only forgets the selection."""
+    global _coordinate_session
     if depsgraph is not None:
         for u in depsgraph.updates:
             if isinstance(u.id, (bpy.types.Mesh, bpy.types.Object)) and (u.is_updated_geometry or u.is_updated_transform):
+                # Only a running coordinate-only modal can retain topology.
+                # Transforms, other meshes and all explicit invalidations reset it.
+                if _coordinate_session and not u.is_updated_transform and u.id.original.as_pointer() in _coordinate_session:
+                    continue
                 break
         else:
             for c in _cache.values():
                 c._sel = None
             return
+    _coordinate_session=None
     _cache.clear()
+
+
+def coordinates_changed(ob,verts):
+    """Refresh a fixed-topology modal without rebuilding indices, selection or BVH."""
+    global _coordinate_session
+    c=_cache.get(ob.as_pointer())
+    if c is None or not c.editing:return
+    _coordinate_session=(ob.as_pointer(),ob.data.as_pointer())
+    ids=[v.index for v in verts if v.is_valid]
+    if ids:
+        m=np.asarray(c.mw)
+        co=np.asarray([c.bm.verts[i].co[:] for i in ids])
+        c.co[ids]=co@m[:3,:3].T+m[:3,3]
+    c.revision+=1;c._bvh_dirty=True;c._sel=None
 
 
 # --- policy -------------------------------------------------------------------------------------------
@@ -510,6 +574,8 @@ def register_handlers():
 
 
 def clear():
+    global _coordinate_session
+    _coordinate_session=None
     _last.clear()
     _cache.clear()
     if invalidate in bpy.app.handlers.depsgraph_update_post:
