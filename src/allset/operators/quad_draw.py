@@ -42,7 +42,6 @@ DOT_RGB = (0.26, 1.0, 0.64)        # Maya selection green #43ffa3 for the dots [
 FILL_RGB = (0.26, 1.0, 0.64)
 LOOP_RGB = (1.0, 0.55, 0.1)
 DELETE_RGB = (1.0, 0.2, 0.2)
-HOVER_RGB = (0.39, 0.86, 1.0)      # kit component edge colour #64dcff
 DOT_SIZE = 8.0
 LINE_PX = 2.0
 
@@ -512,43 +511,80 @@ def clear_dots(bm):
     return len(gone)
 
 
+def _reference_visible(context, region, rv3d, point, refs, clearance=0):
+    """Reject the far sheet of a live reference, allowing coarse-face display sag."""
+    if not refs:
+        return True
+    from . import live
+    xy = _screen_xy(region, rv3d, point)
+    if xy is None:
+        return False
+    origin = view3d_utils.region_2d_to_origin_3d(region, rv3d, xy)
+    delta = point-origin
+    distance = delta.length
+    if distance < 1e-12:
+        return True
+    hit = live.ray_hit(context, origin, delta/distance, refs, True)
+    s = poly_draw.settings(context)
+    offset = abs(s.qd_surface_offset) if s.qd_offset_on else 0
+    return not hit or (hit[0]-origin).length >= distance-max(1e-5,distance*1e-7)-offset*1.1-clearance
+
+
 def component_at(context, region, rv3d, mouse, ob, edges_only=False):
     """('VERT', i) / ('EDGE', i, t) / ('FACE', i, local co) of ``ob`` under the mouse (dots are vertices), or None."""
     global _pick_projection
     c = next((c for candidate, c in preselect.caches(context) if candidate == ob), None)
     if c is None:
         return None
-    key = (region.width, region.height, tuple(map(tuple, rv3d.perspective_matrix)))
+    key = (region.width, region.height, tuple(map(tuple, rv3d.perspective_matrix)), _ui_scale(context))
     if _pick_projection is None or _pick_projection[0] is not c or _pick_projection[1] != key:
         xy, front = preselect.project(c.co, rv3d.perspective_matrix, region.width, region.height)
-        _pick_projection = c, key, xy, front
-    _, _, xy, front = _pick_projection
+        # A large vertex hit zone steals short edges and small faces. Compute a
+        # local radius once per view, retaining the wider Ctrl-loop edge zone.
+        import numpy as np
+        shortest = np.full(len(xy), np.inf)
+        if len(c.edges):
+            lengths = np.linalg.norm(xy[c.edges[:,0]]-xy[c.edges[:,1]], axis=1)
+            np.minimum.at(shortest, c.edges[:,0], lengths)
+            np.minimum.at(shortest, c.edges[:,1], lengths)
+        radius = np.minimum(8.0*_ui_scale(context), shortest*.22)
+        radius = np.maximum(3.0*_ui_scale(context), radius)
+        _pick_projection = c, key, xy, front, radius
+    _, _, xy, front, radius = _pick_projection
     cs = [(ob, c)]
     xray = preselect._xray(context.space_data)
     scale = _ui_scale(context)
+    refs = reference_objects(context)
     import numpy as np
     if not edges_only:
         distance2 = ((xy - mouse)**2).sum(axis=1)
-        near = np.flatnonzero(c.vok & front & (distance2 <= (multi_cut.VERT_PX * scale)**2))
+        near = np.flatnonzero(c.vok & front & (distance2 <= radius**2))
         for j in near[np.argsort(distance2[near])]:
             i = int(j)
-            if not multi_cut._occluded(cs, region, rv3d, Vector(c.co[i]), xray):
+            point = Vector(c.co[i])
+            if not multi_cut._occluded(cs, region, rv3d, point, xray) and _reference_visible(context,region,rv3d,point,refs):
                 return 'VERT', i
     if len(c.edges):
         distance, ts = preselect.segment_distance(mouse, xy[c.edges[:, 0]], xy[c.edges[:, 1]])
         ok = c.eok & front[c.edges[:, 0]] & front[c.edges[:, 1]]
-        near = np.flatnonzero(ok & (distance <= multi_cut.EDGE_PX * scale))
+        tolerance = multi_cut.EDGE_PX*scale if edges_only else 5.0*scale
+        near = np.flatnonzero(ok & (distance <= tolerance))
         for j in near[np.argsort(distance[near])]:
             i = int(j)
             a, b = (Vector(c.co[k]) for k in c.edges[i])
-            if not multi_cut._occluded(cs, region, rv3d, a.lerp(b, float(ts[i])), xray):
+            point = a.lerp(b,float(ts[i]))
+            if not multi_cut._occluded(cs, region, rv3d, point, xray) and _reference_visible(context,region,rv3d,point,refs,(a-b).length*.5):
                 return 'EDGE', i, multi_cut.ray_edge_t(region, rv3d, a, b, mouse)
     if not edges_only:
         origin = view3d_utils.region_2d_to_origin_3d(region, rv3d, mouse)
         direction = view3d_utils.region_2d_to_vector_3d(region, rv3d, mouse)
         hit = c.ray(origin, direction)
         if hit is not None:
-            return 'FACE', hit[1], tuple(c.inv @ (origin + direction.normalized()*hit[0]))
+            point = origin + direction.normalized()*hit[0]
+            f = c.bm.faces[hit[1]]
+            clearance = max(((Vector(c.co[e.verts[0].index])-Vector(c.co[e.verts[1].index])).length for e in f.edges),default=0)*.5
+            if _reference_visible(context,region,rv3d,point,refs,clearance):
+                return 'FACE', hit[1], tuple(c.inv @ point)
     return None
 
 
@@ -570,25 +606,14 @@ def fill_plan(context, region, rv3d, mouse, ob):
         allowed=[not v.hide and bool(front[v.index]) and (v.is_boundary or not v.link_faces) for v in c.bm.verts]
         counts=[len(e.link_faces) for e in c.bm.edges]
         faces=[tuple(v.index for v in f.verts) for f in c.bm.faces if not f.hide and all(front[v.index] for v in f.verts)]
-        _fill_projection=c,key,ScreenFill(xy,allowed,c.edges,counts,faces)
+        _fill_projection=c,key,ScreenFill(xy,allowed,c.edges,counts,faces,world=c.co)
     screen=_fill_projection[2]
     refs=reference_objects(context)
     def visible(i):
         point=Vector(c.co[i])
         if multi_cut._occluded([(ob,c)],region,rv3d,point,False):
             return False
-        if refs:
-            from . import live
-            xy=screen.xy[i]
-            origin=view3d_utils.region_2d_to_origin_3d(region,rv3d,xy)
-            direction=(point-origin).normalized()
-            hit=live.ray_hit(context,origin,direction,refs,True)
-            s=poly_draw.settings(context)
-            offset=abs(s.qd_surface_offset) if s.qd_offset_on else 0
-            distance=(point-origin).length
-            if hit and (hit[0]-origin).length<distance-max(1e-5,distance*1e-7)-offset*1.1:
-                return False
-        return True
+        return _reference_visible(context,region,rv3d,point,refs)
     ring=screen.plan(mouse,visible)
     if ring is None:
         return None
@@ -649,6 +674,9 @@ def _draw_view():
     try:
         if not tool_active(context):
             return
+        from ..ui import toolbox
+        if toolbox.is_toolbox(context.space_data):
+            return
         region = context.region
         scale = _ui_scale(context)
         from . import quad_draw_overlay
@@ -663,8 +691,8 @@ def _draw_view():
                 _lines(region, _ring_lines(data), FILL_RGB, LINE_PX * scale)
             elif kind == 'LOOP':
                 _lines(region, [tuple(p) for s in data for p in s], LOOP_RGB, LINE_PX * scale)
-            elif kind in ('DELETE', 'HOVER', 'TAB'):
-                rgb = DELETE_RGB if kind == 'DELETE' else (HOVER_RGB if kind == 'HOVER' else LOOP_RGB)
+            elif kind in ('DELETE', 'TAB'):
+                rgb = DELETE_RGB if kind == 'DELETE' else LOOP_RGB
                 pts = [tuple(p) for p in data]
                 if len(pts) == 1:
                     _points(pts, rgb, DOT_SIZE * 1.5 * scale)
@@ -689,6 +717,11 @@ def _draw_pixel():
     try:
         if not tool_active(context):
             return
+        from ..ui import toolbox
+        if toolbox.is_toolbox(context.space_data):
+            return
+        from . import quad_draw_overlay
+        quad_draw_overlay.draw_front(context)
         pv = STATE["preview"]
         if pv is None or pv[0] != 'BRUSH':
             return
@@ -756,6 +789,7 @@ def _corner_points(ob, vi):
 def update_hover(context, region, rv3d, mouse, ctrl, shift, tab=False):
     ob = edit_object(context)
     STATE["preview"] = None
+    STATE['hover_component'] = None
     if ob is None:
         return
     if tab:
@@ -782,6 +816,7 @@ def update_hover(context, region, rv3d, mouse, ctrl, shift, tab=False):
     comp = component_at(context, region, rv3d, mouse, ob)
     if comp is not None:
         STATE["preview"] = ('DELETE' if ctrl else 'HOVER', _component_points(ob, comp))
+        STATE['hover_component'] = (ob.name, *comp[:2])
 
 
 def _mods(event):

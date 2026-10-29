@@ -14,12 +14,12 @@ def orient(a,b,c):
     return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
 
 
-def inside(poly,p):
+def inside(poly,p,strict=True):
     # Strict containment: a shared boundary is not an overlap.
     result=False
     for a,b in zip(poly,poly[1:]+poly[:1]):
         if abs(orient(a,b,p))<1e-5 and min(a[0],b[0])-1e-6<=p[0]<=max(a[0],b[0])+1e-6 and min(a[1],b[1])-1e-6<=p[1]<=max(a[1],b[1])+1e-6:
-            return False
+            return not strict
         if (a[1]>p[1]) != (b[1]>p[1]) and p[0] < (b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0]:
             result=not result
     return result
@@ -45,17 +45,24 @@ def overlaps(a,b):
 
 class ScreenFill:
     """One bounded projection cache; queries examine nearby boundary edges and points."""
-    def __init__(self, xy, allowed, edges, edge_counts, faces):
+    def __init__(self, xy, allowed, edges, edge_counts, faces, world=None):
         self.xy=np.asarray(xy,dtype=float).reshape(-1,2)
         self.allowed=np.asarray(allowed,dtype=bool)
         self.edges=np.asarray(edges,dtype=np.int32).reshape(-1,2)
         self.counts={tuple(sorted(e)):int(n) for e,n in zip(self.edges.tolist(),edge_counts)}
         self.boundary=self.edges[np.asarray(edge_counts)==1]
+        self.world=None if world is None else np.asarray(world,dtype=float)
+        self.previous=None
+        self.adjacency=defaultdict(list)
+        for a,b in self.boundary.tolist():
+            self.adjacency[a].append(b)
+            self.adjacency[b].append(a)
         connected=np.zeros(len(self.xy),dtype=bool)
         connected[self.edges.ravel()]=True
         self.connected=np.flatnonzero(connected)
         faces=[tuple(f) for f in faces]
         self.face_sets={frozenset(f) for f in faces}
+        self.normals={}
         groups=defaultdict(list)
         for i,f in enumerate(faces):
             groups[len(f)].append(i)
@@ -65,6 +72,15 @@ class ScreenFill:
         for n,ids in groups.items():
             indices=np.asarray([faces[i] for i in ids],dtype=np.int32)
             points=self.xy[indices]
+            if self.world is not None:
+                world=self.world[indices]
+                normals=np.cross(world[:,1]-world[:,0],world[:,2]-world[:,0])
+                normals/=np.maximum(np.linalg.norm(normals,axis=1)[:,None],1e-12)
+                for f,normal in zip(indices.tolist(),normals):
+                    for a,b in zip(f,f[1:]+f[:1]):
+                        edge=tuple(sorted((a,b)))
+                        if self.counts.get(edge)==1:
+                            self.normals[edge]=normal
             following=np.roll(points,-1,axis=1)
             visible=np.sum(points[:,:,0]*following[:,:,1]-points[:,:,1]*following[:,:,0],axis=1)>1e-5
             front[ids]=visible
@@ -88,6 +104,21 @@ class ScreenFill:
         poly=[tuple(self.xy[i]) for i in ring]
         if area(poly)<1e-4 or any(abs(orient(poly[k-1],poly[k],poly[(k+1)%len(poly)]))<1e-5 for k in range(len(poly))):
             return False
+        if self.world is not None:
+            p=self.world[list(ring)]
+            normals=np.cross(p[1:-1]-p[0],p[2:]-p[0])
+            lengths=np.linalg.norm(normals,axis=1)
+            if np.any(lengths<1e-12):
+                return False
+            normals/=lengths[:,None]
+            # A screen-space polygon can connect folded or opposite-facing sheets.
+            if len(normals)>1 and float(normals[0]@normals[1])<=0:
+                return False
+            normal=normals.mean(axis=0)
+            for a,b in zip(ring,ring[1:]+ring[:1]):
+                neighbour=self.normals.get(tuple(sorted((a,b))))
+                if neighbour is not None and float(neighbour@normal)<-.05:
+                    return False
         for a,b in zip(ring,ring[1:]+ring[:1]):
             if self.counts.get(tuple(sorted((a,b))),0)>=2:
                 return False
@@ -109,14 +140,41 @@ class ScreenFill:
                 return False
         return True
 
+    def quality(self, ring):
+        """Dimensionless corner/skew cost, with continuation of adjacent edge flow."""
+        p=self.xy[list(ring)]
+        edges=np.roll(p,-1,axis=0)-p
+        lengths=np.linalg.norm(edges,axis=1)
+        unit=edges/np.maximum(lengths[:,None],1e-9)
+        corner=np.abs(np.sum(unit*np.roll(unit,1,axis=0),axis=1)).mean()
+        aspect=math.log(max(float(lengths.max()/max(lengths.min(),1e-9)),1.0))
+        flow=[]
+        for k,a in enumerate(ring):
+            for b in self.adjacency.get(a,()):
+                if b not in ring:
+                    delta=self.xy[b]-self.xy[a]
+                    size=float(np.linalg.norm(delta))
+                    if size>1e-6:
+                        flow.append(1-max(abs(float(delta@unit[k]))/size,
+                                          abs(float(delta@unit[k-1]))/size))
+        return float(corner)+aspect*.2+(sum(flow)/len(flow)*.35 if flow else 0)
+
     def plan(self, mouse, visible=lambda i:True):
         from .preselect import segment_distance
         if len(self.xy)<3:
             return None
+        previous=self.previous
+        # A closed four-edge hole is unambiguous. Its topology and projection are
+        # immutable for this cache generation; only visibility needs refreshing.
+        if previous and len(previous)==4 and all(self.counts.get(tuple(sorted(e)))==1
+                for e in zip(previous,previous[1:]+previous[:1])):
+            if inside([tuple(self.xy[i]) for i in previous],mouse) and all(visible(i) for i in previous):
+                return previous
         if len(self.boxes):
             b=self.boxes
             at=np.flatnonzero((b[:,0]<=mouse[0])&(b[:,2]>=mouse[0])&(b[:,1]<=mouse[1])&(b[:,3]>=mouse[1]))
-            if any(inside(self.polygon(i),mouse) for i in at):
+            if any(inside(self.polygon(i),mouse,strict=False) for i in at):
+                self.previous=None
                 return None
         distance=((self.xy-mouse)**2).sum(axis=1)
         eligible=np.flatnonzero(self.allowed)
@@ -129,9 +187,18 @@ class ScreenFill:
             distances,_=segment_distance(mouse,self.xy[edges[:,0]],self.xy[edges[:,1]])
             ok=self.allowed[edges[:,0]]&self.allowed[edges[:,1]]
             ids=np.flatnonzero(ok)
-            close=edges[ids[np.argsort(distances[ids])[:8]]]
+            close=edges[ids[np.argsort(distances[ids])[:12]]]
             # Opposing edges can be farther apart than the nearest eight vertices.
             proposals.update(frozenset(map(int,(*a,*b))) for a,b in itertools.combinations(close,2))
+            # Follow local border paths as well as proximity. A short nearby edge
+            # should not hide the fourth corner of a larger hole. Bounded even at
+            # branch vertices: no unbounded traversal or all-mesh combinations.
+            local=set(map(int,close.ravel()))
+            paths=[(i,) for i in sorted(local)]
+            for _ in range(3):
+                paths=list(itertools.islice(((*p,n) for p in paths for n in self.adjacency[p[-1]]
+                       if n not in p and self.allowed[n]),192))
+                proposals.update(frozenset(p) for p in paths if len(p) in (3,4))
         ordered=[]
         for combo in proposals:
             if len(combo) not in (3,4):
@@ -143,12 +210,20 @@ class ScreenFill:
             shared=sum(self.counts.get(tuple(sorted((a,b))),0)==1 for a,b in zip(ring,ring[1:]+ring[:1]))
             ordered.append((len(ring)!=4,-shared,abs(area(poly)),ring))
         visibility={}
-        for _,_,_,ring in sorted(ordered):
-            if not self.valid(ring):
-                continue
-            for i in ring:
-                if i not in visibility:
-                    visibility[i]=visible(i)
-            if all(visibility[i] for i in ring):
-                return ring
+        for _,group in itertools.groupby(sorted(ordered),key=lambda row:row[:2]):
+            # Score only the best topology class first. Most hole queries have a
+            # single four-boundary-edge candidate; nearby unrelated combinations
+            # must not add per-event shape work.
+            ranked=[(self.quality(ring)-(.08 if ring==previous else 0),size,ring)
+                    for _,_,size,ring in group]
+            for *_,ring in sorted(ranked):
+                if not self.valid(ring):
+                    continue
+                for i in ring:
+                    if i not in visibility:
+                        visibility[i]=visible(i)
+                if all(visibility[i] for i in ring):
+                    self.previous=ring
+                    return ring
+        self.previous=None
         return None

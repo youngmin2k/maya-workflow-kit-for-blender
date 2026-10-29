@@ -1,4 +1,4 @@
-"""A hovered vertex/dot must not leave its cyan hover marker behind during an actual mouse drag."""
+"""A hovered vertex/dot must not leave its red hover marker behind during an actual mouse drag."""
 import os
 import sys
 from pathlib import Path
@@ -9,7 +9,7 @@ import numpy as np
 from mathutils import Quaternion, Vector
 from bpy_extras import view3d_utils
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from sim import MODULE, setup, load_maya_layout, step, run, ev, view3d, win, check, screenshot
+from sim import MODULE, setup, load_maya_layout, step, run, ev, view3d, win, check, screenshot, scale, MEASURED_SCALE
 
 C = {}
 qd = lambda: import_module(MODULE+'.operators.quad_draw')
@@ -36,7 +36,7 @@ def marker_pixels(name):
     bpy.data.images.remove(im)
     x,y=C['old']
     patch=data.reshape(h,w,4)[y-14:y+15,x-14:x+15,:3]
-    return int(((patch[...,2]>.9)&(patch[...,1]>.65)&(patch[...,0]>.2)&(patch[...,0]<.85)).sum())
+    return int(((patch[...,0]>.8)&(patch[...,1]<.35)&(patch[...,2]<.3)).sum())
 
 
 @step
@@ -75,7 +75,7 @@ def hover_vertex():
 
 @step
 def press_vertex():
-    check('vertex hover marker is visible before pressing',marker_pixels('quad_vertex_before')>10)
+    check('vertex hover marker is visible before pressing',marker_pixels('quad_vertex_before')>max(3,10*(scale()/MEASURED_SCALE)**2))
     ev('LEFTMOUSE','PRESS')
 
 
@@ -87,7 +87,7 @@ def drag_vertex():
 
 @step
 def vertex_in_flight():
-    check('LMB drag removes the cyan marker at the original vertex',marker_pixels('quad_vertex_drag')<5)
+    check('LMB drag removes the red marker at the original vertex',marker_pixels('quad_vertex_drag')<5)
     check('LMB drag has no stale hover preview',qd().STATE['preview'] is None)
     bm=bmesh.from_edit_mesh(bpy.context.edit_object.data)
     check('the vertex moved while the button is still held',any((v.co-Vector((-.2,-.25,0))).length<.025 for v in bm.verts))
@@ -109,7 +109,7 @@ def add_dot():
 
 @step
 def press_dot():
-    check('loose dot hover marker is visible before pressing',marker_pixels('quad_dot_before')>10)
+    check('loose dot hover marker is visible before pressing',marker_pixels('quad_dot_before')>max(3,10*(scale()/MEASURED_SCALE)**2))
     ev('MIDDLEMOUSE','PRESS')
 
 
@@ -121,7 +121,7 @@ def drag_dot():
 
 @step
 def dot_in_flight():
-    check('MMB drag removes the cyan marker at the original dot',marker_pixels('quad_dot_drag')<5)
+    check('MMB drag removes the red marker at the original dot',marker_pixels('quad_dot_drag')<5)
     check('MMB drag has no stale hover preview',qd().STATE['preview'] is None)
     dots=qd().dots(bmesh.from_edit_mesh(bpy.context.edit_object.data))
     check('the loose dot moves without making a duplicate',len(dots)==1 and (dots[0].co-Vector((.5,-1,0))).length<.025)

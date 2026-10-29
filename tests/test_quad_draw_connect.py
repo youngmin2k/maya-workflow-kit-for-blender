@@ -41,6 +41,13 @@ def test_no_triangle_or_quad_over_existing_face():
     assert not s.valid((0,1,2,3))
 
 
+def test_existing_face_boundary_is_not_an_empty_gap():
+    s=screen()
+    assert s.plan((-100,0)) is None
+    assert s.plan((-100,50)) is None
+    assert fill.inside([(-200,0),(-100,0),(-100,100),(-200,100)],(-100,50),strict=False)
+
+
 def test_nonmanifold_edge_is_not_used_for_a_new_face():
     s=screen()
     s.counts[(1,2)]=2
@@ -67,6 +74,29 @@ def test_pure_dots_still_make_quads_and_triangles():
     assert set(s.plan((50,50)))=={0,1,2,3}
     s=screen([(0,0,0),(1,0,0),(.5,1,0)],[])
     assert set(s.plan((50,30)))=={0,1,2}
+
+
+def test_quad_quality_prefers_regular_flow_over_a_tiny_skewed_proposal():
+    s=screen([(-1,-1,0),(1,-1,0),(1,1,0),(-1,1,0),(.1,.2,0)],[])
+    assert set(s.plan((0,0)))=={0,1,2,3}
+
+
+def test_preview_is_stable_under_subpixel_motion_but_clears_in_empty_space():
+    s=screen()
+    first=s.plan((-50,50))
+    for delta in (-.2,.1,-.1,.2):
+        assert s.plan((-50+delta,50-delta))==first
+    assert s.plan((10000,10000)) is None
+    assert s.previous is None
+
+
+def test_3d_fold_is_rejected_even_when_screen_polygon_looks_regular():
+    xy=[(0,0),(100,0),(100,100),(0,100)]
+    world=[(0,0,0),(1,0,0),(0,1,0),(1,1,0)]
+    s=fill.ScreenFill(xy,[True]*4,[],[],[],world=world)
+    assert not s.valid((0,1,2,3))
+    s=fill.ScreenFill(xy,[True]*4,[],[],[],world=[(0,0,0),(1,0,0),(1,1,.2),(0,1,0)])
+    assert s.valid((0,1,2,3))
 
 
 def test_weld_two_boundary_endpoints_keeps_valid_shared_edge():

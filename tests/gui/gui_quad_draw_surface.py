@@ -137,7 +137,9 @@ def cache_and_occlusion():
             bpy.data.objects.remove(ob,do_unlink=True)
         bpy.ops.mesh.primitive_plane_add(size=6)
         ref=ctx.object
-        bpy.ops.mesh.primitive_plane_add(size=1.4,location=(0,0,1.5))
+        # Cover the target silhouette too: equal-size planes leave half of every
+        # screen-space wire legitimately outside the foreground surface.
+        bpy.ops.mesh.primitive_plane_add(size=2.0,location=(0,0,1.5))
         ctx.object.name='occluder'
         mod('operators.live').set_objects(ctx.scene,[ref])
         bpy.ops.mesh.primitive_plane_add(size=1.4)
@@ -147,6 +149,7 @@ def cache_and_occlusion():
         pd.reset_settings(pd.settings(),'QUAD_DRAW')
         pd.settings().qd_mesh_color=(1,0,0)
         pd.settings().qd_mesh_alpha=1
+        pd.settings().qd_wire_color=(1,0,0)
         bpy.ops.allset.quad_draw_start()
         cache=mod('operators.quad_draw_overlay')
         first=cache.batches(ctx)
@@ -172,7 +175,7 @@ def settle_new_tool():
 def occluded_faces():
     data=image_crop('quad_draw_occlusion')
     red=(data[...,0]>.8)&(data[...,1]<.15)&(data[...,2]<.15)
-    check('retopology tint does not paint through a foreground occluder',int(red.sum())<100)
+    check('retopology tint and front-layer wires stay behind a foreground occluder',int(red.sum())<100)
     with override():
         ctx=bpy.context; a,r=view3d();q=mod('operators.quad_draw')
         q.component_at(ctx,r,a.spaces.active.region_3d,(r.width/2,r.height/2),ctx.edit_object)
