@@ -966,7 +966,8 @@ def update_hover(context, region, rv3d, mouse, ctrl, shift, tab=False):
     if ctrl and not shift:
         comp = component_at(context, region, rv3d, mouse, ob, edges_only=True)
         if comp is not None:
-            segs = multi_cut.loop_segments(bmesh.from_edit_mesh(ob.data), comp[1], comp[2])
+            from . import quad_draw_cut
+            segs = quad_draw_cut.segments(bmesh.from_edit_mesh(ob.data), comp[1], comp[2])
             mw = ob.matrix_world
             STATE["preview"] = ('LOOP', [(mw @ a, mw @ b) for a, b in segs])
         return
@@ -1239,25 +1240,33 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         return ('MESH', [v.index for v in verts], [mw @ v.co for v in verts], start)
 
     def _loop(self, context, mouse, center=False):
+        from . import quad_draw_cut
         region, rv3d = context.region, context.region_data
         ob = bpy.data.objects[self._ob]
         comp = component_at(context, region, rv3d, mouse, ob, edges_only=True)
         if comp is None:
+            _close_symmetry(self)
             return {'CANCELLED'}
         bm = bmesh.from_edit_mesh(ob.data)
-        before = {tuple(v.co) for v in bm.verts}
         bm.edges.ensure_lookup_table()
         t = 0.5 if center else min(max(comp[2], 0.001), 0.999)
-        if self._sym is not None:
-            try:self._sym.require({v for e in edge_loop(bm.edges[comp[1]]) for f in e.link_faces for v in f.verts})
-            except quad_draw_symmetry.SymmetryError as ex:
-                self.report({'WARNING'},str(ex));_close_symmetry(self);return {'CANCELLED'}
-        mesh_tools.insert_loop(bm, bm.edges[comp[1]], t)
-        if self._refs:
-            mw, inv = ob.matrix_world, ob.matrix_world.inverted_safe()
-            for v in bm.verts:
-                if tuple(v.co) not in before:
-                    v.co = inv @ project_point(context, mw @ v.co, self._refs, region, rv3d)
+        backup=None
+        try:
+            plan=quad_draw_cut.Plan(bm,bm.edges[comp[1]],t,self._sym)
+            if self._sym is None:backup=bm.copy()
+            mw=ob.matrix_world;inv=mw.inverted_safe()
+            project=(lambda co:inv@project_point(context,mw@co,self._refs,region,rv3d)) if self._refs else None
+            plan.apply(project)
+        except (quad_draw_symmetry.SymmetryError,ValueError,ReferenceError,RuntimeError) as ex:
+            if self._sym is not None:self._sym.rollback();self._sym=None
+            elif backup is not None:
+                mesh=bpy.data.meshes.new('_quad_draw_cut_rollback')
+                try:backup.to_mesh(mesh);bm.clear();bm.from_mesh(mesh)
+                finally:bpy.data.meshes.remove(mesh)
+            bmesh.update_edit_mesh(ob.data);_geometry_reset(None)
+            self.report({'WARNING'},str(ex));return {'CANCELLED'}
+        finally:
+            if backup is not None:backup.free()
         _indices(bm)
         if not _sync_symmetry(self,context,finish=True):return {'CANCELLED'}
         bmesh.update_edit_mesh(ob.data)

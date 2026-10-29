@@ -73,6 +73,14 @@ other stationary vertex targets retain precedence. Duplicated extension endpoint
 from weld targets, so a short drag cannot collapse the new quad back into its source edge.
 A Tab click without a drag creates no geometry.
 
+Ctrl+click inserts a loop at the hovered edge position; Ctrl+MMB inserts it at the midpoint. With symmetry,
+new points are paired by their source edges and cut factors before projection onto the live reference.
+A loop that already crosses both halves is cut once, with shared seam vertices. Distinct mirrored paths
+can make two cuts in one face; crossing paths reuse one intersection. World/Object mode projects the
+clicked side and reflects its counterpart, preserving symmetry even when the reference is slightly
+asymmetric. A cut needs matching existing edges/faces on the opposite side; unmatched or hidden topology
+reports a warning and cancels before editing. Failed transactions restore the original mesh.
+
 For Topology symmetry, use **Pick Seam** in Quad Draw Options, then click a manifold edge between matching halves.
 An active selected seam edge can also be bound when entering Quad Draw. Stable vertex identities preserve the binding
 across index changes, tool exit and file saving. The seam is yellow and a matched hovered component is green;
