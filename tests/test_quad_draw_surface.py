@@ -39,7 +39,28 @@ def test_offset_is_applied_along_surface_normal_and_resets():
     pd.reset_settings(s, 'QUAD_DRAW')
     assert not s.qd_offset_on and s.qd_mesh_alpha == .75 and s.qd_wire_overlay
     display=Color(s.qd_mesh_color).from_scene_linear_to_srgb()
-    assert tuple(round(v*255) for v in display)==(0,139,212),tuple(display)
+    assert tuple(round(v*255) for v in display)==(1,172,255),tuple(display)
+
+
+def test_offset_follows_scene_length_units_and_unit_scale():
+    fresh()
+    us=bpy.context.scene.unit_settings
+    saved=us.system,us.length_unit,us.scale_length
+    s=pd.settings();s.qd_offset_on=True;s.qd_surface_offset=.1
+    try:
+        us.system='METRIC'
+        for length,scale,distance in (('CENTIMETERS',1,.001),('CENTIMETERS',.01,.1),
+                                      ('MILLIMETERS',1,.0001),('METERS',1,.1)):
+            us.length_unit=length;us.scale_length=scale
+            point=qd._surface_point(bpy.context,(Vector(),Vector((0,0,1))))
+            assert abs(point.z-distance)<1e-7,(length,scale,point)
+        us.length_unit='CENTIMETERS';us.scale_length=1
+        s.qd_surface_offset=-.1
+        assert abs(qd.surface_offset(bpy.context)+.001)<1e-8
+        s.qd_offset_on=False
+        assert qd.surface_offset(bpy.context)==0
+    finally:
+        us.system,us.length_unit,us.scale_length=saved
 
 
 def test_all_relax_includes_interior_and_boundary_neighbours():

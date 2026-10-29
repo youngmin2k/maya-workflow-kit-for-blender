@@ -134,10 +134,9 @@ class Magnet:
             hit=self.bvh.ray_cast(origin,direction)
             hidden=hit[0] is not None and hit[3]<distance-epsilon
         if not hidden and self.refs:
-            from . import live,poly_draw
+            from . import live,quad_draw
             hit=live.ray_hit(context,origin,direction,self.refs,True)
-            settings=poly_draw.settings(context)
-            offset=abs(settings.qd_surface_offset) if settings.qd_offset_on else 0
+            offset=abs(quad_draw.surface_offset(context))
             hidden=hit is not None and (hit[0]-origin).length<distance-epsilon-offset*1.1
         self.visibility[i]=not hidden
         return not hidden

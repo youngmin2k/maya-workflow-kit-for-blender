@@ -404,11 +404,20 @@ def reference_objects(context):
     return live.objects(context.scene)
 
 
+def surface_offset(context):
+    """Offset in Blender units, from the Maya-style scene length-unit field."""
+    s = poly_draw.settings(context)
+    if not s.qd_offset_on or s.qd_surface_offset == 0:
+        return 0.0
+    from . import units
+    return s.qd_surface_offset * units.maya_unit(context.scene)
+
+
 def _surface_point(context, hit):
     if hit is None:
         return None
     s = poly_draw.settings(context)
-    return hit[0] + hit[1] * s.qd_surface_offset if s.qd_offset_on else hit[0]
+    return hit[0] + hit[1] * surface_offset(context) if s.qd_offset_on else hit[0]
 
 
 def surface_hit(context, region, rv3d, mouse, refs=None):
@@ -434,14 +443,22 @@ def project_point(context, w, refs=None, region=None, rv3d=None):
     refs = reference_objects(context) if refs is None else refs
     # Screen-ray projection follows the visible side of thin/folded surfaces. A nearest-only
     # query can jump to an unrelated sheet behind the point during relax/extend.
+    from . import live
+    nearest = None
     if refs and region is not None and rv3d is not None:
-        xy = _screen_xy(region, rv3d, w)
+        base = w
+        if surface_offset(context):
+            # Project from the surface foot, not from an already offset point.
+            # Reusing its shifted screen position adds a sideways drift each time.
+            nearest = live.nearest(context, w, refs)
+            if nearest is not None:
+                base = nearest[0]
+        xy = _screen_xy(region, rv3d, base)
         if xy is not None:
             hit = surface_hit(context, region, rv3d, xy, refs)
             if hit is not None:
                 return hit
-    from . import live
-    hit = live.nearest(context, w, refs)
+    hit = nearest if nearest is not None else live.nearest(context, w, refs)
     return _surface_point(context, hit) if hit else w
 
 
@@ -525,8 +542,7 @@ def _reference_visible(context, region, rv3d, point, refs, clearance=0):
     if distance < 1e-12:
         return True
     hit = live.ray_hit(context, origin, delta/distance, refs, True)
-    s = poly_draw.settings(context)
-    offset = abs(s.qd_surface_offset) if s.qd_offset_on else 0
+    offset = abs(surface_offset(context))
     return not hit or (hit[0]-origin).length >= distance-max(1e-5,distance*1e-7)-offset*1.1-clearance
 
 
@@ -968,8 +984,18 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             # Preserve the cursor-to-component offset. No screen-plane fallback when the
             # cursor leaves a live surface: keep the last valid point until it re-enters.
             delta = Vector(mouse) - Vector(self._press)
+            anchors = getattr(self, '_surface_anchors', None)
+            if anchors is None:
+                anchors = starts
+                if surface_offset(context):
+                    from . import live
+                    anchors = []
+                    for original in starts:
+                        hit = live.nearest(context, original, self._refs)
+                        anchors.append(hit[0] if hit is not None else original)
+                self._surface_anchors = anchors
             news = []
-            for i, original in zip(idx, starts):
+            for i, original in zip(idx, anchors):
                 xy = _screen_xy(region, rv3d, original)
                 hit = surface_hit(context, region, rv3d, Vector(xy)+delta, self._refs) if xy else None
                 news.append(hit if hit is not None else ob.matrix_world @ bm.verts[i].co)
@@ -1138,6 +1164,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             self._snap = None
             _indices(bm)
         STATE["snap"] = []
+        self._surface_anchors = None
         bmesh.update_edit_mesh(ob.data)
         preselect.invalidate()
         _redraw(context)
@@ -1146,6 +1173,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
     def _cancel(self, context):
         STATE["snap"] = []
         self._snap = None
+        self._surface_anchors = None
         ob = bpy.data.objects.get(self._ob)
         if self._grab is not None and ob is not None:
             bm = bmesh.from_edit_mesh(ob.data)

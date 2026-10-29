@@ -12,15 +12,19 @@ Activate **Mesh Tools > Quad Draw**, the shelf button or **Ctrl+Shift+Q**. The M
 - Extend offers Edge, Loop (the boundary chain up to a corner/pole), and Border (the connected border).
 - Quad Strip Width sets the width in pixels. Clear Dots removes unfinished dots; Reset Settings restores defaults.
 - Live Constraint Options controls the wire overlay/color, mesh tint, opacity, surface offset and backface snapping.
-  The default base tint matches the supplied Maya picker swatch, display sRGB `#008BD4`, stored as linear RGB
-  `(0, 0.258183, 0.658375)`. The reference picker uses ACEScg; its HSV numbers are not Blender's RGB values.
+  The default base tint is display sRGB `#01ACFF`, stored as linear RGB
+  `(0.000303527, 0.412543, 1)`. Display swatches and linear color values use different encodings.
   Opacity, the surface underneath and hover highlighting change the final blended face color. Existing custom
   scene colors remain available; Autodesk does not document a universal fixed RGB value.
 
 Only Make Live meshes are reference surfaces. Without one, dots use the construction plane, even if other objects
 are visible. Component drags preserve the initial screen offset; leaving a live surface keeps the last valid position.
 Relax, inserted loops and extended points project onto the visible reference first, using nearest-surface projection
-when no view ray hits. Surface Offset is a world-space displacement along the reference normal.
+when no view ray hits. Surface Offset displaces points along the reference normal using the scene display length
+unit, consistent with the other Maya-style length fields. For example, 0.10 in a centimetre scene means 0.10 cm,
+including when the scene uses a different unit scale. Visibility and Auto-weld use the same converted distance.
+Reprojection starts from the surface foot of an offset point; drags cache these anchors until release/cancel so
+an already offset point does not shift again when grabbed or projected repeatedly.
 
 To connect two strips in the same retopology mesh, hold Shift over their gap and click the quad preview, or Tab-drag
 a boundary edge toward the other strip with Auto-weld enabled. Previews prefer existing boundary edges and reuse

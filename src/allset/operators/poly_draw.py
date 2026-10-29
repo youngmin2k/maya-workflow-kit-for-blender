@@ -90,14 +90,14 @@ class ALLSET_PG_poly_tools(bpy.types.PropertyGroup):
     qd_wire_color: FloatVectorProperty(name="Wire Color", subtype='COLOR', size=3,
                                        default=(0.0, 0.0, 0.0), min=0.0, max=1.0)
     qd_mesh_color_on: BoolProperty(name="Mesh Color", default=True)
-    # Linear sRGB for the supplied Maya display swatch #008BD4 (ACEScg picker).
+    # Linear sRGB for the requested display color #01ACFF.
     qd_mesh_color: FloatVectorProperty(name="Mesh Color", subtype='COLOR', size=3,
-                                       default=(0.0, 0.258183, 0.658375), min=0.0, max=1.0,
+                                       default=(0.000303527, 0.412543, 1.0), min=0.0, max=1.0,
                                        description="Quad Draw display tint; does not change materials")
     qd_mesh_alpha: FloatProperty(name="Mesh Alpha", default=0.75, min=0.0, max=1.0)
     qd_offset_on: BoolProperty(name="Surface Offset", default=False)
     qd_surface_offset: FloatProperty(name="Surface Offset", default=0.0, soft_min=-0.1, soft_max=0.1,
-                                      description="World-space distance of new and projected points from the live surface")
+                                      description="Distance of new and projected points from the live surface, in scene display length units")
 
 
 SETTINGS = {
