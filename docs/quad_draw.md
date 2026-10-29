@@ -35,8 +35,9 @@ snapshot. These are released on tool exit or drag completion/cancellation. The l
 
 The display tint and antialiased pixel-width strokes use cached GPU batches. Temporary display clearance follows
 nearby faces, so an unrelated long edge does not raise the entire mesh. Materials and theme are preserved.
-During Quad Draw the native cage offset is limited to 0.01, while the compositor keeps the original saved offset.
-This prevents a large offset retained by an older scene from clipping the custom strokes; the native offset returns
+During Quad Draw the native cage depth stays unshifted, while the compositor keeps the original saved offset.
+This prevents the native depth prepass from clipping the custom strokes, including on centimetre-scale meshes
+where even the normal 0.01 offset is large relative to the geometry. The native offset returns
 on tool exit. A workspace reopened with Quad Draw already active initializes the same display and cleanup state.
 Depth-tested strokes are composed after native edit overlays to cover intermittent native cyan wires
 on curved references; the Maya Tool Box column is excluded. Orbit/zoom update uniforms without rebuilding geometry.

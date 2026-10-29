@@ -1477,13 +1477,11 @@ def sync_overlays(context=None):
             wanted = faces and not poly_draw.settings().qd_mesh_color_on
             if ov.show_faces != wanted:
                 ov.show_faces = wanted
-            # Older scenes may retain the large offset used by the previous
-            # renderer. Its native depth prepass then clips our expanded wires.
-            # Keep native clearance small; the compositor retains the saved
-            # offset independently, and _restore_overlays puts it back on exit.
-            native_offset = min(offset, 0.01)
-            if abs(ov.retopology_offset-native_offset) > 1e-6:
-                ov.retopology_offset = native_offset
+            # Even 0.01 is large on centimetre-scale meshes. An unshifted native
+            # prepass avoids competing with the custom display at every scale.
+            # The compositor retains the saved offset; exit restores it below.
+            if ov.retopology_offset != 0.0:
+                ov.retopology_offset = 0.0
 
 
 def _restore_overlays():

@@ -113,7 +113,7 @@ def fixture():
 def persisted_offset():
     capture('quad_depth_saved_06')
     check('saved scene offset is retained by the compositor', abs(C['results'][-1]['saved_offset'] - 0.6) < 1e-06)
-    check('native cage offset stays below custom clearance', abs(C['results'][-1]['native_offset'] - 0.01) < 1e-06)
+    check('native cage depth stays unshifted', C['results'][-1]['native_offset'] == 0.0)
     check('irregular quads have continuous wires with a saved offset', C['results'][-1]['min'] >= 0.95)
     use_offset(2.0)
 
@@ -174,5 +174,55 @@ def resumed_restoration():
     a, r = view3d()
     check('exiting a restored tool returns its original offset', a.spaces.active.overlay.retopology_offset == 2.0)
     check('exiting a restored tool releases its display cache', mod('quad_draw_overlay')._cached is None)
+
+@step
+def centimetre_scene():
+    with override():
+        q = mod('quad_draw')
+        target = bpy.context.edit_object
+        factor = .005
+        bm = bmesh.from_edit_mesh(target.data)
+        for v in bm.verts:
+            v.co *= factor
+        bmesh.update_edit_mesh(target.data)
+        for ob in q.reference_objects(bpy.context):
+            for v in ob.data.vertices:
+                v.co *= factor
+            ob.data.update()
+        mod('preselect').invalidate()
+        mod('live')._trees.clear()
+        a, r = view3d()
+        a.spaces.active.clip_start = .001
+        a.spaces.active.clip_end = 100
+        rv = a.spaces.active.region_3d
+        rv.view_location *= factor
+        rv.view_distance *= factor
+        a.spaces.active.overlay.retopology_offset = .01
+        bpy.ops.wm.tool_set_by_id(name=q.TOOL, space_type='VIEW_3D')
+        q.reset_preview()
+
+@step
+def centimetre_wires():
+    capture('quad_depth_centimetre')
+    check('centimetre-scale mesh keeps continuous perspective wires', C['results'][-1]['min'] >= .95)
+    check('centimetre scene retains its saved display offset', abs(C['results'][-1]['saved_offset']-.01) < 1e-6)
+    a, r = view3d()
+    a.spaces.active.region_3d.view_perspective = 'ORTHO'
+
+@step
+def centimetre_ortho():
+    capture('quad_depth_centimetre_ortho')
+    check('centimetre-scale mesh also has continuous orthographic wires', C['results'][-1]['min'] >= .95)
+    with override():
+        bpy.ops.allset.quad_draw_exit()
+
+@step
+def settle_centimetre_exit():
+    pass
+
+@step
+def centimetre_restored():
+    a, r = view3d()
+    check('small-scene exit restores its original native offset', abs(a.spaces.active.overlay.retopology_offset-.01) < 1e-6)
 
 run()
