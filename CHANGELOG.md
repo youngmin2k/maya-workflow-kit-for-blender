@@ -6,6 +6,9 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
 ## [Unreleased]
 
 ### Fixed
+- **Quad Draw connections**: Shift previews use boundary edges and reject overlapping faces, skipped boundary
+  vertices and non-manifold edges. Auto-weld previews vertex/edge targets while dragging, then welds the same targets
+  on release, including Tab extensions. Escape cancels without merging; tolerance uses actual screen pixels.
 - **Quad Draw drag preview**: dragging a vertex or dot no longer leaves its cyan hover marker at the original position.
 - **Quad Draw**: activating the tool opens its options in the Modeling Toolkit. Retopology has a temporary cyan
   face tint with editable wire color, opacity and surface offset, without changing materials or the theme.

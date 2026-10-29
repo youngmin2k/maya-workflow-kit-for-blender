@@ -7,7 +7,7 @@ empty ``polySurfaceN`` (``allset.quad_draw_start``) — on the Make Live mesh li
 when no surface is live. Unrelated visible meshes never participate.
 
 - click = a dot on the surface; press-drag on a dot / vertex / edge / face = move it along the surface (Auto-weld:
-  a vertex let go within the weld distance of another vertex is merged with it); middle-drag = move too;
+  eligible points snap during the drag and weld on release); middle-drag = move too;
 - Shift+click = fill: the polygon of the dots / border vertices around the mouse (4, else 3); Shift+drag = relax brush;
 - Ctrl+click on an edge = edge loop there (new vertices on the surface);
 - Ctrl+Shift+click = delete the dot / vertex / edge / face under the mouse;
@@ -187,7 +187,7 @@ def border_chain(edge):
     return out
 
 
-def extend_edges(bm, edges, offset):
+def extend_edges(bm, edges, offset, positions=None, created=None):
     """Tab+drag: a quad on each border edge, its far side = the edge's vertices moved by ``offset(co) -> new co``
     (shared between neighbouring edges). Returns the new faces."""
     new = {}
@@ -198,7 +198,10 @@ def extend_edges(bm, edges, offset):
         b, a = poly_draw.edge_start(e)       # against the bordering face's winding
         for v in (a, b):
             if v not in new:
-                new[v] = bm.verts.new(offset(v.co.copy()))
+                co=positions[v.index] if positions is not None else offset(v.co.copy())
+                new[v] = bm.verts.new(co)
+                if created is not None:
+                    created[v.index]=new[v]
         try:
             faces.append(bm.faces.new((b, a, new[a], new[b])))
         except ValueError:
@@ -445,12 +448,14 @@ def project_point(context, w, refs=None, region=None, rv3d=None):
 
 # --- live state -----------------------------------------------------------------------------------------
 
-STATE = {"ob": None, "preview": None, "created": None, "overlays": {}, "timer": False}
+STATE = {"ob": None, "preview": None, "snap": [], "created": None, "overlays": {}, "timer": False}
 _pick_projection = None
+_fill_projection = None
 
 
 def reset_preview():
     STATE["preview"] = None
+    STATE["snap"] = []
 
 
 def edit_object(context):
@@ -554,25 +559,40 @@ def fill_candidates(bm):
 
 def fill_plan(context, region, rv3d, mouse, ob):
     """(ring of vertex indices, world points) for a Shift+click at ``mouse``, or None."""
-    bm = bmesh.from_edit_mesh(ob.data)
-    mw = ob.matrix_world
-    idx, xy = [], []
-    for v in fill_candidates(bm):
-        p = _screen_xy(region, rv3d, mw @ v.co)
-        if p is not None:
-            idx.append(v.index)
-            xy.append(p)
-    index_of = {i: k for k, i in enumerate(idx)}
-    banned = set()
-    for f in bm.faces:
-        ks = [index_of.get(v.index) for v in f.verts]
-        if None not in ks:
-            banned.add(frozenset(ks))
-    ring = fill_order(xy, mouse, banned=banned)
+    global _fill_projection
+    from .quad_draw_fill import ScreenFill
+    c = next((c for candidate,c in preselect.caches(context) if candidate==ob),None)
+    if c is None:
+        return None
+    key=(region.width,region.height,tuple(map(tuple,rv3d.perspective_matrix)))
+    if _fill_projection is None or _fill_projection[0] is not c or _fill_projection[1]!=key:
+        xy,front=preselect.project(c.co,rv3d.perspective_matrix,region.width,region.height)
+        allowed=[not v.hide and bool(front[v.index]) and (v.is_boundary or not v.link_faces) for v in c.bm.verts]
+        counts=[len(e.link_faces) for e in c.bm.edges]
+        faces=[tuple(v.index for v in f.verts) for f in c.bm.faces if not f.hide and all(front[v.index] for v in f.verts)]
+        _fill_projection=c,key,ScreenFill(xy,allowed,c.edges,counts,faces)
+    screen=_fill_projection[2]
+    refs=reference_objects(context)
+    def visible(i):
+        point=Vector(c.co[i])
+        if multi_cut._occluded([(ob,c)],region,rv3d,point,False):
+            return False
+        if refs:
+            from . import live
+            xy=screen.xy[i]
+            origin=view3d_utils.region_2d_to_origin_3d(region,rv3d,xy)
+            direction=(point-origin).normalized()
+            hit=live.ray_hit(context,origin,direction,refs,True)
+            s=poly_draw.settings(context)
+            offset=abs(s.qd_surface_offset) if s.qd_offset_on else 0
+            distance=(point-origin).length
+            if hit and (hit[0]-origin).length<distance-max(1e-5,distance*1e-7)-offset*1.1:
+                return False
+        return True
+    ring=screen.plan(mouse,visible)
     if ring is None:
         return None
-    bm.verts.ensure_lookup_table()
-    return [idx[k] for k in ring], [mw @ bm.verts[idx[k]].co for k in ring]
+    return list(ring),[Vector(c.co[i]) for i in ring]
 
 
 def apply_fill(ob, ring):
@@ -636,6 +656,7 @@ def _draw_view():
         gpu.state.blend_set('ALPHA')
         gpu.state.depth_test_set('NONE')
         pv = STATE["preview"]
+        _points([tuple(p) for p in STATE["snap"]], FILL_RGB, DOT_SIZE*1.5*scale)
         if pv is not None:
             kind, data = pv
             if kind == 'FILL':
@@ -798,31 +819,8 @@ class ALLSET_OT_quad_draw_hover(bpy.types.Operator):
 
 def _weld_px(context):
     s = poly_draw.settings(context)
-    return s.qd_weld_px * _ui_scale(context) if s.qd_auto_weld and not context.scene.allset_soft_select else None
+    return float(s.qd_weld_px) if s.qd_auto_weld and not context.scene.allset_soft_select else None
 
-
-def auto_weld(context, region, rv3d, ob, moved):
-    """Merge each moved vertex with a vertex (not moved) within the Auto-weld distance on screen."""
-    radius = _weld_px(context)
-    if radius is None or not moved:
-        return 0
-    bm = bmesh.from_edit_mesh(ob.data)
-    bm.verts.ensure_lookup_table()
-    mw = ob.matrix_world
-    xy = [_screen_xy(region, rv3d, mw @ v.co) for v in bm.verts]
-    moved_idx = {v.index for v in moved if v.is_valid}
-    pairs = {}
-    for v in moved:
-        if not v.is_valid or xy[v.index] is None:
-            continue
-        neighbours = {e.other_vert(v).index for e in v.link_edges}
-        t = weld_target(xy, v.index, xy[v.index], radius, exclude=moved_idx | neighbours)
-        if t is not None and bm.verts[t] not in pairs.values():
-            pairs[v] = bm.verts[t]
-    if pairs:
-        bmesh.ops.weld_verts(bm, targetmap=pairs)
-        _indices(bm)
-    return len(pairs)
 
 
 class ALLSET_OT_quad_draw(bpy.types.Operator):
@@ -866,6 +864,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             return self._loop(context, mouse, center=self.middle)   # Ctrl+MMB = centred loop
         elif event.shift:
             self._mode = 'SHIFT'                # click = fill (LMB), drag = relax (MMB: the highlighted points)
+            self._fill_plan=fill_plan(context,region,rv3d,mouse,ob) if not self.middle else None
         else:
             self._mode = 'MOVE'
             self._grab = self._grab_at(context, mouse)
@@ -888,6 +887,11 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
         # Hover owns a snapshot of the pre-press coordinates. The modal consumes mouse
         # moves, so the hover operator cannot refresh that marker while dragging.
         STATE["preview"] = None
+        STATE["snap"] = []
+        self._snap = None
+        if self._grab is not None and _weld_px(context) is not None:
+            from .quad_draw_weld import Magnet
+            self._snap = Magnet(context,ob,self._grab[1])
         context.window_manager.modal_handler_add(self)
         _redraw(context)
         return {'RUNNING_MODAL'}
@@ -918,6 +922,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
 
     def _drag_to(self, context, mouse):
         STATE["preview"] = None
+        STATE["snap"] = []
         region, rv3d = context.region, context.region_data
         _k, idx, starts, start = self._grab
         ob = bpy.data.objects[self._ob]
@@ -937,6 +942,11 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             hit = view3d_utils.region_2d_to_location_3d(region, rv3d, mouse, self._depth)
             delta = hit - start
             news = [s + delta for s in starts]
+        snap=getattr(self,'_snap',None)
+        if snap is not None:
+            proposed,pairs=snap.query(context,region,rv3d,dict(zip(idx,news)))
+            news=[proposed[i] for i in idx]
+            STATE["snap"]=[snap.co[t] for t in pairs.values()]
         for i, w in zip(idx, news):
             bm.verts[i].co = inv @ w
         bmesh.update_edit_mesh(ob.data, loop_triangles=False, destructive=False)
@@ -1039,6 +1049,8 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
     def modal(self, context, event):
         if not tool_active(context) or not _view_ok(context) or bpy.data.objects.get(self._ob) is None:
             STATE["preview"] = None
+            STATE["snap"] = []
+            self._snap = None
             return {'CANCELLED'}
         mouse = _mouse(event)
         button = 'MIDDLEMOUSE' if self.middle else 'LEFTMOUSE'
@@ -1073,7 +1085,7 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
                 preselect.invalidate()
                 _redraw(context)
                 return {'FINISHED'}
-            plan = fill_plan(context, region, rv3d, mouse, ob)
+            plan = self._fill_plan
             if plan is None or apply_fill(ob, plan[0]) is None:
                 self.report({'INFO'}, "Quad Draw: Shift+click between 3 or 4 dots / border vertices to fill")
                 _redraw(context)
@@ -1082,15 +1094,23 @@ class ALLSET_OT_quad_draw(bpy.types.Operator):
             return {'FINISHED'}
         if not self._moved and not self._new_dot:
             return {'CANCELLED'}
+        if self._moved:
+            self._drag_to(context,mouse)
         bm = bmesh.from_edit_mesh(ob.data)
         bm.verts.ensure_lookup_table()
-        auto_weld(context, region, rv3d, ob, [bm.verts[i] for i in self._grab[1]])
+        if self._snap is not None:
+            self._snap.commit(bm,{i:bm.verts[i] for i in self._grab[1]})
+            self._snap = None
+            _indices(bm)
+        STATE["snap"] = []
         bmesh.update_edit_mesh(ob.data)
         preselect.invalidate()
         _redraw(context)
         return {'FINISHED'}
 
     def _cancel(self, context):
+        STATE["snap"] = []
+        self._snap = None
         ob = bpy.data.objects.get(self._ob)
         if self._grab is not None and ob is not None:
             bm = bmesh.from_edit_mesh(ob.data)
@@ -1126,6 +1146,8 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
             return {'PASS_THROUGH'}
         self._ob = edit_object(context).name
         self._drag = None
+        self._snap = None
+        self._new_ids = {}
         self._done = False
         self._refs = reference_objects(context)
         update_hover(context, context.region, context.region_data, _mouse(event), False, False, tab=True)
@@ -1137,6 +1159,8 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
 
     def _end(self, context, result):
         STATE["preview"] = None
+        STATE["snap"] = []
+        self._snap = None
         context.workspace.status_text_set(None)
         _redraw(context)
         return result
@@ -1167,6 +1191,11 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
                 # a border vertex: the quad of it, its two border neighbours and the mouse point (#180)
                 self._button = event.type
                 self._drag = ('CORNER', vi)
+                bm=bmesh.from_edit_mesh(ob.data)
+                bm.verts.ensure_lookup_table()
+                a,b=corner_neighbours(bm.verts[vi])
+                self._new_ids={None:len(bm.verts)}
+                self._start_snap(context,[ob.matrix_world@bm.verts[vi].co],[(a.index,vi,b.index,len(bm.verts))])
                 return {'RUNNING_MODAL'}
             ei = poly_draw.border_edge_at(context, region, rv3d, mouse, ob)
             if ei is None and event.type == 'MIDDLEMOUSE':
@@ -1183,6 +1212,14 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
                     mw = ob.matrix_world
                     start = mw @ ((edge.verts[0].co + edge.verts[1].co) / 2)
                 self._drag = ('EXTEND', [e.index for e in loop], start)
+                ids=sorted({v.index for e in loop for v in e.verts})
+                self._new_ids={i:len(bm.verts)+k for k,i in enumerate(ids)}
+                faces=[]
+                for e in loop:
+                    b,a=poly_draw.edge_start(e)
+                    faces.append((b.index,a.index,self._new_ids[a.index],self._new_ids[b.index]))
+                bm.verts.ensure_lookup_table()
+                self._start_snap(context,[ob.matrix_world@bm.verts[i].co for i in ids],faces)
             else:
                 self._drag = ('STRIP', [mouse])
             return {'RUNNING_MODAL'}
@@ -1190,10 +1227,36 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
                 and self._drag is not None:
             self._commit(context, mouse)
             self._drag = None
+            self._snap = None
+            STATE["snap"] = []
             return {'RUNNING_MODAL'}
         if event.type == 'ESC' and event.value == 'PRESS':
             return self._end(context, {'FINISHED'} if self._done else {'CANCELLED'})
         return {'RUNNING_MODAL'} if self._drag is not None else {'PASS_THROUGH'}
+
+    def _start_snap(self,context,extra,faces):
+        self._snap=None
+        if _weld_px(context) is not None:
+            from .quad_draw_weld import Magnet
+            ob=bpy.data.objects[self._ob]
+            self._snap=Magnet(context,ob,self._new_ids.values(),extra,faces)
+
+    def _snap_points(self,context,points):
+        STATE["snap"]=[]
+        snap=getattr(self,'_snap',None)
+        if snap is None:
+            return points
+        proposed={self._new_ids[i]:p for i,p in points.items()}
+        proposed,pairs=snap.query(context,context.region,context.region_data,proposed)
+        STATE["snap"]=[snap.co[t] for t in pairs.values()]
+        return {i:proposed[self._new_ids[i]] for i in points}
+
+    def _extend_positions(self,context,mouse):
+        ob=bpy.data.objects[self._ob]
+        bm=bmesh.from_edit_mesh(ob.data)
+        bm.verts.ensure_lookup_table()
+        offset=self._offset_fn(context,mouse)
+        return self._snap_points(context,{i:ob.matrix_world@offset(bm.verts[i].co) for i in self._new_ids})
 
     def _offset_fn(self, context, mouse):
         region, rv3d = context.region, context.region_data
@@ -1220,7 +1283,8 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
         bm.verts.ensure_lookup_table()
         at = ob.matrix_world @ bm.verts[self._drag[1]].co
         hit = place_point(context, region, rv3d, mouse, self._refs) if self._refs else None
-        return hit if hit is not None else view3d_utils.region_2d_to_location_3d(region, rv3d, mouse, at)
+        point=hit if hit is not None else view3d_utils.region_2d_to_location_3d(region, rv3d, mouse, at)
+        return self._snap_points(context,{None:point})[None]
 
     def _update_drag(self, context, mouse):
         if self._drag[0] == 'CORNER':
@@ -1239,7 +1303,7 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
                 pts += [a, b]
             STATE["preview"] = ('EXTEND', pts)
             return
-        offset = self._offset_fn(context, mouse)
+        positions = self._extend_positions(context, mouse)
         ob = bpy.data.objects[self._ob]
         bm = bmesh.from_edit_mesh(ob.data)
         bm.edges.ensure_lookup_table()
@@ -1248,7 +1312,7 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
         for i in self._drag[1]:
             if i < len(bm.edges):
                 b, a = poly_draw.edge_start(bm.edges[i])
-                pa, pb = mw @ offset(a.co.copy()), mw @ offset(b.co.copy())
+                pa, pb = positions[a.index], positions[b.index]
                 segs += [mw @ a.co, pa, pa, pb, pb, mw @ b.co]
         STATE["preview"] = ('EXTEND', segs)
 
@@ -1267,15 +1331,19 @@ class ALLSET_OT_quad_draw_tab(bpy.types.Operator):
             before = set(bm.verts)
             face = corner_quad(bm, bm.verts[self._drag[1]], inv @ self._corner_point(context, mouse))
             faces = [face] if face is not None else []
-            if faces:
-                auto_weld(context, region, rv3d, ob, [vv for vv in face.verts if vv not in before])
+            if faces and self._snap is not None:
+                new=next(v for v in face.verts if v not in before)
+                self._snap.commit(bm,{self._new_ids[None]:new})
+                _indices(bm)
         elif self._drag[0] == 'EXTEND':
             bm.edges.ensure_lookup_table()
             edges = [bm.edges[i] for i in self._drag[1] if i < len(bm.edges)]
-            before = set(bm.verts)
-            faces = extend_edges(bm, edges, self._offset_fn(context, mouse))
-            if faces:
-                auto_weld(context, region, rv3d, ob, [v for v in bm.verts if v not in before])
+            positions=self._extend_positions(context,mouse)
+            created={}
+            faces = extend_edges(bm,edges,None,{i:inv@p for i,p in positions.items()},created)
+            if faces and self._snap is not None:
+                self._snap.commit(bm,{self._new_ids[i]:v for i,v in created.items()})
+                _indices(bm)
         else:
             path = self._drag[1] + [mouse]
             pairs = strip_pairs(path, poly_draw.settings(context).qd_strip_width * _ui_scale(context))
@@ -1373,8 +1441,10 @@ def _restore_overlays():
             space.overlay.show_faces = faces
             space.overlay.retopology_offset = offset
     STATE["overlays"].clear()
-    global _pick_projection
+    global _pick_projection, _fill_projection
     _pick_projection = None
+    _fill_projection = None
+    STATE["snap"] = []
     from . import quad_draw_overlay
     quad_draw_overlay.clear()
 
