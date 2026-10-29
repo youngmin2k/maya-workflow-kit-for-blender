@@ -356,7 +356,7 @@ def test_reference_surface_and_projection():
     bpy.ops.mesh.primitive_cube_add(size=0.5, location=(10, 0, 0))
     cube = bpy.context.active_object
     refs = qd.reference_objects(bpy.context)
-    assert set(refs) == {sphere, cube}, "no live surface: every visible mesh"
+    assert refs == [], "without a live surface Quad Draw uses the construction plane, like Maya"
     bpy.context.scene.allset_live = sphere
     try:
         assert qd.reference_objects(bpy.context) == [sphere]

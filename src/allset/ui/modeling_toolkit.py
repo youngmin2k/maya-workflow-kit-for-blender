@@ -236,6 +236,19 @@ def draw(layout, context):
     body = _section(layout, "ALLSET_mtk_tools", "Tools")
     if body:
         _grid(body, TOOLS, context)
+    from ..operators import quad_draw
+    if tool is not None and tool.idname == quad_draw.TOOL and edit:
+        from . import mesh_tools_poly
+        body = _section(layout, "ALLSET_mtk_quad_draw", "Quad Draw Options")
+        if body:
+            mesh_tools_poly.draw_quad_draw(body, context)
+            live = _section(body, "ALLSET_mtk_quad_live", "Live Constraint Options", default_closed=True)
+            if live:
+                mesh_tools_poly.draw_live(live, context)
+            body.operator("allset.poly_tools_reset", text="Reset Settings").kind = 'QUAD_DRAW'
+            shortcuts = _section(body, "ALLSET_mtk_quad_shortcuts", "Keyboard/Mouse Shortcuts", default_closed=True)
+            if shortcuts:
+                mesh_tools_poly.draw_shortcuts(shortcuts, mesh_tools_poly.QUAD_DRAW_SHORTCUTS)
 
 
 # Drawn by the dock's Modeling Toolkit tab (channel_box.ALLSET_PT_dock_modeling_toolkit, step 99).

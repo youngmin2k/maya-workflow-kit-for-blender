@@ -11,16 +11,11 @@ import bpy
 from . import notices
 from ..operators import poly_draw, quad_draw
 
-# Maya rows the kit can't honour (Live Constraint Options):
+# Remaining Maya rows without a matching tool gesture:
 # (notice key) -> (substitute, one line)
-_LIVE = "Blender draws the edited mesh with its Retopology overlay (over the surface, theme colours)"
 GREY = {
-    "Quad Draw/Wireframe Overlay": ("Retopology overlay", _LIVE),
-    "Quad Draw/Mesh Color": ("Retopology overlay", _LIVE),
-    "Quad Draw/Mesh Alpha": ("Retopology overlay", _LIVE),
-    "Quad Draw/Surface Offset": ("Overlays > Retopology > Offset", "Set the offset in the viewport's Overlays popover"),
     "Quad Draw/Tab+MMB in empty space": ("Quad Strip Width", "Strips are as wide as Quad Strip Width; change it here"),
-    "Quad Draw/Ctrl+Shift+RMB": ("this Tool Settings dock", "Quad Draw's options marking menu isn't in the kit"),
+    "Quad Draw/Ctrl+Shift+RMB": ("Quad Draw Options", "Use Quad Draw Options in the Modeling Toolkit"),
     "Append to Polygon/Rotation angle": ("Rotate afterwards", "Maya keeps this field greyed in the tool too"),
 }
 
@@ -100,13 +95,22 @@ def draw_quad_draw(layout, context, header=False):
 
 
 def draw_live(layout, context):
-    """Live Constraint Options (Maya factory: Wireframe Overlay on black, Mesh Color on blue, Mesh Alpha 0.75,
+    """Live Constraint Options (black wire, cyan retopology tint, Mesh Alpha 0.75,
     Surface Offset off 0, Snap to Backfaces off)."""
     s = poly_draw.settings(context)
-    _grey(_row(layout, "Wireframe Overlay:"), "Quad Draw/Wireframe Overlay", "on", check=True)
-    _grey(_row(layout, "Mesh Color:"), "Quad Draw/Mesh Color", "on", check=True)
-    _grey(_row(layout, "Mesh Alpha:"), "Quad Draw/Mesh Alpha", "0.7500", check=True)
-    _grey(_row(layout, "Surface Offset:"), "Quad Draw/Surface Offset", "0.0000", check=False)
+    row = _row(layout, "Wireframe Overlay:")
+    row.prop(s, "qd_wire_overlay", text="")
+    sub = row.row(); sub.active = s.qd_wire_overlay
+    sub.prop(s, "qd_wire_color", text="")
+    row = _row(layout, "Mesh Color:")
+    row.prop(s, "qd_mesh_color_on", text="")
+    sub = row.row(); sub.active = s.qd_mesh_color_on
+    sub.prop(s, "qd_mesh_color", text="")
+    _row(layout, "Mesh Alpha:").prop(s, "qd_mesh_alpha", text="", slider=True)
+    row = _row(layout, "Surface Offset:")
+    row.prop(s, "qd_offset_on", text="")
+    sub = row.row(); sub.active = s.qd_offset_on
+    sub.prop(s, "qd_surface_offset", text="")
     _row(layout, "Snap to Backfaces:").prop(s, "qd_snap_backfaces", text="")
     from ..operators import live
     _row(layout, "Live surface:").label(text=live.text(context.scene))

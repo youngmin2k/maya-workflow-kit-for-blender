@@ -21,7 +21,7 @@ import math
 import bmesh
 import bpy
 import gpu
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty
 from bpy_extras import view3d_utils
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector, geometry
@@ -74,23 +74,37 @@ class ALLSET_PG_poly_tools(bpy.types.PropertyGroup):
                                description="A vertex moved this close (pixels) to another one is merged with it")
     qd_weld_px: IntProperty(name="Auto-weld distance", default=10, min=1, soft_max=50, subtype='PIXEL')
     qd_relax: EnumProperty(name="Relax", default='AUTO_LOCK', items=(
-        ('AUTO_LOCK', "Auto-Lock", "Shift+drag relaxes the inner vertices; border vertices only when no inner one "
-                                   "is under the brush"),
+        ('AUTO_LOCK', "Auto-Lock", "The nearest vertex at stroke start chooses border or interior relaxation"),
         ('INTERIOR', "Interior Vertices", "Shift+drag relaxes only inner vertices"),
-        ('BORDER', "Border Vertices", "Shift+drag relaxes only border vertices")))
+        ('BORDER', "Border Vertices", "Shift+drag relaxes only border vertices"),
+        ('ALL', "All Vertices", "Relax all vertices, including borders, using all connected neighbours")))
     qd_extend: EnumProperty(name="Extend", default='EDGE', items=(
         ('EDGE', "Edge", "Tab+drag on a border edge adds one quad"),
-        ('LOOP', "Loop", "Tab+drag on a border edge adds a quad to every edge of that border")))
+        ('LOOP', "Loop", "Tab+drag extends the boundary chain up to its corners"),
+        ('BORDER', "Border", "Tab+drag extends the entire connected border")))
     qd_strip_width: IntProperty(name="Quad Strip Width", default=20, min=1, soft_max=100, subtype='PIXEL',
                                 description="Width of the quads Tab+drag draws in empty space (pixels)")
     qd_snap_backfaces: BoolProperty(name="Snap to Backfaces", default=False,
                                     description="Dots and moved points may land on surface faces turned away")
+    qd_wire_overlay: BoolProperty(name="Wireframe Overlay", default=True)
+    qd_wire_color: FloatVectorProperty(name="Wire Color", subtype='COLOR', size=3,
+                                       default=(0.0, 0.0, 0.0), min=0.0, max=1.0)
+    qd_mesh_color_on: BoolProperty(name="Mesh Color", default=True)
+    qd_mesh_color: FloatVectorProperty(name="Mesh Color", subtype='COLOR', size=3,
+                                       default=(0.0, 0.72, 0.85), min=0.0, max=1.0,
+                                       description="Quad Draw display tint; does not change materials")
+    qd_mesh_alpha: FloatProperty(name="Mesh Alpha", default=0.75, min=0.0, max=1.0)
+    qd_offset_on: BoolProperty(name="Surface Offset", default=False)
+    qd_surface_offset: FloatProperty(name="Surface Offset", default=0.0, soft_min=-0.1, soft_max=0.1,
+                                      description="World-space distance of new and projected points from the live surface")
 
 
 SETTINGS = {
     'CREATE': ("cp_divisions", "cp_limit_on", "cp_limit_points", "cp_keep_planar", "cp_texture"),
     'APPEND': ("ap_divisions", "ap_rotation_angle", "ap_limit_on", "ap_limit_points", "ap_keep_planar", "ap_texture"),
-    'QUAD_DRAW': ("qd_auto_weld", "qd_weld_px", "qd_relax", "qd_extend", "qd_strip_width", "qd_snap_backfaces"),
+    'QUAD_DRAW': ("qd_auto_weld", "qd_weld_px", "qd_relax", "qd_extend", "qd_strip_width", "qd_snap_backfaces",
+                  "qd_wire_overlay", "qd_wire_color", "qd_mesh_color_on", "qd_mesh_color", "qd_mesh_alpha",
+                  "qd_offset_on", "qd_surface_offset"),
 }
 
 

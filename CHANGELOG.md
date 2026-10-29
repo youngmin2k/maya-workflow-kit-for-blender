@@ -5,6 +5,13 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
 
 ## [Unreleased]
 
+### Fixed
+- **Quad Draw**: activating the tool opens its options in the Modeling Toolkit. Retopology has a temporary cyan
+  face tint with editable wire color, opacity and surface offset, without changing materials or the theme.
+  Component drags keep their cursor offset and stay on the live surface when the cursor leaves its silhouette;
+  view projection avoids jumping to hidden sheets during relax and extension. With no live surface, dots use the grid.
+  Relax includes All Vertices, Auto-Lock keeps its choice for the stroke, and Extend distinguishes Loop from Border.
+
 ## [0.7.0] — 2026-10-29
 
 Modeling and animation fixes from your reports, pivot editing / Smart Extrude / Make Live from @youngmin2k, and
