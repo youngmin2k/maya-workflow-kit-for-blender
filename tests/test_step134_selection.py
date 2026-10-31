@@ -62,6 +62,24 @@ def test_component_color_values():
     assert (cc.VERT_PX, cc.VERT_SEL_PX) == (3.0, 4.0)
 
 
+def test_vertex_size_follows_theme():
+    """The kit's vertices use the theme's Vertex Size (selected one larger); it never writes the theme."""
+    assert cc.point_sizes(3) == (3.0, 4.0)
+    assert cc.point_sizes(8) == (8.0, 9.0)
+    assert cc.point_sizes(0) == (3.0, 4.0) and cc.point_sizes(None) == (3.0, 4.0)
+    theme = bpy.context.preferences.themes[0].view_3d
+    old = theme.vertex_size
+    try:
+        theme.vertex_size = 8
+        assert cc.theme_point_sizes(bpy.context) == (8.0, 9.0)
+        bpy.ops.mesh.primitive_cube_add()
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.object.mode_set(mode='OBJECT')
+        assert theme.vertex_size == 8
+    finally:
+        theme.vertex_size = old
+
+
 def test_fan_triangles():
     # a quad (0..3), a triangle (4..6) and a pentagon (7..11)
     ls, lt = [0, 4, 7], [4, 3, 5]

@@ -2,8 +2,8 @@
 """Maya-style component colours in mesh edit mode (step 134).
 
 A mesh in component mode is drawn with these colours (at UI scale 1.0):
-every visible edge 1 px hilite #64dcff; vertex mode: unselected vertices 3 px #c800c8, selected
-vertices 4 px #fdff88; edge mode: selected edges #e3ac79; face mode:
+every visible edge 1 px hilite #64dcff; vertex mode: unselected vertices #c800c8 at the theme's Vertex Size
+(factory 3 px), selected vertices #fdff88 one pixel larger; edge mode: selected edges #e3ac79; face mode:
 selected faces a 1-in-4 pixel stipple #e3ac79, no fill.
 
 Blender draws edit meshes with the user's theme (orange / black). The kit ships no theme (step 130),
@@ -41,8 +41,8 @@ VERT = "#c800c8"            # unselected vertices
 VERT_SEL = "#fdff88"        # selected vertices
 EDGE_SEL = "#e3ac79"        # selected edges
 FACE_SEL = "#e3ac79"        # selected face stipple
-VERT_PX = 3.0               # pixel sizes at UI scale 1.0
-VERT_SEL_PX = 4.0
+VERT_PX = 3.0               # pixel sizes at UI scale 1.0 when the theme vertex size can't be read
+VERT_SEL_PX = 4.0           # selected = theme vertex size + 1 (Blender's factory 3 gives Maya's 3 / 4)
 LINE_PX = 1.5               # thin lines; 1.5 x UI scale just covers Blender's own 2 px edit edge (step 185)
 EDGE_SEL_PX = 2.0           # selected edges a little wider, drawn over the hilite wire
 BMESH_LIMIT = 50000         # cage read from the BMesh (modifiers shown in edit mode) only up to this many vertices
@@ -91,6 +91,24 @@ class MeshArrays:
         self.loop_start = np.zeros(0, np.int32) if loop_start is None else np.asarray(loop_start, np.int32)
         self.loop_total = np.zeros(0, np.int32) if loop_total is None else np.asarray(loop_total, np.int32)
         self.corner_vert = np.zeros(0, np.int32) if corner_vert is None else np.asarray(corner_vert, np.int32)
+
+
+def point_sizes(theme_size):
+    """(unselected, selected) vertex sizes at UI scale 1.0 for the theme's Vertex Size."""
+    try:
+        size = float(theme_size)
+    except (TypeError, ValueError):
+        return VERT_PX, VERT_SEL_PX
+    if size <= 0:
+        return VERT_PX, VERT_SEL_PX
+    return size, size + 1.0
+
+
+def theme_point_sizes(context):
+    try:
+        return point_sizes(context.preferences.themes[0].view_3d.vertex_size)
+    except (AttributeError, IndexError):
+        return VERT_PX, VERT_SEL_PX
 
 
 def fan_triangles(loop_start, loop_total, corner_vert, mask):
@@ -277,8 +295,8 @@ def _batches(st, select_mode):
     if "edges_sel" in lay:
         lines(lay["edges_sel"], srgb(EDGE_SEL) + (1.0,), EDGE_SEL_PX, 'LINES_SEL')
     if "verts" in lay:
-        points(lay["verts"], srgb(VERT) + (1.0,), VERT_PX)
-        points(lay["verts_sel"], srgb(VERT_SEL) + (1.0,), VERT_SEL_PX)
+        points(lay["verts"], srgb(VERT) + (1.0,), 0)          # size index into theme_point_sizes
+        points(lay["verts_sel"], srgb(VERT_SEL) + (1.0,), 1)
     st.batches, st.bkey = out, key
     return out
 
@@ -416,6 +434,7 @@ def _draw():
     if not states:
         return
     scale = context.preferences.system.ui_scale or 1.0
+    vert_px = theme_point_sizes(context)
     gpu.state.depth_test_set('NONE' if _xray(space) else 'LESS_EQUAL')
     gpu.state.depth_mask_set(False)
     proj = {'LINES': _biased_projection(rv3d, DEPTH_BIAS), 'TRIS': _biased_projection(rv3d, FACE_BIAS),
@@ -430,7 +449,7 @@ def _draw():
                     sh.bind()
                     sh.uniform_float("color", color)
                     if kind == 'POINTS':
-                        gpu.state.point_size_set(max(1.0, round(size * scale)))
+                        gpu.state.point_size_set(max(1.0, round(vert_px[size] * scale)))
                     elif kind in ('LINES', 'LINES_SEL'):
                         sh.uniform_float("viewportSize", (region.width, region.height))
                         sh.uniform_float("lineWidth", size * scale)

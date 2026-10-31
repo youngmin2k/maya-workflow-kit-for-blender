@@ -114,3 +114,26 @@ def test_object_mode_insert_unchanged():
     assert ts.use_transform_data_origin and not hold.COMPONENT.on
     bpy.ops.allset.pivot_toggle()
     assert not ts.use_transform_data_origin
+
+
+def test_object_mode_drops_a_placed_component_pivot():
+    """#263: a component pivot placed (and turned) in edit mode no longer drives the object manipulator after
+    leaving edit mode — Center Pivot and Move work on the object pivot again."""
+    sc = _edit_cube()
+    ts = sc.tool_settings
+    ts.transform_pivot_point = 'MEDIAN_POINT'
+    bpy.ops.allset.pivot_toggle()
+    sc.cursor.location = (0.5, 0.0, 1.0)
+    sc.cursor.rotation_euler = (0.4, 0.0, 0.0)
+    bpy.ops.allset.pivot_toggle()
+    assert hold.COMPONENT.custom and ts.transform_pivot_point == 'CURSOR'
+    assert sc.transform_orientation_slots[pivot.MOVE_SLOT].type == pivot.ORIENT_NAME
+    bpy.ops.object.mode_set(mode='OBJECT')
+    hold.COMPONENT.tick(bpy.context)
+    assert not hold.COMPONENT.custom
+    assert ts.transform_pivot_point == 'MEDIAN_POINT', ts.transform_pivot_point
+    assert sc.transform_orientation_slots[pivot.MOVE_SLOT].type == 'GLOBAL', sc.transform_orientation_slots[pivot.MOVE_SLOT].type
+    ob = bpy.context.active_object
+    ob.location = (2.0, 0.0, 0.0)
+    assert bpy.ops.allset.center_pivot() == {'FINISHED'}
+    assert ts.transform_pivot_point != 'CURSOR'

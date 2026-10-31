@@ -314,6 +314,8 @@ class ComponentPivotEdit:
         self.custom = False           # a placed custom pivot is in use (pivot point CURSOR after finish)
         self.sel_sig = None           # the selection it was placed for (Pin Component Pivot off: reset on change)
         self.cursors = set()          # 3D views whose hidden cursor this edit shows (step 134)
+        self.outside = None           # (pivot point, Move / Rotate orientation types) before the component pivot
+        self.turned_axes = False      # this component pivot set the "Maya Pivot" axes
 
     def start(self, context, toggled=False):
         ts = context.scene.tool_settings
@@ -322,6 +324,10 @@ class ComponentPivotEdit:
         self.area_ptr = live_refs.pointer(context.area)   # a pointer: the timer may run after its window closed (#36)
         self.tool = tool.idname if tool and tool.idname != CURSOR_TOOL else "builtin.select_box"
         self.pivot = ts.transform_pivot_point
+        if not self.custom or self.outside is None:
+            from . import pivot
+            slots = context.scene.transform_orientation_slots
+            self.outside = (self.pivot, {i: slots[i].type for i in pivot.PIVOT_SLOTS})
         self.previous_cursor = cursor.matrix.copy()
         if self.pivot != 'CURSOR':
             centre = selection_center(context)
@@ -366,6 +372,7 @@ class ComponentPivotEdit:
         if rotated:
             from . import pivot
             pivot.set_custom_orientation(context, rot)
+            self.turned_axes = True
         if not moved and not rotated:
             cursor.matrix = self.previous_cursor
         if context.mode == EDIT_MODE:
@@ -397,6 +404,27 @@ class ComponentPivotEdit:
             self.custom, self.sel_sig = False, None
         _redraw()
 
+    def leave_edit(self, context):
+        """Out of component mode a custom component pivot no longer applies (Maya's object manipulator sits on the
+        object pivot): the pivot point and the Move / Rotate axes go back to what they were before it was placed."""
+        from . import pivot
+        scene = context.scene
+        ts = scene.tool_settings
+        saved, slots = self.outside if self.outside is not None else ('MEDIAN_POINT', {})
+        if ts.transform_pivot_point == 'CURSOR':
+            ts.transform_pivot_point = component_pivot_after(saved, False)
+        ob = context.view_layer.objects.active
+        own_axes = ob is not None and pivot.PROP in ob      # the object's own turned pivot (follow_lead keeps it)
+        if self.turned_axes and not own_axes:
+            for index, kind in slots.items():
+                slot = scene.transform_orientation_slots[index]
+                try:
+                    slot.type = kind if kind != pivot.ORIENT_NAME else 'GLOBAL'
+                except TypeError:
+                    slot.type = 'GLOBAL'
+        self.custom, self.sel_sig, self.outside, self.turned_axes = False, None, None, False
+        _redraw()
+
     def tick(self, context):
         """Timer: close a toggled session that left edit mode; restore its tool when edit mode is back; drop an
         unpinned custom pivot when the selection changes (Maya Pin Component Pivot off, step 94)."""
@@ -408,7 +436,9 @@ class ComponentPivotEdit:
         if self.custom and not self.on:
             from .pivot_menu import option
             ts = context.scene.tool_settings
-            if context.mode != EDIT_MODE or ts.transform_pivot_point != 'CURSOR':
+            if context.mode != EDIT_MODE:
+                self.leave_edit(context)
+            elif ts.transform_pivot_point != 'CURSOR':
                 self.custom, self.sel_sig = False, None
             elif not option("PIN", context) and selection_signature(context) != self.sel_sig:
                 ts.transform_pivot_point = 'BOUNDING_BOX_CENTER'
