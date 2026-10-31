@@ -316,7 +316,7 @@ def _channel_filter(context, node):
     cb = _cb()
     allowed = set()
     for k in cb.selected_channels(context):
-        if cb.is_shape_key(k):      # a SHAPES channel's curves live on the object data, not the node
+        if cb.is_shape_key(k) or cb.is_blend_key(k):    # curves on the object data / Key datablock, not the node
             continue
         if cb.is_input_key(k):      # an INPUTS channel: the modifier's property, on the object
             owner = cb.input_owner(node, k)

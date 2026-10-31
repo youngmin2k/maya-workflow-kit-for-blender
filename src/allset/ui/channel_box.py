@@ -74,10 +74,11 @@ CUSTOM_PREFIX = "cp:"
 HISTORY_PREFIX = "ph:"   # an attribute of the creation node (polyCube1 ...): "ph:<attribute>"
 INPUT_PREFIX = "in:"     # an INPUTS row as a channel: "in:<modifier type>:<nth of that type>:<property>"
 SHAPE_PREFIX = "sh:"     # a SHAPES row as a channel (step 158): light Intensity / Color, camera Focal Length ...
+BLEND_PREFIX = "bw:"     # a blendShape target weight in INPUTS: "bw:<target name>" (the shape key's value)
 
 # MMB slider: value change per pixel at speed Medium.
 SLIDER_STEP = {"LOC": 0.01, "ROT": math.radians(0.5), "SCALE": 0.01, "CUSTOM": 0.01, "SHAPE": 0.01, "INPUT": 0.01,
-               "HISTORY": 0.01}
+               "HISTORY": 0.01, "BLEND": 0.01}
 SPEEDS = (("SLOWEST", "Slowest", "x0.01", 0.01), ("SLOW", "Slow", "x0.1", 0.1),
           ("MEDIUM", "Medium", "x1", 1.0), ("FAST", "Fast", "x10", 10.0))
 SPEED_FACTOR = {s[0]: s[3] for s in SPEEDS}
@@ -299,6 +300,26 @@ def input_paths(owner, key):
     return [(name, -1)] if rna is not None and rna.is_animatable else []
 
 
+def is_blend_key(key):
+    return key.startswith(BLEND_PREFIX)
+
+
+def blend_target(ob, key):
+    """The shape key behind blendShape weight channel ``key`` on ``ob`` (None: ob has no target of that name)."""
+    if not is_blend_key(key) or is_bone(ob):
+        return None
+    bs = blend_shape_key(ob)
+    if bs is None:
+        return None
+    name = key[len(BLEND_PREFIX):]
+    return next((kb for kb in blend_shape_targets(bs) if kb.name == name), None)
+
+
+def blend_path(name):
+    """Data path of a target weight on the Key datablock (its animation lives there, like Maya's blendShape node)."""
+    return f'key_blocks["{bpy.utils.escape_identifier(name)}"].value'
+
+
 def is_history_key(key):
     return key.startswith(HISTORY_PREFIX)
 
@@ -348,11 +369,16 @@ def row_key(row):
         return SHAPE_PREFIX + row.name
     if row.kind == "INPUT":
         return input_key(row.mod_type, row.nth, row.name)
+    if row.kind == "BLEND":
+        return BLEND_PREFIX + row.name
     return None
 
 
 def curve_owner(ob, key):
     """The ID whose animation holds channel ``key``'s curves."""
+    if is_blend_key(key):
+        kb = blend_target(ob, key)
+        return kb.id_data if kb is not None else None
     return shape_owner(ob, key) if is_shape_key(key) else ob.id_data
 
 
@@ -366,6 +392,8 @@ def channel_path(key):
         return input_parts(key)[2], -1, "INPUT"
     if is_history_key(key):
         return key[len(HISTORY_PREFIX):], -1, "HISTORY"
+    if is_blend_key(key):
+        return blend_path(key[len(BLEND_PREFIX):]), -1, "BLEND"
     c = MAIN_BY_KEY[key]
     return c[2], c[3], c[4]
 
@@ -395,6 +423,8 @@ def channel_label(key):
         _owner, node = history_node_of(lead(), key) if lead() is not None else (None, None)
         name = key[len(HISTORY_PREFIX):]
         return prim_shapes.spec(node["type"], name)[1] if node is not None else nice_name(name)
+    if is_blend_key(key):
+        return key[len(BLEND_PREFIX):]      # Maya names a weight after its target
     return MAIN_BY_KEY[key][1]
 
 
@@ -407,6 +437,8 @@ def has_channel(ob, key):
         return input_owner(ob, key) is not None
     if is_history_key(key):
         return history_node_of(ob, key)[1] is not None
+    if is_blend_key(key):
+        return blend_target(ob, key) is not None
     # Maya rotation channels are always Rotate X / Y / Z: quaternion / axis-angle nodes show Euler (step 221)
     return MAIN_BY_KEY[key][4] != "ROT" or hasattr(ob, "rotation_mode")
 
@@ -423,6 +455,8 @@ def get_value(ob, key):
         return _row_read(input_owner(ob, key), "INPUT", path)
     if kind == "HISTORY":
         return _history_get(ob, key)
+    if kind == "BLEND":
+        return blend_target(ob, key).value
     if kind == "CUSTOM":
         return ob[key[len(CUSTOM_PREFIX):]]
     if kind == "VIS":
@@ -456,6 +490,9 @@ def set_value(ob, key, value):
         return
     if kind == "HISTORY":
         _history_set(ob, key, value)
+        return
+    if kind == "BLEND":
+        blend_target(ob, key).value = value
         return
     if kind == "CUSTOM":
         name = key[len(CUSTOM_PREFIX):]
@@ -491,6 +528,19 @@ def keyframe(ob, key, keytype='KEYFRAME'):
         return False
     if kind == "VIS" and is_bone(ob):
         return False
+    if kind == "BLEND":
+        # a blendShape weight is keyed on the mesh's Key datablock (Graph Editor / Dope Sheet show it there)
+        kb = blend_target(ob, key)
+        if kb is None:
+            return False
+        try:
+            ok = kb.id_data.keyframe_insert(path, keytype=keytype)
+        except (TypeError, RuntimeError):
+            return False
+        if ok:
+            from ..operators import graph_key_menu
+            graph_key_menu.after_insert(kb.id_data, path, -1, bpy.context.scene.frame_current)
+        return ok
     if _non_euler_rot(ob, kind):
         # a quaternion is one rotation: Rotate X / Y / Z key all its components (step 221)
         from .. import rotation_display
@@ -561,9 +611,19 @@ def input_fcurves(ob, key):
     return out
 
 
+def blend_fcurves(ob, key):
+    kb = blend_target(ob, key)
+    fcs = compat.id_fcurve_collection(kb.id_data) if kb is not None else None
+    fc = fcs.find(blend_path(kb.name)) if fcs is not None else None
+    return [fc] if fc is not None else []
+
+
 def fcurve(ob, key):
     if is_history_key(key):
         return None
+    if is_blend_key(key):
+        fcs = blend_fcurves(ob, key)
+        return fcs[0] if fcs else None
     if is_shape_key(key):
         fcs = shape_fcurves(ob, key)
         return fcs[0] if fcs else None
@@ -588,6 +648,8 @@ def channel_fcurves(ob, key):
         return shape_fcurves(ob, key)
     if is_input_key(key):
         return input_fcurves(ob, key)
+    if is_blend_key(key):
+        return blend_fcurves(ob, key)
     if is_history_key(key):
         return []
     if _non_euler_rot(ob, MAIN_BY_KEY.get(key, ("", "", "", 0, ""))[4]):
@@ -611,6 +673,10 @@ def remove_channel_curves(ob, key):
 def driver(ob, key):
     if is_shape_key(key) or is_history_key(key):
         return None
+    if is_blend_key(key):
+        kb = blend_target(ob, key)
+        ad = kb.id_data.animation_data if kb is not None else None
+        return ad.drivers.find(blend_path(kb.name)) if ad is not None else None
     if is_input_key(key):
         owner = input_owner(ob, key)
         ad = ob.animation_data if owner is not None else None
@@ -634,7 +700,8 @@ def channel_state(ob, key, frame=None):
     if driver(ob, key) is not None:
         return 'DRIVEN'
     fc = fcurve(ob, key)
-    if not is_shape_key(key) and not is_input_key(key) and not is_history_key(key) and (isinstance(ob, bpy.types.Object) or is_bone(ob)):
+    if (not is_shape_key(key) and not is_input_key(key) and not is_history_key(key) and not is_blend_key(key)
+            and (isinstance(ob, bpy.types.Object) or is_bone(ob))):
         from ..operators import anim_layers
         id_ob = ob.id_data
         if anim_layers.has_layers(id_ob):
@@ -692,7 +759,7 @@ def drawn_keys(ob):
     scene = bpy.context.scene
     rows = scene.allset_cb.rows if scene is not None and hasattr(scene, "allset_cb") else ()
     keys += history_keys(ob)
-    keys += [k for r in rows if r.kind == "INPUT" for k in [row_key(r)] if has_channel(ob, k)]
+    keys += [k for r in rows if r.kind in ("INPUT", "BLEND") for k in [row_key(r)] if has_channel(ob, k)]
     return keys
 
 
@@ -755,7 +822,7 @@ def cell_key(path, scene=None):
     if m and scene is not None:
         rows = scene.allset_cb.rows
         i = int(m.group(1))
-        if i < len(rows) and rows[i].kind in ("CUSTOM", "SHAPE", "INPUT"):
+        if i < len(rows) and rows[i].kind in ("CUSTOM", "SHAPE", "INPUT", "BLEND"):
             return row_key(rows[i]), ("VALUE" if m.group(2) == "text" else "NAME")
     return None
 
@@ -809,6 +876,8 @@ def entry_kind(ob, key):
         _owner, node = history_node_of(ob, key)
         kind = prim_history.entry_kind(node["type"], key[len(HISTORY_PREFIX):])
         return None if kind == "ENUM" else kind
+    if is_blend_key(key):
+        return "NONE"
     return _KIND_ENTRY[MAIN_BY_KEY[key][4]]
 
 
@@ -1096,6 +1165,8 @@ def row_owner(ob, kind, name, mod_type="", nth=0, lead_ob=None):
     position among that type."""
     if kind == "CUSTOM":
         return ob if name in ob.keys() else None
+    if kind == "BLEND":
+        return blend_target(ob, BLEND_PREFIX + name)
     if kind == "SHAPE":
         data = getattr(ob, "data", None)
         if data is None or (lead_ob is not None and ob.type != lead_ob.type):
@@ -1115,6 +1186,8 @@ def row_owner(ob, kind, name, mod_type="", nth=0, lead_ob=None):
 def _row_kind(owner, kind, name):
     if kind == "CUSTOM":
         return cb_entry.kind_of_value(owner.get(name))
+    if kind == "BLEND":
+        return "NONE"
     v = _virtual(owner, name)
     if v is not None:
         return v.kind
@@ -1124,6 +1197,8 @@ def _row_kind(owner, kind, name):
 def _row_read(owner, kind, name):
     if kind == "CUSTOM":
         return owner[name]
+    if kind == "BLEND":
+        return owner.value
     v = _virtual(owner, name)
     return v.get(owner) if v is not None else getattr(owner, name)
 
@@ -1131,6 +1206,9 @@ def _row_read(owner, kind, name):
 def _row_write(owner, kind, name, value):
     if kind == "CUSTOM":
         owner[name] = type(owner[name])(value)
+        return
+    if kind == "BLEND":
+        owner.value = value
         return
     v = _virtual(owner, name)
     if v is not None:
@@ -1191,8 +1269,8 @@ def _row_sel_set(self, value):
 
 
 class ALLSET_PG_cb_row(bpy.types.PropertyGroup):
-    kind: StringProperty()        # CUSTOM / SHAPE / INPUT / CONSTRAINT
-    name: StringProperty()        # property name
+    kind: StringProperty()        # CUSTOM / SHAPE / INPUT / CONSTRAINT / BLEND
+    name: StringProperty()        # property name (BLEND: the blendShape target's name)
     mod_type: StringProperty()    # INPUT: modifier type, CONSTRAINT: constraint type
     nth: IntProperty()            # position among the lead's modifiers / constraints of that type
     text: StringProperty(get=_row_get, set=_row_set)
@@ -1870,7 +1948,8 @@ def _act_break(self, context, ob, key):
     done = _act_delete(self, context, ob, key)
     dr = driver(ob, key)
     if dr is not None:
-        ob.id_data.animation_data.drivers.remove(dr)
+        owner = curve_owner(ob, key) if is_blend_key(key) else ob.id_data
+        owner.animation_data.drivers.remove(dr)
         done = True
     return done
 
@@ -2287,6 +2366,9 @@ def wanted_rows(ob):
         if is_open(ob, mod_node(mod)):
             for prop in _modifier_props(mod):
                 out.append(("INPUT", prop, mod.type, _nth_of_type(ob, mod)))
+    bs = blend_shape_key(ob)
+    if bs is not None and is_open(ob, blend_shape_node(bs)):
+        out += [("BLEND", kb.name, "", 0) for kb in blend_shape_targets(bs)]
     from ..operators import constrain_multi
     for con in constraints(ob):
         if not is_open(ob, con_node(ob, con)):
@@ -2309,7 +2391,9 @@ def rows_signature(ob):
     if is_bone(ob):
         return repr(("BONE", ob.id_data.name, ob.name, custom_keys(ob), cons, opened))
     mods = [(m.name, m.type) for m in _inputs(ob)]
-    return repr((ob.name, ob.type, custom_keys(ob), mods, cons, opened))
+    bs = blend_shape_key(ob)
+    targets_ = [kb.name for kb in blend_shape_targets(bs)] if bs is not None else []
+    return repr((ob.name, ob.type, custom_keys(ob), mods, cons, opened, targets_))
 
 
 _rows_state = {"busy": False}
@@ -2894,16 +2978,32 @@ def draw_blend_shape(lines, context, ob, key):
             continue
         line = r.row(align=True)
         split = line.split(factor=0.5, align=True)
-        name = split.row(align=True)
-        name.alignment = 'CENTER'
-        name.label(text=label)
-        right = split.row(align=True)
         if kb is None:
+            name = split.row(align=True)
+            name.alignment = 'CENTER'
+            name.label(text=label)
+            right = split.row(align=True)
             right.enabled = False
             right.label(text=cb_entry.format_value(1.0, "NONE", context.scene))
-        else:
-            right.prop(kb, "value", text="")
-        line.label(text="", icon='BLANK1')
+            line.label(text="", icon='BLANK1')
+            continue
+        row = row_for(context, ob, "BLEND", kb.name)
+        if row is None:     # rows not rebuilt yet: the real value
+            name = split.row(align=True)
+            name.alignment = 'CENTER'
+            name.label(text=label)
+            split.row(align=True).prop(kb, "value", text="")
+            line.label(text="", icon='BLANK1')
+            continue
+        # a target weight is a channel like Translate X: selectable name, keyed / animated state (Key Selected)
+        key = row_key(row)
+        sub = split.row(align=True)
+        sub.prop(row, "sel", text=label, toggle=True, emboss=key in selected_channels(context))
+        right = split.row(align=True)
+        state = channel_state(ob, key)
+        right.alert = state in _ALERT_STATES
+        right.prop(row, "text", text="")
+        line.label(text="", icon=_STATE_ICON.get(state, 'BLANK1'))
 
 
 def _draw_group(lines, context, ob, con, mb):

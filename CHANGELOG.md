@@ -86,6 +86,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   the FX shelf's Emitter follows Create Emitter and 3D Fluid Container with Emitter runs Fluids > 3D Container.
 
 ### Fixed
+- **Keying blend shape weights** (#271): the target weights of a blendShape node in the Channel Box INPUTS are
+  channels now, like Maya: click to select them, Channels > Key Selected / Breakdown / Mute / Delete and Cut / Copy /
+  Paste act on them, typed values and the middle-drag slider change every selected mesh with that target, and the
+  row shows its keyed / animated state. The keys go on the mesh's shape keys, so the Graph Editor shows the curve.
 - **Project autosave in the Maya layout** (#254): the autosave copy is written in the Maya layout too; before,
   the Channel Box's own scroll handling counted as a running tool and the copy never got written there. Auto,
   Clamped and Plateau tangents also keep Maya's shape again after an edit in the Maya layout.

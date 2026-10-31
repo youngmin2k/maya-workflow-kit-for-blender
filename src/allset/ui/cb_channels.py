@@ -58,6 +58,9 @@ def after_selection(context):
         data = getattr(ob, "data", None)
         if data is not None and not cb.is_bone(ob):
             owners[data.as_pointer()] = data
+            bs = cb.blend_shape_key(ob)
+            if bs is not None:
+                owners[bs.as_pointer()] = bs
         for owner in owners.values():
             for fc in compat.id_fcurves(owner):
                 fc.select = fc.as_pointer() in wanted
