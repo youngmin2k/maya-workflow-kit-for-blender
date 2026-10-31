@@ -20,7 +20,7 @@ ADDED = []
 
 # Operators that return PASS_THROUGH when they don't apply, so they may sit in
 # front of another item with the same event in the same keymap.
-PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.uv_shell_hover", "allset.emulated_tumble", "allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_press",
+PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.uv_shell_hover", "allset.emulated_tumble", "allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_release", "allset.manip_press",
                       "allset.select_priority", "allset.select_through", "allset.toolbox_guard", "allset.time_scrub",
                       "allset.time_slider_menu", "allset.outliner_set_click", "allset.outliner_set_menu",
                       "allset.graph_channel_click", "allset.graph_channel_scroll", "allset.script_run",
@@ -627,6 +627,12 @@ GIZMO_KEYMAPS = ("Generic Gizmo Maybe Drag", "Generic Gizmo Drag")
 
 
 def patch_manip_duplicate(kd):
+    release_kms = GIZMO_KEYMAPS + ("3D View", "Window")
+    for km in release_kms:
+        # Where the OS can't tell whether the button is held (not Windows), a Shift press that never became a
+        # drag ends on this release (pass-through): the copy / extrusion is taken back as a Shift+click (#265).
+        _add(kd, km, "allset.manip_release", make_event("LEFTMOUSE", "RELEASE", any=True), first=True,
+             shadows=tuple(k for k in release_kms if k != km))
     for km in GIZMO_KEYMAPS:
         _add(kd, km, "allset.manip_duplicate", make_event("LEFTMOUSE", "PRESS", shift=True),
              first=True)

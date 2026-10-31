@@ -242,6 +242,42 @@ def finish(state, window, area, region):
     cleanup(state)
 
 
+def button_held(state):
+    """Is the left button that started ``state`` still held? Asked of the OS where it can tell; elsewhere until
+    the ``allset.manip_release`` keymap items hear the release (``state["listening"]``)."""
+    down = keystate.is_down('LEFTMOUSE')
+    if down is None:
+        return bool(state.get("listening")) and not state.get("released")
+    return down
+
+
+_LISTEN = []     # the press whose release the kit waits for where the OS can't tell (``listen``)
+
+
+def listen(state):
+    """Where the OS can't tell whether the button is held (not Windows), hear its release through the
+    ``allset.manip_release`` keymap items (a modal handler would cancel the gizmo's pending drag)."""
+    state["listening"] = True
+    _LISTEN[:] = [state]
+
+
+class ALLSET_OT_manip_release(bpy.types.Operator):
+    """Left button released: a Smart Duplicate / Extrude press that never became a drag was a click"""
+    bl_idname = "allset.manip_release"
+    bl_label = "Manipulator Release"
+    bl_options = {'INTERNAL'}
+
+    def invoke(self, context, _event):
+        return self.execute(context)
+
+    def execute(self, _context):
+        for state in _LISTEN:
+            if not state.get("seen") and not state.get("done"):
+                state["released"] = True
+        _LISTEN.clear()
+        return {'PASS_THROUGH'}
+
+
 def watch(state, window, area, region):
     """Poll until the gizmo's transform ends, then ``finish``."""
     state["last_op"] = _last_op()
@@ -258,9 +294,10 @@ def watch(state, window, area, region):
                 state["seen"] = True
                 return POLL
             # The gizmo starts its transform only once the mouse moves past the drag threshold ("Maybe Drag"):
-            # a press held still has no transform yet, so wait while the button is down (step 97).
-            if not state.get("seen") and keystate.is_down('LEFTMOUSE'):
+            # a press held still has no transform yet, so wait while the button is down.
+            if not state.get("seen") and button_held(state):
                 return POLL
+            state["done"] = True
             area = live_refs.area(area_ptr, window)
             finish(state, window, area, live_refs.region(area, region_ptr))
         except ReferenceError:
@@ -282,15 +319,25 @@ class ALLSET_OT_manip_duplicate(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context):
-        what = kind(context)
-        if what is not None:
-            state = start_duplicate(context) if what == 'DUPLICATE' else start_extrude(context)
-            if context.window is not None:
-                watch(state, context.window, context.area, context.region)
-            else:
-                cleanup(state)
-        # Always pass the event on: the gizmo's own tweak transforms the selection.
+        self._start(context)
         return {'PASS_THROUGH'}
+
+    @staticmethod
+    def _start(context):
+        """Duplicate / extrude and start watching the gizmo's transform; the state, or None. The event always
+        goes on: the gizmo's own tweak transforms the selection."""
+        what = kind(context)
+        if what is None:
+            return None
+        state = start_duplicate(context) if what == 'DUPLICATE' else start_extrude(context)
+        if context.window is None:
+            cleanup(state)
+            return None
+        held = keystate.is_down('LEFTMOUSE')      # None: this OS can't tell
+        if held is None:
+            listen(state)
+        watch(state, context.window, context.area, context.region)
+        return state
 
 
 class ALLSET_OT_manip_press(bpy.types.Operator):
@@ -608,5 +655,5 @@ def option_state(option):
     return bool(_pref(bpy.context, OPTIONS[option]))
 
 
-classes = (ALLSET_OT_manip_duplicate, ALLSET_OT_manip_option, ALLSET_OT_manip_size,
+classes = (ALLSET_OT_manip_duplicate, ALLSET_OT_manip_release, ALLSET_OT_manip_option, ALLSET_OT_manip_size,
            ALLSET_OT_manip_press, ALLSET_OT_manip_mmb, ALLSET_OT_manip_ctrl, ALLSET_OT_manip_mmb_auto)
