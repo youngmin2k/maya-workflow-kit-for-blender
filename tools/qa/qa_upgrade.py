@@ -1,18 +1,18 @@
-"""QA activity E (upgrade): install 0.5.0 -> use -> upgrade to 0.8.0 -> disable / remove, in a clean sandbox.
+"""QA activity E (upgrade): install 0.5.0 -> use -> upgrade to 0.9.0 -> disable / remove, in a clean sandbox.
 
     python tools/qa/qa_upgrade.py [--blender EXE] [--old ZIP] [--new ZIP]
 
 Sandbox tmp/qa_upg/{config,scripts,extensions} (created before any Blender starts; every probe asserts
 bpy.utils.user_resource('CONFIG') is inside it). Old zip default = the published 0.5.0 on the Desktop
-(MayaWorkflowKit_upload/maya-workflow-kit-0.5.0.zip); new = dist/maya-workflow-kit-0.8.0.zip.
+(MayaWorkflowKit_upload/maya-workflow-kit-0.5.0.zip); new = dist/maya-workflow-kit-0.9.0.zip.
  0 factory snapshot (before anything is installed)
  1 `blender --factory-startup --command extension install-file -r user_default --enable <old zip>`
  2 session with 0.5.0: Maya mode on (welcome.opt_in), 3 add-on prefs, a user shelf button (shelves.json), a hotkey
    change (Hotkey Editor, keyconfigs.user), save_userpref, a .blend with a small rig + keys + skin
  3 install the new zip over it (same command)
- 4 session with 0.8.0: prefs / shelf / hotkey / Maya mode kept? the 0.5.0 .blend opens without tracebacks and its
+ 4 session with 0.9.0: prefs / shelf / hotkey / Maya mode kept? the 0.5.0 .blend opens without tracebacks and its
    joint positions / key values / weights equal the 0.5.0 truth
- 5 Disable -> Enable (0.8.0) snapshot, then Remove from inside Blender (disable(default_set) + package_uninstall)
+ 5 Disable -> Enable (0.9.0) snapshot, then Remove from inside Blender (disable(default_set) + package_uninstall)
  6 final snapshot == factory snapshot taken first (keyconfig, inputs / view / edit prefs, add-ons, handlers, types)
 Output tmp/qa240/qa_e.json; mismatches -> tmp/qa240/findings.jsonl.
 The script runs itself inside Blender as the probe (``-- <mode> OUT.json``).
@@ -351,7 +351,7 @@ else:
 
     SANDBOX = ROOT / "tmp" / "qa_upg"
     OLD = Path(os.path.expanduser("~")) / "Desktop" / "MayaWorkflowKit_upload" / "maya-workflow-kit-0.5.0.zip"
-    NEW = ROOT / "dist" / "maya-workflow-kit-0.8.0.zip"
+    NEW = ROOT / "dist" / "maya-workflow-kit-0.9.0.zip"
 
     def sandbox_env():
         assert SANDBOX.resolve().is_relative_to(ROOT / "tmp"), SANDBOX

@@ -2,7 +2,7 @@ schema_version = "1.0.0"
 
 # Template: <Blender 5.2>/5.2/scripts/templates_toml/blender_manifest.toml
 id = "allset"
-version = "0.8.0"
+version = "0.9.0"
 name = "Maya Workflow Kit"
 tagline = "The whole Maya workflow in Blender, in one install"
 maintainer = "5hyuns <555hyuns@gmail.com>"

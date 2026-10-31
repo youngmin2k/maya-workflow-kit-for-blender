@@ -3,7 +3,12 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.9.0] — 2026-11-01
+
+FX, rendering and lighting run Blender's own features from the Maya menus, S keys components, blend shape weights
+are channels, settings can be exported and imported, and the fixes from your reports. Supported on Blender 5.2 LTS;
+the release smoke test also runs on 5.0 and 5.1. Files saved with older versions are tidied once when they are
+opened (see Changed).
 
 ### Added
 - **Export / Import Settings** (#275): save the kit's settings to one JSON file and load them again after a
@@ -23,6 +28,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   Toolkit, and the W + left-click menu > Transform Constraints) turns every Move handle and the plain middle-drag
   into Edge Slide or Surface Slide until you set it back to Off.
 
+- **UV shell pre-selection** (#264): in the UV Editor the shell under the mouse is highlighted while clicks pick
+  whole shells, so you see what a click will select.
 - **Type in the Attribute Editor** (#258): the type tab has Maya's Text section (the text itself, font, size,
   alignment, tracking, leading, word spacing, slant) and Geometry (extrude distance and offset, bevel distance and
   divisions, curve resolution); Generator, Texturing and Animation say what to use in Blender instead.

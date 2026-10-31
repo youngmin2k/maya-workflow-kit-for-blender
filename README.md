@@ -262,7 +262,7 @@ Maya Workflow Kit is not on extensions.blender.org yet. Once it is, install it f
 
 ### Option 2 — Install the zip from disk
 
-1. Get `maya-workflow-kit-<version>.zip` (current version: 0.8.0) from
+1. Get `maya-workflow-kit-<version>.zip` (current version: 0.9.0) from
    [GitHub Releases](https://github.com/5hyuns/maya-workflow-kit-for-blender/releases) — or build it as in option 3.
 2. In Blender: *Edit > Preferences > Get Extensions > ▾ (top-right menu) > Install from Disk…* and pick the zip — or
    drag the zip onto the Blender window.
