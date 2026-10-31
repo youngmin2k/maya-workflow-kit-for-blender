@@ -104,7 +104,9 @@ def main(argv=None):
     if args.blenders:
         return run_matrix(args)
 
-    if args.no_build:
+    if args.zip:
+        zip_path = Path(args.zip).resolve()
+    elif args.no_build:
         zip_path = headless.build.ext_zip()
     else:
         zip_path = headless.build.main(["--blender", args.blender, "--no-legacy"])
