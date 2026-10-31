@@ -142,10 +142,11 @@ def test_nothing_adopted_while_a_file_loads():
 
 
 def test_watch_waits_only_for_editing_modals():
+    listeners = import_module(kit.MODULE + ".modal_listeners")
     for name in ("ALLSET_OT_joint_outliner_select", "ALLSET_OT_pose_empty_click", "ALLSET_OT_cb_wheel",
                  "ALLSET_OT_cb_channel_drag"):
-        assert name in gw.LISTENERS, name
-    assert "TRANSFORM_OT_translate" not in gw.LISTENERS
+        assert name in listeners.NAMES, name
+    assert "TRANSFORM_OT_translate" not in listeners.NAMES
     assert gw._busy() is False
 
 

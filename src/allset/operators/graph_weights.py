@@ -25,7 +25,7 @@ Keeping the rules (``apply_rules``):
   transform recomputes each move from its start positions, the correction never adds up; the handler runs before
   the redraw). Its writes tag the Action once more and the next pass finds nothing to change.
 - ``watch(context)`` (every 0.25 s from ``ui/graph_view._tick``) does the same for every marked Action; it waits while
-  a modal operator runs, except the kit's click listeners (``LISTENERS``) that stay up for the whole session.
+  a modal operator runs, except the kit's click listeners (``modal_listeners``) that stay up for the whole session.
 Only FREE / ALIGNED handles are rewritten: AUTO / AUTO_CLAMPED / VECTOR handles are Blender's to compute (a drag
 turns them ALIGNED / FREE and then the rule applies). The writes push no undo step of their own.
 
@@ -261,16 +261,9 @@ def selected_points(fc):
 
 # --- watch -----------------------------------------------------------------------------------------------------
 
-# Kit modals that only listen for clicks and stay up for the whole session: they edit no keys
-LISTENERS = {"ALLSET_OT_pose_empty_click", "ALLSET_OT_joint_outliner_select", "ALLSET_OT_cb_channel_drag",
-             "ALLSET_OT_cb_wheel"}
-
-
 def _busy():
-    for window in bpy.context.window_manager.windows:
-        if any(op.bl_idname not in LISTENERS for op in window.modal_operators):
-            return True
-    return False
+    from ..modal_listeners import tool_running
+    return tool_running()
 
 
 def apply_rules(action):
