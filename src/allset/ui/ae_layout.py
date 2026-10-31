@@ -161,30 +161,6 @@ AREA_LIGHT = [
     S("Shadows", False, ("prop", "data", "use_shadow", "Use Shadows")),
 ]
 
-# step 214 (operators/maya_lights.py): Maya's ambient / volume light
-# shape attributes; the stand-ins are point lights, so Maya-only attributes are missing rows.
-AMBIENT_LIGHT = [
-    S("Ambient Light Attributes", True,
-      ("prop", "data", "color", "Color"),
-      ("prop", "data", "allset_intensity", "Intensity"),
-      ("prop", "data", "allset_ambient_shade", "Ambient Shade")),
-    S("Shadows", False,
-      ("missing", "Use Ray Trace Shadows", "Blender's World light isn't shadowed like Maya's ambient light")),
-]
-VOLUME_LIGHT = [
-    S("Volume Light Attributes", True,
-      ("prop", "data", "color", "Color"),
-      ("prop", "data", "allset_intensity", "Intensity"),
-      ("missing", "Light Shape", "Sphere only (the object's scale is the radius)"),
-      ("missing", "Volume Light Dir", "Outward only"),
-      ("missing", "Emit Ambient", "not in Blender's point light"),
-      ("prop", "data", "diffuse_factor", "Emit Diffuse"),
-      ("prop", "data", "specular_factor", "Emit Specular")),
-    S("Color Range", False, ("missing", "Color Range", "linear centre-to-edge falloff only (like the default Maya ramp)")),
-    S("Penumbra", False, ("missing", "Penumbra", "Blender has no volume light penumbra")),
-    S("Shadows", False, ("prop", "data", "use_shadow", "Use Shadows")),
-]
-
 # --- material: standardSurface (Maya 2022 Attribute Editor) on Principled BSDF --------------
 STANDARD_SURFACE = [
     S("Base", True, ("socket", "Weight", "Weight"), ("socket", "Base Color", "Color"),
@@ -375,8 +351,6 @@ BY_KIND = {
     "SUN": (DIRECTIONAL_LIGHT, "directionalLight"),
     "SPOT": (SPOT_LIGHT, None),
     "AREA": (AREA_LIGHT, None),
-    "ambientLight": (AMBIENT_LIGHT, None),          # step 214 (operators/maya_lights.py)
-    "volumeLight": (VOLUME_LIGHT, None),
     "standardSurface": (STANDARD_SURFACE, "standardSurface"),
     "aiStandardSurface": (STANDARD_SURFACE, None),      # Arnold's, same attribute names (step 67)
     "lambert": (LAMBERT, "lambert"),
@@ -398,18 +372,11 @@ NODE_TYPE = {"MESH": "mesh", "CURVE": "nurbsCurve", "SURFACE": "nurbsSurface", "
              "META": "metaball", "EMPTY": "locator"}
 LIGHT_TYPE = {"POINT": "pointLight", "SUN": "directionalLight", "SPOT": "spotLight",
               "AREA": "areaLight"}
-LIGHT_KIND_PROP = "allset_light_kind"     # step 214: operators/lights.KIND_PROP (kept bpy-free here)
-
-
-def light_kind(light):
-    """"ambientLight" / "volumeLight" for the kit's Maya Ambient / Volume Light (step 214), else None."""
-    v = light.get(LIGHT_KIND_PROP) if light is not None else None
-    return v if v in ("ambientLight", "volumeLight") else None
 
 
 def light_type(light):
     """Maya node type of a light shape."""
-    return light_kind(light) or LIGHT_TYPE.get(light.type, "light")
+    return LIGHT_TYPE.get(light.type, "light")
 
 
 def walk(sections, depth=0):

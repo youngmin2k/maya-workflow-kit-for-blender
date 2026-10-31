@@ -64,9 +64,6 @@ KINDS = {
     'POINT_LIGHT': ("Point Light", "pointLight", "object.light_add", {"type": 'POINT'}, None),
     'SPOT_LIGHT': ("Spot Light", "spotLight", "object.light_add", {"type": 'SPOT'}, LEVEL),
     'AREA_LIGHT': ("Area Light", "areaLight", "object.light_add", {"type": 'AREA'}, LEVEL),
-    # step 214 (operators/maya_lights.py): Blender point lights standing in for Maya's ambient / volume light
-    'AMBIENT_LIGHT': ("Ambient Light", "ambientLight", "object.light_add", {"type": 'POINT'}, None),
-    'VOLUME_LIGHT': ("Volume Light", "volumeLight", "object.light_add", {"type": 'POINT'}, None),
     'CAMERA': ("Camera", "camera", "object.camera_add", {}, LEVEL),
     'LOCATOR': ("Locator", "locator", "object.empty_add",
                 {"type": 'PLAIN_AXES', "radius": 1.0}, None),
@@ -108,12 +105,6 @@ LOCATOR_PROP = "allset_locator"
 FALLOFF_LIGHTS = {'POINT', 'SPOT', 'AREA'}
 LIGHT_NOTICE = ("Maya Decay Rate No Decay renders in Cycles; EEVEE and the viewport get darker with the square of "
                 "the distance (matched to Maya at 10 units).")
-# step 214: what the Ambient / Volume Light stand-ins render (operators/maya_lights.py)
-MAYA_LIGHT_NOTICES = {
-    'AMBIENT_LIGHT': "Blender has no ambient light: World colour (flat part) + a point light (Ambient Shade part).",
-    'VOLUME_LIGHT': "Blender has no volume light: a point light cut at the sphere (exact in Cycles, EEVEE "
-                    "approximates the falloff).",
-}
 
 MAYA_CAMERA_LENS, MAYA_FILM_MM = 35.0, 36.0
 
@@ -169,9 +160,6 @@ def create(context, kind, maya_naming=True, overrides=None):
     kw.update(location=(0.0, 0.0, 0.0), rotation=rot or (0.0, 0.0, 0.0), align='WORLD')
     getattr(getattr(bpy.ops, mod), name)(**kw)
     ob = context.view_layer.objects.active
-    from . import maya_lights
-    if kind in maya_lights.KINDS:
-        ob.data[lights.KIND_PROP] = maya_lights.KINDS[kind]
     _scale_data(ob, k)
     if kind in FIELD_MAGNITUDES and ob.field is not None:
         from . import fx
@@ -182,8 +170,6 @@ def create(context, kind, maya_naming=True, overrides=None):
         naming.apply_maya_name(ob, base, rename_data=kind not in NO_SHAPE_NAME)
     if kind == 'LOCATOR':
         ob[LOCATOR_PROP] = True
-    if kind in maya_lights.KINDS:
-        maya_lights.sync(context.scene)     # the World part and the volume radius now (handlers follow later edits)
     if kind == 'JOINT':
         _first_joint(ob, maya_naming)
     if maya_naming:
@@ -222,7 +208,6 @@ class ALLSET_OT_create(bpy.types.Operator):
             return {'FINISHED'}
         ob = create(context, self.kind, _maya_naming(context))
         note = LIGHT_NOTICE if ob.type == 'LIGHT' and ob.data.type in FALLOFF_LIGHTS else ""
-        note = MAYA_LIGHT_NOTICES.get(self.kind, note)
         results.result(self, f"Created {ob.name}" + (f". {note}" if note else ""))
         return {'FINISHED'}
 

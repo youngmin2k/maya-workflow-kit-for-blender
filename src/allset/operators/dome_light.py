@@ -20,7 +20,6 @@ MARK = "allset_dome"                 # object ID property: this locator drives t
 N_TEX, N_MAP, N_COORD, N_BG = "Maya Dome Texture", "Maya Dome Mapping", "Maya Dome Coordinates", "Maya Dome"
 NODES = (N_TEX, N_MAP, N_COORD, N_BG)
 INTENSITY = "intensity"
-AMBIENT_ADD = "Maya Ambient Add"     # operators/maya_lights.py: the ambient light's add node in front of the output
 
 
 def find_dome(scene):
@@ -63,8 +62,7 @@ def ensure_world(scene):
     links.new(coord.outputs["Generated"], mapping.inputs["Vector"])
     links.new(mapping.outputs["Vector"], tex.inputs["Vector"])
     links.new(tex.outputs["Color"], bg.inputs["Color"])
-    add = tree.nodes.get(AMBIENT_ADD)
-    target = add.inputs[0] if add is not None else out.inputs["Surface"]
+    target = out.inputs["Surface"]
     if not (target.is_linked and target.links[0].from_node == bg):
         links.new(bg.outputs["Background"], target)
     return world

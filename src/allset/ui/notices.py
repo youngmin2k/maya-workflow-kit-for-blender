@@ -50,10 +50,10 @@ NOTICES = {
         "Drivers", "Blender has no connection graph: attribute links are drivers (Expression Editor)."),
     "Windows/General Editors/Namespace Editor": (
         "ns: name prefix", "Blender has no namespaces: Maya Workflow Kit keeps them as a \"ns:\" prefix in names."),
-    # Rendering (W3: Light Editor -> kit light list, step 67)
+    # Rendering
     "Windows/Rendering Editors/Light Editor": (
-        "kit Light Editor", "Blender has no Light Editor: Maya Workflow Kit lists the scene lights in a 3D View sidebar tab "
-        "(Exposure is part of Power)."),
+        "Outliner (lights)", "Blender has no Light Editor: an Outliner window lists the scene lights; its eye and "
+        "camera icons turn them off, Light Properties hold their values."),
     "Windows/Rendering Editors/Hypershade": (
         "Shader Editor + kit list", "Blender has no Hypershade: the Shader Editor is the graph, its Hypershade sidebar "
         "tab the browser (add nodes with Shift+A)."),
@@ -151,13 +151,12 @@ NOTICES = {
         "square of the distance, the power matching Maya intensity 1 at 10 units.") for kind in ("Point", "Spot")},
     "Create/Lights/Area Light": (
         "Area light", "Blender's area light falls off like Maya's; its power matches Maya intensity 1 (2 x 2 units)."),
-    # step 214 (operators/maya_lights.py)
-    "Create/Lights/Ambient Light": (
-        "World + point light", "Blender has no ambient light: the World colour gives the flat part and a point light "
-        "the Ambient Shade part; surfaces turned away from the light get more light than in Maya."),
-    "Create/Lights/Volume Light": (
-        "Point light cut at the sphere", "Blender has no volume light: a point light at the centre cut at the "
-        "sphere (the object's scale); Cycles renders Maya's falloff, EEVEE and the viewport approximate it."),
+    **{f"{menu}/Lights/Ambient Light": (
+        "World colour or Point Light", "Blender has no ambient light: raise the World colour (World Properties > "
+        "Surface) for light from every side, or add a Point Light.") for menu in ("Create", "Hypershade/Create")},
+    **{f"{menu}/Lights/Volume Light": (
+        "Point Light", "Blender has no volume light: add a Point Light; in EEVEE its Custom Distance (Light "
+        "Properties) ends the light at a radius.") for menu in ("Create", "Hypershade/Create")},
     # Rigging (W3: HumanIK / Quick Rig -> Rigify)
     **{path: ("Rigify", "Blender has no HumanIK / Quick Rig: the bundled Rigify add-on builds a rig from a "
                         "meta-rig fitted to the mesh (Generate Rig).")
@@ -418,6 +417,19 @@ NOTICES.update({
     "Effects/Collide with Effect": (
         "Fluid effector", "Blender's fire and smoke are Mantaflow fluids: the selected meshes become Fluid "
         "effectors."),
+    "Lighting/Shading/Light Linking Editor": (
+        "Light Linking panel", "Blender keeps light links on the light: Object Properties > Shading > Light Linking "
+        "of the active light lists the objects it lights."),
+    **{f"Lighting/Shading/{verb} {kind} Links": (
+        "Light linking operators", f"Blender links the selected objects to the active light: {verb} = "
+        f"{'Include' if verb == 'Make' else 'Exclude'}. Once one object is included, the light reaches only the "
+        "included objects.") for verb in ("Make", "Break") for kind in ("Light", "Shadow")},
+    "Lighting/Shading/Select Lights Illuminating Object": (
+        "Light Linking panel", "Blender selects linked objects from the light, not lights from an object: check "
+        "each light's Light Linking panel (Object Properties > Shading)."),
+    "Lighting/Shading/Select Lights Shadowing Object": (
+        "Shadow Linking panel", "Blender selects linked objects from the light, not lights from an object: check "
+        "each light's Shadow Linking panel (Object Properties > Shading)."),
     "Lighting/Shading/Transfer Maps...": (
         "Cycles Bake, Selected to Active", "Blender transfers maps with Cycles Bake (Render properties > Bake, "
         "Selected to Active): select the source meshes, then the target."),
@@ -1050,7 +1062,7 @@ NOTICES.update({
 })
 
 
-# Greyed items of the Hypershade / Render Settings / Script Editor menu bars (step 105, Maya 2022)
+# Greyed items of the Hypershade / Script Editor menu bars
 CATEGORIES.update({
     "Hypershade/File": (
         "File > Append", "Blender shares shading networks by appending or linking materials from another .blend "
@@ -1097,13 +1109,6 @@ CATEGORIES.update({
     "Hypershade/Options": (
         "Preferences", "Blender's Shader Editor has no such option (see Preferences > Editing / Interface)."),
     "Hypershade/Help/What's New/Highlight What's New": (
-        "Release notes", "Blender doesn't highlight new menu items: Help > What's New lists them."),
-    "Render Settings/Edit": (
-        "Path field", "Blender has no project image directory: type the folder in the Common tab's Path field."),
-    "Render Settings/Presets": (
-        "Format presets", "Blender's render presets are the Format panel preset menu (Output Properties); Maya's "
-        "AOV / user presets aren't there."),
-    "Render Settings/Help/What's New/Highlight What's New": (
         "Release notes", "Blender doesn't highlight new menu items: Help > What's New lists them."),
     "Script Editor/File": (
         "Text Editor", "Blender sources a script by opening it and running it (Text > Run Script) and saves one text "

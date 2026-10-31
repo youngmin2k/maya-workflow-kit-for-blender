@@ -1,7 +1,9 @@
 """Files saved by older versions are tidied when they are opened (operators/legacy_cleanup.py, temporary): the
 kit's old render camera ``persp`` (no collection, fake user, scene camera) stops being the scene camera and goes, a
 leftover ``defaultLight`` goes, the old camera Renderable values are dropped; the file opens without errors and
-the user's own objects stay."""
+the user's own objects stay. Old Ambient / Volume Lights: the World's "Maya Ambient" nodes go (the World's own
+output linked back), the lights become plain kit point lights with their Maya intensity, a Light Editor Isolate still
+on is undone and the Illuminates by Default value is dropped."""
 
 import os
 from importlib import import_module
@@ -56,7 +58,7 @@ def test_old_file_is_cleaned_on_open():
     assert not [c for c in bpy.data.cameras if lc.RENDERABLE in c.keys()]
     assert cube in bpy.data.objects and "shotCam" in bpy.data.objects, "the user's objects stay"
     # once cleaned there is nothing left to do
-    assert lc.clean() == {"scene_camera": 0, "persp": 0, "default_light": 0, "props": 0}
+    assert not any(lc.clean().values())
 
 
 def test_persp_linked_into_the_scene_is_kept():
@@ -80,3 +82,86 @@ def test_handler_follows_maya_mode_and_disable():
         assert not [h for h in bpy.app.handlers.load_post if getattr(h, "__module__", "").endswith("legacy_cleanup")]
     finally:
         kit.enable()
+
+
+def _old_lights_file(name, kit_world=False):
+    """A scene the way an older version saved it with an Ambient and a Volume Light, a Light Editor Isolate on and
+    a light whose Illuminates by Default is off (built here with plain data)."""
+    bpy.ops.wm.read_homefile(use_empty=True)
+    sc = bpy.context.scene
+    world = bpy.data.worlds.new("World")
+    sc.world = world
+    if kit_world:
+        world[lc.WORLD_MADE] = True
+    compat = import_module(kit.MODULE + ".compat")
+    compat.ensure_world_nodes(world)
+    tree = world.node_tree
+    out = next((n for n in tree.nodes if n.type == 'OUTPUT_WORLD'), None) or tree.nodes.new('ShaderNodeOutputWorld')
+    bg = next((n for n in tree.nodes if n.type == 'BACKGROUND'), None) or tree.nodes.new('ShaderNodeBackground')
+    amb = tree.nodes.new('ShaderNodeBackground')
+    ray = tree.nodes.new('ShaderNodeLightPath')
+    nc = tree.nodes.new('ShaderNodeMath')
+    add = tree.nodes.new('ShaderNodeAddShader')
+    for node, nm in ((amb, "Maya Ambient"), (ray, "Maya Ambient Ray"), (nc, "Maya Ambient Not Camera"),
+                     (add, lc.WORLD_ADD)):
+        node.name = nm
+    tree.links.new(ray.outputs["Is Camera Ray"], nc.inputs[1])
+    tree.links.new(nc.outputs[0], amb.inputs["Strength"])
+    tree.links.new(bg.outputs[0], add.inputs[0])
+    tree.links.new(amb.outputs[0], add.inputs[1])
+    tree.links.new(add.outputs[0], out.inputs["Surface"])
+    obs = {}
+    for nm, kind in (("ambientLight1", "ambientLight"), ("volumeLight1", "volumeLight")):
+        data = bpy.data.lights.new(nm + "Shape", 'POINT')
+        data[lc.LIGHT_KIND] = kind
+        data[lc.LIGHT_INTENSITY] = 2.0
+        data["allset_ambient_shade"] = 0.45
+        ob = bpy.data.objects.new(nm, data)
+        sc.collection.objects.link(ob)
+        obs[nm] = ob
+    vol = obs["volumeLight1"].data
+    vol[lc.VOLUME_NODES_ON] = True
+    compat.ensure_light_nodes(vol)
+    vt = vol.node_tree
+    emission = next(n for n in vt.nodes if n.type == 'EMISSION')
+    falloff = vt.nodes.new('ShaderNodeLightFalloff')
+    falloff.name = "Maya Volume Falloff"
+    vt.links.new(falloff.outputs["Constant"], emission.inputs["Strength"])
+    sun = bpy.data.objects.new("directionalLight1", bpy.data.lights.new("directionalLightShape1", 'SUN'))
+    sc.collection.objects.link(sun)
+    sun.hide_render = sun.hide_viewport = True              # turned off by the isolate
+    sun[lc.ILLUMINATES] = False
+    sc[lc.LIGHT_ISOLATE] = {"light": "ambientLight1", "saved": {"directionalLight1": [False, False],
+                                                               "ambientLight1": [False, False]}}
+    path = _path(name)
+    bpy.ops.wm.save_as_mainfile(filepath=path)
+    return path
+
+
+def test_old_lights_are_cleaned_on_open():
+    path = _old_lights_file("legacy_lights.blend")
+    bpy.ops.wm.read_homefile(use_empty=True)
+    bpy.ops.wm.open_mainfile(filepath=path)
+    sc = bpy.context.scene
+    tree = sc.world.node_tree
+    assert not [n.name for n in tree.nodes if n.name.startswith("Maya Ambient")]
+    out = next(n for n in tree.nodes if n.type == 'OUTPUT_WORLD')
+    assert out.inputs["Surface"].links[0].from_node.type == 'BACKGROUND', "the World's own background is back"
+    lights = import_module(kit.MODULE + ".operators.lights")
+    for nm in ("ambientLight1", "volumeLight1"):
+        data = bpy.data.objects[nm].data
+        assert not [k for k in data.keys() if k in (*lc.LIGHT_PROPS, lc.VOLUME_NODES_ON)], (nm, data.keys())
+        assert abs(lights.intensity(data) - 2.0) < 1e-6 and lights.decay(data) == 0, nm
+    vt = bpy.data.objects["volumeLight1"].data.node_tree
+    assert vt.nodes.get("Maya Volume Falloff") is None and vt.nodes.get(lights.FALLOFF_NODE) is not None
+    sun = bpy.data.objects["directionalLight1"]
+    assert not sun.hide_render and not sun.hide_viewport, "the isolate is undone"
+    assert lc.LIGHT_ISOLATE not in sc.keys() and lc.ILLUMINATES not in sun.keys()
+    assert not any(lc.clean().values())
+
+
+def test_kit_made_world_is_removed():
+    path = _old_lights_file("legacy_lights_world.blend", kit_world=True)
+    bpy.ops.wm.open_mainfile(filepath=path)
+    assert bpy.context.scene.world is None
+    assert "World" not in bpy.data.worlds

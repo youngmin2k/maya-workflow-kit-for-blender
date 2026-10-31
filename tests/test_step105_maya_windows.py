@@ -1,8 +1,6 @@
-"""Step 105: Hypershade, Render Settings and Script Editor look — Maya menu bars like Maya 2022's, the
-Render Settings Common tab writing scene.render, Maya presets, the new Create shader kinds, the Browser tabs, Script
-Editor run / echo."""
+"""Hypershade and Script Editor look — Maya menu bars like Maya 2022's, Render Settings = Blender's render
+tab, the new Create shader kinds, the Browser tabs, Script Editor run / echo."""
 
-import types
 from importlib import import_module
 
 import bpy
@@ -13,7 +11,6 @@ data = import_module(kit.MODULE + ".ui.editor_menu_data")
 menu_map = import_module(kit.MODULE + ".ui.menu_map")
 menu_sets = import_module(kit.MODULE + ".ui.menu_sets")
 notices = import_module(kit.MODULE + ".ui.notices")
-rs = import_module(kit.MODULE + ".ui.render_settings")
 hs = import_module(kit.MODULE + ".ui.hypershade")
 se = import_module(kit.MODULE + ".ui.script_editor")
 material = import_module(kit.MODULE + ".operators.material")
@@ -22,7 +19,6 @@ ae_layout = import_module(kit.MODULE + ".ui.ae_layout")
 
 # Maya 2022 menu bars of these windows
 MAYA_BARS = {"Hypershade": ["File", "Edit", "View", "Create", "Tabs", "Graph", "Window", "Options", "Help"],
-             "Render Settings": ["Edit", "Presets", "Help"],
              "Script Editor": ["File", "Edit", "History", "Command", "Tabs", "Help"]}
 
 
@@ -41,70 +37,19 @@ def test_menu_bars_match_maya_and_are_honest():
         if path.split("/", 1)[0] in MAYA_BARS and (not menu_sets.sub_items(path, it) or path in menu_map.MAP):
             leaves[path] = path in menu_map.MAP
     print("leaves", len(leaves), "mapped", sum(leaves.values()))
-    assert len(leaves) == 357 + 21 + 59, len(leaves)     # Hypershade / Render Settings / Script Editor
+    assert len(leaves) == 357 + 59, len(leaves)     # Hypershade / Script Editor
     assert not [p for p, m in leaves.items() if not m and notices.greyed_notice(p) is None]
     assert sum(leaves.values()) >= 150
-    for name in ("Hypershade", "Script Editor", "Render Settings"):
+    for name in ("Hypershade", "Script Editor"):
         assert hasattr(bpy.types, menu_sets.editor_menu_idname(name, 0))
 
 
-def test_common_tab_writes_scene_render():
-    sc = bpy.context.scene
-    r = sc.render
-    r.filepath = "//../images/"
-    assert sc.allset_rs_dir == "//../images/" and sc.allset_rs_prefix == "" and sc.allset_rs_ext == 'SINGLE'
-    sc.allset_rs_prefix = "shot"
-    assert r.filepath.replace("\\", "/") == "//../images/shot", r.filepath
-    sc.allset_rs_ext = 'DOT'
-    assert r.filepath.endswith("shot.####"), r.filepath      # name.#.ext, padding 4
-    sc.allset_rs_padding = 3
-    assert r.filepath.endswith("shot.###") and sc.allset_rs_padding == 3
-    sc.allset_rs_ext = 'UNDERSCORE'
-    assert r.filepath.endswith("shot_###")
-    sc.allset_rs_dir = "//renders/"
-    assert r.filepath.replace("\\", "/") == "//renders/shot_###", r.filepath
-    sc.allset_rs_size = 'HD_720'
-    assert (r.resolution_x, r.resolution_y, r.resolution_percentage) == (1280, 720, 100)
-    sc.allset_rs_size = 'CCIR_601'
-    assert (r.resolution_x, r.resolution_y) == (720, 486) and abs(r.pixel_aspect_x / r.pixel_aspect_y - 0.9) < 1e-4
-    r.resolution_x = 1000
-    assert sc.allset_rs_size == 'CUSTOM'
-    # Presets > Import Render Settings > Default Settings = factory (960 x 540, PNG, padding 4, single)
-    r.image_settings.file_format = 'JPEG'
-    assert bpy.ops.allset.rs_defaults() == {'FINISHED'}
-    assert (r.resolution_x, r.resolution_y, r.pixel_aspect_x, r.pixel_aspect_y) == (960, 540, 1.0, 1.0)
-    assert sc.allset_rs_size == 'HD_540'
-    assert r.image_settings.file_format == 'PNG' and sc.allset_rs_ext == 'SINGLE'
-    lines = rs.info_lines(sc)
-    assert lines[2].startswith("Image size: 960 x 540 (13.3 x 7.5 inches 72 pixels/inch)"), lines
-
-
-def test_path_split_round_trip():
-    for path in ("//../images/shot.####", "/tmp/a_##", "C:\\out\\b####", "//x/", "name"):
-        d, p, e, n = rs.split_path(path)
-        assert rs.join_path(d, p, e, n).replace("\\", "/") == path.replace("\\", "/"), (path, d, p, e, n)
-
-
-def test_render_panels_hidden_only_in_the_kit_window():
-    wrapped = [c for c, _raw, _kids in rs._wrapped]
-    names = {c.__name__ for c in wrapped}
-    assert "RENDER_PT_context" in names and any(n.startswith("RENDER_PT_eevee") for n in names), sorted(names)[:10]
-    cls = next(c for c in wrapped if c.__name__ == "RENDER_PT_color_management")
-    assert cls.poll(bpy.context)      # outside the kit window: Blender's own poll
-    win = types.SimpleNamespace(as_pointer=lambda: 12345)
-    rs._WINDOWS.add(12345)
-    try:
-        kctx = types.SimpleNamespace(window=win, space_data=types.SimpleNamespace(type='PROPERTIES'),
-                                     window_manager=bpy.context.window_manager, scene=bpy.context.scene)
-        bpy.context.window_manager.allset_rs_tab = 'COMMON'
-        assert cls.poll(kctx) is False and rs.ALLSET_PT_rs_common.poll(kctx)
-        bpy.context.window_manager.allset_rs_tab = 'RENDERER'
-        assert not rs.ALLSET_PT_rs_common.poll(kctx)
-        ctx_cls = next(c for c in wrapped if c.__name__ == "RENDER_PT_context")
-        assert ctx_cls.poll(kctx) is False    # the kit's Render Using row replaces it
-    finally:
-        rs._WINDOWS.discard(12345)
-        bpy.context.window_manager.allset_rs_tab = 'COMMON'
+def test_render_settings_is_blenders_render_tab():
+    """Render Settings opens Blender's Properties > Render (no kit window, no Maya menu bar of its own)."""
+    assert "Render Settings" not in data.EDITORS
+    for path in ("Render/Render Settings...", "Windows/Rendering Editors/Render Settings", "Playback/Render Settings"):
+        assert menu_map.MAP[path] == "allset.render_settings", path
+    assert not hasattr(bpy.types.Scene, "allset_rs_size")
 
 
 def test_create_list_maya_shaders():
@@ -175,6 +120,6 @@ def test_script_editor_runs_python_and_refuses_mel():
 
 def test_headers_patched():
     assert "draw_collapsible" in bpy.types.NODE_MT_editor_menus.__dict__
-    for name, fn in (("PROPERTIES_HT_header", rs._header_draw), ("INFO_HT_header", se._info_header),
+    for name, fn in (("INFO_HT_header", se._info_header),
                      ("TEXT_HT_header", se._text_header)):
         assert getattr(bpy.types, name).draw._draw_funcs[0] is fn, name

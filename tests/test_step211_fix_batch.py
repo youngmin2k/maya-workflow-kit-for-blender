@@ -39,18 +39,19 @@ def _select(obs):
 
 # --- (1) Windows > Relationship Editors > Light Linking -----------------------------------------------------
 
-def test_light_linking_submenu_opens_the_kit_editor():
+def test_light_linking_submenu_opens_the_light_linking_panel():
     mm, ms = m("ui.menu_map"), m("ui.menu_sets")
     # since the step 219 menus the submenu is in the menu data itself, no run-time CHILDREN entry
     md = m("ui.menu_data")
     win = next(it for it in md.MENUS["mainWindowMenu"][3] if it[0] == "Relationship Editors")
     assert ("Light Linking", [("Light-Centric",), ("Object-Centric",)]) in win[1]
-    for label, mode in (("Light-Centric", 'LIGHT_CENTRIC'), ("Object-Centric", 'OBJECT_CENTRIC')):
+    props = ("allset.open_editor", {"ui_type": 'PROPERTIES', "tab": 'OBJECT'})
+    for label in ("Light-Centric", "Object-Centric"):
         act = mm.MAP[f"Windows/Relationship Editors/Light Linking/{label}"]
-        assert act == ("v3d", "allset.light_linking_editor", {"mode": mode}), act
-    assert "Windows/Relationship Editors/Light Linking" not in mm.MAP, "a submenu now, not the Properties tab"
-    # same editor as Lighting/Shading > Light Linking Editor
-    assert mm.MAP["Lighting/Shading/Light Linking Editor"][1] == "allset.light_linking_editor"
+        assert act == props, act
+    assert "Windows/Relationship Editors/Light Linking" not in mm.MAP, "a submenu, not an item"
+    # same place as Lighting/Shading > Light Linking Editor
+    assert mm.MAP["Lighting/Shading/Light Linking Editor"] == props
     paths = {p for p, *_rest in ms.iter_items()} if hasattr(ms, "iter_items") else set()
     if paths:
         assert "Windows/Relationship Editors/Light Linking/Object-Centric" in paths

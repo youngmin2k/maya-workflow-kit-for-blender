@@ -1,4 +1,4 @@
-"""Step 67: Hypershade window, kit Light Editor, Render menu, Render View Keep Image, AE map buttons, standardSurface
+"""Hypershade window, Light Editor (an Outliner of the lights), Render menu, Render View Keep Image, AE map buttons, standardSurface
 names. GUI: tests/gui/gui_step67_render.py."""
 
 import types
@@ -16,7 +16,6 @@ notices = import_module(kit.MODULE + ".ui.notices")
 ae_layout = import_module(kit.MODULE + ".ui.ae_layout")
 ae = import_module(kit.MODULE + ".ui.attribute_editor")
 hs = import_module(kit.MODULE + ".ui.hypershade")
-le = import_module(kit.MODULE + ".ui.light_editor")
 rv = import_module(kit.MODULE + ".ui.render_view")
 maps = import_module(kit.MODULE + ".operators.shading_maps")
 material = import_module(kit.MODULE + ".operators.material")
@@ -100,7 +99,7 @@ def test_windows_menu_and_status_line_share_operators():
     assert not hasattr(status_line, "ALLSET_OT_hypershade"), "one Hypershade operator (ui/hypershade.py)"
     for op in (bpy.ops.allset.hypershade, bpy.ops.allset.light_editor):
         op.get_rna_type()
-    assert "Light Editor" in notices.NOTICES["Windows/Rendering Editors/Light Editor"][0]
+    assert "Outliner" in notices.NOTICES["Windows/Rendering Editors/Light Editor"][0]
 
 
 # --- names / aiStandardSurface ----------------------------------------------------------------------
@@ -229,67 +228,6 @@ def test_hypershade_browser_create_assign():
         assert any(i == "allset.ae_map" for i, _p in rec.ops())
     finally:
         area.ui_type = old
-
-
-# --- Light Editor -------------------------------------------------------------------------------------
-
-def _light(kind, name):
-    data = bpy.data.lights.new(name, kind)
-    ob = bpy.data.objects.new(name, data)
-    bpy.context.collection.objects.link(ob)
-    return ob
-
-
-def test_light_editor_isolate_enable():
-    _clear()
-    sc = bpy.context.scene
-    a, b, c = _light('SUN', "directionalLight1"), _light('POINT', "pointLight1"), _light('SPOT', "spotLight1")
-    c.hide_render = True                       # off before isolating: stays off after
-    assert [o.name for o in le.lights(bpy.context)] == ["directionalLight1", "pointLight1", "spotLight1"]
-    assert bpy.ops.allset.light_isolate(light="pointLight1") == {'FINISHED'}
-    assert le.isolated(sc) == "pointLight1"
-    assert not le.enabled(a) and le.enabled(b) and not le.enabled(c)
-    # isolating another light moves the solo
-    bpy.ops.allset.light_isolate(light="directionalLight1")
-    assert le.enabled(a) and not le.enabled(b)
-    # pressed again: everything back
-    bpy.ops.allset.light_isolate(light="directionalLight1")
-    assert le.isolated(sc) == "" and le.ISOLATE_PROP not in sc
-    assert le.enabled(a) and le.enabled(b) and c.hide_render and not c.hide_viewport
-    # Enable toggles render + viewport together
-    bpy.ops.allset.light_enable(light="pointLight1")
-    assert b.hide_render and b.hide_viewport
-    bpy.ops.allset.light_enable(light="pointLight1")
-    assert not b.hide_render and not b.hide_viewport
-    # a light deleted while isolated is skipped on restore
-    bpy.ops.allset.light_isolate(light="pointLight1")
-    bpy.data.objects.remove(a)
-    bpy.ops.allset.light_isolate(light="pointLight1")
-    assert le.isolated(sc) == ""
-    # select from the list
-    bpy.ops.allset.light_select(light="pointLight1")
-    assert bpy.context.active_object == b and b.select_get()
-
-
-def test_light_editor_panels():
-    _clear()
-    _light('POINT', "pointLight1")
-    rec = Rec()
-    le.draw_list(rec, bpy.context)
-    ops = rec.ops()
-    assert [p.kind for i, p in ops if i == "allset.create"] == [k for k, _i in le.CREATE]
-    for idname in ("allset.light_select", "allset.light_enable", "allset.light_isolate"):
-        assert any(i == idname and p.light == "pointLight1" for i, p in ops), idname
-    props = [e[1][1] for e in rec.log if e[0] == "prop"]
-    assert "color" in props and "allset_intensity" in props
-    bpy.context.view_layer.objects.active = bpy.data.objects["pointLight1"]
-    rec = Rec()
-    le.draw_property_editor(rec, bpy.context)
-    labels = [e[2].get("text", "") for e in rec.log if e[0] == "label"]
-    assert "pointLight:" in labels and "Point Light Attributes" in labels, labels
-    # the tab polls only in a marked Light Editor window (one area)
-    ctx = types.SimpleNamespace(space_data=bpy.context.window.screen.areas[0].spaces.active, window=bpy.context.window)
-    assert not le.is_light_editor(ctx)
 
 
 # --- Render View Keep Image -----------------------------------------------------------------------------

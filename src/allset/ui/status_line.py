@@ -342,22 +342,54 @@ def show_properties(screen, context_name):
 
 
 class ALLSET_OT_render_settings(bpy.types.Operator):
-    """Open the render settings (Maya Render Settings window)"""
+    """Open Blender's render settings (Properties > Render) in a new window, like Maya's Render Settings window"""
     bl_idname = "allset.render_settings"
     bl_label = "Render Settings"
 
     def execute(self, context):
-        # Maya's Render Settings is a window of its own: a new Properties window on the
-        # Render tab, so a Properties editor used as the Attribute Editor keeps its tab
-        # (step 67). Without a window (background) switch a
-        # Properties editor of the screen instead.
-        # Step 105: the kit's Render Settings window (ui/render_settings.py: Maya menus, Render Layer / Render Using,
-        # Common | renderer tabs over a Properties editor on the Render tab).
-        if context.window is not None:
-            from . import render_settings, window_places
-            if render_settings.open_window(context) is not None or window_places.deferred():
+        from ..operators import menu_extras
+        from . import window_places
+        window = context.window
+        area = max(window.screen.areas, key=lambda a: a.width * a.height, default=None) if window else None
+        if area is not None:
+            new = menu_extras.open_window(context, area, "render_settings")
+            if new is not None:
+                new.screen.areas[0].ui_type = 'PROPERTIES'
+                menu_extras.properties_tab_later(new, 'RENDER')
                 return {'FINISHED'}
+            if window_places.deferred():     # opens on a later tick
+                return {'FINISHED'}
+        # no new window (background): switch a Properties editor of the screen instead
         return {'FINISHED'} if show_properties(context.screen, 'RENDER') else {'CANCELLED'}
+
+
+class ALLSET_OT_light_editor(bpy.types.Operator):
+    """Open an Outliner window that lists only the scene's lights (Blender has no Light Editor)"""
+    bl_idname = "allset.light_editor"
+    bl_label = "Light Editor"
+
+    def execute(self, context):
+        from ..operators import menu_extras
+        from . import window_places
+        window = context.window
+        area = max(window.screen.areas, key=lambda a: a.width * a.height, default=None) if window else None
+        if area is None:
+            return {'CANCELLED'}
+        new = menu_extras.open_window(context, area, "light_editor")
+        if new is None:
+            if not window_places.deferred():     # opens on a later tick
+                self.report({'ERROR'}, "Could not open a new window")
+            return {'CANCELLED'}
+        target = new.screen.areas[0]
+        target.ui_type = 'OUTLINER'
+        space = target.spaces.active
+        space.display_mode = 'VIEW_LAYER'
+        space.use_filter_object = True
+        for name in ("mesh", "armature", "empty", "camera", "others", "grease_pencil"):
+            if hasattr(space, "use_filter_object_" + name):
+                setattr(space, "use_filter_object_" + name, False)
+        space.use_filter_object_light = True
+        return {'FINISHED'}
 
 
 class ALLSET_OT_ipr_toggle(bpy.types.Operator):
@@ -615,7 +647,7 @@ def draw_status_line(layout, context, compact=False):
         _flat(row, ALLSET_OT_render_settings.bl_idname, "render_settings")
         _flat(row, "allset.hypershade", "hypershade")       # ui/hypershade.py (step 67)
         _grey(row, "render_setup", "Status Line/Render Setup")
-        _flat(row, "allset.light_editor", "light_editor")   # ui/light_editor.py (step 67)
+        _flat(row, ALLSET_OT_light_editor.bl_idname, "light_editor")
         _grey(row, "pause", "Status Line/Pause Viewport 2.0")
         _group_end(layout, "RENDER")
 
@@ -886,7 +918,7 @@ def unpatch_topbar():
 
 
 classes = (ALLSET_OT_select_mask, ALLSET_OT_select_mode, ALLSET_OT_snap_toggle, ALLSET_MT_symmetry, ALLSET_MT_menu_more,
-           ALLSET_OT_render_settings, ALLSET_OT_ipr_toggle,
+           ALLSET_OT_render_settings, ALLSET_OT_light_editor, ALLSET_OT_ipr_toggle,
            ALLSET_OT_editor_toggle, ALLSET_OT_status_group)
 
 

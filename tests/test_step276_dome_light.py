@@ -107,19 +107,6 @@ def test_existing_world_keeps_its_other_nodes():
     assert dome._output(tree).inputs["Surface"].links[0].from_node.name == dome.N_BG
 
 
-def test_behind_the_maya_ambient_light():
-    _clean()
-    area = next((a for a in bpy.context.screen.areas if a.type == 'VIEW_3D'), None)
-    bpy.ops.allset.create(kind='AMBIENT_LIGHT')
-    tree = bpy.context.scene.world.node_tree
-    add = tree.nodes.get(dome.AMBIENT_ADD)
-    assert add is not None
-    bpy.ops.allset.dome_light('EXEC_DEFAULT')
-    assert add.inputs[0].links[0].from_node.name == dome.N_BG       # dome + ambient both light the scene
-    assert dome._output(tree).inputs["Surface"].links[0].from_node == add
-    del area
-
-
 def test_one_undo_step():
     _clean()
     bpy.ops.ed.undo_push(message="before dome")

@@ -16,7 +16,6 @@ create = import_module(kit.MODULE + ".operators.create")
 lights = import_module(kit.MODULE + ".operators.lights")
 ae_layout = import_module(kit.MODULE + ".ui.ae_layout")
 attribute_editor = import_module(kit.MODULE + ".ui.attribute_editor")
-render_settings = import_module(kit.MODULE + ".ui.render_settings")
 app_template = import_module(kit.MODULE + ".app_template")
 compat = import_module(kit.MODULE + ".compat")
 
@@ -217,4 +216,3 @@ def test_template_resolution_960_540():
     finally:
         for sc in dst.scenes:
             bpy.data.scenes.remove(sc)
-    assert render_settings.DEFAULTS["size"] == "HD_540"

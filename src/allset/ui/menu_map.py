@@ -116,7 +116,7 @@ _WINDOW_EDITORS = {
     # step 219 (Maya 2026 Windows menu): Blender engines in Maya's places
     "LookdevX Graph Editor": "allset.hypershade",                        # Maya shading graph -> Shader Editor
     "Bifrost Graph Editor": _editor('GeometryNodeTree'),                   # Bifrost graph -> Geometry Nodes
-    "Rendering Editors/Light Editor": "allset.light_editor",             # step 67: kit light list
+    "Rendering Editors/Light Editor": "allset.light_editor",             # an Outliner window of the lights
     "Rendering Editors/Render View": "render.view_show",
     "Rendering Editors/Render Settings": "allset.render_settings",
     "Rendering Editors/Shading Group Attributes": ("v3d", "allset.material_attributes", {}),
@@ -187,12 +187,10 @@ MAP = {
     "Create/NURBS Primitives/Plane": _create('NURBS_PLANE'),
     "Create/NURBS Primitives/Torus": _create('NURBS_TORUS'),
     "Create/NURBS Primitives/Circle": _create('NURBS_CIRCLE'),
-    "Create/Lights/Ambient Light": _create('AMBIENT_LIGHT'),        # step 214: operators/maya_lights.py
     "Create/Lights/Directional Light": _create('DIRECTIONAL_LIGHT'),
     "Create/Lights/Point Light": _create('POINT_LIGHT'),
     "Create/Lights/Spot Light": _create('SPOT_LIGHT'),
     "Create/Lights/Area Light": _create('AREA_LIGHT'),
-    "Create/Lights/Volume Light": _create('VOLUME_LIGHT'),
     "Create/Lights/Dome Light": "allset.dome_light",                # step 276 (#201): the World environment
     "Create/Cameras": _create('CAMERA'),
     "Create/Curve Tools/CV Curve Tool": "allset.cv_curve_tool",            # step 156: operators/curve_draw.py
@@ -717,12 +715,9 @@ MAP.update({
     "Deform/Pose Space Deformation/Pose Editor": ("allset.pose_editor", {}),
     "Deform/Pose Space Deformation/Create Pose Interpolator": ("allset.pose_interpolator_create", {}),
     "Windows/Rendering Editors/Render Setup": _props('VIEW_LAYER'),   # Maya 2026 (step 219)
-    # Maya's Light Linking submenu (Windows > Rendering Editors): the step 179 kit editor
-    # in light- / object-centric mode, like Lighting/Shading > Light Linking Editor (step 211, audit 16 NB13).
-    "Windows/Relationship Editors/Light Linking/Light-Centric": ("v3d", "allset.light_linking_editor",
-                                                                 {"mode": 'LIGHT_CENTRIC'}),
-    "Windows/Relationship Editors/Light Linking/Object-Centric": ("v3d", "allset.light_linking_editor",
-                                                                  {"mode": 'OBJECT_CENTRIC'}),
+    # Maya's Light Linking editors: Blender's Light Linking panel (Object Properties > Shading, active light)
+    "Windows/Relationship Editors/Light Linking/Light-Centric": _props('OBJECT'),
+    "Windows/Relationship Editors/Light Linking/Object-Centric": _props('OBJECT'),
     "Windows/Relationship Editors/Sets": _editor('OUTLINER'),
     "Windows/Content Browser": _editor('ASSETS'),
     # Mesh
@@ -898,17 +893,15 @@ MAP.update({
     "nParticles/Soft Body#2": _mod('SOFT_BODY'),
     "nParticles/Make Collide": "allset.fx_passive",
     # Rendering
-    # step 179: Maya light / shadow linking on Blender light linking (operators/light_links.py);
-    # the editor = a kit popover with Maya's two lists (ui/light_link_editor.py)
-    "Lighting/Shading/Light Linking Editor": ("v3d", "allset.light_linking_editor", {}),
-    "Lighting/Shading/Make Light Links": ("allset.light_link", {"kind": "LIGHT", "make": True}),
-    "Lighting/Shading/Break Light Links": ("allset.light_link", {"kind": "LIGHT", "make": False}),
-    "Lighting/Shading/Select Objects Illuminated by Light": ("allset.light_link_select", {"kind": "LIGHT"}),
-    "Lighting/Shading/Select Lights Illuminating Object": ("allset.light_link_select", {"kind": "LIGHT", "lights": True}),
-    "Lighting/Shading/Make Shadow Links": ("allset.light_link", {"kind": "SHADOW", "make": True}),
-    "Lighting/Shading/Break Shadow Links": ("allset.light_link", {"kind": "SHADOW", "make": False}),
-    "Lighting/Shading/Select Objects Shadowed by Light": ("allset.light_link_select", {"kind": "SHADOW"}),
-    "Lighting/Shading/Select Lights Shadowing Object": ("allset.light_link_select", {"kind": "SHADOW", "lights": True}),
+    # Light / shadow linking = Blender's light linking operators: the active object is the light, the other
+    # selected objects are linked (Include) or unlinked (Exclude)
+    "Lighting/Shading/Light Linking Editor": _props('OBJECT'),
+    "Lighting/Shading/Make Light Links": ("object.light_linking_receivers_link", {"link_state": 'INCLUDE'}),
+    "Lighting/Shading/Break Light Links": ("object.light_linking_receivers_link", {"link_state": 'EXCLUDE'}),
+    "Lighting/Shading/Select Objects Illuminated by Light": "object.light_linking_receivers_select",
+    "Lighting/Shading/Make Shadow Links": ("object.light_linking_blockers_link", {"link_state": 'INCLUDE'}),
+    "Lighting/Shading/Break Shadow Links": ("object.light_linking_blockers_link", {"link_state": 'EXCLUDE'}),
+    "Lighting/Shading/Select Objects Shadowed by Light": "object.light_linking_blockers_select",
     "Toon/Assign Outline": ("v3d", "object.grease_pencil_add", {"type": 'LINEART_OBJECT'}),
     "Create/Cameras/Stereo Camera": "allset.stereo_camera",
     # Cache (Alembic / GPU cache = Alembic files; Geometry Cache = Alembic too, with a notice)

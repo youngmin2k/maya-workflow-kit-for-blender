@@ -439,13 +439,13 @@ MAP = {
     "UV Toolkit/Help/Help on UV Toolkit": _url(_MANUAL + "modeling/meshes/uv/index.html"),
 }
 
-# --- step 105: Hypershade, Render Settings, Script Editor ---------------------------------------------------------
-HS, RS, SE = "Hypershade", "Render Settings", "Script Editor"
+# --- Hypershade, Script Editor -------------------------------------------------------------------
+HS, SE = "Hypershade", "Script Editor"
 _HS_MATERIALS = {"Anisotropic": 'ANISOTROPIC', "Blinn": 'BLINN', "Lambert": 'LAMBERT', "Layered Shader": 'LAYERED',
                  "Phong": 'PHONG', "Phong E": 'PHONG_E', "Ramp Shader": 'RAMP', "Standard Surface": 'STANDARD_SURFACE',
                  "Surface Shader": 'SURFACE', "Use Background": 'USE_BACKGROUND'}
 _HS_LIGHTS = {"Directional Light": 'DIRECTIONAL_LIGHT', "Point Light": 'POINT_LIGHT', "Spot Light": 'SPOT_LIGHT',
-              "Area Light": 'AREA_LIGHT', "Ambient Light": 'AMBIENT_LIGHT', "Volume Light": 'VOLUME_LIGHT'}
+              "Area Light": 'AREA_LIGHT'}
 
 
 def _hs_edit(action):
@@ -581,9 +581,6 @@ MAP.update({
     f"{HS}/Window/Attribute Spread Sheet...": _editor('SPREADSHEET'),
     **_help_menu(HS, "render/shader_nodes/index.html"),
     f"{HS}/Help/Help on Shader Library": _url(_MANUAL + "render/materials/index.html"),
-
-    f"{RS}/Presets/Import Render Settings/Default Settings": "allset.rs_defaults",
-    **_help_menu(RS, "render/output/properties/index.html"),
 
     f"{SE}/File/Open Script...": "text.open",
     f"{SE}/File/Save Script...": "text.save_as",

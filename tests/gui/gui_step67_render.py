@@ -1,7 +1,7 @@
 """Step 67 in a real UI (Maya render workflow): sphere -> Windows > Rendering Editors >
 Hypershade -> a window in the Maya Hypershade layout (step 131: panes + Graph) -> Create Standard Surface -> Assign Material To
 Selection -> AE Base Color map button > File -> Render > Render Current Frame -> Keep Image -> render again -> two
-slots used; Windows > Rendering Editors > Light Editor -> a window on its "Light Editor" tab (screenshots)."""
+slots used; Windows > Rendering Editors > Light Editor -> an Outliner window of the lights (screenshots)."""
 
 import os
 import sys
@@ -196,23 +196,12 @@ def s_light():
 def s_light_open():
     w = bpy.context.window_manager.windows[-1]
     a = w.screen.areas[0]
-    ui = next((r for r in a.regions if r.type == 'UI'), None)
-    if wait(s_light_open, lambda: ui is not None and ui.active_panel_category == "Light Editor"):
-        redraw_all()
-        return
-    le = mod(".ui.light_editor")
-    with bpy.context.temp_override(window=w, area=a, region=ui):
-        marked = le.is_light_editor(bpy.context)
-    check(f"Windows > Rendering Editors > Light Editor: a 3D View window on the Light Editor tab "
-          f"(got {C['le']}, {a.type}, {ui.active_panel_category if ui else None}, marked {marked})",
-          a.type == 'VIEW_3D' and ui is not None and ui.active_panel_category == "Light Editor" and marked)
+    sp = a.spaces.active
+    check(f"Windows > Rendering Editors > Light Editor: an Outliner window that lists only lights "
+          f"(got {C['le']}, windows {C['nwin']}, {a.type})",
+          a.type == 'OUTLINER' and sp.use_filter_object and sp.use_filter_object_light
+          and not sp.use_filter_object_mesh and not sp.use_filter_object_camera)
     C["lew"] = w
-    with bpy.context.temp_override(window=w, area=a, region=ui):
-        bpy.ops.allset.light_select(light="pointLight1")
-        bpy.ops.allset.light_isolate(light="pointLight1")
-    sun = bpy.context.scene.objects["directionalLight1"]
-    check(f"Light Editor: pick pointLight1 + Isolate -> directionalLight1 off ({sun.hide_render})",
-          sun.hide_render and bpy.context.active_object.name == "pointLight1")
     redraw_all()
 
 
@@ -237,9 +226,6 @@ def s_render_settings_open():
 @step
 def s_end():
     shot("gui_step67_light_editor.png", C["lew"])
-    with bpy.context.temp_override(window=C["lew"]):
-        bpy.ops.allset.light_isolate(light="pointLight1")
-    check("Isolate again: directionalLight1 back on", not bpy.context.scene.objects["directionalLight1"].hide_render)
 
 
 run()

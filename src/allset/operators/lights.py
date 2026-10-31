@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya light Intensity and Decay Rate on Blender lights (step 137, issue #71).
 
-Maya: a new point / spot / area / volume
-light has intensity 1 and Decay Rate No Decay; a lambert surface facing a point / spot light at any distance renders
+Maya: a new point / spot / area light
+has intensity 1 and Decay Rate No Decay; a lambert surface facing a point / spot light at any distance renders
 color x diffuse x intensity (Linear divides by the distance in Maya units, Quadratic by its square, Cubic by its
 cube). A directional light renders color x diffuse x intensity. An area light (2 x 2 units) falls off by itself,
 and the Decay Rate divides by distance^n on top.
@@ -45,12 +45,6 @@ DECAY_LIGHTS = {'POINT', 'SPOT', 'AREA'}
 FALLOFF_OUTPUT = {0: "Constant", 1: "Linear"}
 MAYA_SPOT_CONE, MAYA_SPOT_PENUMBRA = 40.0, 0.0      # degrees (coneAngle 40, penumbraAngle 0)
 MAYA_AREA_SIZE = 2.0                   # the area light is a 2 x 2 unit square
-KIND_PROP = "allset_light_kind"        # step 214: "ambientLight" / "volumeLight" (operators/maya_lights.py)
-
-
-def _maya_kind(light):
-    """The step 214 Maya light kind of a Blender light (Ambient / Volume Light), else None."""
-    return light.get(KIND_PROP) if light.get(KIND_PROP) in ("ambientLight", "volumeLight") else None
 
 
 def _k():
@@ -60,7 +54,7 @@ def _k():
 
 def decay(light):
     """Maya Decay Rate 0..3 of a Blender light."""
-    if light.type not in DECAY_LIGHTS or _maya_kind(light):
+    if light.type not in DECAY_LIGHTS:
         return 0
     v = light.get(DECAY_PROP)
     if v is None:
@@ -109,9 +103,6 @@ def decay_notice(light):
 
 
 def intensity(light, k=None):
-    if _maya_kind(light):
-        from . import maya_lights
-        return maya_lights.intensity(light)
     k = _k() if k is None else k
     return light.energy / power_factor(light.type, decay(light), k)
 
@@ -147,10 +138,6 @@ def _falloff_nodes(light, n, k):
 
 def apply(light, maya_intensity=None, n=None, k=None):
     """Write Maya intensity / Decay Rate to the light (power + Cycles falloff node)."""
-    if _maya_kind(light):
-        from . import maya_lights
-        maya_lights.set_intensity(light, maya_lights.intensity(light) if maya_intensity is None else maya_intensity)
-        return
     k = _k() if k is None else k
     if maya_intensity is None:
         maya_intensity = intensity(light, k)
@@ -164,10 +151,6 @@ def apply(light, maya_intensity=None, n=None, k=None):
 
 def maya_defaults(light, k):
     """A new Maya light: intensity 1, No Decay; spot cone 40 / penumbra 0; area light 2 x 2 units."""
-    if _maya_kind(light):
-        from . import maya_lights
-        maya_lights.defaults(light, k)
-        return
     if light.type == 'SPOT':
         light.spot_size = math.radians(MAYA_SPOT_CONE)
         light.spot_blend = MAYA_SPOT_PENUMBRA
@@ -192,7 +175,7 @@ def _get_decay(self):
 
 
 def _set_decay(self, value):
-    if self.type in DECAY_LIGHTS and not _maya_kind(self):
+    if self.type in DECAY_LIGHTS:
         apply(self, intensity(self), value)
 
 
@@ -283,11 +266,7 @@ KEY_PATHS = {"allset_intensity": (("energy", -1),)}
 
 
 def key_paths(light, name):
-    """Blender properties a key on Light row ``name`` keys; Ambient / Volume Light intensity is an ID property
-    (step 214: the power can't hold it), kept in step from frame_change_post (operators/maya_lights.py)."""
-    if name == "allset_intensity" and _maya_kind(light):
-        from . import maya_lights
-        return [(f'["{maya_lights.INTENSITY_PROP}"]', -1)]
+    """Blender properties a key on Light row ``name`` keys."""
     return list(KEY_PATHS.get(name, ()))
 
 

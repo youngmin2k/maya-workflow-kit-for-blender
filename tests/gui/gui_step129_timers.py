@@ -1,5 +1,5 @@
 """Step 129 (#36): kit timers keep window / area pointers, not Window / Area objects. Each step opens a kit window
-whose setup retries from a timer (Hypershade and Light Editor: sidebar tab; Graph Editor: frame range; a torn-off
+whose setup retries from a timer (Hypershade: sidebar tab; Light Editor: an Outliner window; Graph Editor: frame range; a torn-off
 Channel Box and a torn-off menu: dock role) and closes it in the same step, before the timer's first tick. A timer
 that kept the freed Window crashed Blender (EXCEPTION_ACCESS_VIOLATION). PASSES when Blender is still running 3 s
 after the last close (longer than every retry loop: 100 x 0.05 s at most)."""

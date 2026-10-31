@@ -25,9 +25,7 @@ def layout():
 
 
 def rs_windows():
-    rs = mod("ui.render_settings")
-    return [w for w in bpy.context.window_manager.windows if w != win() and rs.is_render_settings_window(w)] \
-        if hasattr(rs, "is_render_settings_window") else [w for w in bpy.context.window_manager.windows if w != win()]
+    return [w for w in bpy.context.window_manager.windows if w != win()]
 
 
 def close_others():

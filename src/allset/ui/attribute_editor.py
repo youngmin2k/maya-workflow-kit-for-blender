@@ -233,7 +233,7 @@ def sections_for(ob, key):
     if kind == "J":
         return ae_layout.BY_KIND["joint"][0], "joint"
     if kind == "S":
-        sub = (ae_layout.light_kind(ob.data) or ob.data.type) if ob.type == 'LIGHT' else ob.type
+        sub = ob.data.type if ob.type == 'LIGHT' else ob.type
         return ae_layout.BY_KIND.get(sub, ([], None))[0], sub.lower()
     if kind == "MAT":
         mat = tab_target(ob, key)

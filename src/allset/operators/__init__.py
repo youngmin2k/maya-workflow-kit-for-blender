@@ -9,7 +9,7 @@ Operator ids use the ``allset.`` prefix. Each module lists its classes in
 import bpy
 
 from . import (auto_key, bookmarks, ik_fk, component, create, curve_tools, curves_maya, cut_sew, display, driven_key, duplicate, extrude, file_io, freeze, option_windows, fx, global_keys4, graph_keys, graph_key_menu, deformer_weights, joint_labels, group, history, hold, joints, pivot_menu, key_batch, key_batch3, key_insert, loop_pick, manip, marquee,
-               anim_layers, lights, light_links, material, menu_extras, menu_items, mesh_maya, multi_cut, poly_maya, rig_maya, mesh_tools, outliner_drag, parenting, pickwalk, pivot, playblast, preselect, project, rig_tools, select_convert, select_priority, sets, shading_maps, skin, snap_align, soft_select, symmetry, taphold,
+               anim_layers, lights, material, menu_extras, menu_items, mesh_maya, multi_cut, poly_maya, rig_maya, mesh_tools, outliner_drag, parenting, pickwalk, pivot, playblast, preselect, project, rig_tools, select_convert, select_priority, sets, shading_maps, skin, snap_align, soft_select, symmetry, taphold,
                time_keys, tool_keys, units, uv_shells, uv_tools, uv_modify, uv_select_178, view, view_keys3, visibility)
 from . import poly_draw, quad_draw  # step 144 POLY: Create Polygon / Append to Polygon / Quad Draw (#30)
 from . import edge_loops  # step 144 LOOP: Insert / Offset Edge Loop, Slide Edge (#31)
@@ -34,7 +34,7 @@ classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *marquee.classes, *preselect.classes, *select_priority.classes, *menu_extras.classes,
            *tool_keys.classes, *symmetry.classes, *pivot.classes, *snap_align.classes, *time_keys.classes,
            *joints.classes, *skin.classes, *driven_key.classes, *rig_tools.classes, *mesh_maya.classes,
-           *mesh_tools.classes, *extrude.classes, *uv_tools.classes, *uv_shells.classes, *uv_modify.classes, *light_links.classes, *anim_layers.classes, *uv_select_178.classes, *shading_maps.classes, *fx.classes, *project.classes, *graph_keys.classes, *graph_key_menu.classes, *deformer_weights.classes, *joint_labels.classes, *ik_fk.classes, *playblast.classes, *key_batch.classes, *cut_sew.classes, *multi_cut.classes,
+           *mesh_tools.classes, *extrude.classes, *uv_tools.classes, *uv_shells.classes, *uv_modify.classes, *anim_layers.classes, *uv_select_178.classes, *shading_maps.classes, *fx.classes, *project.classes, *graph_keys.classes, *graph_key_menu.classes, *deformer_weights.classes, *joint_labels.classes, *ik_fk.classes, *playblast.classes, *key_batch.classes, *cut_sew.classes, *multi_cut.classes,
            *outliner_drag.classes, *key_insert.classes, *view_keys3.classes, *global_keys4.classes,
            *pivot_menu.classes, *sets.classes, *menu_items.classes, *file_io.classes, *option_windows.classes,
            *key_batch3.classes, *bookmarks.classes, *curve_tools.classes, *curves_maya.classes,
@@ -128,7 +128,6 @@ from . import references  # noqa: E402  step 209: Reference Editor commands (rel
 
 classes += references.classes
 
-from . import maya_lights  # noqa: E402  step 214: Maya Ambient / Volume Light (no classes: props + handlers)
 from . import weight_paint
 
 classes += weight_paint.classes
@@ -207,8 +206,6 @@ def register():
     snap_align.register_props()
     material.register_props()
     lights.register_props()
-    maya_lights.register()
-    light_links.register_props()
     anim_layers.register_props()
     driven_key.register_props()
     mesh_tools.register_props()
@@ -335,8 +332,6 @@ def unregister():
     fx_more.unregister_props()
     fx.unregister_props()
     anim_layers.unregister_props()
-    light_links.unregister_props()
-    maya_lights.unregister()
     lights.unregister_props()
     material.unregister_props()
     uv_shell_select.unregister_props()

@@ -30,8 +30,17 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   Render > Batch Render renders the frame range in this session, Show Batch Render opens Blender's Render window and
   Test Resolution sets Blender's Resolution % (the size of every render). F12 / Ctrl+F12 and Ctrl+Alt+Enter are Blender's own
   render keys again (F12 over the 3D View and the UV Editor stays Maya's UV selection mask).
+- **Light linking uses Blender's light linking**: Lighting/Shading > Make / Break Light Links and Make / Break Shadow
+  Links link the selected objects to the **active** light (Make = Include, Break = Exclude; once one object is
+  included, the light reaches only the included objects), Select Objects Illuminated / Shadowed by Light select the
+  active light's linked objects. The Light Linking Editor (Lighting/Shading and Windows > Relationship Editors >
+  Light Linking) opens Blender's Light Linking panel (Object Properties > Shading).
+- **Light Editor** (Windows > Rendering Editors and the Status Line) opens an Outliner window that lists only the
+  scene's lights; **Render Settings** opens Blender's Properties > Render in a window of its own.
 - **Files saved with older versions** are tidied when they are opened: the hidden `persp` render camera the kit
-  made stops being the scene camera and is removed, and a leftover `defaultLight` goes.
+  made stops being the scene camera and is removed, and a leftover `defaultLight` goes. The World's "Maya Ambient"
+  nodes are taken out, old Ambient / Volume Lights become point lights with the same intensity, a Light Editor
+  Isolate left on is undone.
 - **Prevent Negative Scale on every Scale handle** (#261): in component mode the centre handle and the plane
   handles stop at zero too, so a selection scales onto its pivot (ready to merge) or onto a line through it
   without flipping. Object Mode still scales past zero.
@@ -46,6 +55,12 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   own Overwrite / Placeholders.
 - **Test Resolution** preference (a separate size for kit renders): Blender's Resolution % sets the size of every
   render.
+- **Ambient Light and Volume Light** (Create > Lights, the Hypershade's Create > Lights, the Rendering shelf): greyed
+  with a note, Blender has neither (raise the World colour, or use a Point Light).
+- **Kit light linking rules**: making links for several lights at once, Illuminates by Default and Select Lights
+  Illuminating / Shadowing Object (greyed: each light's Light Linking panel lists its objects).
+- **Kit Light Editor and Render Settings windows**: the Light Editor's list with Isolate, and the Render Settings
+  window's Common tab, image size presets and its Edit / Presets / Help menus.
 
 ### Fixed
 - **Joints inside a mesh in wireframe** (#266): a wireframe view (4) shows every joint and bone again, also the ones

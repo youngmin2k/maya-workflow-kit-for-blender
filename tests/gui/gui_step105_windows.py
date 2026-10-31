@@ -1,6 +1,6 @@
 """Step 105 in a real UI: the Maya Workflow Kit layout, pCube1 with lambert1 + a Blinn, then Windows > Rendering Editors >
 Hypershade, Render > Render Settings, Windows > General Editors > Script Editor in new windows -> Maya menu bars,
-Browser tabs, Common tab, history over MEL / Python input (screenshots with ALLSET_GUI_SHOTS)."""
+Browser tabs, Blender's Render tab, history over MEL / Python input (screenshots with ALLSET_GUI_SHOTS)."""
 
 import os
 import sys
@@ -115,37 +115,17 @@ def s_hs_shot():
 @step
 def s_rs():
     w = newest()
-    rs = mod(".ui.render_settings")
-    a = w.screen.areas[0] if w else None
-    check(f"Render Settings window = a kit-marked Properties window on Render ({C['rs']}, "
-          f"{a and a.ui_type}, {a and a.spaces.active.context})",
-          a is not None and a.ui_type == 'PROPERTIES' and w.as_pointer() in rs._WINDOWS)
     redraw()
 
 
 @step
 def s_rs_wait():
-    redraw()
-
-
-@step
-def s_rs_shot():
     w = newest()
+    a = w.screen.areas[0] if w else None
+    check(f"Render Settings = a Properties window on Blender's Render tab ({C['rs']}, "
+          f"{a and a.ui_type}, {a and a.spaces.active.context})",
+          a is not None and a.ui_type == 'PROPERTIES' and a.spaces.active.context == 'RENDER')
     shot("gui_step105_render_settings.png", w)
-    bpy.context.window_manager.allset_rs_tab = 'RENDERER'
-    redraw()
-
-
-@step
-def s_rs_renderer_wait():
-    redraw()
-
-
-@step
-def s_rs_renderer_shot():
-    w = newest()
-    shot("gui_step105_render_settings_renderer.png", w)
-    bpy.context.window_manager.allset_rs_tab = 'COMMON'
     close_extra_windows()
     C["se"] = menu("Windows/General Editors/Script Editor")
 

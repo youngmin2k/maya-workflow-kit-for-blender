@@ -166,7 +166,9 @@ def test_foreign_panel_reregister_failure_is_skipped():
         with _Patch(bpy.utils, "register_class", register_class):
             assert sw.set_mode(True, layout=False) is True, sw.last_error[0]
         assert sw._registered[0]
-        assert refused == set(panels), f"the foreign panels were never re-registered: {refused}"
+        sidebar, render = panels
+        # the sidebar panel is re-registered to hide it in the Maya dock; render panels are left alone
+        assert refused == {sidebar}, f"re-registered: {refused}"
         for cls in panels:
             assert cls.is_registered, f"{cls.__name__} lost"
             assert cls.__dict__.get("poll") is raw_polls[cls], f"{cls.__name__} kept a kit poll"

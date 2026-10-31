@@ -56,7 +56,7 @@ def is_uv(space):
 # --- menu bars ---------------------------------------------------------------------------------------------------
 
 BLENDER_MENUS = {GE: "GRAPH_MT_editor_menus", DS: "DOPESHEET_MT_editor_menus", UV: "IMAGE_MT_editor_menus",
-                 # step 105 windows (the Render Settings window is a Properties editor: no Blender menus)
+                 # Hypershade / Script Editor windows
                  "Hypershade": "NODE_MT_editor_menus", "Script Editor": "INFO_MT_editor_menus"}
 
 
@@ -81,7 +81,7 @@ def _bar_class(editor):
 
 
 _BLENDER = {ed: _blender_menu_class(ed) for ed in BLENDER_MENUS}
-_BAR = {ed: _bar_class(ed) for ed in (*BLENDER_MENUS, "Render Settings")}
+_BAR = {ed: _bar_class(ed) for ed in BLENDER_MENUS}
 
 
 def draw_menu_bar(layout, context, editor):
