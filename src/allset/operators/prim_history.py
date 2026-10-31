@@ -80,7 +80,16 @@ def attrs(owner):
         return {}
     out = prim_shapes.defaults(node["type"])
     out.update({k: v for k, v in node["attrs"].items() if k in out})
+    if "createUVs" in out and "createUVs" not in node["attrs"] and node.get("createUVs") == 0:
+        out["createUVs"] = 0          # a node saved before Create UVs was a Channel Box attribute
     return out
+
+
+def uvs_on(values, extra):
+    """Whether the shape gets UVs: the node's own Create UVs (polyCylinder), else the stored create option."""
+    if "createUVs" in values:
+        return values["createUVs"] != 0
+    return extra.get("createUVs", 1) != 0
 
 
 def _sig_mesh(me, bm=None):
@@ -310,7 +319,7 @@ def rebuild(context, ob, changes):
     shape = prim_shapes.build(ntype, values)
     extra = {key: node[key] for key in ("createUVs",) if key in node}
     if ntype in prim_shapes.POLY:
-        _write_mesh(owner, shape, k, extra.get("createUVs", 1) != 0)
+        _write_mesh(owner, shape, k, uvs_on(values, extra))
     elif ntype in GROUPS:
         for part, patch in zip(_parts(owner), shape):
             _swap_curve(context, part, patch, k)
@@ -333,10 +342,13 @@ def create_object(context, kind, values=None, maya_naming=True, create_uvs=True)
     for name, v in {**KIND_VALUES.get(kind, {}), **(values or {})}.items():
         if name in vals:
             vals[name] = prim_shapes.clamp(node_type, name, v)
+    if not create_uvs and "createUVs" in vals:
+        vals["createUVs"] = 0
     k = units.maya_unit(context.scene)
     shape = prim_shapes.build(node_type, vals)
     coll = context.collection
     extra = {} if create_uvs else {"createUVs": 0}
+    create_uvs = uvs_on(vals, extra)
     if node_type in prim_shapes.POLY:
         import bmesh
         me = bpy.data.meshes.new(base + "Shape")

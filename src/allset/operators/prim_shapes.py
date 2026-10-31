@@ -52,6 +52,9 @@ NORMAL = [_a("normalX", "Normal X", 0.0, "float"), _a("normalY", "Normal Y", 1.0
 CENTER = [_a("centerX", "Center X", 0.0, "length"), _a("centerY", "Center Y", 0.0, "length"),
           _a("centerZ", "Center Z", 0.0, "length")]
 DEGREE = ("enum", ("Linear", "Cubic"))   # Maya degree 1 / 3 (stored as 1 / 3)
+# Create UVs (polyCylinder): 0 = no UVs; the kit lays out every other choice like the Create menu
+# (Normalize and Preserve Aspect Ratio)
+CREATE_UVS = ("None", "Normalization Off", "Normalize", "Normalize and Preserve Aspect Ratio")
 SWEEPS = [_a("startSweep", "Start Sweep", 0.0, "angle", 0.0, 360.0), _a("endSweep", "End Sweep", 360.0, "angle", 0.0, 360.0)]
 
 # Defaults = what the Create menu builds with factory option boxes; where
@@ -64,11 +67,14 @@ NODES = {
     "polySphere": [*AXIS, _a("radius", "Radius", 1.0, "length", 0.0),
                    _a("subdivisionsAxis", "Subdivisions Axis", 20, "int", 3),
                    _a("subdivisionsHeight", "Subdivisions Height", 20, "int", 2)],
-    "polyCylinder": [*AXIS, _a("radius", "Radius", 1.0, "length", 0.0), _a("height", "Height", 2.0, "length", 0.0),
+    "polyCylinder": [*AXIS, _a("heightBaseline", "Height Baseline", 0.0, "float"),
+                     _a("radius", "Radius", 1.0, "length", 0.0), _a("height", "Height", 2.0, "length", 0.0),
                      _a("subdivisionsAxis", "Subdivisions Axis", 20, "int", 3),
                      _a("subdivisionsHeight", "Subdivisions Height", 1, "int", 1),
                      _a("subdivisionsCaps", "Subdivisions Caps", 1, "int", 0),
-                     _a("roundCap", "Round Cap", False, "bool")],
+                     _a("createUVs", "Create UVs", 3, ("enum", CREATE_UVS)),
+                     _a("roundCap", "Round Cap", False, "bool"),
+                     _a("roundCapHeightCompensation", "Round Cap Height Compensation", False, "bool")],
     "polyCone": [*AXIS, _a("radius", "Radius", 1.0, "length", 0.0), _a("height", "Height", 2.0, "length", 0.0),
                  _a("subdivisionsAxis", "Subdivisions Axis", 20, "int", 3),
                  _a("subdivisionsHeight", "Subdivisions Height", 1, "int", 1),
@@ -366,11 +372,27 @@ SIDE_U, SIDE_V = (0.375, 0.625), (0.3125, 0.68844)
 CAP_R, CAP_V, CAP_DV = 0.15625, (0.15625, 0.84375), 0.00625
 
 
+def cylinder_heights(a):
+    """(side height, y shift) of polyCylinder: Round Cap Height Compensation keeps the round caps inside Height
+    (the side gets 2 x radius shorter); Height Baseline moves the shape by -baseline x half its whole height
+    (-1 = bottom on the origin, 1 = top on the origin)."""
+    h, sc = a["height"], a["subdivisionsCaps"]
+    dome = a["radius"] if a.get("roundCap") and sc > 0 else 0.0
+    if dome and a.get("roundCapHeightCompensation"):
+        h = max(h - 2.0 * dome, 0.0)
+    return h, -a.get("heightBaseline", 0.0) * (h + 2.0 * dome) / 2.0
+
+
+def _shifted(verts, dy):
+    return verts if not dy else [(x, y + dy, z) for x, y, z in verts]
+
+
 def poly_cylinder(a):
-    r, h, sx, sy, sc = a["radius"], a["height"], a["subdivisionsAxis"], a["subdivisionsHeight"], a["subdivisionsCaps"]
+    r, sx, sy, sc = a["radius"], a["subdivisionsAxis"], a["subdivisionsHeight"], a["subdivisionsCaps"]
+    h, dy = cylinder_heights(a)
     dome = r if a.get("roundCap") and sc > 0 else 0.0
     if sc == 0:
-        return _cylinder_ngon_caps(a, r, h, sx, sy)
+        return _cylinder_ngon_caps(a, r, h, sx, sy, dy)
     # Maya stacks every ring from the bottom cap's innermost up the side to the top cap's innermost, then the two
     # centres (step 257: 24 / 24 polyCylinder sizes with Subdivisions Caps >= 1, round caps 4 / 4)
     rings = []          # (radius, y, part): part -1 bottom cap, 0 side, 1 top cap
@@ -415,10 +437,10 @@ def poly_cylinder(a):
             hard.add(frozenset((rim0 * sx + i, rim0 * sx + (i + 1) % sx)))
             hard.add(frozenset((rim1 * sx + i, rim1 * sx + (i + 1) % sx)))
     hard |= _soft_by_angle(verts, [faces[i] for i in side])
-    return Mesh(_orient(verts, a), faces, uvs, hard, _cylinder_edges(len(rings), sx, (c0, c1)))
+    return Mesh(_orient(_shifted(verts, dy), a), faces, uvs, hard, _cylinder_edges(len(rings), sx, (c0, c1)))
 
 
-def _cylinder_ngon_caps(a, r, h, sx, sy):
+def _cylinder_ngon_caps(a, r, h, sx, sy, dy=0.0):
     verts = []
     for j in range(sy + 1):
         verts += _ring(sx, r, -h / 2 + h * j / sy)
@@ -438,7 +460,7 @@ def _cylinder_ngon_caps(a, r, h, sx, sy):
         hard.add(frozenset((i, (i + 1) % sx)))
         hard.add(frozenset((sy * sx + i, sy * sx + (i + 1) % sx)))
     hard |= _soft_by_angle(verts, faces[:side])
-    return Mesh(_orient(verts, a), faces, uvs, hard, _cylinder_edges(sy + 1, sx, None))
+    return Mesh(_orient(_shifted(verts, dy), a), faces, uvs, hard, _cylinder_edges(sy + 1, sx, None))
 
 
 def _cap_ring(r, centre_y, sc, c, sign, dome):

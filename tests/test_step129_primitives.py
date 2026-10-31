@@ -168,7 +168,8 @@ def test_inputs_rows_and_editing_subdivisions_caps_rebuilds():
     assert props.subdivisionsCaps_text == "1" and props.subdivisionsAxis_text == "20"
     assert props.radius_text == "1" and props.height_text == "2", (props.radius_text, props.height_text)
     rows = creation_inputs.node_rows("polyCylinder")
-    assert rows[:6] == ["radius", "height", "subdivisionsAxis", "subdivisionsHeight", "subdivisionsCaps", "roundCap"]
+    assert rows[:9] == ["heightBaseline", "radius", "height", "subdivisionsAxis", "subdivisionsHeight",
+                        "subdivisionsCaps", "createUVs", "roundCap", "roundCapHeightCompensation"]
     props.subdivisionsCaps_text = "2"
     assert _counts(ob.data)[0] == (82, 180, 100), _counts(ob.data)
     assert props.subdivisionsCaps_text == "2"
