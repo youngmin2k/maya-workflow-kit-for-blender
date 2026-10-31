@@ -536,7 +536,7 @@ MAP = {
     "nCache/Delete Cache": ("allset.ncache", {"action": 'DELETE', "kind": 'ALL'}),
     "Fields/Solvers/Interactive Playback": "screen.animation_play",
     "nHair/Create Hair": "object.curves_empty_hair_add",
-    "Fluids/3D Container": "object.quick_smoke",
+    "Fluids/3D Container": "allset.fluid_quick_smoke",
     "Fluids/Ocean": _mod('OCEAN'),
     # fields = Blender force field empties; Gravity / Uniform = a Wind field turned down / along +X
     "Fields/Solvers/Air": _field('WIND'),
@@ -552,8 +552,8 @@ MAP = {
     "Fields/Solvers/Create Pin Constraint": ("rigidbody.connect", {"con_type": 'POINT'}),
     "Fields/Solvers/Create Hinge Constraint": ("rigidbody.connect", {"con_type": 'HINGE'}),
     "Fields/Solvers/Create Spring Constraint": ("rigidbody.connect", {"con_type": 'GENERIC_SPRING'}),
-    "Effects/Fire": ("object.quick_smoke", {"style": 'FIRE'}),
-    "Effects/Smoke": "object.quick_smoke",
+    "Effects/Fire": ("allset.fluid_quick_smoke", {"style": 'FIRE'}),
+    "Effects/Smoke": "allset.fluid_quick_smoke",
     # --- Rendering ---
     # Materials (operators/material.py, step 29).
     "Lighting/Shading/Material Attributes": ("v3d", "allset.material_attributes", {}),
@@ -1026,7 +1026,7 @@ MAP.update({
     # Sculpting stamps Blender lacks: the keymap's step-107 substitutes (sculpt Ctrl+8 / Ctrl+9)
     "Mesh Tools/Sculpting Tools/Spray Tool": _sculpt("Draw Sharp"),
     "Mesh Tools/Sculpting Tools/Repeat Tool": _sculpt("Layer"),
-    "Fluids/Add/Edit Contents/Emit from Object": "object.quick_smoke",
+    "Fluids/Add/Edit Contents/Emit from Object": "allset.fluid_quick_smoke",
     "Fluids/Make Collide": "allset.fluid_collide",
     "nCloth/Display Input Mesh": ("allset.ncloth_display", {"mesh": 'INPUT'}),
     "nCloth/Display Current Mesh": ("allset.ncloth_display", {"mesh": 'CURRENT'}),

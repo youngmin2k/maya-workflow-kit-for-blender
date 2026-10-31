@@ -279,7 +279,7 @@ def test_pencil_and_add_points():
 def test_fluid_container_button_is_the_menu_item():
     # the 3D Fluid Container with Emitter button runs its menu item (Fluids > 3D Container = Blender's Quick Smoke)
     action, _icon = shelf_map.lookup("FX", "3D Fluid Container with Emitter", "Create3DContainerEmitter")
-    assert action == "object.quick_smoke", action
+    assert action == "allset.fluid_quick_smoke", action
 
 
 def test_fluid_collide_and_ncloth_display():

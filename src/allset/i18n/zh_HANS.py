@@ -5729,4 +5729,7 @@ STRINGS = {
     "Create the rigid body solver (Maya Create Rigid Body Solver: Blender's scene Rigid Body World, one per\nscene)": '创建刚体解算器 (Maya 的 Create Rigid Body Solver: Blender 场景的刚体世界，每个场景一个)',
     "Make the selected curves guide particles (Maya Fields > Volume Curve, Effects > Flow > Create Curve Flow:\nBlender's Curve Guide force field on the curve)": '让所选曲线引导粒子 (Maya 的 Fields > Volume Curve、Effects > Flow > Create Curve Flow: 曲线上的 Blender 曲线引导力场)',
     "Make the selected meshes emit smoke into a fluid container (Maya Fluids > Add/Edit Contents > Emitter:\nBlender's Fluid modifier of type Flow)": '让所选网格向流体容器发射烟雾 (Maya 的 Fluids > Add/Edit Contents > Emitter: 类型为流动的 Blender 流体修改器)',
+    "Make the selected meshes smoke emitters in a new smoke domain (Blender's Quick Smoke), except fluids": '将所选网格设为新烟雾域中的烟雾发射器 (Blender 的快速烟雾)，流体除外',
+    'Smoke & Fire': '烟雾和火',
+    'Smoke Style': '烟雾样式',
 }

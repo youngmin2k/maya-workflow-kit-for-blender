@@ -44,7 +44,8 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   nParticles > Emit from Object / Make Collide add Blender's Cloth / Collision modifier or particle system to every
   selected mesh, Create Active / Passive Rigid Body are Blender's rigid bodies, the Fields/Solvers fields are
   Blender's force fields (Gravity and Uniform = a Wind field turned down / along X), Fluids > 3D Container and
-  Effects > Fire / Smoke are Blender's Quick Smoke, nConstraint > Transform Constraint is Blender's Hook to New
+  Effects > Fire / Smoke are Blender's Quick Smoke (meshes that already are fluids are left out; when every selected
+  mesh is one, a warning says so instead of a Python error), nConstraint > Transform Constraint is Blender's Hook to New
   Object, Fluids > Add/Edit Contents > Emitter makes the selected meshes smoke flows and Effects > Flow > Create
   Curve Flow a Curve Guide field. Nothing is rescaled: Blender simulates one unit as one metre, so FX works in metre
   scenes (the creating items say so in their tooltip).

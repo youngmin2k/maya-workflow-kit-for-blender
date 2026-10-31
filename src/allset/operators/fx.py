@@ -147,6 +147,46 @@ class ALLSET_OT_fluid_collide(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def is_fluid(ob):
+    return any(md.type == 'FLUID' for md in ob.modifiers)
+
+
+class ALLSET_OT_fluid_quick_smoke(bpy.types.Operator):
+    """Make the selected meshes smoke emitters in a new smoke domain (Blender's Quick Smoke), except fluids"""
+    bl_idname = "allset.fluid_quick_smoke"
+    bl_label = "Quick Smoke"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    style: EnumProperty(name="Smoke Style", items=(('SMOKE', "Smoke", ""), ('FIRE', "Fire", ""),
+                                                   ('BOTH', "Smoke & Fire", "")), default='SMOKE')
+
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
+
+    def execute(self, context):
+        # Blender's Quick Smoke stops with a Python error on a mesh that already has a Fluid modifier
+        meshes = _meshes(context)
+        fluids = [ob for ob in meshes if is_fluid(ob)]
+        if not meshes:
+            self.report({'ERROR'}, "Select at least one mesh object")
+            return {'CANCELLED'}
+        if len(fluids) == len(meshes):
+            self.report({'WARNING'}, f"Already a fluid: {', '.join(ob.name for ob in fluids)}")
+            return {'CANCELLED'}
+        for ob in fluids:
+            ob.select_set(False)
+        try:
+            res = bpy.ops.object.quick_smoke(style=self.style)
+        except RuntimeError as ex:
+            from . import maya_errors
+            maya_errors.report_nested(self, ex)
+            return {'CANCELLED'}
+        if fluids:
+            self.report({'WARNING'}, f"Skipped, already a fluid: {', '.join(ob.name for ob in fluids)}")
+        return res
+
+
 class ALLSET_OT_ncloth_display(bpy.types.Operator):
     """Show the selected cloth objects' input mesh (cloth off in the viewport) or the simulated current mesh
     (Maya nCloth > Display Input Mesh / Display Current Mesh)"""
@@ -169,4 +209,5 @@ class ALLSET_OT_ncloth_display(bpy.types.Operator):
         return {'FINISHED'}
 
 
-classes = (ALLSET_OT_fx_remove_ncloth, ALLSET_OT_ncache, ALLSET_OT_fluid_collide, ALLSET_OT_ncloth_display)
+classes = (ALLSET_OT_fx_remove_ncloth, ALLSET_OT_ncache, ALLSET_OT_fluid_collide, ALLSET_OT_fluid_quick_smoke,
+           ALLSET_OT_ncloth_display)

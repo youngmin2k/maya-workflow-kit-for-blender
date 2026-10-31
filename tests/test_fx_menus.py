@@ -24,8 +24,8 @@ DIRECT = {
     "Fields/Solvers/Create Active Rigid Body": ("rigidbody.objects_add", {"type": 'ACTIVE'}),
     "Fields/Solvers/Create Passive Rigid Body": ("rigidbody.objects_add", {"type": 'PASSIVE'}),
     "Fields/Solvers/Use Selected as Source": ("object.forcefield_toggle", {}),
-    "Fluids/3D Container": ("object.quick_smoke", {}),
-    "Effects/Fire": ("object.quick_smoke", {"style": 'FIRE'}),
+    "Fluids/3D Container": ("allset.fluid_quick_smoke", {}),
+    "Effects/Fire": ("allset.fluid_quick_smoke", {"style": 'FIRE'}),
     "Fields/Solvers/Air": ("object.effector_add", {"type": 'WIND'}),
     "Fields/Solvers/Vortex": ("object.effector_add", {"type": 'VORTEX'}),
 }

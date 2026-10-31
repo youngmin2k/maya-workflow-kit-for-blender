@@ -5729,4 +5729,7 @@ STRINGS = {
     "Create the rigid body solver (Maya Create Rigid Body Solver: Blender's scene Rigid Body World, one per\nscene)": 'リジッドボディソルバーを作成します (Maya の Create Rigid Body Solver: Blender のシーンのリジッドボディワールド、シーンに 1 つ)',
     "Make the selected curves guide particles (Maya Fields > Volume Curve, Effects > Flow > Create Curve Flow:\nBlender's Curve Guide force field on the curve)": '選択したカーブでパーティクルを導きます (Maya の Fields > Volume Curve、Effects > Flow > Create Curve Flow: カーブ上の Blender のカーブガイドフォースフィールド)',
     "Make the selected meshes emit smoke into a fluid container (Maya Fluids > Add/Edit Contents > Emitter:\nBlender's Fluid modifier of type Flow)": '選択したメッシュから流体コンテナに煙を放出します (Maya の Fluids > Add/Edit Contents > Emitter: タイプがフローの Blender の流体モディファイアー)',
+    "Make the selected meshes smoke emitters in a new smoke domain (Blender's Quick Smoke), except fluids": '選択したメッシュを新しい煙ドメインの煙エミッタにします (Blender のクイック煙)。流体は除きます',
+    'Smoke & Fire': '煙と炎',
+    'Smoke Style': '煙のスタイル',
 }
