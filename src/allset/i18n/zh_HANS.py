@@ -4079,7 +4079,7 @@ STRINGS = {
     'Tangent Weights': '切线权重',
     'Tangent axis': '切线轴',
     'Tangent constraint': '切线约束',
-    'Tangent weight of the curves the kit creates (Maya Curves > Default Tangent Weight)': '工具包所创建曲线的切线权重(Maya 曲线 > 默认切线权重)',
+    'Tangent weight of new animation curves, keyed in any way (Maya Curves > Default Tangent Weight)': '新动画曲线(无论以何种方式设置关键帧)的切线权重(Maya 曲线 > 默认切线权重)',
     'Tangential Drag': '切向阻力',
     'Tangents': '切线',
     'Tangents and Binormals': '切线和副法线',

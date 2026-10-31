@@ -86,6 +86,11 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   the FX shelf's Emitter follows Create Emitter and 3D Fluid Container with Emitter runs Fluids > 3D Container.
 
 ### Fixed
+- **Non-weighted tangents in the Graph Editor** (#267): dragging a tangent handle of a non-weighted curve only turns
+  it, like Maya: the tangent stays a third of the way to the next key while you drag (it used to follow the mouse in
+  length), and the rule also holds after every other edit. Curves made with Blender's own keying (the I key, Insert
+  Keyframe, Blender's auto keying) get Curves > Default Tangent Weight too (non-weighted unless set to Weighted);
+  animation loaded from a file, imported or appended keeps its tangents.
 - **Joints inside a mesh in wireframe** (#266): a wireframe view (4) shows every joint and bone again, also the ones
   inside a mesh, like Maya; X-Ray shading draws them through the surfaces too. In a shaded view a mesh hides the
   joints inside it, as in Maya — Shading > X-Ray Joints shows them.

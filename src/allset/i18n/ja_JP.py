@@ -4079,7 +4079,7 @@ STRINGS = {
     'Tangent Weights': 'タンジェントのウェイト',
     'Tangent axis': 'タンジェント軸',
     'Tangent constraint': 'タンジェントコンストレイン',
-    'Tangent weight of the curves the kit creates (Maya Curves > Default Tangent Weight)': 'キットが作成するカーブのタンジェントの重み (Maya の カーブ > デフォルトのタンジェントの重み)',
+    'Tangent weight of new animation curves, keyed in any way (Maya Curves > Default Tangent Weight)': 'キーの設定方法を問わず、新しいアニメーション カーブのタンジェントの重み (Maya の カーブ > デフォルトのタンジェントの重み)',
     'Tangential Drag': '接線方向ドラッグ',
     'Tangents': 'タンジェント',
     'Tangents and Binormals': 'タンジェントと従法線',

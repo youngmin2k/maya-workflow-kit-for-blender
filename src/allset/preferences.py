@@ -188,10 +188,10 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         description="Draw each buffered curve's snapshot behind it in the Graph Editor (Maya View > Show Buffer Curves)")
     default_tangent_weight: bpy.props.EnumProperty(
         name="Default Tangent Weight", default='NON_WEIGHTED',
-        items=(('NON_WEIGHTED', "Non-weighted Tangents", "New curves the kit keys keep every tangent a third of "
-                "the way to the next key"),
-               ('WEIGHTED', "Weighted Tangents", "New curves the kit keys have tangents whose length can change")),
-        description="Tangent weight of the curves the kit creates (Maya Curves > Default Tangent Weight)")
+        items=(('NON_WEIGHTED', "Non-weighted Tangents", "New animation curves keep every tangent a third of the "
+                "way to the next key"),
+               ('WEIGHTED', "Weighted Tangents", "New animation curves have tangents whose length can change")),
+        description="Tangent weight of new animation curves, keyed in any way (Maya Curves > Default Tangent Weight)")
     retime_snap_on_frame: bpy.props.BoolProperty(
         name="Snap On Frame",
         description="Retime markers and their drags land on whole frames (Maya Retime Tool setting)")

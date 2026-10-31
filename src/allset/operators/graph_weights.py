@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya weighted / non-weighted tangents and tangent length locks (step 198).
+"""Maya weighted / non-weighted tangents and tangent length locks.
 
 Maya:
 - a weighted tangent's weight is the Bezier arm length in (frame, value) space, the angle is taken there too:
@@ -19,15 +19,27 @@ Blender's F-curve handles already are weighted tangents, so the kit only stores 
   written. A lock finds its key by frame (±1e-3); when no key sits there but the key count is still "n" (keys
   were moved, none added / removed) it takes the key at the stored index and follows its new frame.
 
-``watch(context)`` (every 0.25 s from ``ui/graph_view._tick``, never while a modal operator runs) re-applies both
-rules to FREE / ALIGNED handles. AUTO / AUTO_CLAMPED / VECTOR handles are Blender's to compute: Blender
-recalculates them on every update, a drag turns them ALIGNED / FREE and then the rule applies. Writes made by the
-watch push no undo step of their own (they join the next one).
+Keeping the rules (``apply_rules``):
+- live: a ``depsgraph_update_post`` handler re-applies both rules to every Action an update touched, so while a
+  tangent handle of a non-weighted curve is dragged in the Graph Editor only its angle follows the mouse (Blender's
+  transform recomputes each move from its start positions, the correction never adds up; the handler runs before
+  the redraw). Its writes tag the Action once more and the next pass finds nothing to change.
+- ``watch(context)`` (every 0.25 s from ``ui/graph_view._tick``) does the same for every marked Action; it waits while
+  a modal operator runs, except the kit's click listeners (``LISTENERS``) that stay up for the whole session.
+Only FREE / ALIGNED handles are rewritten: AUTO / AUTO_CLAMPED / VECTOR handles are Blender's to compute (a drag
+turns them ALIGNED / FREE and then the rule applies). The writes push no undo step of their own.
+
+New curves made by keying (Blender's own keying included: I key, Insert Keyframe, auto keying) get the Default
+Tangent Weight (``adopt``): a curve of a local Action that is not part of the animation the file was loaded with
+(``take_baseline`` at register / load), has no stored entry and holds exactly one key on the current frame. Loaded,
+imported and appended animation keeps its tangents: it is in the baseline or has more than one key (a one-key curve
+has no arm a rule could change).
 """
 
 import math
 
 import bpy
+from bpy.app.handlers import persistent
 from bpy.props import BoolProperty
 
 from .. import compat
@@ -249,11 +261,41 @@ def selected_points(fc):
 
 # --- watch -----------------------------------------------------------------------------------------------------
 
+# Kit modals that only listen for clicks and stay up for the whole session: they edit no keys
+LISTENERS = {"ALLSET_OT_pose_empty_click", "ALLSET_OT_joint_outliner_select", "ALLSET_OT_cb_channel_drag",
+             "ALLSET_OT_cb_wheel"}
+
+
 def _busy():
     for window in bpy.context.window_manager.windows:
-        if len(window.modal_operators):
+        if any(op.bl_idname not in LISTENERS for op in window.modal_operators):
             return True
     return False
+
+
+def apply_rules(action):
+    """Both rules on one Action's marked curves: Δt/3 arms for non-weighted ones, stored lengths for locked weighted
+    ones. Returns the number of arms changed."""
+    data = action.get(PROP)
+    if data is None:
+        return 0
+    changed = 0
+    for fc in compat.action_fcurves(action):
+        entry = data.get(curve_key(fc))
+        if entry is None:
+            continue
+        if int(entry.get("w", 1)) == 0:
+            changed += third_arms(fc)
+        elif len(entry.get("locks", ())):
+            changed += keep_lengths(fc)
+    return changed
+
+
+def _redraw():
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if area.type in {'GRAPH_EDITOR', 'VIEW_3D', 'DOPESHEET_EDITOR'}:
+                area.tag_redraw()
 
 
 def watch(context=None):
@@ -262,26 +304,84 @@ def watch(context=None):
         actions = [a for a in bpy.data.actions if PROP in a]
         if not actions or _busy():
             return 0
-        changed = 0
-        for action in actions:
-            data = action[PROP]
-            for fc in compat.action_fcurves(action):
-                entry = data.get(curve_key(fc))
-                if entry is None:
-                    continue
-                if int(entry.get("w", 1)) == 0:
-                    changed += third_arms(fc)
-                elif len(entry.get("locks", ())):
-                    changed += keep_lengths(fc)
+        changed = sum(apply_rules(action) for action in actions)
         if changed:
-            for window in bpy.context.window_manager.windows:
-                for area in window.screen.areas:
-                    if area.type in {'GRAPH_EDITOR', 'VIEW_3D', 'DOPESHEET_EDITOR'}:
-                        area.tag_redraw()
+            _redraw()
         return changed
     except Exception as exc:    # a timer must never raise
         print("allset graph_weights.watch:", exc)
         return 0
+
+
+# --- new curves: the Default Tangent Weight for curves made by keying --------------------------------------------
+
+_baseline = {}              # Action name -> curve keys the file was loaded with (or that existed at register)
+_state = {"loading": False}
+
+
+def take_baseline():
+    """Remember every curve that exists now: loaded animation is never adopted."""
+    _baseline.clear()
+    try:
+        actions = list(bpy.data.actions)
+    except AttributeError:          # restricted data while Blender starts: the startup file's load_post follows
+        return
+    for action in actions:
+        _baseline[action.name] = frozenset(curve_key(fc) for fc in compat.action_fcurves(action))
+
+
+def new_by_keying(action, fc, frame):
+    """True for a curve keying just made: not loaded, exactly one key, on ``frame``."""
+    if curve_key(fc) in _baseline.get(action.name, ()):
+        return False
+    pts = fc.keyframe_points
+    return len(pts) == 1 and abs(pts[0].co[0] - frame) <= FRAME_TOL
+
+
+def adopt(action, scene, context=None):
+    """Give the curves keying just made in ``action`` the Default Tangent Weight. Returns how many."""
+    if _state["loading"] or action.library is not None or action.override_library is not None:
+        return 0
+    frame = scene.frame_current + scene.frame_subframe
+    n = 0
+    for fc in compat.action_fcurves(action):
+        data = action.get(PROP)
+        if data is not None and curve_key(fc) in data:
+            continue
+        if new_by_keying(action, fc, frame):
+            apply_default(fc, context)
+            n += 1
+    return n
+
+
+@persistent
+def _on_depsgraph(scene, depsgraph):
+    try:
+        if not depsgraph.id_type_updated('ACTION'):
+            return
+        changed = 0
+        for update in depsgraph.updates:
+            idd = update.id
+            if not isinstance(idd, bpy.types.Action):
+                continue
+            action = idd.original
+            adopt(action, scene)
+            changed += apply_rules(action)
+        if changed:
+            _redraw()
+    except Exception as exc:        # a handler must never raise
+        print("allset graph_weights:", exc)
+
+
+@persistent
+def _load_pre(*_args):
+    _state["loading"] = True
+
+
+@persistent
+def _load_post(*_args):
+    _state["loading"] = False
+    take_baseline()
 
 
 # --- operators -------------------------------------------------------------------------------------------------
@@ -351,9 +451,22 @@ class ALLSET_OT_tangent_weight_lock(bpy.types.Operator):
 classes = (ALLSET_OT_curve_weights, ALLSET_OT_tangent_weight_lock)
 
 
+_HANDLERS = (("depsgraph_update_post", _on_depsgraph), ("load_pre", _load_pre), ("load_post", _load_post))
+
+
 def register_handlers():
-    pass
+    _state["loading"] = False
+    take_baseline()
+    for name, fn in _HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
+        if fn not in handlers:
+            handlers.append(fn)
 
 
 def unregister_handlers():
-    pass
+    for name, fn in _HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
+        if fn in handlers:
+            handlers.remove(fn)
+    _baseline.clear()
+    _state["loading"] = False
