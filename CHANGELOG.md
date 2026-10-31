@@ -90,6 +90,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   the FX shelf's Emitter follows Create Emitter and 3D Fluid Container with Emitter runs Fluids > 3D Container.
 
 ### Fixed
+- **Graph Editor key drags with Auto Key on** (#270): dragging keys in the Graph Editor no longer sometimes adds a
+  key at the current time (with the value the curve had before the drag), and one undo takes the whole drag back.
+  Editing the curves themselves is not a channel change, like Maya; changing a keyed channel still sets its key.
 - **Keying blend shape weights** (#271): the target weights of a blendShape node in the Channel Box INPUTS are
   channels now, like Maya: click to select them, Channels > Key Selected / Breakdown / Mute / Delete and Cut / Copy /
   Paste act on them, typed values and the middle-drag slider change every selected mesh with that target, and the

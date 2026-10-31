@@ -8,6 +8,9 @@ no longer writes preferences (steps 70–129 did, ``prefs_preset`` group ``autok
 notes the objects that changed, and a short timer — once no transform is running, like Blender keys at the end of
 a transform — keys each of their F-curves whose channel value differs from the curve at the current frame. Blender's
 own Auto Keying (``tool_settings.use_keyframe_insert_auto``) is left to the user.
+
+Like Maya, editing the curves themselves (dragging keys in the Graph Editor, tangent changes) is not a channel change:
+an object updated together with one of its Actions is not noted, so no key appears at the current time.
 """
 
 import bpy
@@ -29,14 +32,33 @@ def _playing():
     return any(w.screen is not None and w.screen.is_animation_playing for w in (wm.windows if wm else ()))
 
 
+# the kit's own drags that change channels or keys: Auto Key waits for them to end, like for Blender's transforms
+WAIT_FOR = frozenset({"ALLSET_OT_cb_field_drag", "ALLSET_OT_graph_key_drag", "ALLSET_OT_graph_axis_drag"})
+
+
+def waits_for(bl_idname):
+    return bl_idname.startswith("TRANSFORM_OT") or bl_idname.startswith("ALLSET_OT_manip") or bl_idname in WAIT_FOR
+
+
 def _transforming():
     wm = bpy.context.window_manager
     for w in (wm.windows if wm else ()):
         for op in w.modal_operators:
-            if (op.bl_idname.startswith("TRANSFORM_OT") or op.bl_idname.startswith("ALLSET_OT_manip")
-                    or op.bl_idname == "ALLSET_OT_cb_field_drag"):
+            if waits_for(op.bl_idname):
                 return True
     return False
+
+
+def _actions(ad):
+    """Pointers of the Actions that animate through ``ad`` (its action and its NLA strips' actions)."""
+    out = set()
+    if ad.action is not None:
+        out.add(ad.action.as_pointer())
+    for track in ad.nla_tracks:
+        for strip in track.strips:
+            if strip.action is not None:
+                out.add(strip.action.as_pointer())
+    return out
 
 
 def _nla_mapped(ad):
@@ -159,11 +181,16 @@ def _on_depsgraph(scene, depsgraph):
     if not enabled(scene) or _playing():
         return
     found = False
+    # an object whose animation curves changed in this update (keys dragged in the Graph Editor, a key set, a tangent
+    # rule) only shows its new animated value: that is no channel change to key
+    edited = {u.id.original.as_pointer() for u in depsgraph.updates if isinstance(u.id, bpy.types.Action)}
     for update in depsgraph.updates:
         ob = update.id.original if isinstance(update.id, bpy.types.Object) else None
         if ob is None or ob.animation_data is None:
             continue
         if ob.animation_data.action is None and not ob.animation_data.nla_tracks:
+            continue
+        if edited and _actions(ob.animation_data) & edited:
             continue
         _pending[ob.name] = scene.frame_current
         found = True
