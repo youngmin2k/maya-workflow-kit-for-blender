@@ -9,7 +9,8 @@ child's sphere. A joint without children draws no bone.
 
 Colours follow the selection: unselected joints dark violet, selected ones white, the lead (last selected) green; a
 joint below a selected one takes that joint's colour, and a bone takes its parent joint's colour. Selected joints in a
-perspective view also show short local axes (X red, Y green, Z blue). X-Ray Joints draws them through everything.
+perspective view also show short local axes (X red, Y green, Z blue). A shaded surface hides the joints behind or
+inside it; X-Ray Joints, X-Ray and wireframe views draw them through every surface.
 
 Here a skeleton's joints are its bones' heads (pose positions in Object / Pose Mode, edit bones in Edit Mode); in
 Object Mode a selected skeleton object counts as its root joints selected. Bones with a custom shape draw that shape
@@ -484,6 +485,13 @@ def _save_post(*_args):
     _tick()
 
 
+def see_through(space):
+    """Joints draw over every surface: X-Ray Joints, a wireframe view (no surface hides a joint, like Maya) or
+    X-Ray shading."""
+    shading = space.shading
+    return bool(space.overlay.show_xray_bone or shading.type == 'WIREFRAME' or shading.show_xray)
+
+
 def _draw():
     context = bpy.context
     try:
@@ -498,8 +506,7 @@ def _draw():
     from gpu_extras.batch import batch_for_shader
     region = context.region
     sh = gpu.shader.from_builtin('POLYLINE_SMOOTH_COLOR')
-    xray = context.space_data.overlay.show_xray_bone
-    gpu.state.depth_test_set('NONE' if xray else 'LESS_EQUAL')
+    gpu.state.depth_test_set('NONE' if see_through(context.space_data) else 'LESS_EQUAL')
     gpu.state.depth_mask_set(False)
     gpu.state.blend_set('ALPHA')
     try:

@@ -24,6 +24,9 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   without flipping. Object Mode still scales past zero.
 
 ### Fixed
+- **Joints inside a mesh in wireframe** (#266): a wireframe view (4) shows every joint and bone again, also the ones
+  inside a mesh, like Maya; X-Ray shading draws them through the surfaces too. In a shaded view a mesh hides the
+  joints inside it, as in Maya — Shading > X-Ray Joints shows them.
 - **Translated tooltips** (thanks to @RIPTIDE-z for spotting it in #260): the tooltips of the kit's own buttons and
   menu items now follow the interface language too (Japanese, Simplified Chinese).
 - **Vertex size** (#263): edit-mode vertices follow Blender's theme Vertex Size (selected ones one pixel larger)
