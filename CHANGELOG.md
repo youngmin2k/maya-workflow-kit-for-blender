@@ -22,6 +22,11 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   field on the selected object).
 
 ### Changed
+- **FX, Rendering and lighting run Blender's own features**: the Maya FX and Rendering menus stay where a Maya user
+  looks for them, and each item now calls Blender's own simulation, light or render operator or opens the Blender
+  editor for it; items Blender has nothing for are greyed with a note. Modeling, animation, rigging, UV, texturing,
+  the Hypershade, lambert1 and the Channel Box Intensity / Decay rows of lights are unchanged. See
+  [Maya FX and Rendering in Blender](docs/fx_render_concepts.md) for every item.
 - **Render items call Blender's render**: Render > Render Current Frame / Redo Previous Render / Render Sequence,
   the Status Line Render button and the Render View's Render button run Blender's Render Image / Render Animation
   through the scene camera at the Output properties size (a scene needs a camera, like any Blender render).
@@ -35,10 +40,6 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   Light Linking) opens Blender's Light Linking panel (Object Properties > Shading).
 - **Light Editor** (Windows > Rendering Editors and the Status Line) opens an Outliner window that lists only the
   scene's lights; **Render Settings** opens Blender's Properties > Render in a window of its own.
-- **Files saved with older versions** are tidied when they are opened: the hidden `persp` render camera the kit
-  made stops being the scene camera and is removed, and a leftover `defaultLight` goes. The World's "Maya Ambient"
-  nodes are taken out, old Ambient / Volume Lights become point lights with the same intensity, a Light Editor
-  Isolate left on is undone.
 - **FX menus call Blender's simulations at real size**: nCloth > Create nCloth / Create Passive Collider and
   nParticles > Emit from Object / Make Collide add Blender's Cloth / Collision modifier or particle system to every
   selected mesh, Create Active / Passive Rigid Body are Blender's rigid bodies, the Fields/Solvers fields are
@@ -47,9 +48,12 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   Object, Fluids > Add/Edit Contents > Emitter makes the selected meshes smoke flows and Effects > Flow > Create
   Curve Flow a Curve Guide field. Nothing is rescaled: Blender simulates one unit as one metre, so FX works in metre
   scenes (the creating items say so in their tooltip).
-- **Files saved with older versions** also get their FX back to real size: a scene gravity the kit had scaled to
-  the centimetre layout (0.098) goes back to Blender's 9.81 unless it was changed by hand, and kit nCloth stiffness
-  and damping lose their rescale.
+- **Files saved with older versions** are tidied once when they are opened: the hidden `persp` render camera the
+  kit made stops being the scene camera and is removed, a leftover `defaultLight` goes, the World's "Maya Ambient"
+  nodes are taken out, old Ambient / Volume Lights become point lights with the same intensity and a Light Editor
+  Isolate left on is undone. FX goes back to real size: a scene gravity the kit had scaled to the centimetre layout
+  (0.098) goes back to Blender's 9.81 unless it was changed by hand, and kit nCloth stiffness and damping lose their
+  rescale.
 - **Prevent Negative Scale on every Scale handle** (#261): in component mode the centre handle and the plane
   handles stop at zero too, so a selection scales onto its pivot (ready to merge) or onto a line through it
   without flipping. Object Mode still scales past zero.

@@ -149,7 +149,7 @@ See [custom pivot editing](docs/pivot_component_picking.md) for the full control
 - **Attribute Editor** with Maya's node tabs and sections (transform, shape, history, material, shading group) and
   Notes; **Ctrl+A** toggles Channel Box ↔ Attribute Editor.
 - **Outliner** with Maya's Display / Show menus (DAG hierarchy, Shapes toggle), sets and Maya's startup rows (cameras, default sets).
-- Maya menu bars in the **Graph Editor, Dope Sheet, UV Editor, Hypershade, Render Settings and Script Editor**; a
+- Maya menu bars in the **Graph Editor, Dope Sheet, UV Editor, Hypershade and Script Editor**; a
   **Tool Settings** dock; the **Modeling Toolkit**.
 - **Command Line** and **Script Editor** run Python with a small `maya.cmds` look-alike (e.g. `cmds.polyCube()`,
   `cmds.move(5, 0, 0)`).
@@ -196,9 +196,11 @@ See [custom pivot editing](docs/pivot_component_picking.md) for the full control
 ### Rendering & FX
 
 - **Hypershade** menus and Browser tabs, Maya shader types with their Attribute Editor sections, shading groups.
-- **Render Settings** window with Maya's Common tab; Rendering menu set (Render Current Frame, Keep Image in the
-  render view).
-- **FX** menu set with Maya's simulation scale: nucleus gravity, nParticles emitters, nCloth.
+- **Rendering** menu set on Blender's own render: Render Current Frame / Sequence, Render Settings (Blender's Render
+  properties), Keep Image in the render view, light linking; Intensity and Decay of lights in the Channel Box.
+- **FX** menu set on Blender's own simulations (Cloth, Collision, particles, force fields, rigid bodies, Mantaflow).
+  Nothing is rescaled: Blender simulates one unit as one metre, so FX works in metre scenes. See
+  [Maya FX and Rendering in Blender](docs/fx_render_concepts.md).
 
 ### Scene & files
 
