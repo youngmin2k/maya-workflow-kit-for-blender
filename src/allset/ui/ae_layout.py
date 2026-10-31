@@ -335,8 +335,40 @@ PLAIN_MATERIAL = [
       ("prop", "data", "roughness", "Roughness")),
 ]
 
+# --- type (Maya Type tool node) -> Blender text object data ------------------------------------------------------
+TYPE = [
+    S("Text", True,
+      ("prop", "data", "body", "Text"),
+      ("prop", "data", "font", "Font"),
+      ("prop", "data", "font_bold", "Bold Font"),
+      ("prop", "data", "font_italic", "Italic Font"),
+      ("prop", "data", "size", "Font Size"),
+      ("prop", "data", "align_x", "Alignment"),
+      ("prop", "data", "space_character", "Tracking"),
+      ("prop", "data", "space_line", "Leading"),
+      ("prop", "data", "space_word", "Word Spacing"),
+      ("prop", "data", "shear", "Slant"),
+      ("missing", "Kerning", "Blender sets kerning per character in text edit mode (Alt+Left / Alt+Right).")),
+    S("Geometry", True,
+      ("prop", "data", "extrude", "Extrude Distance"),
+      ("prop", "data", "offset", "Extrude Offset"),
+      ("prop", "data", "bevel_depth", "Bevel Distance"),
+      ("prop", "data", "bevel_resolution", "Bevel Divisions"),
+      ("prop", "data", "resolution_u", "Curve Resolution")),
+    S("Generator", False,
+      ("missing", "Generator", "Blender text has no generator mode (Python expressions, time code, frame "
+                               "numbers): type the text, or drive it with a Python script.")),
+    S("Texturing", False,
+      ("missing", "Texturing", "Assign materials to the text object; Blender has no per-type caps / bevel "
+                               "material slots like Maya's type texturing.")),
+    S("Animation", False,
+      ("missing", "Animation", "Blender has no per-character type animation: animate the object, or convert the "
+                               "text to a mesh (Modify > Convert) and animate that.")),
+]
+
 # (sections, research template name or None)
 BY_KIND = {
+    "FONT": (TYPE, None),
     "transform": (TRANSFORM, "transform"),
     "joint": (JOINT, "joint"),
     "MESH": (MESH, "mesh"),

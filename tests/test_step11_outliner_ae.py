@@ -255,7 +255,7 @@ def _rna_owner(owner_name, kind):
     return {"MESH": bpy.types.Mesh, "CAMERA": bpy.types.Camera, "POINT": bpy.types.PointLight,
             "SUN": bpy.types.SunLight, "SPOT": bpy.types.SpotLight, "AREA": bpy.types.AreaLight,
             "ambientLight": bpy.types.PointLight, "volumeLight": bpy.types.PointLight,     # step 214 stand-ins
-            "material": bpy.types.Material,
+            "material": bpy.types.Material, "FONT": bpy.types.TextCurve,
             "nucleus": bpy.types.Scene.bl_rna.properties["allset_nucleus"].fixed_type}.get(kind)   # step 68
 
 
