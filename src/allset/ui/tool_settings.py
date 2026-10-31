@@ -768,7 +768,7 @@ def draw_dock(layout, context):
 
 
 class ALLSET_PT_tool_settings(bpy.types.Panel):
-    """Maya Tool Settings (the Properties Tool tab of the dock, ui/tool_dock.py)"""
+    """Maya Tool Settings (the Properties Tool tab of the dock)"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = "Tool"

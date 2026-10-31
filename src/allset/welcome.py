@@ -174,7 +174,7 @@ def _wanted():
 
 
 class ALLSET_OT_welcome_wait(bpy.types.Operator):
-    """Open the welcome dialog once the pointer is in the main window, clear of its menu bar (#170)"""
+    """Open the welcome dialog once the pointer is in the main window, clear of its menu bar"""
     bl_idname = "allset.welcome_wait"
     bl_label = "Welcome (wait for the pointer)"
     bl_options = {'INTERNAL'}

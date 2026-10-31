@@ -58,7 +58,7 @@ class ALLSET_UL_sdk_attrs(bpy.types.UIList):
 
 
 class ALLSET_UL_sdk_nodes(bpy.types.UIList):
-    """Driven node rows (the node whose attributes the right list shows is pressed). Step 226: a loaded object's
+    """Driven node rows (the node whose attributes the right list shows is pressed). A loaded object's
     blendShape and constraint nodes follow it (Maya: any keyable attribute can be driven)."""
 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index=0):

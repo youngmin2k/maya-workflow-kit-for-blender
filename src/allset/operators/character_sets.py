@@ -493,7 +493,7 @@ class ALLSET_PT_character_set(bpy.types.Panel):
 
 
 class ALLSET_PT_character_editor(bpy.types.Panel):
-    """Windows > Relationship Editors > Character Sets (step 197, #104): Maya's Relationship Editor in character mode
+    """Windows > Relationship Editors > Character Sets: Maya's Relationship Editor in character mode
     lists the character sets, highlights the current one and edits its members from the selection — here a popup over
     the kit character sets (= scene Keying Sets)."""
     bl_idname = "ALLSET_PT_character_editor"

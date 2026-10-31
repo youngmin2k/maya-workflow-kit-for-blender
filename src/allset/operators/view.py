@@ -647,7 +647,7 @@ def maya_ortho_distance(space, scene=None):
 
 class ALLSET_OT_toggle_quad_view(bpy.types.Operator):
     """Toggle the four view; leaving it keeps the panel under the cursor (Maya Space tap). Four real panels, each
-    with its own camera, shading and Show settings (ui/four_view.py, step 237)"""
+    with its own camera, shading and Show settings"""
     bl_idname = "allset.toggle_quad_view"
     bl_label = "Toggle Four Views"
 

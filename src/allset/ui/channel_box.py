@@ -1940,8 +1940,7 @@ class ALLSET_OT_cb_show_all(bpy.types.Operator):
 # --- menus -------------------------------------------------------------------------------------------
 
 class ALLSET_MT_cb_channels(bpy.types.Menu):
-    """Maya Channel Box Channels menu (RMB anywhere in the Channel Box;
-    step 158 completes it)"""
+    """Maya Channel Box Channels menu (RMB anywhere in the Channel Box)"""
     bl_label = "Channels"
 
     def draw(self, context):
@@ -3081,7 +3080,7 @@ PANE_TOP = 1.6
 
 
 class ALLSET_PT_dock_attribute_editor(bpy.types.Panel):
-    """Maya Attribute Editor tab of the dock (step 99)"""
+    """Maya Attribute Editor tab of the dock"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = AE_CATEGORY
@@ -3095,7 +3094,7 @@ class ALLSET_PT_dock_attribute_editor(bpy.types.Panel):
 
 
 class ALLSET_PT_dock_modeling_toolkit(bpy.types.Panel):
-    """Maya Modeling Toolkit tab of the dock (step 99)"""
+    """Maya Modeling Toolkit tab of the dock"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_category = MTK_CATEGORY

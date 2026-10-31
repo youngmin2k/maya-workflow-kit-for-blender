@@ -887,8 +887,8 @@ def _expire():
 
 
 class ALLSET_OT_tip(bpy.types.Operator):
-    """A note about the Blender side of a Maya window, shown as a tooltip instead of a sentence in the window
-    (step 106); clicking puts it in the Help Line"""
+    """A note about the Blender side of a Maya window, shown as a tooltip instead of a sentence in the window;
+    clicking puts it in the Help Line"""
     bl_idname = "allset.tip"
     bl_label = "Note"
     bl_options = {'INTERNAL'}

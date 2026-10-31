@@ -15,6 +15,9 @@ Runs without Blender. Categories:
 - ``notices``       "not in Blender" notices shown in tooltips (``ui/notices.py``)
 - ``ui``            literal labels in the code: ``text=``, ``bl_label``, ``bl_category``, property ``name=`` /
                     ``description=`` and enum item names
+- ``tooltips``      docstrings of operator / panel / menu classes (and subclasses that set ``bl_*`` values):
+                    Blender shows a class docstring as the tooltip when the class sets no ``bl_description``;
+                    classes built with ``type()`` at run time (composed texts) are not listed
 
 The translations live in ``src/allset/i18n/<locale>.py`` (``STRINGS = {English: translation}``).
 """
@@ -204,8 +207,49 @@ def ui():
     return {s for s in out if _ok(s)}
 
 
+# Blender classes whose docstring becomes the description (tooltip)
+_DOC_BASES = ("Operator", "Macro", "Panel", "Menu", "Header", "UIList", "Gizmo", "GizmoGroup", "PropertyGroup",
+              "WorkSpaceTool")
+
+
+def _base_name(node):
+    return node.attr if isinstance(node, ast.Attribute) else node.id if isinstance(node, ast.Name) else ""
+
+
+def _docstrings(path):
+    """Docstrings of the Blender classes in ``path``, as Python stores them (``inspect.cleandoc``), unless the
+    class sets its own ``bl_description``."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    out = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ClassDef):
+            continue
+        blender_class = any(isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id.startswith("bl_")
+                                                               for t in n.targets) for n in node.body)
+        if not (blender_class or any(_base_name(b) in _DOC_BASES for b in node.bases)):
+            continue
+        if any(isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "bl_description"
+                                                 for t in n.targets) for n in node.body):
+            continue
+        doc = ast.get_docstring(node, clean=True)
+        if doc:
+            out.add(doc)
+    return out
+
+
+def tooltips():
+    out = set()
+    for path in sorted(PKG.rglob("*.py")):
+        rel = path.relative_to(PKG).as_posix()
+        if rel.startswith("i18n/") or rel.startswith("keymap/ic_"):
+            continue
+        out |= _docstrings(path)
+    return {s for s in out if _ok(s)}
+
+
 CATEGORIES = {"menus": menus, "editor_menus": editor_menus, "panel_menus": panel_menus, "marking": marking,
-              "shelf": shelf, "notices": notices, "ui": ui}
+              "shelf": shelf, "notices": notices, "ui": ui,
+              "tooltips": tooltips}
 
 
 def collect():

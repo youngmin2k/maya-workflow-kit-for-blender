@@ -24,6 +24,8 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   without flipping. Object Mode still scales past zero.
 
 ### Fixed
+- **Translated tooltips** (thanks to @RIPTIDE-z for spotting it in #260): the tooltips of the kit's own buttons and
+  menu items now follow the interface language too (Japanese, Simplified Chinese).
 - **Vertex size** (#263): edit-mode vertices follow Blender's theme Vertex Size (selected ones one pixel larger)
   instead of a fixed 3 px.
 - **Pivot after component mode** (#263): a pivot moved or turned with D / Insert in Edit Mode no longer stays on

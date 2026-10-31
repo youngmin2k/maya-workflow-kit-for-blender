@@ -157,3 +157,46 @@ def test_disable_takes_translations_back():
         finally:
             kit.enable()
         assert bpy.app.translations.pgettext_iface(SAMPLES[0]) != SAMPLES[0]
+
+
+def _kit_classes():
+    """Registered kit classes (operators, panels, menus ...) whose description comes from their docstring."""
+    out = []
+    for base in (bpy.types.Operator, bpy.types.Panel, bpy.types.Menu, bpy.types.Header, bpy.types.UIList,
+                 bpy.types.PropertyGroup, bpy.types.GizmoGroup, bpy.types.Gizmo):
+        stack = list(base.__subclasses__())
+        while stack:
+            cls = stack.pop()
+            stack.extend(cls.__subclasses__())
+            if cls.__module__.startswith(kit.MODULE) and "bl_rna" in cls.__dict__ and cls.__doc__:
+                out.append(cls)
+    return out
+
+
+def test_tooltips_are_collected_and_translated():
+    """A kit class's docstring is its tooltip: the string Blender shows is in the collected ``tooltips`` and in
+    every dictionary, and Blender returns the translation for it."""
+    tool = _tool()
+    collected = tool.tooltips()
+    classes = _kit_classes()
+    assert len(classes) > 200, len(classes)
+    import inspect
+    import sys
+
+    def literal(cls):       # written as a class statement (type()-built classes compose their text)
+        src = sys.modules[cls.__module__].__file__
+        return f"class {cls.__name__}(" in open(src, encoding="utf-8").read()
+    shown = {inspect.cleandoc(cls.__doc__) for cls in classes
+             if "bl_description" not in cls.__dict__ and "__doc__" in cls.__dict__ and literal(cls)}
+    missing = sorted(s for s in shown if s not in collected and tool._ok(s))
+    assert not missing, missing[:5]
+    for locale in LOCALES:
+        table = i18n.LANGUAGES[locale]
+        untranslated = sorted(s for s in collected if s not in table)
+        assert not untranslated, (locale, untranslated[:5])
+        if not _usable(locale):
+            continue
+        sample = next(inspect.cleandoc(cls.__doc__) for cls in classes
+                      if getattr(cls, "bl_idname", "") == "allset.component_slide")
+        with _Language(locale):
+            assert bpy.app.translations.pgettext_tip(sample) == table[sample], (locale, sample)

@@ -85,7 +85,7 @@ class ALLSET_OT_command_line_language(bpy.types.Operator):
 
 
 class ALLSET_OT_script_editor(bpy.types.Operator):
-    """Open the Maya Script Editor: history over input with MEL / Python tabs (ui/script_editor.py, step 105)"""
+    """Open the Maya Script Editor: history over input with MEL / Python tabs"""
     bl_idname = "allset.script_editor"
     bl_label = "Script Editor"
 
