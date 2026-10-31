@@ -172,6 +172,8 @@ from . import graph_move  # noqa: E402  step 281 (#192): Graph Editor Shift axis
 classes += graph_move.classes
 from . import graph_frame  # noqa: E402  step 281: Graph Editor F / A frame Maya's rectangle
 classes += graph_frame.classes
+from . import graph_scale_box  # noqa: E402  Graph Editor Scale Keys manipulator (#270)
+classes += graph_scale_box.classes
 from . import poly_display  # noqa: E402  Display > Polygons Normals Size / Reset Display
 classes += poly_display.classes
 from . import interactive_create  # noqa: E402  Create > Polygon Primitives > Interactive Creation (#225)
@@ -250,6 +252,7 @@ def register():
     graph_weights.register_handlers()
     graph_menu_198.register_props()
     graph_move.register_props()
+    graph_scale_box.register_handlers()
     skin_tools_199.register_handlers()
     constrain_199.register_handlers()
     graph_curves_203.register_handlers()
@@ -299,6 +302,7 @@ def unregister():
     repeat_maya.unregister_handlers()
     anim_snapshot.unregister_handlers()
     select_2d.unregister_timers()
+    graph_scale_box.unregister_handlers()
     graph_move.unregister_timers()
     graph_move.unregister_props()
     modify_maya.unregister_props()

@@ -187,8 +187,12 @@ _drag_case("lmb_columns_auto", 'LEFTMOUSE', 26, frames=(1, 10), every=True, auto
 _drag_case("mmb_columns_auto", 'MIDDLEMOUSE', 26, frames=(1, 10), every=True, auto_key=True, current=15)
 
 
+# r = Scale Keys tool: the box around the selected keys; dragging a side / corner scales about the opposite one
 @step
 def s_r():
+    frame_view()
+    zoom_out()
+    select_only((1, 10))
     x, y = win_xy(region().width // 2, region().height // 3)
     ev('MOUSEMOVE', 'NOTHING', x=x, y=y)
     ev('R', 'PRESS')
@@ -199,6 +203,89 @@ def s_r():
 def s_r_check():
     check("r over the Graph Editor picks the Scale Keys tool",
           bpy.context.window_manager.allset_graph_key_tool == 'SCALE')
+    sb = import_module(MODULE + ".operators.graph_scale_box")
+    a = C["area"]
+    with bpy.context.temp_override(window=win(), area=a, region=region(), space_data=a.spaces.active):
+        box = sb.current_box(bpy.context)
+    (x1, y1), (x10, y10) = key_px(1), key_px(10)
+    check(f"the Scale Keys box spans the selected keys ({box})",
+          box is not None and abs(box[0] - x1) < 1.5 and abs(box[2] - x10) < 1.5
+          and abs(box[1] - min(y1, y10)) < 1.5 and abs(box[3] - max(y1, y10)) < 1.5)
+    if SHOTS:
+        screenshot(os.path.join(SHOTS, "issue270_scale_box.png"))
+
+
+def _box_case(name, grab, move, expect):
+    st = {}
+    for _ in range(10):
+        step(lambda: None)
+
+    def before():
+        bpy.context.scene.tool_settings.use_snap_anim = True
+        bpy.context.scene.allset_auto_key = False
+        select_only((1, 10))
+        bpy.ops.ed.undo_push(message=f"{name} select")
+        st["before"] = state()
+        (x1, y1), (x10, y10) = key_px(1), key_px(10)
+        st["box"] = (x1, min(y1, y10), x10, max(y1, y10))
+        st["press"] = grab(st["box"])
+        st["move"] = move(st["box"])
+    step(before)
+    step(lambda: ev('MOUSEMOVE', 'NOTHING', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1]))
+    step(lambda: ev('LEFTMOUSE', 'PRESS', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1]))
+    for i in range(1, 5):
+        def mv(i=i):
+            x = st["press"][0] + st["move"][0] * i / 4
+            y = st["press"][1] + st["move"][1] * i / 4
+            ev('MOUSEMOVE', 'NOTHING', x=win_xy(x, y)[0], y=win_xy(x, y)[1])
+        step(mv)
+    step(lambda: ev('LEFTMOUSE', 'RELEASE'))
+    step(lambda: None)
+    step(lambda: None)
+
+    def verify():
+        pts = [(round(kp.co.x, 3), round(kp.co.y, 4)) for kp in curve().keyframe_points]
+        ok, text = expect(pts)
+        check(f"{name}: {text} ({pts})", ok)
+        count = sum(len(fc.keyframe_points) for fc in fcurves())
+        check(f"{name}: no key added", count == sum(len(c[2]) for c in st["before"]))
+        if SHOTS:
+            screenshot(os.path.join(SHOTS, f"issue270_{name}.png"))
+        x, y = win_xy(region().width // 2, region().height // 3)
+        ev('MOUSEMOVE', 'NOTHING', x=x, y=y)
+    step(verify)
+
+    def undo():
+        ev('LEFT_CTRL', 'PRESS', ctrl=True)
+        ev('Z', 'PRESS', ctrl=True)
+        ev('Z', 'RELEASE', ctrl=True)
+        ev('LEFT_CTRL', 'RELEASE')
+    step(undo)
+    step(lambda: None)
+    step(lambda: None)
+    step(lambda: check(f"{name}: one undo puts the keys back", state() == st["before"]))
+
+
+def _ppf():
+    v2d = region().view2d
+    return v2d.view_to_region(11, 0, clip=False)[0] - v2d.view_to_region(10, 0, clip=False)[0]
+
+
+# right side 4.5 frames further: time x1.5 about frame 1 -> 10 lands on 14 (values kept)
+_box_case("box_right", lambda b: (b[2], (b[1] + b[3]) / 2), lambda b: (4.5 * _ppf(), 0),
+          lambda pts: (pts[0] == (1.0, 0.0) and pts[1] == (14.0, 0.05) and pts[2] == (20.0, 0.02),
+                       "time scaled 1.5 about the left side"))
+# top side up by the box height: value x2 about the bottom (value 0) -> 0.05 becomes 0.1, times kept
+_box_case("box_top", lambda b: ((b[0] + b[2]) / 2, b[3]), lambda b: (0, b[3] - b[1]),
+          lambda pts: (pts[0] == (1.0, 0.0) and pts[1][0] == 10.0 and abs(pts[1][1] - 0.1) < 2e-3
+                       and pts[2] == (20.0, 0.02), "value scaled 2 about the bottom side"))
+# left side pressed inside the box: no scale, Blender's click (the keys don't move)
+_box_case("box_inside", lambda b: ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2 - 3), lambda b: (0, 0),
+          lambda pts: (pts == [(1.0, 0.0), (10.0, 0.05), (20.0, 0.02)], "a press inside the box scales nothing"))
+
+
+@step
+def s_tool_back():
     bpy.context.window_manager.allset_graph_key_tool = 'MOVE'
 
 

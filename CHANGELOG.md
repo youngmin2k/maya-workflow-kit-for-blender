@@ -6,6 +6,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [Unreleased]
 
 ### Added
+- **Scale Keys manipulator in the Graph Editor** (#270): with the Scale Keys tool (r) a box with handles is drawn
+  around the selected keys. Drag a left / right side to scale the keys in time (speed up or slow down an animation),
+  the bottom / top side to scale their values, or a corner for both; the opposite side stays where it is, time snap
+  lands the keys on whole frames, and one undo takes the drag back. Turn it off in the preferences (Graph Editor >
+  Scale Keys Manipulator).
 - **Edge / Surface slide with the Move tool** (#262): Ctrl+Shift+middle-drag slides the selected vertices along
   their edges (edges and faces with Edge Slide). The Move tool's **Transform Constraint** (Tool Settings, Modeling
   Toolkit, and the W + left-click menu > Transform Constraints) turns every Move handle and the plain middle-drag

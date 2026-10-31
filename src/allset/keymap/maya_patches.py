@@ -29,7 +29,7 @@ PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.uv_shell_hover", "allset.emul
                       "allset.select_2d_click", "allset.select_2d_box", "allset.graph_layer_pick",
                       "allset.uv_shell_pick", "allset.uv_shell_box",
                       "allset.graph_axis_drag", "allset.graph_move_snap", "allset.graph_shift_press",
-                      "allset.graph_key_drag",
+                      "allset.graph_key_drag", "allset.graph_scale_box",
                       "allset.hg_click", "allset.hg_mmb", "allset.hg_rmb", "allset.hg_zoom",
                       "allset.hg_frame")
 
@@ -1177,6 +1177,10 @@ def patch_graph_keys_2(kd):
         _add(kd, "Graph Editor", "allset.graph_key_tool", make_event(key), {"tool": tool})
     # Maya l = value lines
     _add(kd, "Graph Editor", "allset.graph_value_lines", make_event("L"))
+    # Scale Keys tool (r): a left press on a side / corner of the box around the selected keys scales them; anywhere
+    # else it passes through to Blender's click select
+    _add(kd, "Graph Editor", "allset.graph_scale_box", make_event("LEFTMOUSE"), first=True,
+         shadows=("Graph Editor", "Screen", "View2D"))
 
 
 GRAPH_WER = {"W": "transform.translate", "E": "transform.rotate", "R": "transform.resize"}

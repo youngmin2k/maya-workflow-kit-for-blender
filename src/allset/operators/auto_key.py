@@ -33,7 +33,8 @@ def _playing():
 
 
 # the kit's own drags that change channels or keys: Auto Key waits for them to end, like for Blender's transforms
-WAIT_FOR = frozenset({"ALLSET_OT_cb_field_drag", "ALLSET_OT_graph_key_drag", "ALLSET_OT_graph_axis_drag"})
+WAIT_FOR = frozenset({"ALLSET_OT_cb_field_drag", "ALLSET_OT_graph_key_drag", "ALLSET_OT_graph_axis_drag",
+                      "ALLSET_OT_graph_scale_box"})
 
 
 def waits_for(bl_idname):

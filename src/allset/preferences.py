@@ -179,6 +179,10 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Unconstrained Drag", default=True,
         description="Middle-mouse drags in the Graph Editor move keys in time and value; off, the first move "
                     "picks time or value")
+    graph_scale_manipulator: bpy.props.BoolProperty(
+        name="Scale Keys Manipulator", default=True,
+        description="With the Scale Keys tool (r) the Graph Editor draws a box around the selected keys: drag a "
+                    "side to scale them in time or value, a corner for both")
 
     # Graph Editor depth 2 (step 198): View > Show Buffer Curves (factory off),
     # Curves > Default Tangent Weight (factory Non-weighted), Retime Tool Snap On Frame (factory off), Edit > Set Curve
