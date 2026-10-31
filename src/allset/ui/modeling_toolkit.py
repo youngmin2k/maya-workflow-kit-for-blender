@@ -31,8 +31,6 @@ GREY = {
         "X-ray", "Blender does not highlight back faces separately: use X-ray (Alt+Z) to see and pick them."),
     "Modeling Toolkit/Selection Constraint": (
         "Select menu", "Blender has no selection constraint: use Select > Select Loops / Linked / Similar."),
-    "Modeling Toolkit/Transform Constraint": (
-        "Edge / Vertex Slide", "Blender has no transform constraint: slide along edges with G G (Edge / Vertex Slide)."),
     "Modeling Toolkit/UV": (
         "UV Editor", "UV components are edited in the UV Editor (Windows > Modeling Editors > UV Editor)."),
     "Modeling Toolkit/Soft Selection/Global": (
@@ -222,7 +220,10 @@ def draw(layout, context):
     from .status_line import draw_symmetry
     draw_symmetry(split, context)
     _grey(layout, "Modeling Toolkit/Selection Constraint", "Selection Constraint: Off")
-    _grey(layout, "Modeling Toolkit/Transform Constraint", "Transform Constraint: Off")
+    split = layout.split(factor=0.4)
+    split.label(text="Transform Constraint")
+    from .. import preferences
+    split.prop(preferences.get(context), "transform_constraint", text="")
 
     body = _section(layout, "ALLSET_mtk_soft", "Soft Selection", default_closed=True)
     if body:

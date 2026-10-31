@@ -328,6 +328,11 @@ class ALLSET_OT_manip_mmb(bpy.types.Operator):
         snap_align.apply_tool(context.scene.tool_settings, self.mode)   # step 263: per-tool Step Snap
         kwargs = {"release_confirm": True}
         handle = HANDLES.get(self.mode)
+        if self.mode == 'TRANSLATE':
+            from . import xform_constraint
+            if xform_constraint.active(context):     # Maya Transform Constraint: MMB slides the components
+                res = bpy.ops.allset.component_slide('INVOKE_DEFAULT')
+                return {'FINISHED'} if res & {'RUNNING_MODAL', 'FINISHED'} else {'CANCELLED'}
         if self.mode == 'RESIZE':
             res = self._maya_scale(handle)
             if res is not None:

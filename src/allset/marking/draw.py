@@ -169,6 +169,9 @@ def checked(action):
         if op == "allset.prevent_negative_scale":
             from .. import preferences
             return preferences.get(bpy.context).prevent_negative_scale
+        if op == "allset.xform_constraint":
+            from ..operators import xform_constraint
+            return xform_constraint.mode(bpy.context) == props["mode"]
         if op == "allset.symmetry":
             from ..operators import symmetry
             return symmetry.item_state(props["mode"])

@@ -225,7 +225,7 @@ def test_tool_option_toggle_reset_marking_state_and_object_scope():
     assert not scale.enabled(bpy.context) and not bpy.ops.allset.prevent_negative_scale.poll()
 
 
-def test_axis_registry_and_plane_uniform_object_paths_stay_native():
+def test_object_mode_scaling_stays_native():
     ob = setup()
     axis = bpy.context.scene.transform_orientation_slots[3]
     axis.type = 'GLOBAL'

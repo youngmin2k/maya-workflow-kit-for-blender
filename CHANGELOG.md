@@ -3,6 +3,32 @@
 All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 111–124 and Maya Kit before step 111). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Edge / Surface slide with the Move tool** (#262): Ctrl+Shift+middle-drag slides the selected vertices along
+  their edges (edges and faces with Edge Slide). The Move tool's **Transform Constraint** (Tool Settings, Modeling
+  Toolkit, and the W + left-click menu > Transform Constraints) turns every Move handle and the plain middle-drag
+  into Edge Slide or Surface Slide until you set it back to Off.
+
+- **Type in the Attribute Editor** (#258): the type tab has Maya's Text section (the text itself, font, size,
+  alignment, tracking, leading, word spacing, slant) and Geometry (extrude distance and offset, bevel distance and
+  divisions, curve resolution); Generator, Texturing and Animation say what to use in Blender instead.
+- **polyCylinder attributes** (#259): Height Baseline (−1 puts the bottom on the origin, 1 the top), Create UVs
+  (None turns the UVs off) and Round Cap Height Compensation (round caps stay inside the height) in the Channel Box
+  INPUTS and the Attribute Editor, in Maya's order, next to Subdivisions Caps and Round Cap.
+
+### Changed
+- **Prevent Negative Scale on every Scale handle** (#261): in component mode the centre handle and the plane
+  handles stop at zero too, so a selection scales onto its pivot (ready to merge) or onto a line through it
+  without flipping. Object Mode still scales past zero.
+
+### Fixed
+- **Vertex size** (#263): edit-mode vertices follow Blender's theme Vertex Size (selected ones one pixel larger)
+  instead of a fixed 3 px.
+- **Pivot after component mode** (#263): a pivot moved or turned with D / Insert in Edit Mode no longer stays on
+  the object in Object Mode — Center Pivot and the Move manipulator work on the object pivot again.
+
 ## [0.8.0] — 2026-10-31
 
 Maya 2026 marking menus, Hypershade and shelves, the Marking Menu Editor from @TMouraille, Quad Draw from

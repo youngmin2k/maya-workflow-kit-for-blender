@@ -3,7 +3,8 @@
 Double-click the Scale icon to open **Tool Settings > Scale Settings**. Enable
 **Prevent Negative Scale**, or toggle it in the **R + left-click** marking menu.
 The active-tool settings popup exposes the same option. It is available in mesh
-Edit Mode; Object Mode, plane handles and uniform scale retain Blender behavior.
+Edit Mode on every Scale handle (one axis, Ctrl + axis, plane and centre); Object
+Mode keeps Blender's negative scaling.
 
 The option is on by default, as in Maya. Reset Tool restores that default. It is an addon preference, saved by Blender's normal preference-saving mechanism;
 the tool does not force-save or change other Blender preferences.
@@ -11,6 +12,10 @@ the tool does not force-save or change other Blender preferences.
 Select vertices, edges/loops or faces and drag an X/Y/Z scale handle inward.
 The scale factor stops at **exactly zero**, flattening fully selected points onto
 the plane through the active pivot, perpendicular to that orientation axis.
+A plane handle stops at zero on its two axes (the points line up on one line through
+the pivot) and the centre handle on all three (the points meet at the pivot, ready
+for Merge). On these handles the factor follows the mouse from the press point, so
+coming back from past zero starts growing again where the drag crossed zero.
 World, Object, Normal and custom orientations use their corresponding frames.
 Individual Origins retains Blender's per-component centers, rather than promising
 one shared plane. No vertices are welded and no edges/faces are deleted.
@@ -28,7 +33,7 @@ one shared plane. No vertices are welded and no edges/faces are deleted.
 - Mouse release / Enter confirms; **Esc/right-click** restores the pre-drag
   coordinates and UVs. One Undo reverses the entire gesture, and Redo restores it.
 
-The guard affects the Maya Scale tool's single-axis mesh gestures. It does not
+The guard affects the Maya Scale tool's mesh gestures. It does not
 intercept arbitrary `transform.resize` scripts, UV scaling, Smart Extrude's own
 handles, or scaling in Blender mode. The guarded gesture supports increment
 snapping; X/C/V geometry snapping is not evaluated by this path. Disable the option
@@ -49,6 +54,6 @@ specifies single-axis component scaling stopping at zero.
 [Scale objects and components](https://help.autodesk.com/cloudhelp/2026/ENU/Maya-Basics/files/GUID-09D0E733-74DF-44E2-937A-C857001E45B2.htm)
 describes handles, pivots and MMB routes.
 
-The docs do not fully specify negative numeric input, recovery after overshooting
-zero, or uniform/plane limits. Numeric clamping and immediate recovery above are
-explicit addon choices; plane/uniform behavior is retained.
+The docs do not fully specify negative numeric input or recovery after overshooting
+zero. Numeric clamping and immediate recovery on the single-axis route are explicit
+addon choices.

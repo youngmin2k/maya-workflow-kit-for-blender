@@ -56,9 +56,22 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     # Maya's Scale tool default: on
     prevent_negative_scale: bpy.props.BoolProperty(
         name="Prevent Negative Scale",
-        description="Stop single-axis mesh component scaling at zero in the Maya Scale tool; "
-                    "does not affect object, plane or uniform scaling",
+        description="Stop mesh component scaling at zero on every handle of the Maya Scale tool "
+                    "(one axis, plane or centre); object scaling is not affected",
         default=True, update=_redraw_tools)
+    # Maya Move tool Transform Constraint (default Off)
+    transform_constraint: bpy.props.EnumProperty(
+        name="Transform Constraint",
+        description="In mesh edit mode the Move tool slides components along their edges or the surface",
+        items=(('NONE', "Off", "Move components freely"),
+               ('EDGE', "Edge", "Slide components along their edges"),
+               ('SURFACE', "Surface", "Move components along the surface of the mesh")),
+        default='NONE', update=_redraw_tools)
+    uv_shell_preview: bpy.props.BoolProperty(
+        name="UV Shell Pre-selection",
+        description="In the UV Editor, while clicks pick whole UV shells, fill the shell under the mouse in the "
+                    "pre-selection colour before you click",
+        default=True)
     # Maya preSelectHilite true.
     preselect_highlight: bpy.props.BoolProperty(
         name="Pre-selection Highlight",

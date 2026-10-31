@@ -20,13 +20,14 @@ from . import pivot_rotate
 from . import pivot_translate
 from . import smart_extrude
 from . import component_scale
+from . import xform_constraint
 from . import live
 from . import live_translate
 
 classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pivot_pick.classes,
            *pivot_rotate.classes,
-           *pivot_translate.classes, *smart_extrude.classes, *component_scale.classes, *live.classes, *live_translate.classes,
+           *pivot_translate.classes, *smart_extrude.classes, *component_scale.classes, *xform_constraint.classes, *live.classes, *live_translate.classes,
            *pickwalk.classes, *view.classes, *freeze.classes, *parenting.classes,
            *duplicate.classes, *history.classes, *create.classes, *visibility.classes,
            *component.classes, *manip.classes, *material.classes,

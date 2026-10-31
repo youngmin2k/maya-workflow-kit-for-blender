@@ -32,8 +32,8 @@ def _clear():
         bpy.data.objects.remove(ob, do_unlink=True)
 
 
-def _drag(clamp, d):
-    op = SimpleNamespace(_press=(0, 0), _mode='AXIS', _dir=Vector((1, 0)), _len=100.0, _depth0=1.0, _depth_tip=1.0,
+def _drag(clamp, d, mode='AXIS'):
+    op = SimpleNamespace(_press=(0, 0), _mode=mode, _dir=Vector((1, 0)), _len=100.0, _depth0=1.0, _depth_tip=1.0,
                          _snap=False, _wpp=0.01, _radius=1.0, _clamp=clamp)
     return ms.drag_factor(op, d, 0)
 
@@ -42,6 +42,26 @@ def test_prevent_negative_scale_stops_the_kit_axis_drag_at_zero():
     assert _drag(False, -300) < 0.0                      # past zero: the plain drag flips
     assert _drag(True, -300) == 0.0                      # Prevent Negative Scale: flat, not flipped
     assert _drag(True, 50) == _drag(False, 50) > 0.0     # above zero both agree
+
+
+def test_prevent_negative_scale_stops_plane_and_centre_handles_at_zero():
+    """#261: the plane and centre handles stop at zero too, so components can be scaled onto the pivot."""
+    for mode in ('PLANE', 'CENTER'):
+        assert _drag(False, -300, mode) < 0.0, mode
+        assert _drag(True, -300, mode) == 0.0, mode
+        assert _drag(True, 30, mode) == _drag(False, 30, mode) > 0.0, mode
+
+
+def test_clamp_is_on_for_every_handle_in_component_mode_only():
+    prefs = import_module(kit.MODULE + '.preferences')
+    cs = import_module(kit.MODULE + '.operators.component_scale')
+    _clear()
+    bpy.ops.mesh.primitive_cube_add()
+    prefs.get(bpy.context).prevent_negative_scale = True
+    bpy.ops.object.mode_set(mode='EDIT')
+    assert cs.enabled(bpy.context)
+    _object_mode()
+    assert not cs.enabled(bpy.context), "object mode keeps negative scaling"
 
 
 def test_d_pivot_edit_keeps_an_edge_selection():

@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Non-negative single-axis component scaling in the Maya Scale tool.
+"""Non-negative component scaling in the Maya Scale tool.
+
+The manipulator's own drag (``manip_scale``) stops every handle at zero; this operator is the single-axis
+route for MMB scaling and scripts.
 
 Each preview restores the original coordinates/UVs and executes Blender's native
 transform without nested undo steps. Thus zero is reversible within a gesture,
@@ -67,7 +70,7 @@ class Snapshot:
 
 
 class ALLSET_OT_prevent_negative_scale(bpy.types.Operator):
-    """Stop single-axis component scaling at zero; Object Mode is unaffected"""
+    """Stop component scaling at zero on every Scale handle; Object Mode is unaffected"""
     bl_idname = "allset.prevent_negative_scale"
     bl_label = "Prevent Negative Scale"
     bl_options = {'INTERNAL'}

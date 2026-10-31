@@ -552,7 +552,7 @@ class ALLSET_GGT_xform(GizmoGroup):
         self._built_for = (kind, pivot)
         self._ops_for = None
 
-    def _bind_ops(self, kind, otype, frame=None, clamp=False, live_move=False):
+    def _bind_ops(self, kind, otype, frame=None, clamp=False, live_move=False, slide=False):
         """Point each handle at Blender's transform with its constraint and orientation."""
         op = {'TRANSLATE': "transform.translate", 'RESIZE': "transform.resize"}[kind]
         if frame is None:
@@ -570,6 +570,9 @@ class ALLSET_GGT_xform(GizmoGroup):
                 elif role == 'PLANE':
                     props.plane = data
                 props.orient_type = otype
+            elif slide and kind == 'TRANSLATE' and not editing and role in ('AXIS', 'PLANE', 'CENTER'):
+                # Maya Transform Constraint Edge / Surface: every Move handle slides the components
+                props = gz.target_set_operator("allset.component_slide")
             elif role == 'AXIS':
                 axes = tuple(a == data for a in 'XYZ')
                 props = gz.target_set_operator("allset.component_scale" if clamp and kind == 'RESIZE' else op)
@@ -590,7 +593,7 @@ class ALLSET_GGT_xform(GizmoGroup):
             elif role == 'PIVOT_RING':
                 props = gz.target_set_operator("allset.pivot_rotate")
                 props.axis = data
-        self._ops_for = (kind, otype, tuple(v for row in frame for v in row), clamp, live_move)
+        self._ops_for = (kind, otype, tuple(v for row in frame for v in row), clamp, live_move, slide)
 
     @staticmethod
     def _orient(props, otype, frame):
@@ -622,9 +625,11 @@ class ALLSET_GGT_xform(GizmoGroup):
         clamp = kind == 'RESIZE' and component_scale.enabled(context)
         from ..operators import live_translate
         live_move = kind == 'TRANSLATE' and not pivot and live_translate.enabled(context)
-        signature = (kind, otype, tuple(v for row in frame for v in row), clamp, live_move)
+        from ..operators import xform_constraint
+        slide = kind == 'TRANSLATE' and not pivot and xform_constraint.active(context)
+        signature = (kind, otype, tuple(v for row in frame for v in row), clamp, live_move, slide)
         if self._ops_for != signature and not any(gz.is_modal for gz, _role, _data in self.handles):
-            self._bind_ops(kind, otype, frame=frame, clamp=clamp, live_move=live_move)
+            self._bind_ops(kind, otype, frame=frame, clamp=clamp, live_move=live_move, slide=slide)
         if context.mode == 'EDIT_MESH':
             pts, act = _edit_points(context)
         else:

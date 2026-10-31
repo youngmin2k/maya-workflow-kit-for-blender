@@ -755,8 +755,13 @@ def _select_prefs():
 
 
 def _constraints():
-    """Maya's Selection / Transform Constraints submenus of the tool option menus (no Blender constraint modes)."""
-    return [("Selection Constraints", unavailable()), ("Transform Constraints", unavailable())]
+    """Maya's Selection / Transform Constraints submenus of the tool option menus: no Blender selection
+    constraint; Transform Constraints = the kit's Move-tool slide setting (operators/xform_constraint.py)."""
+    def tc(mode):
+        return ("allset.xform_constraint", {"mode": mode})
+    return [("Selection Constraints", unavailable()),
+            ("Transform Constraints", Sub(items=[("Off", tc('NONE')), ("Edge Slide", tc('EDGE')),
+                                                 ("Surface Slide", tc('SURFACE')), ("Along Normals", None)]))]
 
 
 def _custom_axis(slot):

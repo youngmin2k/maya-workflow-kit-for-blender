@@ -80,7 +80,7 @@ def _inside(rect, x, y):
     return rect[0] <= x <= rect[2] and rect[1] <= y <= rect[3]
 
 
-TOGGLE_OPS = ("wm.context_toggle", "allset.prevent_negative_scale", "allset.manip_option", "allset.symmetry", "allset.component_mask",
+TOGGLE_OPS = ("wm.context_toggle", "allset.prevent_negative_scale", "allset.xform_constraint", "allset.manip_option", "allset.symmetry", "allset.component_mask",
               "allset.pivot_option", "allset.mm_camera_based")
 # Shift+Q pick mask: Poly Vertices / Poly Edges / Faces are check boxes, "All Components on" is a command (step 93).
 MASK_CHECKS = ("VERT", "EDGE", "FACE")

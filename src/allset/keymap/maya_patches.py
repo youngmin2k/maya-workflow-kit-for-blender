@@ -20,7 +20,7 @@ ADDED = []
 
 # Operators that return PASS_THROUGH when they don't apply, so they may sit in
 # front of another item with the same event in the same keymap.
-PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.emulated_tumble", "allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_press",
+PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.uv_shell_hover", "allset.emulated_tumble", "allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_press",
                       "allset.select_priority", "allset.select_through", "allset.toolbox_guard", "allset.time_scrub",
                       "allset.time_slider_menu", "allset.outliner_set_click", "allset.outliner_set_menu",
                       "allset.graph_channel_click", "allset.graph_channel_scroll", "allset.script_run",
@@ -1485,6 +1485,29 @@ def patch_emulated_tumble(kd):
 
 
 PATCHES += (patch_weight_paint_exit, patch_global_set_key, patch_emulated_tumble)
+
+
+# --- Edge slide with the Move tool (#262) ----------------------------------------------------------------------
+# Maya: Ctrl+Shift+middle-drag with the Move tool slides the selected components along their edges (the Transform
+# Constraint setting drives the handles and the plain MMB drag). Outside mesh edit mode the operator's poll fails
+# and the event goes on.
+
+def patch_component_slide(kd):
+    _add(kd, "3D View Tool: Move", "allset.component_slide", make_event("MIDDLEMOUSE", "PRESS", shift=True, ctrl=True),
+         {"mode": 'EDGE'})
+
+
+PATCHES += (patch_component_slide,)
+
+
+# --- UV shell pre-selection (#264) ------------------------------------------------------------------------------
+# The UV Editor's mouse moves are watched (always PASS_THROUGH) so the shell under the mouse can be highlighted.
+
+def patch_uv_shell_hover(kd):
+    _add(kd, "UV Editor", "allset.uv_shell_hover", make_event("MOUSEMOVE", "ANY", any=True), first=True)
+
+
+PATCHES += (patch_uv_shell_hover,)
 
 
 def apply(data):

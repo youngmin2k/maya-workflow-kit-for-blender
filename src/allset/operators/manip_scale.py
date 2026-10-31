@@ -388,7 +388,7 @@ def drag_factor(op, mx, my):
     if op._snap:
         f = quantise(f)
     if getattr(op, "_clamp", False) and f < 0.0:
-        f = 0.0                     # Prevent Negative Scale: a single-axis component scale stops flat at zero
+        f = 0.0                     # Prevent Negative Scale: a component scale stops flat at zero
     return f
 
 
@@ -476,7 +476,9 @@ class ALLSET_OT_manip_scale(bpy.types.Operator):
         from . import snap_align
         self._snap = snap_align.step_snap_mode(context.scene.tool_settings, 'RESIZE') != 'OFF'
         from . import component_scale
-        self._clamp = self.mode == 'AXIS' and not self.others and component_scale.enabled(context)
+        # Prevent Negative Scale: every handle (axis, Ctrl other axes, plane, centre) stops components at zero, so a
+        # selection can be scaled flat or onto its pivot (Maya); object mode keeps negative scaling
+        self._clamp = component_scale.enabled(context)
         # the press point: a drag event (gizmo) is handled once the mouse passed the drag threshold
         px, py = event.mouse_x, event.mouse_y
         if event.value == 'CLICK_DRAG':

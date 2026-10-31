@@ -100,6 +100,7 @@ def reset_maya_options(context, kind):
     if kind == 'TRANSLATE':
         from .. import preferences
         prefs = preferences.get(context)
+        prefs.transform_constraint = 'NONE'
         for name in ("smart_duplicate", "smart_extrude"):
             setattr(prefs, name, prefs.bl_rna.properties[name].default)
 
@@ -236,8 +237,8 @@ TS_NOTICES = {
     f"{TS}/Bake Pivot Orientation": ("Modify > Bake Pivot",
                                      "The kit keeps a turned pivot as the Maya Pivot orientation; bake it from the menu"),
     f"{TS}/Show Orientation Handle": ("always shown", "The kit's pivot edit always shows its orientation ring"),
-    f"{TS}/Transform Constraint": ("Edge / Vertex Slide (G G)",
-                                   "Blender's move has no edge / surface constraint; slide components with G twice"),
+    f"{TS}/Transform Constraint": ("the Move tool's Transform Constraint",
+                                   "Edge / Surface slide works with the Move tool; rotate and scale stay free"),
     f"{TS}/Tweak Mode": ("the Tweak select tool",
                          "Blender's Tweak tool (Q) drags the component under the mouse without selecting it first"),
     f"{TS}/Automatically Orient Joints": ("Skeleton > Orient Joint",
@@ -388,7 +389,12 @@ def draw_settings(layout, context, kind):
             _grey(_labelled(layout, ""), "Modify Translation", check=False)
     layout.separator(factor=0.5)
     row = _labelled(layout, "Transform Constraint:")
-    _grey(row, "Transform Constraint", text="Off")
+    if kind == 'TRANSLATE':
+        from .. import preferences
+        row.enabled = context.mode == 'EDIT_MESH'
+        row.prop(preferences.get(context), "transform_constraint", text="")
+    else:
+        _grey(row, "Transform Constraint", text="Off")
     row = _labelled(layout, "Step Snap:")
     mode = snap_align.step_snap_mode(ts, kind)
     for m in ('OFF', 'RELATIVE', 'ABSOLUTE'):
