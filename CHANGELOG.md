@@ -17,6 +17,11 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
 - **polyCylinder attributes** (#259): Height Baseline (−1 puts the bottom on the origin, 1 the top), Create UVs
   (None turns the UVs off) and Round Cap Height Compensation (round caps stay inside the height) in the Channel Box
   INPUTS and the Attribute Editor, in Maya's order, next to Subdivisions Caps and Round Cap.
+- **More Fields/Solvers items** (#123): Initial State > Clear Initial State (the cloth or rigid body goes back to how
+  it was before its initial state was set) and Set From Mesh (an nCloth starts from another mesh with the same
+  vertex count); Set Rigid Body Interpenetration / Collision (the selected rigid bodies pass through each other or
+  collide again); Assign to Selected (cloth, soft body and particles react only to the fields assigned to them);
+  Use Selected as Source (the object carries the field).
 
 ### Changed
 - **Prevent Negative Scale on every Scale handle** (#261): in component mode the centre handle and the plane

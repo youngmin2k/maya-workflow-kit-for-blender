@@ -180,8 +180,8 @@ from . import interactive_create  # noqa: E402  Create > Polygon Primitives > In
 classes += interactive_create.classes
 from . import autosave  # noqa: E402  project autosave copies (#254)
 from . import sweep_mesh  # noqa: E402  Create > Sweep Mesh: live sweepMeshCreator node (#238)
-from . import fx_more, render_more  # noqa: E402  Maya FX / Rendering items on Blender systems (#123)
-classes += fx_more.classes + render_more.classes
+from . import fx_more, fx_solvers, render_more  # noqa: E402  Maya FX / Rendering items on Blender systems (#123)
+classes += fx_more.classes + fx_solvers.classes + render_more.classes
 
 _register_classes, _unregister_classes = bpy.utils.register_classes_factory(classes)
 

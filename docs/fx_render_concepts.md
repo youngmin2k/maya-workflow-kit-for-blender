@@ -24,6 +24,10 @@ items Blender has nothing for are greyed and their tooltip says what to use inst
 | Rigid bodies and solver | Rigid Body World (one per scene) | Create Active / Passive Rigid Body, Create Rigid Body Solver, Rigid Body Solver Attributes (Scene properties) |
 | Set Active / Passive Key | Rigid body Animated checkbox, keyed | Fields/Solvers > Set Active Key / Set Passive Key |
 | Initial State, Transfer Cache To Input Mesh | Simulated shape written into the mesh / transform | Fields/Solvers > Initial State > Set for Selected / Set for All Dynamic; nCache > Transfer Cache To Input Mesh |
+| Clear Initial State, Set From Mesh | Mesh / transform from before the first Initial State; another mesh's shape written into the cloth | Fields/Solvers > Initial State > Clear Initial State / Set From Mesh |
+| Rigid body interpenetration | Generic rigid body constraint with no limits and Disable Collisions on, one per pair | Fields/Solvers > Set Rigid Body Interpenetration / Set Rigid Body Collision |
+| Fields connected to objects | Effector Collection of the cloth, soft body or particle settings | Fields/Solvers > Assign to Selected |
+| Field source object | Force field on the object itself | Fields/Solvers > Use Selected as Source |
 | nCache | Point cache Bake / Free Bake (Physics properties) | nCache > Create New Cache / Delete Cache, Create Particle Disk Cache |
 | 3D fluid container, emitter | Mantaflow domain, Flow mesh | Fluids > 3D Container, Add/Edit Contents > Emitter, Edit Fluid Resolution |
 | Fluid collision, Collide with Effect | Fluid modifier of type Effector | Fluids > Make Collide; Effects > Collide with Effect |

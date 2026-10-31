@@ -378,6 +378,24 @@ NOTICES.update({
         "World panel."),
     "Fields/Solvers/Create Rigid Body Solver": (
         "Rigid Body World", "Blender has one rigid body solver per scene, the Rigid Body World (made if missing)."),
+    "Fields/Solvers/Initial State/Clear Initial State": (
+        "Start shape restored", "Blender puts the cloth mesh and the rigid body transforms back to how they were "
+        "before the initial state was set."),
+    "Fields/Solvers/Initial State/Set From Mesh": (
+        "Start shape from mesh", "Blender writes the other selected mesh's shape (same vertex count) into the "
+        "cloth mesh, so the simulation starts from it."),
+    "Fields/Solvers/Set Rigid Body Interpenetration": (
+        "No-collision constraint", "Blender lets two rigid bodies pass through each other with a Generic rigid "
+        "body constraint that has no limits and Disable Collisions on: one per pair of selected bodies."),
+    "Fields/Solvers/Set Rigid Body Collision": (
+        "No-collision constraint removed", "Blender removes the kit's no-collision constraints between the "
+        "selected rigid bodies, so they collide again."),
+    "Fields/Solvers/Assign to Selected": (
+        "Effector Collection", "Blender limits a simulation to the force fields in its Effector Collection "
+        "(Physics > Field Weights): the selected fields go into it."),
+    "Fields/Solvers/Use Selected as Source": (
+        "Force field on the object", "Blender puts the field's settings on the selected object's own force field "
+        "and removes the field's empty."),
     "Effects/Flow/Create Curve Flow": (
         "Curve Guide + emitter", "Blender makes the curve a Curve Guide force field and adds a point emitter at its "
         "start; the particles follow the curve."),

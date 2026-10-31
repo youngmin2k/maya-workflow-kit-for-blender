@@ -528,6 +528,23 @@ def _reset_cache(pc):
     pc.frame_start = pc.frame_start          # a point cache setting change drops the unbaked frames
 
 
+INPUT_CO = ".allset_input_co"           # mesh point attribute: the shape before the first Initial State
+INPUT_MATRIX = "allset_input_matrix"    # object ID property: a rigid body's transform before it
+
+
+def keep_input(ob):
+    """Remember what ``ob`` looked like before its first Initial State, so Clear Initial State can bring it back.
+    A later Initial State keeps the first one."""
+    if ob.type == 'MESH' and any(md.type in {'CLOTH', 'SOFT_BODY'} for md in ob.modifiers):
+        me = ob.data
+        if me.attributes.get(INPUT_CO) is None:
+            co = [0.0] * (3 * len(me.vertices))
+            me.vertices.foreach_get("co", co)
+            me.attributes.new(INPUT_CO, 'FLOAT_VECTOR', 'POINT').data.foreach_set("vector", co)
+    elif ob.rigid_body is not None and INPUT_MATRIX not in ob:
+        ob[INPUT_MATRIX] = [x for row in ob.matrix_basis for x in row]
+
+
 def set_initial_state(context, obs):
     """The simulated shape / place at the current frame becomes the start: cloth and soft body meshes take their
     simulated vertex positions (the modifier stays), rigid bodies their simulated transform. Returns the objects."""
@@ -542,6 +559,7 @@ def set_initial_state(context, obs):
                 co = [0.0] * (3 * len(me.vertices))
                 me.vertices.foreach_get("co", co)
                 ev.to_mesh_clear()
+                keep_input(ob)
                 ob.data.vertices.foreach_set("co", co)
                 if ob.data.shape_keys is not None:
                     ob.data.shape_keys.reference_key.data.foreach_set("co", co)
@@ -552,6 +570,7 @@ def set_initial_state(context, obs):
             else:
                 ev.to_mesh_clear()
         elif ob.rigid_body is not None:
+            keep_input(ob)
             ob.matrix_world = ob.matrix_world.copy()        # the simulated (evaluated) transform, kept
             done.append(ob)
     world = context.scene.rigidbody_world
