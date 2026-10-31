@@ -900,6 +900,9 @@ def patch_time_slider(kd):
         # (one "Screen" item each, patch_global_set_key: they work in every editor)
         for key in ("W", "E", "R"):
             kd.remove(km, "anim.keyframe_insert_by_name", type=key, shift=True)
+    # Maya S in component mode keys the selected points' positions (vertices, CVs, lattice points)
+    for km in ("Mesh", "Curve", "Lattice"):
+        _add(kd, km, "allset.set_key", make_event("S"))
 
 
 # --- 32. Joints: pose-mode pick-walk, P / Shift+P (step 57) -------------------------------------------

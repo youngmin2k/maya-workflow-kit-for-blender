@@ -142,6 +142,11 @@ def set_key(context, breakdown=False, channels=""):
         # whatever is selected (step 187, rule 3)
         from . import character_sets
         return character_sets.key_current(context, keytype)
+    if not channels:
+        from . import point_keys
+        if point_keys.applies(context):
+            # Maya component mode: S keys the selected points' X / Y / Z (edges / faces: their vertices)
+            return point_keys.key_points(context, keytype)
     only = CHANNEL_SETS.get(channels)
     from ..ui import cb_channels
     count = 0

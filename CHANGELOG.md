@@ -20,6 +20,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **More Fields/Solvers items** (#123): Set Rigid Body Interpenetration (Blender's Generic rigid body constraint with
   Disable Collisions between the selected bodies and the active one) and Use Selected as Source (Blender's force
   field on the selected object).
+- **Set Key on components** (#272): S in component mode keys the selected points' X / Y / Z at the current time,
+  like Maya — mesh vertices (selected edges and faces key their vertices), NURBS curve and surface CVs, Bezier
+  points with their handles, and lattice points. Keyed vertices follow the time in edit mode too, and one undo
+  removes the keys. In object mode S keys the object's channels as before.
 
 ### Changed
 - **FX, Rendering and lighting run Blender's own features**: the Maya FX and Rendering menus stay where a Maya user

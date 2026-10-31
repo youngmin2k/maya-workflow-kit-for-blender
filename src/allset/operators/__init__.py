@@ -23,6 +23,7 @@ from . import component_scale
 from . import xform_constraint
 from . import live
 from . import live_translate
+from . import point_keys  # S on selected points keys their positions
 
 classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pivot_pick.classes,
@@ -258,9 +259,11 @@ def register():
     deformers_205a.register_handlers()
     curves_207.register_handlers()
     sweep_mesh.register()
+    point_keys.register_handlers()
 
 
 def unregister():
+    point_keys.unregister_handlers()
     autosave.unregister()
     sweep_mesh.unregister()
     ik_rp.unregister_handlers()
