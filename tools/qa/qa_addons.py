@@ -10,8 +10,7 @@ scripts folder:
     COMPAT_ENGINES, a child panel, a child under a Blender render panel, and a module-valued global ``classes``
     (``from . import classes``, the #79 shape)
   qa_dummy_keys: add-on keymap items on W / Q / E / R in "3D View"
-Per order: enable all -> Maya mode on -> Render Settings data path (render_panels, wrapped polls through a marked
-fake window) -> smoke (Rigify metarig + generate, Node Wrangler ops, dummy panels / keys) -> Maya mode off ->
+Per order: enable all -> Maya mode on -> smoke (Rigify metarig + generate, Node Wrangler ops, dummy panels / keys) -> Maya mode off ->
 disable the kit -> the other add-ons' panels / keymap items / ops still there and work. stderr is teed so Python
 tracebacks printed by Blender (handlers, draw, timers) are counted per phase.
 LoopTools / Bool Tool are online-only extensions: not covered (no download).
@@ -24,7 +23,6 @@ import sys
 import traceback
 from importlib import import_module
 from pathlib import Path
-from types import SimpleNamespace
 
 import addon_utils
 import bpy
@@ -254,51 +252,6 @@ def _dummy_classes():
                                                    "QA_PT_under_blender")]
 
 
-def _render_settings_path(r):
-    """What the kit's Render Settings window does with Blender's / other add-ons' Render panels, headless: the
-    panel list (registration_key over every Render panel), then each wrapped poll through a marked fake window."""
-    rs = import_module(kit.MODULE + ".ui.render_settings")
-    panels = rs.render_panels()
-    names = [c.__name__ for c in panels]
-    r.check("rs_panels_listed", "QA_PT_render_main" in names and "QA_PT_render_plain" in names,
-            {"n": len(names), "qa": [n for n in names if n.startswith("QA_")]})
-    wrapped = {c.__name__ for c, _raw, _k in rs._wrapped}
-    r.check("rs_dummy_wrapped", {"QA_PT_render_main", "QA_PT_render_plain"} <= wrapped,
-            {"wrapped_qa": sorted(n for n in wrapped if n.startswith("QA_"))})
-    win = SimpleNamespace(as_pointer=lambda: 424242)
-    rs._WINDOWS.add(424242)
-    try:
-        sc = bpy.context.scene
-        ctx_common = SimpleNamespace(window=win, space_data=SimpleNamespace(type='PROPERTIES'),
-                                     window_manager=SimpleNamespace(allset_rs_tab='COMMON'), scene=sc,
-                                     preferences=bpy.context.preferences,
-                                     engine=sc.render.engine)
-        ctx_engine = SimpleNamespace(window=win, space_data=SimpleNamespace(type='PROPERTIES'),
-                                     window_manager=SimpleNamespace(allset_rs_tab='ENGINE'), scene=sc,
-                                     preferences=bpy.context.preferences,
-                                     engine=sc.render.engine)
-        errs, common_shown, engine_hidden = [], [], []
-        for cls in panels:
-            for ctx, bucket, want in ((ctx_common, common_shown, False), (ctx_engine, engine_hidden, None)):
-                try:
-                    got = cls.poll(ctx) if hasattr(cls, "poll") else True
-                except Exception as ex:
-                    errs.append(f"{cls.__name__}: {ex!r}")
-                    continue
-                if want is False and got:
-                    bucket.append(cls.__name__)
-        r.check("rs_polls_no_error", not errs, errs[:8])
-        r.check("rs_common_tab_hides_render_panels", not common_shown, common_shown[:8], severity="S3")
-        # engine tab: the dummy panels poll like without the kit
-        got = {c.__name__: bool(c.poll(ctx_engine)) if hasattr(c, "poll") else True for c in panels
-               if c.__name__.startswith("QA_")}
-        r.check("rs_engine_tab_shows_dummy", all(got.values()), got)
-        info = rs.info_lines(sc)
-        r.check("rs_info_lines", bool(info), info[:3])
-    finally:
-        rs._WINDOWS.discard(424242)
-
-
 def _rigify_smoke(r):
     if "rigify" not in bpy.context.preferences.addons:
         r.check("rigify_enabled", False, "rigify not enabled")
@@ -395,11 +348,6 @@ def run(order):
         res.setdefault("addon_order", {})[key] = _addon_order(key)
     print(f"QA-F {order} add-on keymap order on W/Q/E/R (Maya on): {res['addon_order']}", flush=True)
     print(f"QA-F {order} 3D View first item per key (Maya on): {res['first_on_key']}", flush=True)
-    try:
-        _render_settings_path(r)
-    except Exception:
-        r.check("render_settings_path", False, traceback.format_exc()[-1500:], severity="S1")
-    r.phase("render_settings")
     _rigify_smoke(r)
     r.phase("rigify")
     _other_smoke(r, "maya_on")

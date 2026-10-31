@@ -48,7 +48,7 @@ EDGE = 3                  # px the area edges take from a split
 MAYA_LENS = 70.0
 MAYA_FRAME_END = 120      # playback 1-120
 MAYA_RANGE_END = 200      # animation range 1-200 (step 20: Range Slider outer fields)
-MAYA_RESOLUTION = (960, 540)   # = ui/render_settings.py HD 540, step 137
+MAYA_RESOLUTION = (960, 540)   # HD 540
 STRIP_MARKER = ".AllsetStrip"  # = ui/shelf.py MARKER (Status Line row)
 SHELF_MARKER = ".AllsetShelf"  # = ui/shelf.py SHELF_MARKER (Shelf row)
 # Maya lengths are cm: 1 Maya unit = 0.01 BU with m scene units + cm display.

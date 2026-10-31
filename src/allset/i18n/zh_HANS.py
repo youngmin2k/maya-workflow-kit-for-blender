@@ -3763,7 +3763,7 @@ STRINGS = {
     'Show Tooltip Help': '显示工具提示帮助',
     'Show Upstream Curves': '显示上游曲线',
     'Show an Object / Edit Joints / Pose Joints picker at the start of the main viewport header while a skeleton is active (not part of Maya)': '当骨架处于活动状态时，在主视口标题栏开头显示 物体 / 编辑关节 / 姿态关节 选择器(不属于 Maya)',
-    "Show batch rendering messages in the Script Editor history (Maya; the kit's batch render writes its messages to the system console)": '在脚本编辑器历史中显示批渲染消息(Maya；工具包的批渲染将其消息写入系统控制台)',
+    "Show batch rendering messages in the Script Editor history (Maya; Blender's renders write their messages to the system console)": '在脚本编辑器历史中显示批渲染消息(Maya；Blender 的渲染将其消息写入系统控制台)',
     'Show brush': '显示笔刷',
     'Show line numbers': '显示行号',
     'Show only targets whose name contains this': '仅显示名称包含此文本的目标',

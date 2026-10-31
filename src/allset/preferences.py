@@ -204,8 +204,8 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     # the rest off, History Output Show Both). Read by command_line/runner.py (step 216).
     se_batch_render_messages: bpy.props.BoolProperty(
         name="Batch Render Messages", default=True,
-        description="Show batch rendering messages in the Script Editor history (Maya; the kit's batch render "
-                    "writes its messages to the system console)")
+        description="Show batch rendering messages in the Script Editor history (Maya; Blender's renders "
+                    "write their messages to the system console)")
     se_echo_all: bpy.props.BoolProperty(
         name="Echo All Commands",
         description="Write every command run from a menu, shelf or marking menu into the Script Editor history "

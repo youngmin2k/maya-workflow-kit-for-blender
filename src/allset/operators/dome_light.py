@@ -43,7 +43,7 @@ def _node(tree, kind, name, location):
 
 def ensure_world(scene):
     """The scene's World with the dome nodes (made when missing): Texture Coordinate > Mapping > Environment Texture >
-    Background > the World output (behind the Maya ambient light's add node when there is one)."""
+    Background > the World output."""
     from .. import compat
     world = scene.world
     if world is None:

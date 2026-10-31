@@ -3763,7 +3763,7 @@ STRINGS = {
     'Show Tooltip Help': 'ツールチップヘルプを表示',
     'Show Upstream Curves': '上流のカーブを表示',
     'Show an Object / Edit Joints / Pose Joints picker at the start of the main viewport header while a skeleton is active (not part of Maya)': 'スケルトンがアクティブなとき、メインビューポートのヘッダー先頭にオブジェクト / ジョイント編集 / ジョイントのポーズのピッカーを表示します (Maya にはない機能)',
-    "Show batch rendering messages in the Script Editor history (Maya; the kit's batch render writes its messages to the system console)": 'バッチレンダーのメッセージをスクリプトエディタの履歴に表示します (Maya。キットのバッチレンダーはメッセージをシステムコンソールに書き出します)',
+    "Show batch rendering messages in the Script Editor history (Maya; Blender's renders write their messages to the system console)": 'バッチレンダーのメッセージをスクリプトエディタの履歴に表示します (Maya。Blender のレンダーはメッセージをシステムコンソールに書き出します)',
     'Show brush': 'ブラシを表示',
     'Show line numbers': '行番号を表示',
     'Show only targets whose name contains this': '名前にこれを含むターゲットだけを表示',
