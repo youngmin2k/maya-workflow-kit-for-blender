@@ -238,7 +238,6 @@ def draw_common(layout, context):
     if body:
         body.use_property_split = True
         body.prop(scene, "camera", text="Renderable Camera")
-        draw_renderable(body, scene)
     header, body = layout.panel("ALLSET_rs_size", default_closed=False)
     header.label(text="Image Size")
     if body:
@@ -253,25 +252,13 @@ def draw_common(layout, context):
         row = body.row(align=True)
         row.prop(r, "pixel_aspect_x", text="Pixel aspect X")
         row.prop(r, "pixel_aspect_y", text="Y")
-    # Maya Common > Render Options (step 152): Enable Default Light, factory on (operators/default_light.py)
+    # Maya Common > Render Options > Skip existing frames = Blender's Overwrite off + Placeholders on
     header, body = layout.panel("ALLSET_rs_options", default_closed=False)
     header.label(text="Render Options")
-    if body and hasattr(scene, "allset_default_light"):
+    if body:
         body.use_property_split = True
-        body.prop(scene, "allset_default_light", text="Enable Default Light")
-    if body and hasattr(scene, "allset_skip_existing"):
-        body.prop(scene, "allset_skip_existing", text="Skip existing frames")
-
-
-def draw_renderable(layout, scene):
-    """Each scene camera's Renderable check (Render Sequence > All Render-Enabled Cameras renders those on)."""
-    cams = sorted((ob for ob in scene.objects if ob.type == 'CAMERA' and ob.data is not None
-                   and hasattr(ob.data, "allset_renderable")), key=lambda ob: ob.name)
-    if not cams:
-        return
-    col = layout.column(heading="Renderable", align=True)
-    for ob in cams:
-        col.prop(ob.data, "allset_renderable", text=ob.name)
+        body.prop(r, "use_overwrite")
+        body.prop(r, "use_placeholder")
 
 
 class ALLSET_OT_rs_defaults(bpy.types.Operator):

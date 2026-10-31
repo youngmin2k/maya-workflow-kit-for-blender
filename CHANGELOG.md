@@ -24,9 +24,28 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   Use Selected as Source (the object carries the field).
 
 ### Changed
+- **Render items call Blender's render**: Render > Render Current Frame / Redo Previous Render / Render Sequence,
+  the Status Line Render button and the Render View's Render button run Blender's Render Image / Render Animation
+  through the scene camera at the Output properties size (a scene needs a camera, like any Blender render).
+  Render > Batch Render renders the frame range in this session, Show Batch Render opens Blender's Render window and
+  Test Resolution sets Blender's Resolution % (the size of every render). F12 / Ctrl+F12 and Ctrl+Alt+Enter are Blender's own
+  render keys again (F12 over the 3D View and the UV Editor stays Maya's UV selection mask).
+- **Files saved with older versions** are tidied when they are opened: the hidden `persp` render camera the kit
+  made stops being the scene camera and is removed, and a leftover `defaultLight` goes.
 - **Prevent Negative Scale on every Scale handle** (#261): in component mode the centre handle and the plane
   handles stop at zero too, so a selection scales onto its pivot (ready to merge) or onto a line through it
   without flipping. Object Mode still scales past zero.
+
+### Removed
+- **Default light for renders**: a scene without lights no longer gets a light from the camera while it renders
+  (Render Settings > Render Options > Enable Default Light and the Preferences row are gone); add a light to the
+  scene instead.
+- **Batch Render in a background Blender**, Cancel Batch Render (greyed: Esc stops a running render) and the Render
+  Sequence / Batch Render option windows (camera choice, All Render-Enabled Cameras, alternate output folder,
+  processors); the camera **Renderable** check went with them. Render Options > Skip existing frames is now Blender's
+  own Overwrite / Placeholders.
+- **Test Resolution** preference (a separate size for kit renders): Blender's Resolution % sets the size of every
+  render.
 
 ### Fixed
 - **Joints inside a mesh in wireframe** (#266): a wireframe view (4) shows every joint and bone again, also the ones

@@ -945,7 +945,7 @@ def patch_uv(kd):
     _add(kd, UV_KM, "allset.uv_layout", make_event("L", ctrl=True))
     for km in ("Object Mode", "Mesh"):
         _add(kd, km, "allset.uv_component", make_event("F12"), {"mode": 'UV'},
-             shadows=("Screen",))      # step 214: Screen F12 = Blender render, Maya's F12 wins in the 3D View
+             shadows=("Screen",))      # Screen F12 = Blender render, Maya's F12 wins in the 3D View
         _add(kd, km, "allset.uv_component", make_event("F12", alt=True), {"mode": 'SHELL'})
 
 
@@ -1417,23 +1417,17 @@ def patch_repeat(kd):
     # there; the Dope Sheet's g (step 269) steps aside in the Timeline, so the Time Slider still repeats
 
 
-# --- 51. Blender's render keys with the default light, like Maya (#120) ---------------------------------------------
-# A UI render's render_* handlers run on the job thread (operators/default_light.py), so the light is added by a kit
-# operator wrapping render.render. F12 / Ctrl+F12 = Blender's Render Image / Animation keys: their default-keyconfig
-# items in "Screen" are switched off in Maya mode (Screen is a patched keymap), so the kit's go there. The 3D View's
+# --- 51. Blender's render keys ---------------------------------------------------------------------------------------
+# F12 / Ctrl+F12 = Blender's Render Image / Render Animation. Their default-keyconfig items in "Screen" are switched
+# off in Maya mode (Screen is a patched keymap), so the same render.render items go there as kit items. The 3D View's
 # Object Mode / Mesh F12 (Maya's SelectUVMask, patch_uv) runs first there, and the UV Editor gets the same Maya F12
-# (its keymap runs before Screen): F12 renders everywhere else. IC's Ctrl+Alt+Enter Render Animation (Screen Editing)
-# is wrapped the same way.
+# (its keymap runs before Screen): F12 renders everywhere else. IC's Ctrl+Alt+Enter Render Animation stays.
 
 def patch_blender_render(kd):
-    _add(kd, "Screen", "allset.render_blender", make_event("F12"), {"use_viewport": True}, first=True,
+    _add(kd, "Screen", "render.render", make_event("F12"), {"use_viewport": True},
          shadows=("Object Mode", "Mesh", UV_KM))   # Maya's F12 UV mask wins in the 3D View / UV Editor
     _add(kd, UV_KM, "allset.uv_component", make_event("F12"), {"mode": 'UV'}, shadows=("Screen",))
-    _add(kd, "Screen", "allset.render_blender", make_event("F12", ctrl=True), {"animation": True, "use_viewport": True},
-         first=True)
-    if kd.remove("Screen Editing", "render.render", type="RET", ctrl=True, alt=True):
-        _add(kd, "Screen Editing", "allset.render_blender", make_event("RET", ctrl=True, alt=True),
-             {"animation": True, "use_viewport": True}, first=True)
+    _add(kd, "Screen", "render.render", make_event("F12", ctrl=True), {"animation": True, "use_viewport": True})
 
 
 PATCHES = (patch_tweak_fallback, patch_selection, patch_display, patch_group, patch_space,

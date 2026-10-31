@@ -4390,10 +4390,19 @@ def _m67_4_menu():
     using = next(x for kind, t, x in rec.out if t == "Render Using")
     batch = next(x for kind, t, x in rec.out if t == "Batch Render" and kind == "op")
     tip = mod("ui.notices").tooltip("Render/Batch Render", False)
-    # step 152: Batch Render runs (a background Blender), its tooltip says so
+    # Batch Render runs Blender's Render Animation, its tooltip names the command-line way
     check(f"[M67-4] Render Using = engine list ({using}), Batch Render runs ({batch[0]}) with 'blender -b' "
           f"in its tooltip", using == "ALLSET_MT_render_using" and batch[0] == "allset.menu_item"
           and "blender -b" in tip)
+    sc = bpy.context.scene
+    if sc.camera is None:       # Blender renders through the scene camera
+        sc.camera = next((o for o in sc.objects if o.type == 'CAMERA'), None)
+    if sc.camera is None:
+        cam = bpy.data.objects.new("camera1", bpy.data.cameras.new("cameraShape1"))
+        sc.collection.objects.link(cam)
+        cam.location = (28.0, -28.0, 21.0)
+        cam.rotation_euler = (1.1, 0.0, 0.785)
+        sc.camera = cam
     menu("Render/Render Current Frame")
 
 
@@ -4414,7 +4423,7 @@ def _m67_4_rendered():
         rv.draw_header(rec, bpy.context)
     got = [(x[0] if kind == "op" else t) for kind, t, x in rec.out]
     check(f"[M67-4] its header starts Render · Keep Image · Remove Image · 'Slot N · k kept' ({got})",
-          got[:3] == ["allset.render_current_frame", "allset.render_keep_image", "allset.render_remove_image"]
+          got[:3] == ["render.render", "allset.render_keep_image", "allset.render_remove_image"]
           and got[3].startswith("Slot 1") and got[3].endswith("0 kept"))
     C["rv"] = (w, a)
     with bpy.context.temp_override(window=w, area=a, space_data=a.spaces.active):

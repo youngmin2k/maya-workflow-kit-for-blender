@@ -97,8 +97,7 @@ def dag_rows(scene, shapes):
     """[(kind, object name, depth, has children, bone name)] in Maya DAG order: roots in scene
     order, children depth first; collapsed objects (and joints) hide their children. An
     armature's bones come first under it, like the joints under a Maya skeleton group."""
-    # the kit's default light exists only during a render (step 152): Maya's Outliner doesn't list it
-    order = {ob: i for i, ob in enumerate(scene.objects) if not ob.get("allset_default_light")}
+    order = {ob: i for i, ob in enumerate(scene.objects)}
     # Object.children scans every object in the file: once per object made each depsgraph update O(n^2)
     # (step 240 QA G: 620 objects = 65 ms per update)
     children = {}

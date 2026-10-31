@@ -177,8 +177,8 @@ PAGES = (
     ]),
     ("RENDERING", "Rendering", 1, "Rendering: Rendering Preferences", [
         ("Rendering", [
-            ("pref", "test_resolution", "Test resolution"),
-            ("scene", "allset_default_light", "Enable default light"),
+            ("missing", "Test resolution", "Blender's Output properties > Resolution % sets the size of every render"),
+            ("missing", "Enable default light", "Blender renders a scene with its own lights only"),
         ]),
     ]),
     ("SEARCH", "Search", 1, "Search: Search Preferences", [
@@ -272,7 +272,6 @@ MAYA_FACTORY = {
     "frame_start": 1,
     "frame_end": 200,
     "sync_mode": 'NONE',            # Maya Playback speed "Play every frame"
-    "allset_default_light": True,
 }
 
 

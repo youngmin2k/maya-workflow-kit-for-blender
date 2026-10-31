@@ -57,10 +57,24 @@ NOTICES = {
     "Windows/Rendering Editors/Hypershade": (
         "Shader Editor + kit list", "Blender has no Hypershade: the Shader Editor is the graph, its Hypershade sidebar "
         "tab the browser (add nodes with Shift+A)."),
-    # step 152: mapped (operators/render_batch.py); the tooltip says how Blender does it
+    # Render menu: Blender's own render (the tooltip says how Blender does it)
+    **{f"Render/{item}": (
+        "Render Image", "Blender renders through the scene camera (Scene properties > Camera) at the Output "
+        "properties size; a scene without a camera can't render.")
+       for item in ("Render Current Frame", "Redo Previous Render")},
+    "Render/Render Sequence": (
+        "Render Animation", "Blender renders the frame range through the scene camera into the Output properties "
+        "folder; Esc stops it."),
     "Render/Batch Render": (
-        "Background Blender", "Blender has no batch render queue: Maya Workflow Kit renders a copy of the scene in "
-        "a separate background Blender (blender -b ... -a)."),
+        "Render Animation", "Blender has no batch render queue: the frame range renders in this session (Esc stops "
+        "it); for a background render run blender -b <file> -a."),
+    "Render/Cancel Batch Render": (
+        "Esc", "Blender has no batch render queue: Esc in the Render window stops the running render."),
+    "Render/Show Batch Render": (
+        "Render window", "Blender shows the last render in its Render window (Render > View Render)."),
+    "Render/Test Resolution": (
+        "Resolution %", "Blender has no separate test size: these items set Output properties > Format > "
+        "Resolution %, the size of every render."),
     # step 109: mapped items whose Blender result differs
     "Create/NURBS Primitives/Square": (
         "Four NURBS curves", "Blender has no NURBS square: four straight NURBS curves under an empty, like Maya's group."),

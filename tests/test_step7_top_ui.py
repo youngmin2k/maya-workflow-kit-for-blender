@@ -302,7 +302,7 @@ def test_topbar_draw_maya_and_blender():
     ops = [e[1] for e in fake.layout.log if e[0] == "op"]
     # (selection masks: collapsed by default, like Maya's Status Line)
     for op in ("allset.save_scene", "allset.select_mode", "allset.status_group", "allset.snap_toggle",
-               "allset.render_current_frame", "allset.render_settings", "allset.editor_toggle"):
+               "render.render", "allset.render_settings", "allset.editor_toggle"):
         assert op in ops, (op, ops)
     other = types.SimpleNamespace(type='VIEW_3D')
     fake = types.SimpleNamespace(layout=FakeLayout())

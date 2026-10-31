@@ -9,7 +9,7 @@ Operator ids use the ``allset.`` prefix. Each module lists its classes in
 import bpy
 
 from . import (auto_key, bookmarks, ik_fk, component, create, curve_tools, curves_maya, cut_sew, display, driven_key, duplicate, extrude, file_io, freeze, option_windows, fx, global_keys4, graph_keys, graph_key_menu, deformer_weights, joint_labels, group, history, hold, joints, pivot_menu, key_batch, key_batch3, key_insert, loop_pick, manip, marquee,
-               anim_layers, lights, light_links, material, menu_extras, menu_items, mesh_maya, multi_cut, poly_maya, rig_maya, mesh_tools, outliner_drag, parenting, pickwalk, pivot, playblast, preselect, project, render_persp, rig_tools, select_convert, select_priority, sets, shading_maps, skin, snap_align, soft_select, symmetry, taphold,
+               anim_layers, lights, light_links, material, menu_extras, menu_items, mesh_maya, multi_cut, poly_maya, rig_maya, mesh_tools, outliner_drag, parenting, pickwalk, pivot, playblast, preselect, project, rig_tools, select_convert, select_priority, sets, shading_maps, skin, snap_align, soft_select, symmetry, taphold,
                time_keys, tool_keys, units, uv_shells, uv_tools, uv_modify, uv_select_178, view, view_keys3, visibility)
 from . import poly_draw, quad_draw  # step 144 POLY: Create Polygon / Append to Polygon / Quad Draw (#30)
 from . import edge_loops  # step 144 LOOP: Insert / Offset Edge Loop, Slide Edge (#31)
@@ -39,16 +39,14 @@ classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pivot_menu.classes, *sets.classes, *menu_items.classes, *file_io.classes, *option_windows.classes,
            *key_batch3.classes, *bookmarks.classes, *curve_tools.classes, *curves_maya.classes,
            *poly_maya.classes, *rig_maya.classes, *loop_pick.classes,
-           *render_persp.classes, *select_convert.classes, *poly_draw.classes, *quad_draw.classes,
+           *select_convert.classes, *poly_draw.classes, *quad_draw.classes,
            *edge_loops.classes)
 
 from . import deformers  # noqa: E402  step 144 DEFORM: Maya Deform menu deformers + Paint Weights (#34)
 
 classes += deformers.classes
 
-from . import default_light, render_batch, render_cameras  # noqa: E402  render: default light, Test Resolution, Batch (#101)
-
-classes += render_batch.classes
+from . import legacy_cleanup  # noqa: E402  tidies files saved by older versions (temporary)
 
 from . import curve_draw  # noqa: E402  step 156 lane T: CV / EP Curve Tool, Three / Two Point Circular Arc
 from . import joint_preview  # noqa: E402  Joint Tool viewport feedback
@@ -200,8 +198,7 @@ def register():
     pose_space_227.register_props()
     motion_path_228.register_props()
     flow_path_228.register_props()
-    default_light.register()
-    render_cameras.register_props()
+    legacy_cleanup.register()
     joint_edit.register()
     joint_display.register_props()
     poly_display.register_props()
@@ -354,8 +351,6 @@ def unregister():
     mesh_tools.unregister_props()
     driven_key.unregister_props()
     snap_align.unregister_props()
-    render_batch.unregister()
-    render_cameras.unregister_props()
-    default_light.unregister()
+    legacy_cleanup.unregister()
     _unregister_classes()
 

@@ -15,7 +15,6 @@ lights = import_module(kit.MODULE + ".operators.lights")
 create = import_module(kit.MODULE + ".operators.create")
 material = import_module(kit.MODULE + ".operators.material")
 units = import_module(kit.MODULE + ".operators.units")
-default_light = import_module(kit.MODULE + ".operators.default_light")
 channel_box = import_module(kit.MODULE + ".ui.channel_box")
 attribute_editor = import_module(kit.MODULE + ".ui.attribute_editor")
 menu_map = import_module(kit.MODULE + ".ui.menu_map")
@@ -76,7 +75,6 @@ def test_create_names_and_defaults():
     assert vol.data.use_custom_distance and abs(vol.data.cutoff_distance - k) < 1e-6 * k
     assert vol.data.node_tree.nodes.get(ml.V_FALLOFF) is not None
     assert vol.data.node_tree.nodes.get(lights.FALLOFF_NODE) is None
-    assert default_light.scene_has_lights(sc) and not default_light.needed(sc), "they turn the default light off"
 
 
 def test_intensity_shade_round_trip_and_radius():
@@ -217,7 +215,6 @@ def _setup_render(engine, k, half_width):
     if engine == 'CYCLES':
         sc.cycles.samples, sc.cycles.use_denoising = 64, False
         sc.cycles.max_bounces = 0          # Maya Software has no bounce light
-    sc.allset_default_light = False
     cam = bpy.data.objects.new("probeCam", bpy.data.cameras.new("probeCam"))
     sc.collection.objects.link(cam)
     cam.data.type, cam.data.ortho_scale = 'ORTHO', 2 * half_width * k

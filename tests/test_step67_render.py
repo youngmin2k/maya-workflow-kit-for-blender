@@ -77,15 +77,17 @@ def test_render_menu_restored():
     pos = [items.index(w) for w in want]
     assert pos == sorted(pos), items
     assert len(items) > 15, items
-    assert menu_map.MAP["Render/Render Current Frame"] == "allset.render_current_frame"   # step 137: persp camera
-    assert menu_map.MAP["Render/Render Sequence"] == "allset.render_sequence"
+    assert menu_map.MAP["Render/Render Current Frame"] == "render.render"
+    assert menu_map.MAP["Render/Render Sequence"] == ("render.render", {"animation": True})
     assert menu_map.MAP["Render/IPR Render Current Frame"] == "allset.ipr_toggle"
     assert menu_map.MAP["Render/Render Using"] == ("menu", "ALLSET_MT_render_using")
     paths = {p for p, _it in menu_sets.iter_items()}
     for path in ("Render/Render Current Frame", "Render/Batch Render", "Render/Render Using"):
         assert path in paths, path
     assert "blender -b" in notices.NOTICES["Render/Batch Render"][1]
-    assert menu_map.MAP["Render/Batch Render"] == "allset.batch_render"      # step 152 (#101)
+    assert menu_map.MAP["Render/Batch Render"] == ("render.render", {"animation": True})
+    assert "Render/Cancel Batch Render" not in menu_map.MAP and "Blender" in notices.NOTICES[
+        "Render/Cancel Batch Render"][1]
     # the Render Using menu lists the engines
     rec = Rec()
     rv.ALLSET_MT_render_using.draw(types.SimpleNamespace(layout=rec), bpy.context)
@@ -320,7 +322,7 @@ def test_keep_image_render_slots():
     # header buttons only for Render Result
     rec = Rec()
     rv.draw_header(rec, types.SimpleNamespace(space_data=types.SimpleNamespace(image=image)))
-    assert [i for i, _p in rec.ops()] == ["allset.render_current_frame", "allset.render_keep_image",
+    assert [i for i, _p in rec.ops()] == ["render.render", "allset.render_keep_image",
                                       "allset.render_remove_image"]
     rec = Rec()
     rv.draw_header(rec, types.SimpleNamespace(space_data=types.SimpleNamespace(image=None)))

@@ -501,7 +501,7 @@ MAP = {
     **{f"Playback/Playback Speed/Play Every Frame, {k}": ("wm.context_set_enum", {"data_path": "scene.sync_mode",
                                                                                   "value": "NONE"})
        for k in ("Free", "Max Real-time")},
-    "Playback/Render Current Frame": "allset.render_current_frame",
+    "Playback/Render Current Frame": "render.render",
     "Playback/Render Settings": "allset.render_settings",
     # --- Visualize ---
     "Visualize/Motion Trail Editor": "allset.motion_trail_editor",      # step 225 L21
@@ -556,21 +556,17 @@ MAP = {
     "Lighting/Shading/Assign Existing Material": ("menu", "ALLSET_MT_assign_existing_material"),
     "Texturing/3D Paint Tool": "paint.texture_paint_toggle",
     "Render/Render Settings...": "allset.render_settings",
-    # Render menu (step 67).
-    # Maya renders into the Render View window: render.render INVOKE opens Blender's (Render Result).
-    # Through the active view's camera, else Maya's persp camera made on demand (operators/render_persp.py, step 137).
+    # Render menu: Blender's own render (INVOKE opens Blender's Render window, Maya's Render View) through the scene
+    # camera, at the Output properties size; Esc stops it.
     "Render/Render Using": ("menu", "ALLSET_MT_render_using"),
-    "Render/Render Current Frame": "allset.render_current_frame",
-    "Render/Redo Previous Render": "allset.render_current_frame",
+    "Render/Render Current Frame": "render.render",
+    "Render/Redo Previous Render": "render.render",
     "Render/IPR Render Current Frame": "allset.ipr_toggle",
     "Render/Redo Previous IPR Render": "allset.ipr_toggle",
-    "Render/Render Sequence": "allset.render_sequence",
-    # step 152 (#101, operators/render_batch.py): Test Resolution = the kit renders' size (Maya's submenu, a check on
-    # the current choice); Batch Render = a separate background Blender on a copy of the scene.
-    "Render/Test Resolution": ("menu", "ALLSET_MT_test_resolution"),
-    "Render/Batch Render": "allset.batch_render",
-    "Render/Cancel Batch Render": "allset.cancel_batch_render",
-    "Render/Show Batch Render": "allset.show_batch_render",
+    "Render/Render Sequence": ("render.render", {"animation": True}),
+    "Render/Test Resolution": ("menu", "ALLSET_MT_test_resolution"),     # Blender's Resolution %
+    "Render/Batch Render": ("render.render", {"animation": True}),
+    "Render/Show Batch Render": "render.view_show",
 }
 
 # Items Maya adds at run time, inserted after a data path: {after path: [item]} with

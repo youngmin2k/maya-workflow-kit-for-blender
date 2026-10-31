@@ -162,7 +162,7 @@ ENTRIES = {
     "SelectMultiComponentMask": _e("KIT", (OBJ_NM, "allset.component_mode", {"type": "MULTI"}),
                                    note="정점·엣지·면 동시 선택 모드"),
     "SelectUVMask": _e("KIT", (OBJ, "allset.uv_component", {"mode": 'UV'}),
-                       note="UV Editor 를 열고 (편집 모드) UV 선택 = UV Sync 끔 + UV 정점 (step 66). 3D 뷰 오브젝트·메시 편집 밖의 F12 = Blender Render Image + Maya 기본 라이트 (allset.render_blender, step 214)"),
+                       note="UV Editor 를 열고 (편집 모드) UV 선택 = UV Sync 끔 + UV 정점. 3D 뷰 오브젝트·메시 편집과 UV Editor 밖의 F12 = Blender Render Image (render.render)"),
     "SelectMeshUVShell": _e("KIT", (OBJ, "allset.uv_component", {"mode": 'SHELL'}),
                             note="Maya UV Shell 마스크: 3D View / UV Editor 클릭·박스가 UV 셸 전체 (면) 를 고름 (step 256, operators/uv_shell_select.py)"),
     # --- step 66: UV Editor ---
@@ -183,7 +183,7 @@ ENTRIES = {
                                   note="닿는 엣지 (면 -> 테두리 엣지)"),
     "ConvertSelectionToFaces": _e("KIT", ("Mesh", "allset.convert_selection", {"type": "FACE"}),
                                   note="닿는 면 (Blender 모드 전환은 포함된 면만)"),
-    "ConvertSelectionToUVs": _e("NO", note="3D 뷰 UV 컴포넌트 없음 (UV Editor 사용). Ctrl+F12 = Blender Render Animation + Maya 기본 라이트 (allset.render_blender, step 214)"),
+    "ConvertSelectionToUVs": _e("NO", note="3D 뷰 UV 컴포넌트 없음 (UV Editor 사용). Ctrl+F12 = Blender Render Animation (render.render)"),
     "GrowPolygonSelectionRegion": _e("KIT", ("Mesh", "mesh.select_more", {})),
     "ShrinkPolygonSelectionRegion": _e("KIT", ("Mesh", "mesh.select_less", {})),
     "GrowLoopPolygonSelectionRegion": _e("KIT", ("Mesh", "mesh.select_next_item", {}),

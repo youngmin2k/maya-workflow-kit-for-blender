@@ -105,6 +105,28 @@ class ALLSET_MT_render_using(bpy.types.Menu):
         self.layout.props_enum(context.scene.render, "engine")
 
 
+TEST_PERCENTAGES = (100, None, 10, 25, 50, 75, None, 110, 125, 150)     # None = a divider
+
+
+class ALLSET_MT_test_resolution(bpy.types.Menu):
+    """Blender's Resolution % of the Output properties (Maya Render > Test Resolution): it sets the size of every
+    render"""
+    bl_idname = "ALLSET_MT_test_resolution"
+    bl_label = "Test Resolution"
+
+    def draw(self, context):
+        r = context.scene.render
+        for perc in TEST_PERCENTAGES:
+            if perc is None:
+                self.layout.separator()
+                continue
+            w, h = r.resolution_x * perc // 100, r.resolution_y * perc // 100
+            text = f"Render Settings ({w}x{h})" if perc == 100 else f"{perc}% Settings ({w}x{h})"
+            op = self.layout.operator("wm.context_set_int", text=text,
+                                      icon='CHECKBOX_HLT' if r.resolution_percentage == perc else 'CHECKBOX_DEHLT')
+            op.data_path, op.value = "scene.render.resolution_percentage", perc
+
+
 def draw_header(layout, context):
     """Maya Render View toolbar buttons for an Image Editor showing Render Result."""
     space = context.space_data
@@ -112,7 +134,7 @@ def draw_header(layout, context):
     if image is None or image.type != 'RENDER_RESULT':
         return
     row = layout.row(align=True)
-    row.operator("allset.render_current_frame", text="Render", icon='RENDER_STILL')   # step 137
+    row.operator("render.render", text="Render", icon='RENDER_STILL')
     row.operator("allset.render_keep_image", text="Keep Image", icon='PINNED')
     row.operator("allset.render_remove_image", text="Remove Image", icon='X')
     slots = image.render_slots
@@ -121,7 +143,8 @@ def draw_header(layout, context):
     layout.separator()
 
 
-classes = (ALLSET_OT_render_keep_image, ALLSET_OT_render_remove_image, ALLSET_MT_render_using)
+classes = (ALLSET_OT_render_keep_image, ALLSET_OT_render_remove_image, ALLSET_MT_render_using,
+           ALLSET_MT_test_resolution)
 
 
 def register():

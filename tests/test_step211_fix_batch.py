@@ -186,8 +186,6 @@ def test_startup_cameras_lead_the_dag_and_stay_hidden():
     os_ = m("ui.outliner_sets")
     assert [e[1] for e in os_.default_entries(sc)] == ["defaultLightSet", "defaultObjectSet"]
     assert [e[1] for e in os_.default_entries()][:4] == ["persp", "top", "front", "side"]
-    # the render persp camera is the startup persp
-    assert m("operators.render_persp").persp_camera() == persp
 
 
 def test_startup_cameras_cant_be_deleted_and_stay_out_of_exports():

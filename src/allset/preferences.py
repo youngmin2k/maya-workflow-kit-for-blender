@@ -271,18 +271,6 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
                ('STEPPED', "Stepped", "Blender Constant")),
         description="Out tangent of the keys the kit sets (Maya Tangents > Default Out Tangent)")
 
-    # Render > Test Resolution (default Render Settings; step 152,
-    # operators/render_batch.py): the size of Render Current Frame / Render Sequence.
-    test_resolution: bpy.props.EnumProperty(
-        name="Test Resolution",
-        items=(("PANEL", "Camera Panel", "The size of the 3D View"),
-               ("SETTINGS", "Render Settings", "The Render Settings size"),
-               ("10", "10%", ""), ("25", "25%", ""), ("50", "50%", ""), ("75", "75%", ""),
-               ("110", "110%", ""), ("125", "125%", ""), ("150", "150%", "")),
-        default="SETTINGS",
-        description="Maya Render > Test Resolution: the size of Render Current Frame / Render Sequence "
-                    "(batch renders use the Render Settings size)")
-
     # Top UI (step 7; Maya Windows > UI Elements).
     maya_top_bar: bpy.props.BoolProperty(
         name="Maya Menu Bar",

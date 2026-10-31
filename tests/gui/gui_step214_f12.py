@@ -1,12 +1,10 @@
-"""Step 214 (#120) lane F12 in a real UI: Maya Workflow Kit layout, a cube, no lights, a camera -> F12 over the
-Outliner = Blender's Render Image through ``allset.render_blender``: the Render window opens, the cube is lit by
-the default light, like Maya (added on the main thread before the render job, operators/default_light.py) and the light is
-gone after the job. F12 over the 3D View in object mode stays Maya's UV selection mask (no render).
+"""F12 in a real UI: Maya Workflow Kit layout, a cube, no lights, a camera -> F12 over the Outliner = Blender's own
+Render Image (render.render): the Render window opens and the render adds no light. Render > Render Current Frame
+runs the same Blender render. F12 over the 3D View in object mode stays Maya's UV selection mask (no render).
 Screenshots: gui_step214_f12_render.png (Render window), gui_step214_f12_main.png."""
 
 import os
 import sys
-import tempfile
 from importlib import import_module
 
 import bpy
@@ -59,8 +57,8 @@ def wait(fn, cond, limit=150):
 
 
 def marked():
-    return [o.name for o in bpy.data.objects if o.get("allset_default_light")] + \
-        [d.name for d in bpy.data.lights if d.get("allset_default_light")]
+    """Lights the kit made itself (none: renders use the scene's own lights)."""
+    return [o.name for o in bpy.data.objects if o.type == 'LIGHT' and o.name not in C.get("lights", [])]
 
 
 def live_f12():
@@ -107,8 +105,8 @@ def s_press_f12():
           f"no lights {C['lights']}", C["cube"] and bpy.context.scene.camera is not None and not C["lights"])
     f12 = C["f12"]
     blender_own = [it for it in f12 if it[0] == "active" and it[2] == "render.render"]
-    check(f"Maya mode: Blender's own F12 render.render is off ({blender_own}); kit F12 items {f12}",
-          not blender_own and ("addon", "Screen", "allset.render_blender") in f12
+    check(f"Maya mode: Blender's F12 render.render is a Maya-keymap item ({blender_own}); kit F12 items {f12}",
+          not blender_own and ("addon", "Screen", "render.render") in f12
           and ("addon", "Object Mode", "allset.uv_component") in f12)
     bpy.app.handlers.render_pre.append(_seen)
     area, region = biggest('OUTLINER')
@@ -137,34 +135,9 @@ def s_rendered():
     check(f"F12 over the Outliner: the Render window opened ({w is not None})", w is not None)
     bpy.app.handlers.render_pre.remove(_seen)
     names, job = C["during"]
-    check(f"the render saw the default light (render_pre: {C.get('seen')}; next tick: {names}, job {job})",
-          C.get("seen") == [["defaultLight"]])
-    path = os.path.join(SHOTS or tempfile.gettempdir(), "gui_step214_f12_result.png")
-    stats = (0, 0.0)
-    try:
-        bpy.data.images["Render Result"].save_render(filepath=path)
-        img = bpy.data.images.load(path)
-        px = list(img.pixels)
-        wd, ht = img.size
-        bg = px[0:3]
-        hits = [k for k in range(wd * ht) if max(abs(px[4 * k + c] - bg[c]) for c in range(3)) > 0.03]
-        mean = sum(max(px[4 * k + c] for c in range(3)) for k in hits) / len(hits) if hits else 0.0
-        stats = (len(hits), mean)
-        bpy.data.images.remove(img)
-    except (RuntimeError, KeyError) as ex:
-        C["err"] = str(ex)
-    print("STEP214_F12 render", stats, path)
-    check(f"the cube is lit in the Render Result ({stats[0]} cube pixels, mean {stats[1]:.3f} > 0.15"
-          f"{C.get('err', '')})", stats[0] > 300 and stats[1] > 0.15)
+    check(f"the render saw only the scene's lights (render_pre: {C.get('seen')}; next tick: {names}, job {job})",
+          C.get("seen") == [[]] and not names)
     C["rv"] = w
-    redraw_all()
-
-
-@step
-def s_cleaned():
-    if wait(s_cleaned, lambda: not marked(), limit=20):
-        return
-    check(f"the default light is gone after the render ({marked()})", not marked())
     redraw_all()
 
 
@@ -172,6 +145,27 @@ def s_cleaned():
 def s_shots():
     shot("gui_step214_f12_render.png", C["rv"])
     shot("gui_step214_f12_main.png")
+    for w in list(bpy.context.window_manager.windows[1:]):
+        with bpy.context.temp_override(window=w):
+            bpy.ops.wm.window_close()
+
+
+@step
+def s_menu_render():
+    """Render > Render Current Frame = the same Blender render."""
+    C["windows_before"] = len(bpy.context.window_manager.windows)
+    with bpy.context.temp_override(window=win()):
+        C["menu_ret"] = bpy.ops.allset.menu_item('INVOKE_DEFAULT', item="Render/Render Current Frame")
+
+
+@step
+def s_menu_rendered():
+    if wait(s_menu_rendered, lambda: not bpy.app.is_job_running('RENDER') and render_window()[0] is not None):
+        redraw_all()
+        return
+    w, _a = render_window()
+    check(f"Render > Render Current Frame opened the Render window (menu {C['menu_ret']}, {w is not None})",
+          w is not None and not marked())
     for w in list(bpy.context.window_manager.windows[1:]):
         with bpy.context.temp_override(window=w):
             bpy.ops.wm.window_close()

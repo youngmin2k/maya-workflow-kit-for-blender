@@ -17,7 +17,7 @@ from bpy.props import FloatProperty
 from mathutils import Matrix, Vector
 
 TUMBLE_TOOL, TRACK_TOOL, DOLLY_TOOL = "allset.tumble_tool", "allset.track_tool", "allset.dolly_tool"
-MAYA_FILM_MM = 36.0       # 35 mm camera film back (operators/render_persp.MAYA_FILM_MM)
+MAYA_FILM_MM = 36.0       # 35 mm camera film back (create.MAYA_FILM_MM)
 
 
 # --- Center View of Selection (pure maths) -----------------------------------------------------
