@@ -1,4 +1,4 @@
-"""Step 150 lane A (#96) in a real UI: Maya Workflow Kit layout, pCube1 Translate X / Y keyed, Graph Editor from
+"""Lane A (#96) in a real UI: Maya Workflow Kit layout, pCube1 Translate X / Y keyed, Graph Editor from
 Windows > Animation Editors. View > Curve Name > Always writes "pCube1.translateX" / "pCube1.translateY" beside the
 last keys in the curve colours (Never: nothing); View > Auto Frame (on by default, like Maya) refits the value axis when
 the selection changes to pCube2 (keys at 40 .. 200, values 0 .. 50; the time range stays)."""
@@ -163,7 +163,7 @@ def s_auto_frame():
     v = r.view2d
     y0, y1 = v.region_to_view(0, 0)[1], v.region_to_view(0, r.height)[1]
     top = 50 * mod(".operators.units").maya_unit()
-    # step 281: Maya's Auto Frame refits the value axis to the curves shown and keeps the time range
+    # Maya's Auto Frame refits the value axis to the curves shown and keeps the time range
     check(f"Auto Frame: pCube2 selected -> time kept {x0:.1f} .. {x1:.1f} (was {C['x'][0]:.1f} .. {C['x'][1]:.1f}), "
           f"values {y0:.3f} .. {y1:.3f} refit to its keys 0 .. {top:.3f}",
           abs(x0 - C["x"][0]) < 1e-3 and abs(x1 - C["x"][1]) < 1e-3 and y0 < 0 < top < y1 < 2 * top)

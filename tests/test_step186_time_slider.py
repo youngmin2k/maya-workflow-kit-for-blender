@@ -1,4 +1,4 @@
-"""Step 186: the Maya Time Slider ruler in the Maya Workflow Kit layout.
+"""The Maya Time Slider ruler in the Maya Workflow Kit layout.
 
 
 The step rule (frames between ticks / labels) against the steps Maya draws:

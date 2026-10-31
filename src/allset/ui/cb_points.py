@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Channel Box in component mode: the selected points' rows (step 165).
+"""Channel Box in component mode: the selected points' rows.
 
 Maya 2022: with
 points selected the Channel Box shows the shape's name, a ``CVs (click to show)`` line and INPUTS; a click on that
@@ -173,7 +173,7 @@ classes = (ALLSET_PG_cb_points, ALLSET_OT_cb_points_toggle)
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    # Scene, not WindowManager: UI edits of WM properties push no undo step (step 38)
+    # Scene, not WindowManager: UI edits of WM properties push no undo step
     bpy.types.Scene.allset_cb_points = bpy.props.PointerProperty(type=ALLSET_PG_cb_points)
     bpy.types.WindowManager.allset_cb_points = BoolProperty(name="CVs Shown", options={'SKIP_SAVE'})
 

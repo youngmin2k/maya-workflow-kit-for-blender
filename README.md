@@ -324,7 +324,7 @@ Optional — the kit leaves your theme and preferences to you. Maya users usuall
   like (or pick one in *Preferences > Themes > Presets*).
 - **Navigation** (*Preferences > Navigation*): Orbit Method *Turntable*, Orbit Around Selection *off*, Zoom to Mouse
   Position *off*, Auto Perspective *on*, Zoom Method *Dolly* with Zoom Axis *Horizontal*.
-- **Undo Steps 256** (*Edit > Preferences > System > Memory & Limits > Undo Steps*) — Maya's undo queue is unlimited,
+- **Undo Steps: 256** (*Edit > Preferences > System > Memory & Limits > Undo Steps*) — Maya's undo queue is unlimited,
   Blender keeps only 32 steps by default, so a long modeling session runs out of undo much sooner than in Maya. 256 is
   Blender's maximum; the kit can't set it for you (extensions may not change Blender's preferences) and shows this hint
   in its preferences while Undo Steps is lower.

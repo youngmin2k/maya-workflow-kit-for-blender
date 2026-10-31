@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Channel Box Channels menu commands Maya has and the step-38 set lacked (step 158).
+"""Channel Box Channels menu commands Maya has and the step-38 set lacked.
 
 Maya 2022 Channel Box Channels menu: Breakdown All / Mute All /
 Unmute All act on every shown channel; Cut / Copy / Delete Selected take the whole curves of the selected channels
@@ -199,7 +199,7 @@ def connection(ob, key):
     return None
 
 
-# --- Add to / Remove From Selected Layers: real since step 188 (operators/anim_layers.ALLSET_OT_anim_layer_attrs) ---
+# --- Add to / Remove From Selected Layers: real (operators/anim_layers.ALLSET_OT_anim_layer_attrs) ---
 LAYER_PATH = "Channel Box/Channels/"
 LAYER_ITEMS = ("Add to Selected Layers", "Remove From Selected Layers")
 NOTICES = {}

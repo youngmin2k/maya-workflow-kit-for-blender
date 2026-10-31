@@ -1,4 +1,4 @@
-"""Step 265 (Issue #178) in a real UI: Maya D hold with another add-on that also binds D, then D + drag on the Move
+"""Issue #178: in a real UI: Maya D hold with another add-on that also binds D, then D + drag on the Move
 manipulator moves only the pivot.
 
 An add-on registered after the kit adds its own D item to the add-on keyconfig's "Object Mode" keymap (the reporter's

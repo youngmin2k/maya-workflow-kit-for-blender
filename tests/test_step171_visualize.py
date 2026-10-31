@@ -1,4 +1,4 @@
-"""Step 171: Visualize > Create Animation Snapshot / Update Snapshot and ghosting (Ghost Selected / Unghost Selected /
+"""Visualize > Create Animation Snapshot / Update Snapshot and ghosting (Ghost Selected / Unghost Selected /
 Unghost All / Ghosting Editor). Maya rules.
 
 Maya points are Y-up: Maya (x, y, z) = Blender (x, -z, y); Maya rotateY = Blender rotation Z (same sign)."""

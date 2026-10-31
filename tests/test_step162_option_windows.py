@@ -1,5 +1,5 @@
-"""Step 162 (1): Display > Toggle Show/Hide ❒ and Edit > Delete by Type > Non-Deformer History ❒ open Maya's option
-windows again (they fell to the generic "Blender has no settings" window after step 147); results follow the
+"""Display > Toggle Show/Hide ❒ and Edit > Delete by Type > Non-Deformer History ❒ open Maya's option
+windows again (they fell to the generic "Blender has no settings" window before); results follow the
 Maya results."""
 
 from importlib import import_module

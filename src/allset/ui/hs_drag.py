@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya Hypershade: middle-mouse drag a material swatch from the Browser onto an object in a viewport = assign it
-(step 162).
+.
 
 Maya: MMB-drag a shader swatch and release it over a surface in a modeling panel; the shader is assigned to that
 object (in component mode with faces selected on it: to those faces). The Hypershade is a separate window, so the
@@ -18,7 +18,7 @@ How (Blender 4.5, tests/gui/gui_step162_hs_drag.py):
   Hypershade window. ``Window.x / y`` place every window on the screen (bottom-left origin like event
   coordinates): the release point is mapped into the window under it, its 3D View WINDOW region, a ray from that
   view's perspective matrix and ``Scene.ray_cast``.
-- The material goes on through ``operators/material.assign`` (step 29 rules).
+- The material goes on through ``operators/material.assign`` (the kit's material rules).
 - While dragging, a small swatch + name follows the cursor in the Browser and in any 3D View it is over.
 """
 

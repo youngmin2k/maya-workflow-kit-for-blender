@@ -1,4 +1,4 @@
-"""Step 276 (#201): Create > Lights > Dome Light = Blender's World environment, driven by a domeLight locator."""
+"""#201: Create > Lights > Dome Light = Blender's World environment, driven by a domeLight locator."""
 
 import os
 import sys

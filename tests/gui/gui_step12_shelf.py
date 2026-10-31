@@ -1,4 +1,4 @@
-"""Step 12 in a real UI: the Maya strip (Status Line + Shelf) of the Maya Workflow Kit layout,
+"""In a real UI: the Maya strip (Status Line + Shelf) of the Maya Workflow Kit layout,
 tab switching, UI Elements > Shelf toggle in the factory layout; screenshots."""
 
 import os
@@ -52,8 +52,8 @@ def s_strip():
     rg = regions(strip)
     check(f"strip sits above the 3D View (strip y {strip.y}, 3D View top {area3d.y + area3d.height})",
           strip.y >= area3d.y + area3d.height - 2)
-    # step 49: the template's Shelf is its own header-only row under the Status Line
-    # (step 113: the shelf row has no header — tab strip + icons in its WINDOW region)
+    # the template's Shelf is its own header-only row under the Status Line
+    # (the shelf row has no header — tab strip + icons in its WINDOW region)
     row = C["shelf"].shelf_row_area(scr)
     shelf_h = regions(row)['WINDOW'].height if row else 0
     check(f"Status Line row and Shelf row both shown ({rg['HEADER'].height}, {shelf_h})",

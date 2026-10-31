@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's double-click component selection (issue #22, step 129; Maya 2026 rules, #222).
+"""Maya's double-click component selection (issue #22; Maya 2026 rules, #222).
 
 Maya 2026 polygon selection: double-click an edge = its edge loop; double-click a vertex or a face = every
 vertex / face of its shell (the connected piece of the mesh). Select a component, then Shift+double-click a
@@ -183,7 +183,7 @@ def loop_select_args(extend):
     return {"extend": extend, "deselect": False, "toggle": False}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_loop_pick(bpy.types.Operator):
     """Maya double-click: an edge selects its loop, a vertex or face its shell; Shift: the components between the
     last pick and this one along their loop"""

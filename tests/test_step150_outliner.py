@@ -1,4 +1,4 @@
-"""Step 150 lane B (#96): the kit's Maya Graph Editor outliner — Maya attribute names (Visibility, not Hide
+"""Lane B (#96): the kit's Maya Graph Editor outliner — Maya attribute names (Visibility, not Hide
 Viewport), joints and blendShape nodes as their own rows, Maya's highlight rule (only picked rows, not every
 attribute of a selected node), scrolling, a click on a joint row shows only its curves."""
 

@@ -1,4 +1,4 @@
-"""Step 27 in a real UI: = / - manipulator size, Alt+5 wireframe on shaded, Home default view,
+"""In a real UI: = / - manipulator size, Alt+5 wireframe on shaded, Home default view,
 PgUp / PgDn smoothing level, 0 back to rough display (simulated keys over the viewport)."""
 
 import os
@@ -18,7 +18,7 @@ def centre():
 
 
 def manip_size():
-    """Step 130: = / - scale the kit's Move / Scale manipulator for the session (Blender's gizmo_size is a preference)."""
+    """= / - scale the kit's Move / Scale manipulator for the session (Blender's gizmo_size is a preference)."""
     from importlib import import_module
     return import_module(MODULE + ".ui.manipulator").SIZE[0]
 

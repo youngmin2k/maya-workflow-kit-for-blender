@@ -11,10 +11,10 @@ import bpy
 from . import (auto_key, bookmarks, ik_fk, component, create, curve_tools, curves_maya, cut_sew, display, driven_key, duplicate, extrude, file_io, freeze, option_windows, fx, global_keys4, graph_keys, graph_key_menu, deformer_weights, joint_labels, group, history, hold, joints, pivot_menu, key_batch, key_batch3, key_insert, loop_pick, manip, marquee,
                anim_layers, lights, material, menu_extras, menu_items, mesh_maya, multi_cut, poly_maya, rig_maya, mesh_tools, outliner_drag, parenting, pickwalk, pivot, playblast, preselect, project, rig_tools, select_convert, select_priority, sets, shading_maps, skin, snap_align, soft_select, symmetry, taphold,
                time_keys, tool_keys, units, uv_shells, uv_tools, uv_modify, uv_select_178, view, view_keys3, visibility)
-from . import poly_draw, quad_draw  # step 144 POLY: Create Polygon / Append to Polygon / Quad Draw (#30)
-from . import edge_loops  # step 144 LOOP: Insert / Offset Edge Loop, Slide Edge (#31)
-from . import ik_rp  # step 245 (#162): Maya ikRPsolver pole vector / twist
-from . import joint_edit  # step 243 (#160): joint moves keep Maya frames, Preserve Children, Edit-mode Translate
+from . import poly_draw, quad_draw  # Create Polygon / Append to Polygon / Quad Draw (#30)
+from . import edge_loops  # Insert / Offset Edge Loop, Slide Edge (#31)
+from . import ik_rp  # #162: Maya ikRPsolver pole vector / twist
+from . import joint_edit  # #160: joint moves keep Maya frames, Preserve Children, Edit-mode Translate
 from . import pivot_pick
 from . import pivot_rotate
 from . import pivot_translate
@@ -43,89 +43,89 @@ classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *select_convert.classes, *poly_draw.classes, *quad_draw.classes,
            *edge_loops.classes)
 
-from . import deformers  # noqa: E402  step 144 DEFORM: Maya Deform menu deformers + Paint Weights (#34)
+from . import deformers  # noqa: E402  Maya Deform menu deformers + Paint Weights (#34)
 
 classes += deformers.classes
 
 from . import legacy_cleanup  # noqa: E402  tidies files saved by older versions (temporary)
 
-from . import curve_draw  # noqa: E402  step 156 lane T: CV / EP Curve Tool, Three / Two Point Circular Arc
+from . import curve_draw  # noqa: E402  CV / EP Curve Tool, Three / Two Point Circular Arc
 from . import joint_preview  # noqa: E402  Joint Tool viewport feedback
 
 classes += curve_draw.classes
 
-from . import dag  # noqa: E402  step 164: Maya DAG rules for parents (hide / delete / export / isolate)
+from . import dag  # noqa: E402  Maya DAG rules for parents (hide / delete / export / isolate)
 
 classes += dag.classes
 
-from . import by_type  # noqa: E402  step 166: Select All by Type for the kit's IK handles / clusters / particles
+from . import by_type  # noqa: E402  Select All by Type for the kit's IK handles / clusters / particles
 
 classes += by_type.classes
 
-from . import modify_maya  # noqa: E402  step 168: Modify menu (Smooth Mesh Preview to Polygons, Evaluate Nodes, ...)
+from . import modify_maya  # noqa: E402  Modify menu (Smooth Mesh Preview to Polygons, Evaluate Nodes, ...)
 
 classes += modify_maya.classes
 
-from . import deform_edit  # noqa: E402  step 169: Deform > Wire / ShrinkWrap / Lattice edits, Prune, Point On Curve
+from . import deform_edit  # noqa: E402  Deform > Wire / ShrinkWrap / Lattice edits, Prune, Point On Curve
 
 classes += deform_edit.classes
 
-from . import select_2d  # noqa: E402  step 170: Maya click / marquee modifiers in Graph / Dope Sheet / UV
+from . import select_2d  # noqa: E402  Maya click / marquee modifiers in Graph / Dope Sheet / UV
 
 classes += select_2d.classes
 
-from . import anim_snapshot  # noqa: E402  step 171: Visualize > Create Animation Snapshot / Update Snapshot
+from . import anim_snapshot  # noqa: E402  Visualize > Create Animation Snapshot / Update Snapshot
 
 classes += anim_snapshot.classes
 
-from . import repeat_maya  # noqa: E402  step 175: Maya G / Edit > Repeat / Recent Commands for menu commands
+from . import repeat_maya  # noqa: E402  Maya G / Edit > Repeat / Recent Commands for menu commands
 
 classes += repeat_maya.classes
 
-from . import surfaces_maya  # noqa: E402  step 181: Maya Surfaces menu on NURBS surfaces
+from . import surfaces_maya  # noqa: E402  Maya Surfaces menu on NURBS surfaces
 
 classes += surfaces_maya.classes
 
-from . import character_sets  # noqa: E402  step 187: Maya Character Sets on Keying Sets
+from . import character_sets  # noqa: E402  Maya Character Sets on Keying Sets
 
 classes += character_sets.classes
 
-from . import color_sets_maya, normals_maya  # noqa: E402  step 189: Mesh Display normals and colour sets
+from . import color_sets_maya, normals_maya  # noqa: E402  Mesh Display normals and colour sets
 
 classes += normals_maya.classes + color_sets_maya.classes
 
-from . import poly_cleanup  # noqa: E402  step 197: Mesh > Cleanup... (Maya polyCleanup)
+from . import poly_cleanup  # noqa: E402  Mesh > Cleanup... (Maya polyCleanup)
 
 classes += poly_cleanup.classes
 
-from . import graph_buffers, graph_menu_198, graph_retime, graph_weights  # noqa: E402  step 198: Graph Editor depth 2
+from . import graph_buffers, graph_menu_198, graph_retime, graph_weights  # noqa: E402  Graph Editor depth 2
 
 classes += graph_retime.classes + graph_buffers.classes + graph_weights.classes + graph_menu_198.classes
 
-from . import constrain_199, skin_tools_199  # noqa: E402  step 199: Skin and Constrain tools 2
+from . import constrain_199, skin_tools_199  # noqa: E402  Skin and Constrain tools 2
 
 classes += skin_tools_199.classes + constrain_199.classes
-from . import graph_curves_203  # noqa: E402  step 203: Graph Editor curve commands
+from . import graph_curves_203  # noqa: E402  Graph Editor curve commands
 classes += graph_curves_203.classes
-from . import anim_layers_204  # noqa: E402  step 204: animation layers 4
+from . import anim_layers_204  # noqa: E402  animation layers 4
 classes += anim_layers_204.classes
-from . import pins_205  # noqa: E402  step 205 lane P: UV / Proximity Pin, intermediate objects, wrap influences
+from . import pins_205  # noqa: E402  UV / Proximity Pin, intermediate objects, wrap influences
 from . import skin_follow  # noqa: E402  a skin moves with its skeleton object; older files get it on load
 classes += pins_205.classes
-from . import deformers_205b  # noqa: E402  step 205 lane B: Morph / Jiggle deformers
+from . import deformers_205b  # noqa: E402  Morph / Jiggle deformers
 classes += deformers_205b.classes
-from . import deformers_205a  # noqa: E402  step 205 lane A: Tension / Solidify / Sculpt deformers
+from . import deformers_205a  # noqa: E402  Tension / Solidify / Sculpt deformers
 classes += deformers_205a.classes
 
-from . import uv_206  # noqa: E402  step 206: UV Editor Cycle / Split / Create Shell (Grid) / Auto Seams / UV sets
+from . import uv_206  # noqa: E402  UV Editor Cycle / Split / Create Shell (Grid) / Auto Seams / UV sets
 
 classes += uv_206.classes
 
-from . import curves_207  # noqa: E402  step 207: Curves > Bend / Curl / Scale Curvature / Lock Length / CV Hardness ...
+from . import curves_207  # noqa: E402  Curves > Bend / Curl / Scale Curvature / Lock Length / CV Hardness ...
 
 classes += curves_207.classes
 
-from . import references  # noqa: E402  step 209: Reference Editor commands (reload / unload / replace / import ...)
+from . import references  # noqa: E402  Reference Editor commands (reload / unload / replace / import ...)
 
 classes += references.classes
 
@@ -133,44 +133,44 @@ from . import weight_paint
 
 classes += weight_paint.classes
 
-from . import bake_maya  # noqa: E402  step 217 L18: Maya Bake Simulation (constraints muted, not deleted)
+from . import bake_maya  # noqa: E402  Maya Bake Simulation (constraints muted, not deleted)
 
 classes += bake_maya.classes
 
-from . import controllers  # noqa: E402  step 217: Control > Tag As Controller / Parent Controller (pick walk)
+from . import controllers  # noqa: E402  Control > Tag As Controller / Parent Controller (pick walk)
 
 classes += controllers.classes
 
-from . import deformer_order  # noqa: E402  step 218 L17 / L15b: reorderDeformers, blend shape weight keys
+from . import deformer_order  # noqa: E402  reorderDeformers, blend shape weight keys
 
 classes += deformer_order.classes
-from . import game_exporter, motion_trail  # noqa: E402  step 225
+from . import game_exporter, motion_trail  # noqa: E402
 classes += game_exporter.classes
 classes += motion_trail.classes
-from . import constrain_multi, control_shapes, wire_color  # noqa: E402  step 226 (#136)
+from . import constrain_multi, control_shapes, wire_color  # noqa: E402  #136
 classes += control_shapes.classes + wire_color.classes + constrain_multi.classes
-from . import constrain_interp  # noqa: E402  step 252 (#168): Maya interpType
+from . import constrain_interp  # noqa: E402  #168: Maya interpType
 classes += constrain_interp.classes
-from . import blend_shapes_227, pose_space_227  # noqa: E402  step 227 (#137)
+from . import blend_shapes_227, pose_space_227  # noqa: E402  #137
 classes += blend_shapes_227.classes + pose_space_227.classes
-from . import flow_path_228, motion_path_228  # noqa: E402  step 228 (#138)
+from . import flow_path_228, motion_path_228  # noqa: E402  #138
 classes += motion_path_228.classes + flow_path_228.classes
-from . import skeleton_menu  # noqa: E402  step 246 (#163): Insert / Remove / Disconnect / Connect Joint
+from . import skeleton_menu  # noqa: E402  #163: Insert / Remove / Disconnect / Connect Joint
 classes += skeleton_menu.classes
-from . import skin_basics  # noqa: E402  step 247 (#164): Prune / Set Max Influences / Go to Bind Pose
+from . import skin_basics  # noqa: E402  #164: Prune / Set Max Influences / Go to Bind Pose
 classes += skin_basics.classes
-from . import joint_display  # noqa: E402  step 248 (#165): Radius row, Local Rotation Axes, Joint Size
+from . import joint_display  # noqa: E402  #165: Radius row, Local Rotation Axes, Joint Size
 classes += joint_display.classes
-from . import skin_method  # noqa: E402  step 250 (#167): Weight Blended / DQ skinning method
-from . import uv_shell_select  # noqa: E402  step 256 (#172): Maya UV Shell selection in the 3D View / UV Editor
+from . import skin_method  # noqa: E402  #167: Weight Blended / DQ skinning method
+from . import uv_shell_select  # noqa: E402  #172: Maya UV Shell selection in the 3D View / UV Editor
 classes += uv_shell_select.classes
-from . import manip_scale  # noqa: E402  step 275 (#200): Maya Scale manipulator centre / axis drag
+from . import manip_scale  # noqa: E402  #200: Maya Scale manipulator centre / axis drag
 classes += manip_scale.classes
-from . import dome_light  # noqa: E402  step 276 (#201): Create > Lights > Dome Light = the World environment
+from . import dome_light  # noqa: E402  #201: Create > Lights > Dome Light = the World environment
 classes += dome_light.classes
-from . import graph_move  # noqa: E402  step 281 (#192): Graph Editor Shift axis lock + time snap to whole frames
+from . import graph_move  # noqa: E402  #192: Graph Editor Shift axis lock + time snap to whole frames
 classes += graph_move.classes
-from . import graph_frame  # noqa: E402  step 281: Graph Editor F / A frame Maya's rectangle
+from . import graph_frame  # noqa: E402  Graph Editor F / A frame Maya's rectangle
 classes += graph_frame.classes
 from . import graph_scale_box  # noqa: E402  Graph Editor Scale Keys manipulator (#270)
 classes += graph_scale_box.classes

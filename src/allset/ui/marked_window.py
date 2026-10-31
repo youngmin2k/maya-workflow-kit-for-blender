@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya floating editor windows drawn by a kit panel (step 213, Issue #119): Component Editor, Shape Editor,
+"""Maya floating editor windows drawn by a kit panel (Issue #119): Component Editor, Shape Editor,
 Connection Editor.
 
-Same mechanism as the Reference Editor (step 209, ui/reference_editor.py) and the Hypershade panes (step 131): a new
+Same mechanism as the Reference Editor (ui/reference_editor.py) and the Hypershade panes: a new
 window whose one area is a Properties editor on the Tool tab (header and navigation bar hidden) marked by hidden tab
 flags. Each kind has its own flag pair (``KINDS``) — none of them is a ``maya_dock.ROLE_FLAGS`` single flag, the
 Hypershade ``MARK`` pair or the Reference Editor's triple, so their checks never match each other. The editor's panel
@@ -18,10 +18,10 @@ KINDS = {
     "NORMALS_SIZE": ("show_properties_view_layer", "show_properties_data"),   # operators/poly_display.py
     "SHAPE_EDITOR": ("show_properties_object", "show_properties_data"),
     "CONNECTION_EDITOR": ("show_properties_object", "show_properties_material"),
-    "HOTKEY_EDITOR": ("show_properties_bone", "show_properties_bone_constraints"),   # step 215 (ui/hotkey_editor.py)
-    "PREFERENCES": ("show_properties_scene", "show_properties_output"),   # step 215: Maya Preferences
-    "POSE_EDITOR": ("show_properties_object", "show_properties_constraints"),   # step 227 (ui/pose_editor.py)
-    "GAME_EXPORTER": ("show_properties_scene", "show_properties_physics"),   # step 263 (operators/game_exporter.py)
+    "HOTKEY_EDITOR": ("show_properties_bone", "show_properties_bone_constraints"),   # ui/hotkey_editor.py
+    "PREFERENCES": ("show_properties_scene", "show_properties_output"),   # Maya Preferences
+    "POSE_EDITOR": ("show_properties_object", "show_properties_constraints"),   # ui/pose_editor.py
+    "GAME_EXPORTER": ("show_properties_scene", "show_properties_physics"),   # operators/game_exporter.py
     "MARKING_MENU_EDITOR": ("show_properties_bone", "show_properties_data"),   # marking/menu_editor.py
     "HYPERGRAPH": ("show_properties_scene", "show_properties_collection"),   # ui/hypergraph.py
     "SKIN_TOOLS": ("show_properties_bone", "show_properties_modifiers"),   # ui/skin_tools.py
@@ -132,7 +132,7 @@ def draw_menu_bar(layout, context, editor):
 
 
 def close_later(window):
-    """Close ``window`` from a timer (closing the window an operator runs in, from inside it, is unsafe; step 116)."""
+    """Close ``window`` from a timer (closing the window an operator runs in, from inside it, is unsafe)."""
     ptr = window.as_pointer()
 
     def tick():

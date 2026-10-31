@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Create Polygon and Append to Polygon tools (step 144, GitHub #30).
+"""Maya Create Polygon and Append to Polygon tools (GitHub #30).
 
 - Create Polygon (Mesh Tools > Create Polygon): the kit tool ``allset.create_polygon_tool`` (object and edit mode) runs
   ``allset.create_polygon``: click = a point (Maya's construction plane: the ground in a perspective view, the view
@@ -31,7 +31,7 @@ from . import preselect
 
 CREATE_TOOL = "allset.create_polygon_tool"
 APPEND_TOOL = "allset.append_polygon_tool"
-BASE_NAME = "polySurface"        # Maya polyCreateFacet result (kit Maya naming, step 63 Separate)
+BASE_NAME = "polySurface"        # Maya polyCreateFacet result (kit Maya naming, like Separate)
 EDGE_PX = 16.0                   # border-edge pick radius (preselect.RADIUS_PX)
 SNAP_PX = 16.0                   # point snapping radius (V hold)
 POINT_RGB = (0.27, 0.82, 0.98)   # the tool's points / outline
@@ -813,7 +813,7 @@ class ALLSET_OT_append_polygon_start(bpy.types.Operator):
                 bpy.ops.object.mode_set(mode='OBJECT')
             context.view_layer.objects.active = ob
             ob.select_set(True)
-            bpy.ops.object.mode_set('EXEC_DEFAULT', True, mode='EDIT')    # own undo step (step 129)
+            bpy.ops.object.mode_set('EXEC_DEFAULT', True, mode='EDIT')    # own undo step
         try:
             bpy.ops.wm.tool_set_by_id(name=APPEND_TOOL, space_type='VIEW_3D')
         except RuntimeError as ex:

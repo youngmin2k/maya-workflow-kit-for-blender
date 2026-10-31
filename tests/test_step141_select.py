@@ -1,4 +1,4 @@
-"""Step 141 lane SELECT (quant gap 3): Select menu / Ctrl+RMB (CTRL_CONVERT) conversions — Grow / Shrink Along Loop,
+"""Lane SELECT (quant gap 3): Select menu / Ctrl+RMB (CTRL_CONVERT) conversions — Grow / Shrink Along Loop,
 perimeters, To Face Path, To Shell Border, To UV Shell Border, To UVs, To UV Perimeter, To UV Edge Loop
 (operators/select_convert.py). Every expected selection is Maya's result on meshes numbered like
 Maya's.
@@ -159,7 +159,7 @@ def test_menu_paths_mapped():
         assert menu_map.MAP.get(path) == ("allset.uv_component", {"mode": comp}), path
     for label, t in (("To Vertices", 'VERT'), ("To Edges", 'EDGE'), ("To Faces", 'FACE')):
         assert menu_map.MAP["Select/Convert Selection/" + label] == ("allset.convert_selection", {"type": t})
-    # what stays greyed has a notice (step 101)
+    # what stays greyed has a notice
     for path in ("Select/Components/Vertex Face", "Select/Convert Selection/To Vertex Faces"):
         assert path not in menu_map.MAP and notices.greyed_notice(path), path
     # the UV Editor's Select menu runs the same conversions

@@ -1,4 +1,4 @@
-"""Step 169 in a real UI: a wire made from the menu bends a plane when its curve moves (the viewport draws the
+"""In a real UI: a wire made from the menu bends a plane when its curve moves (the viewport draws the
 Geometry Nodes wire), Show Base Wire shows curve1BaseWire, and the Paint Weights > Wire box opens the Paint
 Attributes Tool window; screenshots (ALLSET_GUI_SHOTS)."""
 

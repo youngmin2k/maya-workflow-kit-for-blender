@@ -1,4 +1,4 @@
-"""Step 56: Maya keys and Time Slider — S keys every keyable channel, Set Breakdown Key, Time Slider
+"""Maya keys and Time Slider — S keys every keyable channel, Set Breakdown Key, Time Slider
 Cut / Copy / Paste / Delete / Snap / Keys / Tangents / Set Range to, Key > Delete Keys = all keys,
 keymaps (timeline LMB / Shift / MMB / RMB, K time drag, S), the Channel Box RMB items.
 GUI: tests/gui/gui_step56_time_slider.py."""
@@ -217,7 +217,7 @@ def test_keymap_patches():
     kd = patch.KeyconfigData(data)
     dope = kd.items("Dopesheet")
     first = [(it[0], patch.event_key(it[1])) for it in dope[:5]]
-    # step 84 puts the range drag (passes through off the range) in front of time_scrub
+    # the range drag (passes through off the range) sits in front of time_scrub
     assert {f[0] for f in first} == {"allset.time_range_drag", "allset.time_scrub", "allset.time_slider_menu"}, first
     assert kd.find("Dopesheet", "allset.time_scrub", type="LEFTMOUSE", shift=True)
     assert kd.find("Dopesheet", "allset.time_scrub", type="MIDDLEMOUSE")

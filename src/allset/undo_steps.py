@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""One undo step per Maya command, and no Blender redo panel (step 147, #88 #92 #86).
+"""One undo step per Maya command, and no Blender redo panel (#88 #92 #86).
 
 A Python ``bpy.ops`` call without ``undo=True`` raises Blender's undo depth (wm_event_system.cc WM_operator_call_py),
 so every operator a menu / shelf / marking-menu item runs pushes no undo step and is not registered. ``command``
@@ -24,7 +24,7 @@ def push(label):
         bpy.ops.ed.undo_push(message=label or "Maya Command")
     except RuntimeError:          # no window manager context (a timer in a closing window)
         return
-    from .command_line import undo_text       # Maya's "Undo: <command>" after Ctrl+Z names this step (step 176)
+    from .command_line import undo_text       # Maya's "Undo: <command>" after Ctrl+Z names this step
     undo_text.pushed(label or "Maya Command")
 
 

@@ -1,4 +1,4 @@
-"""Step 140 lane EDIT: Maya option windows for the key commands, Parent / Unparent / Ungroup, Duplicate Special,
+"""Maya option windows for the key commands, Parent / Unparent / Ungroup, Duplicate Special,
 Connect, Circularize, Make Hole and Insert Edge Loop (issues #33, #35). Fields / labels / defaults
 follow Maya's option windows."""
 
@@ -90,7 +90,7 @@ FIELDS = {
     "insert_edge_loop": ("Insert Edge Loop Tool", "Insert Edge Loop", [
         ("maintain", "Maintain position:", "Relative distance from edge"), ("loops", "Number of edge loops:", 2),
         ("edge_flow", "", False), ("adjust_edge_flow", "Adjust Edge Flow:", 1.0),
-        ("smoothing", "Smoothing angle:", 30.0)]),     # step 144 LOOP: the kit tool honours it
+        ("smoothing", "Smoothing angle:", 30.0)]),     # the kit Offset Edge Loop tool honours it
 }
 
 
@@ -131,7 +131,7 @@ def test_every_path_opens_its_window():
             assert path in menu_map.MAP, path
             assert menu_sets.option_kind(path) == "window", (path, menu_sets.option_kind(path))
             assert ow.find_path(path).key == key, (path, ow.find_path(path).key)
-            if path.endswith("Scale Keys"):        # greyed until step 140 (Mesh Tools/Make Hole keeps its "differs" note)
+            if path.endswith("Scale Keys"):        # mapped now (Mesh Tools/Make Hole keeps its "differs" note)
                 assert path not in notices.NOTICES, f"{path} is mapped now: its notice must go"
         assert hasattr(bpy.ops.allset, "opt_" + key)
 
@@ -597,7 +597,7 @@ def test_make_hole_merge_modes():
 
 
 def test_insert_edge_loop_values_reach_the_kit_tool():
-    """Step 144 LOOP: the window's values go to the kit Insert Edge Loop tool (Scene.allset_loop_tools), not to
+    """LOOP: the window's values go to the kit Insert Edge Loop tool (Scene.allset_loop_tools), not to
     Blender's Loop Cut."""
     w = ow._BY_KEY["insert_edge_loop"]
     v = {**w.defaults(), "maintain": "Multiple edge loops", "loops": 3, "edge_flow": True, "adjust_edge_flow": 0.5,

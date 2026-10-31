@@ -1,4 +1,4 @@
-"""Step 161 G3 / G4 in the Maya Workflow Kit layout: the Space-tap four view shows Maya-style
+"""G3 / G4 in the Maya Workflow Kit layout: the Space-tap four view shows Maya-style
 ortho cameras (about 30 units across), and the lead's green wire stays
 drawn in a side view maximised from the four view (step-154 dogfood shots 08 / 09). Shots with ``--shots``."""
 
@@ -40,7 +40,7 @@ def shot(name):
 
 
 def windows_regions():
-    """(main area, WINDOW regions of every viewport panel) — step 237: the four view is four real 3D View areas."""
+    """(main area, WINDOW regions of every viewport panel) — the four view is four real 3D View areas."""
     area, _r = view3d()
     fv = mod("ui.four_view")
     return area, [r for a in fv.panes(win().screen) for r in a.regions if r.type == 'WINDOW']

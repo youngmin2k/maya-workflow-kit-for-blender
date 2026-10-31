@@ -1,4 +1,4 @@
-"""Step 217 B3 / B4 in a real UI.
+"""B3 / B4 in a real UI.
 B3: a Joint Tool click inside an existing joint's drawn sphere branches from it, outside it starts a new skeleton
 (Maya 2026: hit area = the drawn sphere) - at two zoom levels.
 B4: picking the skeleton object with no bone selected enters Pose with the root joint selected (Channel Box = root)."""

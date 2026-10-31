@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Tool Box: the 3D View toolbar shows Maya's tools in every mode (step 49).
+"""Maya Tool Box: the 3D View toolbar shows Maya's tools in every mode.
 
 Maya's Tool Box is a narrow column left of the
 Outliner: Select, Lasso, Paint Select, Move, Rotate, Scale, the last non-sacred tool, then quick layout
@@ -33,7 +33,7 @@ MAYA_TOOLS = ("builtin.select_box", "builtin.select_lasso", "builtin.select_circ
 
 _saved = {}
 _drawing = [False]
-# True while Maya's Skin Paint Mode (Select / Paint Select, step 218) sets a select tool inside weight paint: those
+# True while Maya's Skin Paint Mode (Select / Paint Select) sets a select tool inside weight paint: those
 # tools then stay in paint instead of leaving it like the Tool Box's Select / Move / ... (operators/weight_paint.py)
 KEEP_PAINT = [False]
 
@@ -48,8 +48,7 @@ def _enabled(context):
 
 def is_toolbox(space):
     """True for the Maya Workflow Kit template's Tool Box column (= tools/make_startup.py is_toolbox_space). Not keyed on
-    its overlays: a column whose overlays got turned on is still the column (``settle`` turns them off again;
-    step 112)."""
+    its overlays: a column whose overlays got turned on is still the column (``settle`` turns them off again)."""
     return (space is not None and space.type == 'VIEW_3D' and space.show_region_toolbar
             and not space.show_region_header and not space.show_region_ui and not space.show_object_viewport_mesh)
 
@@ -102,7 +101,7 @@ def maya_tools(blender_items, mode):
 
 
 def kit_icons_on(items, context):
-    """The Tool Box column's Maya tools with the kit-drawn Maya icons (step 131, #23): each ToolDef copy names a
+    """The Tool Box column's Maya tools with the kit-drawn Maya icons (#23): each ToolDef copy names a
     kit-only icon that ``kit_icons.tool_icon_name`` put into Blender's toolbar icon cache. Only the drawn copy
     changes (tool switching looks tools up by idname); the last-tool slot and tools without a kit glyph keep
     Blender's icon."""
@@ -140,7 +139,7 @@ def _tools_from_context(cls, context, mode=None):
     yield from original(cls, context, mode)
 
 
-# --- double-click a tool = its Tool Settings (step 129, #3; Maya 2022 Tool Box) -------------------------------------
+# --- double-click a tool = its Tool Settings (#3; Maya 2022 Tool Box) -------------------------------------
 # A toolbar icon is a UI button: a double click never reaches a keymap, but each click runs wm.tool_set_by_id, whose
 # execute imports bl_ui.space_toolsystem_common.activate_by_id when it runs ($S\startup\bl_operators\wm.py:2338-2347;
 # a DOUBLE_CLICK the button doesn't take comes back as a PRESS). That module function is wrapped: the same tool set
@@ -199,8 +198,8 @@ def _make_activate_by_id(original):
 
 def _draw_begin(self, context):
     """Prepended to the toolbar's draw: Blender's own draw (ToolSelectPanelHelper.draw) lists the Maya tools while
-    the flag is on. A prepend / append pair, not a replaced draw (step 115). Also marks the toolbar's buttons for the
-    double-click watch (step 129)."""
+    the flag is on. A prepend / append pair, not a replaced draw. Also marks the toolbar's buttons for the
+    double-click watch."""
     _drawing[0] = _enabled(context)
     if context.space_data is not None and context.space_data.type == 'VIEW_3D':
         self.layout.context_pointer_set(TOOLBAR_MEMBER, context.space_data)
@@ -227,8 +226,8 @@ class ALLSET_OT_toolbox_guard(bpy.types.Operator):
 # follow the UI scale: the template's column fits the toolbar at the Maya density (effective scale 1.0,
 # "Maya Density" preset). At a larger scale it is resized to one toolbar column with screen.area_move,
 # whose poll fails while the mouse is over any region (screen.active_region): the column stayed
-# empty at Windows 125 % without the density preset (step 98). So ALLSET_OT_fit_columns
-# puts the cursor on the area edge for a moment (step 99: the poll passes there), moves the edge and
+# empty at Windows 125 % without the density preset. So ALLSET_OT_fit_columns
+# puts the cursor on the area edge for a moment (the poll passes there), moves the edge and
 # puts the cursor back; until then the main view of that screen shows its own toolbar.
 TOOLBAR_PX = 56
 RETINA_EXTRA_PX = 4  # px more per pixel-size step above 1 (column_width)
@@ -253,9 +252,9 @@ def column_width(context=None):
     return round(TOOLBAR_PX * system.ui_scale) + RETINA_EXTRA_PX * max(0, int(system.pixel_size) - 1)
 
 
-# The right tab stack (ui/maya_dock.py STACK area, #60, step 142 #78): 280 px with the Channel Box raised (a 260 px
+# The right tab stack (ui/maya_dock.py STACK area, #60, #78): 280 px with the Channel Box raised (a 260 px
 # panel + the vertical tab strip; = tools/make_startup.py's old DOCK_PX 260 + 17), 480 px with the Attribute Editor
-# raised (the AE is a wide panel). Since step 142 the kit's tabs are a Maya-style
+# raised (the AE is a wide panel). The kit's tabs are a Maya-style
 # vertical strip too (maya_dock.draw_strip), so the stack is as wide as the raised panel needs: the Channel Box / Modeling
 # Toolkit stack at least 277 px x the scale (wider when the Channel Box labels need it), the Attribute Editor
 # stack 480 px x the scale (Maya resizes the stack when its tab changes, ``tab_changed``).
@@ -274,7 +273,7 @@ FONT_PT = 11         # Blender's widget font (Preferences > Interface > Text Ren
 
 
 def _unit(scale, pixel_size=1.0):
-    """Blender's widget unit UI_UNIT_X in px (= toolbar_fit.unit, step 132)."""
+    """Blender's widget unit UI_UNIT_X in px (= toolbar_fit.unit)."""
     from .toolbar_fit import unit
     return unit(scale, pixel_size)
 
@@ -322,10 +321,10 @@ _running = [False]
 # #53: the fit only resizes a layout as it was loaded (or as it was when the UI scale changed). A move whose poll
 # failed used to wait and run the first time the poll passed: right after the next area split (a split clears
 # screen.active_region), so opening the Tool Settings dock at UI scale 1.25 moved the Outliner edge 45 px into it
-# and closing the dock left the viewport 45 px narrower (step 132); later it also
+# and closing the dock left the viewport 45 px narrower; later it also
 # undid the user's own Outliner / shelf row sizes whenever the mouse crossed an area gap.
 _state = {}          # screen name -> [ui scale, area pointers, armed, monotonic time armed]
-# Step 258 (#155, QA 240 H2-3): a fit that could not run at once (no cursor warp, the mouse over a region) waited
+# #155: a fit that could not run at once (no cursor warp, the mouse over a region) waited
 # and ran at the next area split mid-session — after Four View or a dialog the shelf row, Outliner, Channel Box and
 # Time Slider jumped under the pointer. The fit is a load-time adjustment: it only runs within FIT_WINDOW seconds
 # of the screen being loaded / first seen / the UI scale changing.
@@ -337,7 +336,7 @@ def _armed(screen, scale):
     changed, not fitted yet and within FIT_WINDOW seconds of that. Once its areas change (split, close, dock,
     tear-off) it stays off for this scale."""
     import time
-    # step 237: the viewport panels don't count — the four view (ui/four_view.py) splits / joins them without
+    # the viewport panels don't count — the four view (ui/four_view.py) splits / joins them without
     # touching the columns
     areas = frozenset(a.as_pointer() for a in screen.areas
                       if not (a.type == 'VIEW_3D' and not is_toolbox(a.spaces.active)))
@@ -464,10 +463,10 @@ def fit_columns(start_fit=True):
         screen = window.screen
         armed = _armed(screen, scale)
         needed = False       # an edge of this screen is off its fitted place
-        # the Maya shelf row (tab row + icon row, 64 px at scale 1, step 51): grow it downwards
+        # the Maya shelf row (tab row + icon row, 64 px at scale 1): grow it downwards
         row = shelf_row_area(screen)
         if row is not None and row.spaces.active.show_region_header:
-            # step 113: the shelf row draws its tab strip in the WINDOW region (layouts saved before carry a header)
+            # the shelf row draws its tab strip in the WINDOW region (layouts saved before carry a header)
             with context.temp_override(window=window, screen=screen, area=row):
                 row.spaces.active.show_region_header = False
         if row is not None:
@@ -476,7 +475,7 @@ def fit_columns(start_fit=True):
                 needed = True
                 _move_edge(window, row, row.x + row.width // 2, row.y, -d,
                            (row.x + row.width // 2, row.y - 1), pending)
-        # the Time Slider (step 202, #109): its ruler keeps 36 px times the UI scale. The template area has a
+        # the Time Slider (#109): its ruler keeps 36 px times the UI scale. The template area has a
         # fixed height, so at UI 1.25 the taller header left a 29 px ruler that Blender's current-frame box filled
         # (look_compare time_slider_current): grow it upwards
         slider = time_slider_area(screen)
@@ -509,7 +508,7 @@ def fit_columns(start_fit=True):
                        want - column.width, (column.x + column.width + 1, column.y + column.height // 2), pending)
         elif abs(column.width - want) <= 1:
             # the layout Outliner right of the column keeps Maya's panel width at this scale (widening the column
-            # took its pixels; step 99)
+            # took its pixels)
             outl = next((a for a in screen.areas if a.type == 'OUTLINER' and abs(a.x - (column.x + column.width)) <= GAP_PX
                          and a.height >= column.height - 4), None)
             wo = round(OUTLINER_PX * scale)
@@ -525,7 +524,7 @@ def fit_columns(start_fit=True):
             continue
         key = screen.name
         # The property update re-inits the area through the context window: a timer runs with the last active
-        # window, which may just have been closed (crash in WM_window_get_active_workspace, step 99) — so set it
+        # window, which may just have been closed (crash in WM_window_get_active_workspace) — so set it
         # with this window in the context. Only the kit's own fallback is undone: a toolbar the user showed (T)
         # stays (PR #125 synced it to the column width every fit).
         if narrow and key not in _fallback and not main.spaces.active.show_region_toolbar:
@@ -811,13 +810,13 @@ def _auto_armature_tick():
                 if target is not None and ob.mode == 'OBJECT':
                     from ..operators import joint_selection
                     try:
-                        # step 241 (#156): the Move tool on an unskinned skeleton then switches it to
+                        # #156: the Move tool on an unskinned skeleton then switches it to
                         # Edit mode (joint_selection.sync_tool_mode, tool_keys watch)
                         bpy.ops.object.mode_set(mode='POSE')
                     except (RuntimeError, ValueError):
                         pass
                     else:
-                        # B4 (step 217): a skeleton picked from the Outliner / Select All shows its root joint
+                        # B4: a skeleton picked from the Outliner / Select All shows its root joint
                         if joint_selection.select_roots_if_empty(ob):
                             for a in window.screen.areas:
                                 a.tag_redraw()
@@ -937,7 +936,7 @@ class ALLSET_OT_pose_empty_click(bpy.types.Operator):
         if (x - press[0]) ** 2 + (y - press[1]) ** 2 > 36:
             return {'PASS_THROUGH'}
 
-        # pointers, looked up when the timer runs: the window may close in between (#36, step 129)
+        # pointers, looked up when the timer runs: the window may close in between (#36)
         win_ptr, area_ptr = context.window.as_pointer(), context.area.as_pointer()
 
         def check():
@@ -952,7 +951,7 @@ class ALLSET_OT_pose_empty_click(bpy.types.Operator):
                 with bpy.context.temp_override(window=win, area=area, region=region):
                     ctx = bpy.context
                     obj = ctx.view_layer.objects.active
-                    # Pose mode: select_priority decides every click (a control stays in Pose; #171, step 255 —
+                    # Pose mode: select_priority decides every click (a control stays in Pose; #171 —
                     # head-tail lines missed custom-shape controls and dropped Pose ~60 ms after the pick)
                     if obj is not None and obj.type == 'ARMATURE' and obj.mode == 'EDIT':
                         # Give joints priority even if a mesh is visible behind them.
@@ -1025,7 +1024,7 @@ class ALLSET_OT_joint_outliner_select(bpy.types.Operator):
             return {'PASS_THROUGH'}
         if context.region is None or context.region.type != 'WINDOW':
             return {'PASS_THROUGH'}
-        # pointers, looked up when the timer runs: the window may close in between (#36, step 129)
+        # pointers, looked up when the timer runs: the window may close in between (#36)
         win_ptr, area_ptr = context.window.as_pointer(), area.as_pointer()
 
         # Blender updates selected_ids on completion of the Outliner click.
@@ -1105,7 +1104,7 @@ class ALLSET_PT_toolbox_layouts(bpy.types.Panel):
     def draw(self, context):
         col = self.layout.column(align=True)
         col.scale_y = 1.75   # = the tool buttons (ToolSelectPanelHelper.draw_cls scale_y)
-        # kit-drawn Maya layout icons (step 131, #23; Blender's icon until the glyph is made)
+        # kit-drawn Maya layout icons (#23; Blender's icon until the glyph is made)
         from .kit_icons import button
         op = ALLSET_OT_quick_layout.bl_idname
         button(col, op, "layout:SINGLE", 'VIEW_PERSPECTIVE', text="").layout = 'SINGLE'

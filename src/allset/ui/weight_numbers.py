@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya 2024+ Paint Skin Weights > Visualization > Numeric: the painted influence's weight at every vertex
-(step 224, Issue #134 / #126 A3).
+(Issue #134 / #126 A3).
 
 Settings: Show Numbers off by default, Decimal Places 2 (1-4), Number Color yellow (1, 1, 0), optional Color Ramp
 (0 white -> 1 black), back-facing vertices drawn too. Blender has no such display, so the kit draws it: a 3D View

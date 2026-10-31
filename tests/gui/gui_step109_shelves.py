@@ -1,4 +1,4 @@
-"""Step 109 in a real UI: every Maya shelf tab shows all of Maya's buttons (greyed slots for the unmapped ones),
+"""In a real UI: every Maya shelf tab shows all of Maya's buttons (greyed slots for the unmapped ones),
 a click on a greyed icon shows its notice, a Sculpting icon picks the Blender brush; one shot per tab."""
 
 import json
@@ -46,7 +46,7 @@ def s_setup():
 @step
 def s_scene():
     bpy.ops.allset.keymap_activate()
-    bpy.ops.allset.make_maya(open_layout=False)     # Maya theme (dogfood note, step 98)
+    bpy.ops.allset.make_maya(open_layout=False)     # Maya theme (dogfood note)
     bpy.ops.allset.shelf_select(shelf=TABS[0])
     redraw()
 

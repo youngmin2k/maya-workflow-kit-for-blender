@@ -1,4 +1,4 @@
-"""Step 77: edit-mode Insert = the D component pivot edit as a toggle; a turned 3D cursor becomes the
+"""Edit-mode Insert = the D component pivot edit as a toggle; a turned 3D cursor becomes the
 "Maya Pivot" Move orientation. GUI: tests/gui/gui_step77_component_pivot.py."""
 
 from importlib import import_module

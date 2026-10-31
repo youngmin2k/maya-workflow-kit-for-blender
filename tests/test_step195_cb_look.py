@@ -1,4 +1,4 @@
-"""Step 195: Maya dock grey and Time Slider current-time block (dock #444444,
+"""Maya dock grey and Time Slider current-time block (dock #444444,
 current-time block #525252). The pixel results are checked by look-comparison shots
 (compare_s195_*); here the rules behind them."""
 

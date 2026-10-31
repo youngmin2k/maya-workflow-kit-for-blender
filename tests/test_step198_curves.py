@@ -1,4 +1,4 @@
-"""Step 198 lane B: Maya buffer curves (Snapshot / Swap / Show Buffer Curves) and weighted / non-weighted tangents,
+"""Maya buffer curves (Snapshot / Swap / Show Buffer Curves) and weighted / non-weighted tangents,
 tangent length locks (operators/graph_buffers.py, operators/graph_weights.py).
 
 Maya results. Scene: pCube1.tx keys (1,0) (5,2) (10,5) (15,3) (25,8) at 24 fps;

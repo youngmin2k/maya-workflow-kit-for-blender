@@ -1,4 +1,4 @@
-"""Step 252 (#168): Maya orient / parent constraint Interp Type and aim world up types against the expected
+"""#168: Maya orient / parent constraint Interp Type and aim world up types against the expected
 results."""
 
 import math

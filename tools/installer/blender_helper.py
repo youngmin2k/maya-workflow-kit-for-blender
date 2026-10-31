@@ -43,7 +43,7 @@ def make():
     if not module or module not in bpy.context.preferences.addons:
         return False, "Maya Workflow Kit is not enabled"
     from importlib import import_module
-    import_module(module + ".welcome").opt_in(open_layout=False)   # Maya mode on + Make Blender Maya (step 115)
+    import_module(module + ".welcome").opt_in(open_layout=False)   # Maya mode on + Make Blender Maya
     bpy.ops.wm.save_userpref()
     return True, "Make Blender Maya done"
 

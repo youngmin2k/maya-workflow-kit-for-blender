@@ -12,21 +12,21 @@ The kit draws the edges itself (POST_VIEW):
 - Here: evaluated mesh edges in a cached batch per object (numpy, ~28 ms for 100k polys, rebuilt only when
   the object's geometry changes), drawn with the object matrix and a small depth bias (no z-fighting).
   Nothing is written to the file.
-- Step 134: the colours are kit-fixed. Steps 130-133 read the
-  user's theme ``object_active`` / ``object_selected``, which is Blender's orange since the kit ships no theme.
+- The colours are kit-fixed: the user's theme ``object_active`` / ``object_selected`` is Blender's
+  orange, since the kit ships no theme.
   LEAD / OTHER = Maya's lead / other selected colours.
-- Step 142 (#76): in wireframe shading Maya draws unselected objects in a dark blue dormant
+- #76: in wireframe shading Maya draws unselected objects in a dark blue dormant
   wire colour (DORMANT); Blender draws them in the
   theme's wire colour (#181818 here). The same pass draws them in DORMANT (the "Selection Wireframe"
   preference covers both).
-- Step 149 (#91): a frame change (playback, scrubbing, ``frame_set``) evaluates the depsgraph without a
+- #91: a frame change (playback, scrubbing, ``frame_set``) evaluates the depsgraph without a
   ``depsgraph_update_post``, so a skinned / nCloth mesh kept the wire of the first evaluated frame. ``frame_change_post``
   drops the batches of objects whose evaluated shape can depend on time (``time_dependent``: modifiers, shape keys,
   animated data); static meshes keep their batch.
-- Step 149: a selected lattice is drawn too (Blender's own is the theme's orange). Maya draws a selected
+- A selected lattice is drawn too (Blender's own is the theme's orange). Maya draws a selected
   lattice in the same colours as meshes (white, the lead green). Edges = the lattice grid along U / V / W through the evaluated points
   (``co_deform``).
-- Step 161 (G4): Maya highlights the whole hierarchy under a selected object: every descendant shape is drawn in the
+- Maya highlights the whole hierarchy under a selected object: every descendant shape is drawn in the
   colour of its nearest selected ancestor (Maya: group1
   (selected) -> pCube1 white, pCube2 (lead) -> pCube3 green). Without it a child in front of its selected parent hid
   the parent's wire (step-154 dogfood 09: side view, pCube2 under pCube1 in front of it) — ``highlighted``.
@@ -130,15 +130,15 @@ def _view(context):
 
 
 def _shown(ob, space):
-    """Drawn in this view: the per-view type filter and local view count (step 262: ``visible_get()`` alone
+    """Drawn in this view: the per-view type filter and local view count (``visible_get()`` alone
     ignores them, ``visible_get(viewport=space)`` doesn't)."""
     if isinstance(space, bpy.types.SpaceView3D):
         return ob.visible_get(viewport=space)
     return ob.visible_get()
 
 
-# Maya Show > Selection Highlighting is per panel (step 262, Issue #173). The kit's highlight is this wire; Maya
-# Workflow Kit views keep Blender's outline off (step 47), so ``show_outline_selected`` can't be the row's state.
+# Maya Show > Selection Highlighting is per panel (Issue #173). The kit's highlight is this wire; Maya
+# Workflow Kit views keep Blender's outline off, so ``show_outline_selected`` can't be the row's state.
 # Views with highlighting off = a JSON {area index: Blender outline was on} on their screen (Blender
 # spaces / areas take no ID properties; an area index survives save / open).
 HILITE_OFF = "allset_hilite_off"
@@ -221,7 +221,7 @@ def highlighted(context):
             if not child.select_get():          # a selected child keeps its own colour (visited as a root)
                 visit(child, lead)
     for ob in context.selected_objects:
-        # step 262 (#173): an armature in Pose / Edit mode is selected for its bones (Maya: a picked control),
+        # #173: an armature in Pose / Edit mode is selected for its bones (Maya: a picked control),
         # so its child meshes aren't a selected hierarchy
         if ob.mode != 'OBJECT':
             continue

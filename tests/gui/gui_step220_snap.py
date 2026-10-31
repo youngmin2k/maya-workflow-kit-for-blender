@@ -1,4 +1,4 @@
-"""Step 220 (Issue #139) in a real UI: the reported path — Move tool, Step Snap Off in Tool Settings, then Snap to Grid
+"""Issue #139: in a real UI: the reported path — Move tool, Step Snap Off in Tool Settings, then Snap to Grid
 on the Status Line (no hold key) — and a Move manipulator drag lands on a whole Maya unit, in object mode and on
 selected vertices in edit mode. Before the fix the drag moved freely (use_snap_translate off)."""
 

@@ -4,7 +4,7 @@
 Maya has one global state (``symmetricModelling``): on/off, about object/world/topology,
 axis x/y/z; factory default off, x, object. Blender keeps symmetry per mesh
 (``Mesh.use_mirror_x/y/z``, ``use_mirror_topology``, local axes through the object
-origin), read by edit-mode transforms and sculpt (step 36).
+origin), read by edit-mode transforms and sculpt.
 
 - The global state lives in ``Scene.allset_symmetry`` (saved with the file; Blender
   user preferences stay untouched).
@@ -278,7 +278,7 @@ def _on_depsgraph(scene, _depsgraph):
         sym = scene.allset_symmetry
     except AttributeError:
         return
-    # step 286 (#191): meshes are in edit mode only while the active object is — no scene walk otherwise
+    # #191: meshes are in edit mode only while the active object is — no scene walk otherwise
     if not _state["edit"] and not _editing(scene):
         return
     edit = edit_meshes(scene)

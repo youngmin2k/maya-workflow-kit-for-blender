@@ -1,4 +1,4 @@
-"""Step 47: Maya wireframe on selected objects — the kit draws the evaluated edges itself (POST_VIEW),
+"""Maya wireframe on selected objects — the kit draws the evaluated edges itself (POST_VIEW),
 so nothing is written to the file; batches are cached per object and dropped when the geometry changes."""
 
 import os

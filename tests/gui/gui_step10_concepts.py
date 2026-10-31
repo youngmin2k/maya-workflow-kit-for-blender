@@ -1,4 +1,4 @@
-"""Step 10 in a real UI: P / Shift+P, Shift+D, Alt+Shift+D keys, the A hold + LMB
+"""In a real UI: P / Shift+P, Shift+D, Alt+Shift+D keys, the A hold + LMB
 marking menu (Freeze Transforms by drag), the Modify menu Pivot section; screenshots."""
 
 import os

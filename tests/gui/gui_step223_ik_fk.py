@@ -1,4 +1,4 @@
-"""Step 223 (Issue #133) in a real UI: an IK handle made with the kit shows Maya's "Ik Blend" row in the Channel Box,
+"""Issue #133: in a real UI: an IK handle made with the kit shows Maya's "Ik Blend" row in the Channel Box,
 and Key > IK/FK Keys > Set IK/FK Key / Enable IK Solver / Move IK to FK run from the Maya menu path (menu_item, one
 undo step each). A screenshot of the Channel Box with the handle selected goes to the shots folder."""
 

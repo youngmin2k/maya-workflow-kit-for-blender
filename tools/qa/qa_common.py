@@ -1,4 +1,4 @@
-"""QA step 240 shared helpers (run inside Blender or plain Python): findings file, JSON output."""
+"""QA shared helpers (run inside Blender or plain Python): findings file, JSON output."""
 
 import json
 import os

@@ -1,4 +1,4 @@
-"""Step 165 in the Maya Workflow Kit layout: RMB on a cube > Inputs opens the node list
+"""In the Maya Workflow Kit layout: RMB on a cube > Inputs opens the node list
 (like Maya's RMB Inputs list: Select / Enable / Disable All, the nodes, All Inputs...), picking a node opens it in the
 Channel Box; in component mode the Channel Box shows the shape, the CVs line and INPUTS. Shots with ``--shots``."""
 
@@ -161,7 +161,7 @@ def s_node_shot():
     last = mod("ui.channel_box")._last
     check(f"the Channel Box scrolled to the picked node ({list(last.values())})",
           any(v[2] is None or v[0] > 0 for v in last.values()))
-    shot("node_picked")     # screen.screenshot shows the previous frame (step 9): one tick after the redraw
+    shot("node_picked")     # screen.screenshot shows the previous frame: one tick after the redraw
 
 
 @step

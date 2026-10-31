@@ -1,10 +1,10 @@
-"""Step 286 (#191) in a real UI: the Maya Workflow Kit layout with a busy scene (a 102k-vertex grid skinned to a
+"""#191: in a real UI: the Maya Workflow Kit layout with a busy scene (a 102k-vertex grid skinned to a
 120-bone chain + 600 cubes, the qa_perf scene). For a few seconds one cube is moved every 20 ms while the views
 redraw; a profiler records every Python call in that time (timers, draw handlers, depsgraph handlers, panels).
 The same is done again after the 600 cubes are deleted. Reported: kit Python time per 3D View redraw and the top kit
 functions (``tmp/s286/profile_<tag>.txt``). Checked: the 600 extra objects add less than ``BUDGET_MS`` of kit Python
 per 3D View redraw or ``BUDGET_SHARE`` of the few-objects figure when that is larger (time under the profiler, which slows Python down
-by about 2x and varies by ~40 % with the machine's load; before step 286 the 600 objects added 3.6 ms = 51 %)."""
+by about 2x and varies by ~40 % with the machine's load; before the speed-up the 600 objects added 3.6 ms = 51 %)."""
 
 import cProfile
 import os

@@ -1,4 +1,4 @@
-"""Step 203 in a real UI: the Maya Graph Editor outliner rows for Pin Channel and List > Load Selected Objects
+"""In a real UI: the Maya Graph Editor outliner rows for Pin Channel and List > Load Selected Objects
 (Maya Graph Editor rules): pCube1 (translate X) and pSphere1 (translate Y) keyed; pick pCube1's
 row + Curves > Pin Channel, select only pSphere1 -> pSphere1's rows plus pCube1's pinned row below them (pin
 marks drawn); Auto Load off + Load Selected on pSphere1, then select pCube1 -> the list stays."""

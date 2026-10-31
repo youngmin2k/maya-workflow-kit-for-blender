@@ -1,4 +1,4 @@
-"""Release check helper (step 53): does installing Maya Workflow Kit leave the user's own setup alone?
+"""Release check helper: does installing Maya Workflow Kit leave the user's own setup alone?
 
 Runs inside a background Blender on the release sandbox (tools/release_check.py), without
 --factory-startup so the sandbox preferences load like a user's:
@@ -6,8 +6,8 @@ Runs inside a background Blender on the release sandbox (tools/release_check.py)
     blender -b --python tools/release_probe.py -- seed  OUT.json   # a "user" setup, saved
     blender -b --python tools/release_probe.py -- check OUT.json   # what is there now
     blender -b --python tools/release_probe.py -- disable OUT.json # disable the kit, save, snapshot
-    ... -- enable / make / remove OUT.json      # enable, Make Blender Maya, Remove from inside Blender (step 60)
-    ... -- offline_org OUT.json                 # switch off non-file:// remote repositories (repo_check, step 61)
+    ... -- enable / make / remove OUT.json      # enable, Make Blender Maya, Remove from inside Blender
+    ... -- offline_org OUT.json                 # switch off non-file:// remote repositories (repo_check)
 
 ALLSET_REPO names the repository the kit is in (default user_default; tools/repo_check.py: mayakit).
 
@@ -122,14 +122,14 @@ def main():
     if mode == "seed":
         seed()
     elif mode == "make":
-        # Make Blender Maya (theme, splash, density ...), saved like a user would leave it (step 60)
+        # Make Blender Maya (theme, splash, density ...), saved like a user would leave it
         from importlib import import_module
         kit = next(a.module for a in bpy.context.preferences.addons if a.module.endswith(".allset"))
-        import_module(kit + ".welcome").opt_in(open_layout=False)   # step 115: Maya mode on + Make Blender Maya
+        import_module(kit + ".welcome").opt_in(open_layout=False)   # Maya mode on + Make Blender Maya
         bpy.ops.wm.save_userpref()
     elif mode == "remove":
         # Preferences > Extensions > Remove in a running session (the add-on's code runs: disable,
-        # then the files go). `blender --command extension remove` never loads add-ons (step 60).
+        # then the files go). `blender --command extension remove` never loads add-ons.
         repo = os.environ.get("ALLSET_REPO", "user_default")   # tools/repo_check.py: its own repository
         # repo_index counts enabled repositories only ($S\addons_core\bl_pkg\bl_extension_ops.py:811-830)
         from bl_pkg.bl_extension_ops import extension_repos_read

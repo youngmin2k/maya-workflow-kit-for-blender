@@ -1,4 +1,4 @@
-"""Step 129 (issues #37, #38) in the Maya Workflow Kit layout: S over the viewport keys the cube and the Time
+"""Issues #37, #38 in the Maya Workflow Kit layout: S over the viewport keys the cube and the Time
 Slider shows a red tick at that frame even while it is the current frame (Blender's playhead box drew over it);
 the Auto Key button is Maya's key button and keys a changed, already keyed channel on another frame."""
 
@@ -101,7 +101,7 @@ def s_tick_shot():
 def s_other_frame_shot():
     path = shot("gui_step129_key_other.png")
     _a, r, _h = timeline()
-    # step 186: Maya draws a key tick on the frame's tick = the left edge of its cell (time_slider.key_x)
+    # Maya draws a key tick on the frame's tick = the left edge of its cell (time_slider.key_x)
     ts = import_module(MODULE + ".ui.time_slider")
     x = r.x + int(ts.key_x(r, 10, True))
     n = red_in(path, x - 3, x + 4, r.y, r.y + r.height)
@@ -129,7 +129,7 @@ def s_press_auto():
 
 @step
 def s_auto_on():
-    # step 130: the kit's own Maya Auto Key (Scene.allset_auto_key), no Blender preference
+    # the kit's own Maya Auto Key (Scene.allset_auto_key), no Blender preference
     check("#37: clicking it turns Auto Key on", bpy.context.scene.allset_auto_key)
     redraw()
 
@@ -144,7 +144,7 @@ def s_auto_shot():
 
 @step
 def s_auto_check():
-    # step 130: the kit's Maya Auto Key keys from a short timer after the change (Blender's own keyed at once)
+    # the kit's Maya Auto Key keys from a short timer after the change (Blender's own keyed at once)
     ob = bpy.data.objects["pCube1"]
     curves = import_module(MODULE + ".compat").id_fcurve_collection(ob)     # 5.0: no Action.fcurves
     fc = curves.find("location", index=0)

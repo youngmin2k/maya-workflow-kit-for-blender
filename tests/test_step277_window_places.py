@@ -1,4 +1,4 @@
-"""Step 277 (#203): kit windows reopen at their last size and place (per window kind, fitted into view).
+"""#203: kit windows reopen at their last size and place (per window kind, fitted into view).
 The real windows: tests/gui/gui_step277_window_places.py."""
 
 import json

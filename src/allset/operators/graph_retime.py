@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Graph Editor Retime Tool (Edit > Transformation Tools > Retime Tool, step 198, Issue #105).
+"""Maya Graph Editor Retime Tool (Edit > Transformation Tools > Retime Tool, Issue #105).
 
 - Double-click in the curve area adds a retime marker (whole frame with Snap On Frame).
 - Dragging a marker's handle (mid height) retimes every key of the displayed curves: the keys between the moved
@@ -25,7 +25,7 @@ import bpy
 
 from .. import live_refs
 
-MIN_GAP = 0.01            # frames; Blender merges keys closer than 0.01 in x (step 97)
+MIN_GAP = 0.01            # frames; Blender merges keys closer than 0.01 in x
 SNAP_GAP = 1.0
 YELLOW = (0.85, 0.85, 0.0, 1.0)
 GREY = (0.55, 0.55, 0.55, 1.0)
@@ -170,7 +170,7 @@ def _draw():
     gpu.state.blend_set('NONE')
 
 
-# Maya's Retime Tool works in the Graph Editor and the Dope Sheet (both Edit menus, step 198)
+# Maya's Retime Tool works in the Graph Editor and the Dope Sheet (both Edit menus)
 SPACES = ("SpaceGraphEditor", "SpaceDopeSheetEditor")
 AREA_TYPES = {'GRAPH_EDITOR', 'DOPESHEET_EDITOR'}
 
@@ -331,7 +331,7 @@ class ALLSET_OT_retime_tool(bpy.types.Operator):
 
     def _double(self, context, event):
         """A double-click on empty curve area: Blender's DOUBLE_CLICK, or a second PRESS within the double-click
-        time near the first (simulated events never become DOUBLE_CLICK, step 73)."""
+        time near the first (simulated events never become DOUBLE_CLICK)."""
         now = time.monotonic()
         last, self._last_press = self._last_press, (now, event.mouse_x, event.mouse_y)
         if event.value == 'DOUBLE_CLICK':

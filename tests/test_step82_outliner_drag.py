@@ -1,4 +1,4 @@
-"""Step 82: Outliner drags parent the Maya way (drop zones, parenting, reorder in Blender's drawn order, keymap).
+"""Outliner drags parent the Maya way (drop zones, parenting, reorder in Blender's drawn order, keymap).
 GUI: tests/gui/gui_step82_outliner_drag.py (LMB drop redone, MMB drag, undo)."""
 
 import json

@@ -1,4 +1,4 @@
-"""Step 139 lane UV in a real UI (#68): with a cube selected in object mode the kit's Maya
+"""In a real UI (#68): with a cube selected in object mode the kit's Maya
 UV menu > Automatic projects the whole cube (polyAutoProjection: 6 shells, 24 UVs);
 in component mode the UV Editor's Create > Best Plane and Contour Stretch are enabled and run.
 Menus are opened as menus and picked with the keyboard (arrows + Return). Screenshots: gui_step139_uv_menu.png,

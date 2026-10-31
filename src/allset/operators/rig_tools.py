@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Rigging menu items with Maya meaning (step 62).
+"""Rigging menu items with Maya meaning.
 
 - Constrain > Parent / Point / Orient / Scale / Aim ...: Maya order (targets, then the constrained node
   last). In pose mode the constraint goes on the active joint (pose bone), the target is the selected
@@ -32,7 +32,7 @@ CONSTRAINT_TYPES = (
 )
 CONSTRAIN_HINT = "Select the control first, then the joint last (joints in pose mode)"
 # Maya constraint commands that print "Target list was empty or contained no valid targets." with one node selected
-# (Parent, Point / Orient / Scale / Aim / Geometry: step 258).
+# (Parent, Point / Orient / Scale / Aim / Geometry).
 # Attach to Motion Path is another command.
 MAYA_TARGET_ERROR = {'CHILD_OF', 'COPY_LOCATION', 'COPY_ROTATION', 'COPY_SCALE', 'TRACK_TO', 'SHRINKWRAP'}
 
@@ -44,7 +44,7 @@ class ALLSET_OT_constrain(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     type: EnumProperty(items=CONSTRAINT_TYPES, name="Type")
-    # Maya option window values for a multi-target constraint (step 226, operators/constrain_multi.py); a one-target
+    # Maya option window values for a multi-target constraint (operators/constrain_multi.py); a one-target
     # constraint is set up afterwards by option_windows._constraint as before
     maintain_offset: EnumProperty(name="Maintain Offset", items=(
         ('DEFAULT', "Default", "Like Maya: on for Parent, off for Point / Orient / Scale"),
@@ -63,7 +63,7 @@ class ALLSET_OT_constrain(bpy.types.Operator):
             others = [o for o in context.selected_objects if o is not arm]
             bones = [b for b in context.selected_pose_bones or () if b != pb]
             if pb is not None and not (others or bones) and self.type in MAYA_TARGET_ERROR:
-                self.report({'ERROR'}, maya_errors.NO_TARGETS)       # Maya: one joint selected (step 258)
+                self.report({'ERROR'}, maya_errors.NO_TARGETS)       # Maya: one joint selected
                 return {'CANCELLED'}
             if pb is None or not (others or bones):
                 self.report({'WARNING'}, CONSTRAIN_HINT)
@@ -72,7 +72,7 @@ class ALLSET_OT_constrain(bpy.types.Operator):
                        + [(b.id_data, b.name) for b in sorted(bones, key=lambda b: b.name)])
             if self.type in constrain_multi.TYPES and (len(targets) > 1 or any(
                     constrain_multi.needs_joint_axes(pb, t, sub, self.type) for t, sub in targets)):
-                # step 233: a joint following an object's rotation also goes through the node builder (Maya axes)
+                # a joint following an object's rotation also goes through the node builder (Maya axes)
                 return self._multi(context, pb, targets, label)
             before = len(pb.constraints)
             bpy.ops.pose.constraint_add_with_targets(type=self.type)
@@ -81,7 +81,7 @@ class ALLSET_OT_constrain(bpy.types.Operator):
             ob = context.active_object
             others = [o for o in context.selected_objects if o is not ob]
             if not others and self.type in MAYA_TARGET_ERROR:
-                # Maya with one object selected: an Error (step 258)
+                # Maya with one object selected: an Error
                 self.report({'ERROR'}, maya_errors.NO_TARGETS)
                 return {'CANCELLED'}
             if not others:
@@ -107,7 +107,7 @@ class ALLSET_OT_constrain(bpy.types.Operator):
         con = cons[-1]
         if arm is not None:
             from .joints import free_location_constrained
-            free_location_constrained(context, arm)       # a Maya child joint's translate is free (step 233)
+            free_location_constrained(context, arm)       # a Maya child joint's translate is free
             cons = arm.pose.bones[owner].constraints       # the edit-mode round trip renews the pose bones
             con = cons[-1]
         if self.type == 'TRACK_TO':
@@ -119,13 +119,13 @@ class ALLSET_OT_constrain(bpy.types.Operator):
         return {'FINISHED'}
 
     def _multi(self, context, owner, targets, label):
-        """Maya multi-target constraint: one node, weighted average of the targets (step 226)."""
+        """Maya multi-target constraint: one node, weighted average of the targets."""
         mo = None if self.maintain_offset == 'DEFAULT' else self.maintain_offset == 'ON'
         constrain_multi.build(context, owner, targets, self.type, mo, self.weight)
         names = ", ".join(constrain_multi.target_label(t, sub) for t, sub in targets)
         owner_name = owner.name
         if isinstance(owner, bpy.types.PoseBone):
-            # step 233: read names first — the edit-mode round trip makes Python's pose bone references stale
+            # read names first — the edit-mode round trip makes Python's pose bone references stale
             from .joints import free_location_constrained
             free_location_constrained(context, owner.id_data)
         results.result(self, f"{label} constraint on {owner_name} (targets {names})")
@@ -136,10 +136,10 @@ class ALLSET_OT_constrain(bpy.types.Operator):
 
 # aimConstraint defaults: aim vector +X, up vector +Y, world up
 # type Vector, world up vector (0, 1, 0). Maya is Y-up: an object's Maya X / Y / Z = Blender X / Z / -Y
-# (step 57); a joint's Maya X / Y / Z = the bone's Y / Z / X (the bone's Y points at the child, Maya's primary X).
+#; a joint's Maya X / Y / Z = the bone's Y / Z / X (the bone's Y points at the child, Maya's primary X).
 AIM_VECTOR, UP_VECTOR, WORLD_UP = (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), "Vector"
 # Maya aimConstraint world up types (enum order of the node's worldUpType: Scene Up / Object Up / Object Rotation Up /
-# Vector / None, command default Vector — step 252)
+# Vector / None, command default Vector)
 WORLD_UP_TYPES = ("Scene up", "Object up", "Object rotation up", "Vector", "None")
 AIM_UP = "allset_aim_up"          # helper empty: name of the aim constraint whose up it carries
 UP_SUFFIX = " up"                 # the Locked Track that turns an Object up aim about its aim axis

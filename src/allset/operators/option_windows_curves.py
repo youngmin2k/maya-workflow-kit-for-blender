@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 156: Maya option windows of the Curves menu and Create > Curve Tools (same spec as operators/option_windows.py;
+"""Maya option windows of the Curves menu and Create > Curve Tools (same spec as operators/option_windows.py;
 option_windows._extend appends ``WINDOWS``). Titles, fields and default values match the Maya option windows
 (each option with its default value). Fields Blender / the kit can't follow are listed as ``missing``."""
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Visualize > Create Animation Snapshot / Update Snapshot (step 171).
+"""Maya Visualize > Create Animation Snapshot / Update Snapshot.
 
 Maya rules (Maya 2022):
 - Visualize > Create Animation Snapshot with the factory options: Time range Start/End 1 – 10, Increment 1,
@@ -17,7 +17,7 @@ Maya rules (Maya 2022):
 Kit: the copies are ordinary mesh objects (Blender has no snapshot node); the group Empty keeps the record (ID
 properties: the source object pointer, range, increment, update style). Copies are made by sampling the evaluated
 object at each frame (``scene.frame_set`` loop, the current frame restored). The kit's smooth-preview modifiers are
-left out like Maya's worldMesh (display only, step 15). Fast / Slow updates rebuild from a timer after a
+left out like Maya's worldMesh (display only). Fast / Slow updates rebuild from a timer after a
 depsgraph update that touches the source's Action (Fast) or the source itself (Slow); Modify > Evaluate Nodes >
 Snapshots off stops them (``Scene.allset_eval.snapshot``, Maya Modify > Evaluate Nodes > Snapshots).
 """
@@ -342,7 +342,7 @@ class ALLSET_OT_animation_snapshot(bpy.types.Operator):
 
     def execute(self, context):
         # Maya: "the current time and the selection don't change" — only an edited mesh / curve leaves Edit mode so
-        # the copies see its edits; joints keep Pose mode (step 258, #155 H3-4: the snapshot used to drop it)
+        # the copies see its edits; joints keep Pose mode (#155 H3-4: the snapshot used to drop it)
         if context.mode.startswith('EDIT'):
             bpy.ops.object.mode_set(mode='OBJECT')
         start, end = self.start, self.end

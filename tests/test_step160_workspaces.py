@@ -1,4 +1,4 @@
-"""Step 160 (#81): Maya's workspaces in the template, Windows > Workspaces / Status Line dropdown, Reset Current
+"""#81: Maya's workspaces in the template, Windows > Workspaces / Status Line dropdown, Reset Current
 Workspace. GUI shots: tests/gui/gui_step160_workspaces.py."""
 
 import ast

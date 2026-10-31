@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya key moves in the Graph Editor: Shift axis lock and time snap to whole frames (step 281, #192).
+"""Maya key moves in the Graph Editor: Shift axis lock and time snap to whole frames (#192).
 
 Maya moves the selected keys linearly with the drag (time = dx / pixels per frame, value = -dy / pixels per value).
 With Shift held the axis is decided by the first mouse move whose offset from the press reaches 3 px in x or y:

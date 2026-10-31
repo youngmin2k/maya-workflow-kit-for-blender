@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Playblast: a viewport recording of the playback range, then the player (step 70).
+"""Maya Playblast: a viewport recording of the playback range, then the player.
 
 Maya's Windows > Playblast records the Time Slider range from the active view into a temporary movie and plays it
 in a player (View on); its option box sets Time range, Format, Quality and Scale
 Blender: ``render.opengl``
-(animation) already records the playback (preview) range (step 48), into the scene's render output;
+(animation) already records the playback (preview) range, into the scene's render output;
 ``render.play_rendered_anim`` opens Blender's player on it. The kit points the output at a temporary folder with
 the playblast's format and scale, plays it, and puts the scene's render settings back.
 """

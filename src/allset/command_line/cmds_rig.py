@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""maya.cmds look-alike 3 (step 216, Issue #122): freeze, constraints, joints, connections.
+"""maya.cmds look-alike 3 (Issue #122): freeze, constraints, joints, connections.
 
 Numbers follow the rest of the look-alike (cmds_shim.py): lengths in Maya units, Blender's axes as they are.
 
@@ -13,9 +13,9 @@ Numbers follow the rest of the look-alike (cmds_shim.py): lengths in Maya units,
   puts the object on the target; with it a Child Of on the node's channels whose inverse is the target's current
   matrix (Maya's offset is composed as a matrix: orient mo). aim = Track To (aim / up vectors along
   axes) evaluated in a hidden helper's space whose Z is Maya's world up vector — Blender's Track To ups to world Z.
-- joint = a joint of a kit skeleton (``operators/joints.py``, step 57): a bone, ``jointN`` named scene-wide; the
+- joint = a joint of a kit skeleton (``operators/joints.py``): a bone, ``jointN`` named scene-wide; the
   selected joint is the parent, a selected transform parents a new skeleton keeping the joint's world position.
-- connectAttr / disconnectAttr = the Connection Editor's connections (``ui/connection_editor.py``, step 213: drivers
+- connectAttr / disconnectAttr = the Connection Editor's connections (``ui/connection_editor.py``: drivers
   with variable ``cn``, Maya unit conversion).
 
 Constraint nodes and joints are not Blender objects, so the DAG commands of cmds_shim / cmds_dag (getAttr, setAttr,

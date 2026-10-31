@@ -1,11 +1,11 @@
-"""Step 129 (#10): every button of the Maya panel toolbar clicked twice with simulated mouse clicks in the Maya
+"""#10: every button of the Maya panel toolbar clicked twice with simulated mouse clicks in the Maya
 Workflow Kit layout — state before -> click -> after -> click -> after.
 
 The viewport looks through a camera (so the camera buttons are enabled) and a cube is selected (Isolate Select).
 Toggles must change on the first click and come back on the second (Maya iconTextCheckBox); commands act; greyed
 buttons change nothing. Value fields (exposure / gamma / view transform) are not clicked.
 
-Step 132 (#52): runs at the session's UI scale (1.25 on a 125 % display; ``--ui-scale 0.8`` = 1.0, ``1.2`` = 1.5).
+#52: runs at the session's UI scale (1.25 on a 125 % display; ``--ui-scale 0.8`` = 1.0, ``1.2`` = 1.5).
 The groups that don't fit the header are in the Maya » overflow popover: the test opens it, sweeps it top to bottom
 and clicks those buttons there (the popover is reopened before every click)."""
 

@@ -1,4 +1,4 @@
-"""Step 180: Maya animation layers on NLA (operators/anim_layers.py) like Maya:
+"""Maya animation layers on NLA (operators/anim_layers.py) like Maya:
 the same base keys, the same layer keys set like Maya's setKeyframe -v (the value is the result), raw layer curves and
 translateX / rotateX / rotateY / rotateZ / scaleX at frames 1..10, then weight, mute, solo, override and the key that
 the selected layer receives."""

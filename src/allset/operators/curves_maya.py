@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2022 curve commands on Blender curves (step 156;
+"""Maya 2022 curve commands on Blender curves (
 maths in ``curves_math``, bpy-free).
 
 Representation: a Maya clamped-uniform NURBS curve = a Blender NURBS spline with
@@ -312,7 +312,7 @@ class ALLSET_OT_curve_cut(_CurveOp, bpy.types.Operator):
     bl_idname = "allset.curve_cut"
     bl_label = "Cut Curve"
 
-    # Cut Curve Options (step 196): Cut "Using last curve" / Keep "Longest
+    # Cut Curve Options: Cut "Using last curve" / Keep "Longest
     # segments"; the last curve = the active one (Maya's last selected)
     last_only: BoolProperty(name="Using last curve", default=False, options={'SKIP_SAVE'})
     keep_longest: BoolProperty(name="Longest segments", default=False, options={'SKIP_SAVE'})
@@ -383,7 +383,7 @@ class ALLSET_OT_curve_straighten(_CurveOp, bpy.types.Operator):
     bl_idname = "allset.curve_straighten"
     bl_label = "Straighten Curve"
 
-    # Straighten Curves Options (step 196): default Straightness 1, Preserve length on
+    # Straighten Curves Options: default Straightness 1, Preserve length on
     straightness: FloatProperty(name="Straightness", default=1.0, soft_min=0.0, soft_max=2.0, options={'SKIP_SAVE'})
     preserve_length: BoolProperty(name="Preserve length", default=True, options={'SKIP_SAVE'})
 

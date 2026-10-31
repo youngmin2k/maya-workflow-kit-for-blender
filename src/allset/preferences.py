@@ -2,7 +2,7 @@
 """Add-on preferences (Preferences > Add-ons > Maya Workflow Kit).
 
 Options for Maya units and parent mode
-from step 10. Only this add-on's own settings live here: since step 130 no option writes Blender's
+Only this add-on's own settings live here: no option writes Blender's
 preferences (the navigation / undo / panel / auto key / theme / splash / density / font / wire presets are gone).
 """
 
@@ -40,11 +40,11 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
     # Set once "Maya" was activated automatically on first enable, so later
-    # starts respect a different keymap the user picked (step 2).
+    # starts respect a different keymap the user picked.
     keymap_auto_activated: bpy.props.BoolProperty(options={'HIDDEN'})
 
-    # Maya mode on/off (switch.py, step 60), kept across restarts. Off after install: enabling the
-    # extension changes nothing until the user opts in (welcome dialog / button / switch; step 115).
+    # Maya mode on/off (switch.py), kept across restarts. Off after install: enabling the
+    # extension changes nothing until the user opts in (welcome dialog / button / switch).
     maya_mode: bpy.props.BoolProperty(name="Maya Mode", default=False, options={'HIDDEN'})
     # Edit-mode marquee/lasso also selects occluded components, like Maya.
     select_through: bpy.props.BoolProperty(
@@ -84,7 +84,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         description="In object mode, a click picks IK handles, then joints (armatures), then curves before meshes "
                     "under the mouse, like Maya's selection priority",
         default=True)
-    # Step 217: bone collections = the rigger's "animator controls" set.
+    # bone collections = the rigger's "animator controls" set.
     pick_walk_skip_hidden_collections: bpy.props.BoolProperty(
         name="Pick Walk Skips Hidden Bone Collections",
         description="In Pose mode the arrow keys walk past bones whose bone collections are all hidden (Rigify MCH / "
@@ -104,9 +104,9 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Pulse Armature Mode",
         description="Softly pulse the viewport header's mode button while a skeleton is selected (not part of Maya)",
         default=False)
-    # First start (step 42): welcome dialog shown once.
+    # First start: welcome dialog shown once.
     welcome_done: bpy.props.BoolProperty(options={'HIDDEN'})
-    # step 260 (#177): how often the welcome dialog opened without "Make Blender feel like Maya" being clicked
+    # #177: how often the welcome dialog opened without "Make Blender feel like Maya" being clicked
     welcome_shown: bpy.props.IntProperty(options={'HIDDEN'})
 
     start_in_maya_layout: bpy.props.BoolProperty(
@@ -114,7 +114,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         description="When Blender starts without a file in Maya mode, open a new scene in the Maya layout",
         default=False)
 
-    # Step 138 (#63): Maya's UI doesn't come from the scene file: opening a file
+    # #63: Maya's UI doesn't come from the scene file: opening a file
     # shows the Maya layout (ui/scene_carry.py).
     maya_layout_on_open: bpy.props.BoolProperty(
         name="Keep Maya Layout When Opening Files",
@@ -144,18 +144,17 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Exit On Completion", default=True,
         description="Interactive Creation switches to the Select tool after one primitive; off, the tool keeps drawing primitives")
 
-    # Graph Editor View > Snap Time To Selection (default off; Alt+/ toggles it;
-    # step 92).
+    # Graph Editor View > Snap Time To Selection (default off; Alt+/ toggles it).
     snap_time_to_selection: bpy.props.BoolProperty(
         name="Snap Time To Selection",
         description="Selecting keys in the Graph Editor moves the current time to the earliest selected key")
     # Graph Editor View > Auto Frame / Auto Frame Time / Curve Name (defaults: on / off / Never;
-    # ui/graph_view.py, step 150).
+    # ui/graph_view.py).
     graph_auto_frame: bpy.props.BoolProperty(
         name="Auto Frame", default=True,
         description="When the selection changes, the Graph Editor refits its value axis to the curves it shows "
                     "(Maya View > Auto Frame)")
-    # Dope Sheet View > Auto Frame (Maya displayAutoFitItem, factory off in the Dope Sheet; step 166)
+    # Dope Sheet View > Auto Frame (Maya displayAutoFitItem, factory off in the Dope Sheet)
     dope_auto_frame: bpy.props.BoolProperty(
         name="Dope Sheet Auto Frame",
         description="When the selection changes, the Dope Sheet frames all the keys it shows (Maya Dope Sheet "
@@ -184,7 +183,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         description="With the Scale Keys tool (r) the Graph Editor draws a box around the selected keys: drag a "
                     "side to scale them in time or value, a corner for both")
 
-    # Graph Editor depth 2 (step 198): View > Show Buffer Curves (factory off),
+    # Graph Editor depth 2: View > Show Buffer Curves (factory off),
     # Curves > Default Tangent Weight (factory Non-weighted), Retime Tool Snap On Frame (factory off), Edit > Set Curve
     # Colors... rules (Maya curveRGBColor: attribute name -> colour; JSON list of [attribute, r, g, b]).
     graph_show_buffers: bpy.props.BoolProperty(
@@ -205,7 +204,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
 
     # Script Editor History menu (defaults:
     # Batch Render Messages / Line numbers in errors on,
-    # the rest off, History Output Show Both). Read by command_line/runner.py (step 216).
+    # the rest off, History Output Show Both). Read by command_line/runner.py.
     se_batch_render_messages: bpy.props.BoolProperty(
         name="Batch Render Messages", default=True,
         description="Show batch rendering messages in the Script Editor history (Maya; Blender's renders "
@@ -241,7 +240,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
                ('PYTHON', "Show Python Only", "History lists Python results only")))
 
     # Channel Box Channels > Sync Selection in Graph Editor / Sync Timeline Display (default off;
-    # Maya Channel Box Channels menu, ui/cb_channels.py, step 158).
+    # Maya Channel Box Channels menu, ui/cb_channels.py).
     cb_sync_graph: bpy.props.BoolProperty(
         name="Sync Selection in Graph Editor",
         description="Selecting channels in the Channel Box selects their curves, and S keys only the selected channels")
@@ -249,7 +248,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Sync Timeline Display",
         description="The Time Slider shows only the keys of the channels selected in the Channel Box")
     # Graph Editor Select > Curve / Key / In Tangent / Out Tangent (Maya selectType pick masks, factory all on;
-    # Maya Graph Editor Select menu, operators/graph_key_menu.py, step 157).
+    # Maya Graph Editor Select menu, operators/graph_key_menu.py).
     graph_select_curve: bpy.props.BoolProperty(
         name="Curve", default=True, description="Clicking or dragging in the Graph Editor can pick curves")
     graph_select_key: bpy.props.BoolProperty(
@@ -275,13 +274,13 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
                ('STEPPED', "Stepped", "Blender Constant")),
         description="Out tangent of the keys the kit sets (Maya Tangents > Default Out Tangent)")
 
-    # Top UI (step 7; Maya Windows > UI Elements).
+    # Top UI (Maya Windows > UI Elements).
     maya_top_bar: bpy.props.BoolProperty(
         name="Maya Menu Bar",
         description="Top bar shows the Maya menus, menu sets and Status Line instead of "
                     "Blender's menus and workspace tabs (Blender menus stay as submenus)",
         default=True)
-    # Maya view furniture (step 46), in views whose Blender navigation gizmo is off.
+    # Maya view furniture, in views whose Blender navigation gizmo is off.
     @_quiet
     def _update_navigation(self, context):
         from .ui import view_furniture
@@ -317,25 +316,25 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
                 if area.type == 'PROPERTIES':
                     area.tag_redraw()
 
-    # Maya wireframe on selected objects over shading (step 47).
+    # Maya wireframe on selected objects over shading.
     maya_selection_wire: bpy.props.BoolProperty(
         name="Selection Wireframe", description="Selected objects show their wireframe over shading, like "
                                                 "Maya (lead light green, others white); in wireframe shading "
                                                 "unselected objects are Maya's dark blue",
         default=True, update=_update_selection_wire)
-    # Maya component colours in mesh edit mode (step 134).
+    # Maya component colours in mesh edit mode.
     maya_component_colors: bpy.props.BoolProperty(
         name="Component Colors", description="Mesh edit mode shows Maya's component colors: light blue edges, "
                                               "purple / yellow vertices, orange edges and stippled faces",
         default=True, update=_update_selection_wire)
-    # Maya grey docks (step 195): the dock areas are lifted from the theme's Properties grey to #444444
+    # Maya grey docks: the dock areas are lifted from the theme's Properties grey to #444444
     maya_dock_colors: bpy.props.BoolProperty(
         name="Dock Colors", description="The Channel Box / Attribute Editor / Modeling Toolkit docks are drawn "
                                         "in Maya's lighter grey",
         default=True, update=_update_dock_colors)
     maya_view_axis: bpy.props.BoolProperty(
         name="View Axis", description="Maya axis triad in the bottom left of the view", default=True)
-    # Maya in-view messages (on by default; step 72).
+    # Maya in-view messages (on by default).
     in_view_messages: bpy.props.BoolProperty(
         name="In-View Messages", description="Short fading messages in the view when you group, hide, toggle "
                                              "object/component selection (F8), soft select or Make Live, like Maya",
@@ -350,7 +349,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         items=lambda self, context: _menu_set_items(), default=0)
     show_status_line: bpy.props.BoolProperty(
         name="Status Line", description="Maya Status Line icons in the top bar", default=True)
-    # Maya layout parity (step 49).
+    # Maya layout parity.
     maya_toolbox: bpy.props.BoolProperty(
         name="Maya Tool Box", description="3D View toolbars show Maya's Tool Box in every mode: Select, Lasso, "
                                           "Paint Select, Move, Rotate, Scale, the last other tool and quick layout "
@@ -362,7 +361,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Help Line", description="Maya-style help for the active tool in the status bar",
         default=True)
 
-    # Marking menus and hotbox (step 9).
+    # Marking menus and hotbox.
     marking_menu_style: bpy.props.EnumProperty(
         name="Marking Menus",
         description="How Maya marking menus are shown",
@@ -380,10 +379,10 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
                                                "the current one (on by default, like Maya)",
         default=True)
 
-    # Shelf (step 12): current tab (factory file name or "USER:<name>").
+    # Shelf: current tab (factory file name or "USER:<name>").
     shelf_current: bpy.props.StringProperty(options={'HIDDEN'})
 
-    # Maya project (operators/project.py, step 69): Blender has no projects, so the current
+    # Maya project (operators/project.py): Blender has no projects, so the current
     # project folder and the Recent Projects list live here, like Maya keeps the workspace in its prefs.
     project_root: bpy.props.StringProperty(name="Current Project", subtype='DIR_PATH',
                                            description="Maya Workflow Kit project folder: file dialogs open in its scenes "
@@ -412,10 +411,10 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     autosave_folder: bpy.props.StringProperty(
         name="Autosave Folder", subtype='DIR_PATH',
         description="Autosave folder when the destination is Named Folder")
-    # Maya option window values (operators/option_windows.py, step 103).
+    # Maya option window values (operators/option_windows.py).
     option_settings: bpy.props.StringProperty(options={'HIDDEN'})   # JSON {window key: {field: value}}
 
-    # Scene concepts (step 10).
+    # Scene concepts.
     parent_mode: bpy.props.EnumProperty(
         name="Parent Mode", description="What P (Parent) does to the child's values",
         items=(('MAYA', "Maya", "Keep the world position and recompute the local values "
@@ -462,7 +461,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         if self.maya_mode:
             row.operator("allset.switch_mode", text="Switch to Blender", icon='BLENDER').mode = 'BLENDER'
         else:
-            # Nothing is changed until the user asks for it (step 115): the same dialog as the first start.
+            # Nothing is changed until the user asks for it: the same dialog as the first start.
             row.operator("allset.welcome", text="Make Blender feel like Maya", icon='EVENT_M')
             row.operator("allset.switch_mode", text="Maya Mode Only").mode = 'MAYA'
         box.label(text="Ctrl+Alt+Shift+M or the Maya / Blender switch at the right of the top bar switches at any time. "
@@ -551,8 +550,8 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         box.prop(self, "in_view_messages")
 
 
-# Undo depth (step 141, B6): Maya's undo queue is infinite, Blender keeps 32 steps
-# by default and the kit may not write Blender's preferences (step 130), so the kit only tells the user.
+# Undo depth (B6): Maya's undo queue is infinite, Blender keeps 32 steps
+# by default and the kit may not write Blender's preferences, so the kit only tells the user.
 UNDO_RECOMMENDED = 256      # Blender's maximum
 UNDO_HINT = ("Maya's undo is unlimited; Blender keeps {steps} steps. For long Maya-style sessions raise Edit > "
              "Preferences > System > Memory & Limits > Undo Steps to 256 (Blender's maximum).")
@@ -566,8 +565,8 @@ EMULATE_HINT = i18n.mark(
 
 
 def emulate_hint(context=None):
-    """Step 260 (#177): the Emulate 3 Button Mouse hint while that Blender preference is on, else None (read only:
-    the kit never writes Blender's preferences, step 130). Blender converts Alt+LMB into a plain MMB without Alt
+    """#177: the Emulate 3 Button Mouse hint while that Blender preference is on, else None (read only:
+    the kit never writes Blender's preferences). Blender converts Alt+LMB into a plain MMB without Alt
     (wm_event_system.cc wm_eventemulation)."""
     inputs = (context or bpy.context).preferences.inputs
     return EMULATE_HINT if getattr(inputs, "use_mouse_emulate_3_button", False) else None

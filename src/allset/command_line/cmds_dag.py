@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""``maya.cmds`` scene / DAG commands of the kit's look-alike (step 208, Issue #115): delete, rename, objExists,
+"""``maya.cmds`` scene / DAG commands of the kit's look-alike (Issue #115): delete, rename, objExists,
 listRelatives, parent, group, duplicate, spaceLocator.
 
 Maya's behaviour: return
 values, names, selection after each command, world positions kept. They go through the kit's own operations —
-``parenting``, ``group``, ``duplicate``, ``dag.delete_hierarchy`` (step 164), ``create`` — so a script
+``parenting``, ``group``, ``duplicate``, ``dag.delete_hierarchy``, ``create`` — so a script
 gives what the menus give.
 """
 
@@ -29,7 +29,7 @@ def _history_owner(name):
 
 
 def delete(*args, **kwargs):
-    """``delete`` = the nodes and everything below them (Maya DAG rule, step 164); ``-ch`` = Edit > Delete by Type >
+    """``delete`` = the nodes and everything below them (Maya DAG rule); ``-ch`` = Edit > Delete by Type >
     History (the object stays); a creation node's name (polyCube1) deletes only that history. Returns None."""
     f = _Flags("delete", kwargs)
     ch = f.get("constructionHistory", "ch", False)
@@ -212,7 +212,7 @@ def _shape_target(name):
 
 
 def _parent_shape(names, relative):
-    """``parent -s [-r] curveShape... joint|curve`` (step 226): the curve
+    """``parent -s [-r] curveShape... joint|curve``: the curve
     shapes become the joint's control shape (bone Custom Shape) or join the target curve. Returns the shape names."""
     from ..operators import control_shapes
     if names:

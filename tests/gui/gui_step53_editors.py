@@ -1,4 +1,4 @@
-"""Step 53 in a real UI: with Maya Workflow Kit on (Maya keymap active), the other editors keep their own basic
+"""In a real UI: with Maya Workflow Kit on (Maya keymap active), the other editors keep their own basic
 operation (Maya add-ons that break Graph Editor navigation).
 
 - Text Editor: typing inserts text, including the keys the kit binds elsewhere (z = undo, h = hide,
@@ -192,7 +192,7 @@ def s_graph_zoomed():
     mat = bpy.data.materials.new("probeMaterial")
     mat.use_nodes = True
     ob.data.materials.append(mat)
-    # the new cube may already have lambert1 (step 100 default material): show this material's tree
+    # the new cube may already have lambert1 (the kit's default material): show this material's tree
     ob.active_material_index = len(ob.material_slots) - 1
     area().type = 'NODE_EDITOR'
     area().ui_type = 'ShaderNodeTree'

@@ -1,4 +1,4 @@
-"""Step 129 lane CB in a real UI:
+"""In a real UI:
 - #6: drag down over the Channel Box names Translate X -> Scale Z selects that range (blue name cells); a drag that
   starts on a value field selects too; then one value typed into a selected field goes into every selected channel
   of both selected cubes.
@@ -64,7 +64,7 @@ def s_wait():
     redraw()
 
 
-# fields: a sweep down the right part of the dock; names: along each field's row (step 135: the dock width
+# fields: a sweep down the right part of the dock; names: along each field's row (the dock width
 # follows the UI scale, so the name column is no longer at a fixed fraction of it)
 step(find_button(dock, lambda p, _c: p.endswith("allset_cb.tx_text"), C, "tx_field", x_frac=0.7, step_px=4))
 step(find_button(dock, lambda p, _c: p.endswith("allset_cb.rz_text"), C, "rz_field", x_frac=0.7, step_px=4))

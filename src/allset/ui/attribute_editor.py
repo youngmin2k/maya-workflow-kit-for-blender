@@ -4,16 +4,16 @@
 Maya's Attribute Editor.
 - Dock mode (``WindowManager.allset_dock``): the sidebar tabs "Channel Box / Layer
   Editor", "Attribute Editor", "Modeling Toolkit" = the tabs of Maya's right dock
-  (step 99); Ctrl+A toggles
+ ; Ctrl+A toggles
   (``ShowAttributeEditorOrChannelBox``).
 - Node tabs: transform = object, shape = object
   data, one tab per modifier (construction history inputs) and per material.
 - Sections and their rows: ``ae_layout`` (Maya template sections, collapse flags
   from Maya's Attribute Editor templates), drawn as ``layout.panel`` sections.
-- Joints (step 55): in pose mode the node is the lead pose bone (``channel_box.lead``): a
+- Joints: in pose mode the node is the lead pose bone (``channel_box.lead``): a
   ``joint`` tab (ae_layout.JOINT) plus one tab per constraint node, like Maya's
   ``pCube1_parentConstraint1``.
-- Step 106 (Maya 2022's Attribute Editor):
+- Maya's Attribute Editor:
   the kit's last extrusion is a ``polyExtrudeFace`` history tab (``H``), modifiers are tabs with Maya node names
   (``MODIFIER_NODES``), and Maya's AE chrome: menu bar List / Selected / Focus / Attributes / Display / Show / Help,
   Focus / Presets / Show / Hide beside the node name, Notes, and Select / Load Attributes / Copy Tab at the bottom.
@@ -33,7 +33,7 @@ from . import cb_entry, channel_box
 
 DOCK_ITEMS = (('CHANNEL_BOX', "Channel Box / Layer Editor", "Maya Channel Box and Layer Editor"),
               ('ATTRIBUTE_EDITOR', "Attribute Editor", "Maya Attribute Editor"),
-              ('MODELING_TOOLKIT', "Modeling Toolkit", "Maya Modeling Toolkit (ui/modeling_toolkit.py, step 63)"))
+              ('MODELING_TOOLKIT', "Modeling Toolkit", "Maya Modeling Toolkit (ui/modeling_toolkit.py)"))
 
 
 def dock_mode(context):
@@ -79,7 +79,7 @@ MODIFIER_NODES = {
     'SIMPLE_DEFORM': "nonLinear", 'CAST': "nonLinear", 'WAVE': "nonLinear", 'DISPLACE': "textureDeformer",
     'SCREW': "polyRevolve", 'EDGE_SPLIT': "polySoftEdge",
     'WEIGHTED_NORMAL': "polyNormalPerVertex", 'NODES': "geometryNodes",
-    'HOOK': "cluster", 'SURFACE_DEFORM': "wrap", 'CURVE': "curveWarp",    # step 144 (operators/deformers.BASES)
+    'HOOK': "cluster", 'SURFACE_DEFORM': "wrap", 'CURVE': "curveWarp",    # operators/deformers.BASES
 }
 
 
@@ -88,7 +88,7 @@ def modifier_node(ob, md):
     (``<type><n>``, numbered per type like Maya: ``polyBevel1``); a named one (kit-made ``polySmoothFace``, the
     user's own) keeps its name."""
     from ..operators import deformers
-    kit = deformers.node_type(md)     # a kit Maya deformer (step 144: cluster1 = HOOK, wrap1 = SURFACE_DEFORM ...)
+    kit = deformers.node_type(md)     # a kit Maya deformer (cluster1 = HOOK, wrap1 = SURFACE_DEFORM ...)
     if kit is not None:
         return md.name, kit
     mtype = MODIFIER_NODES.get(md.type, md.type.lower())
@@ -108,7 +108,7 @@ def default_name(md):
 
 
 def history_record(ob):
-    """The kit's last extrusion of ``ob`` (Maya polyExtrudeFace node), or None (edit mode only, step 65)."""
+    """The kit's last extrusion of ``ob`` (Maya polyExtrudeFace node), or None (edit mode only)."""
     from . import in_view
     try:
         return in_view.cb_record(bpy.context, ob)
@@ -141,28 +141,28 @@ def tabs(ob):
     if ob.data is not None:
         out.append(("S", ob.data.name, node_type(ob)))
     rec = history_record(ob)
-    if rec is not None:              # Maya: the newest history node first (CB INPUTS order, step 65)
-        out.append(("H", rec.name, rec.spec.node_type))   # polyExtrudeFace / Edge / Vertex, polyBevel3 (step 139)
+    if rec is not None:              # Maya: the newest history node first (CB INPUTS order)
+        out.append(("H", rec.name, rec.spec.node_type))   # polyExtrudeFace / Edge / Vertex, polyBevel3
     from ..operators import skin_tools_199
     for md in ob.modifiers:
-        if display.is_preview(md):   # shape display attribute, drawn in "Smooth Mesh" (step 15)
+        if display.is_preview(md):   # shape display attribute, drawn in "Smooth Mesh"
             continue
-        if skin_tools_199.is_part(md):   # the skin's weight-sum helper (step 199) belongs to the skinCluster
+        if skin_tools_199.is_part(md):   # the skin's weight-sum helper belongs to the skinCluster
             continue
         from ..operators import skin_method
-        if skin_method.is_part(md):      # Weight Blended's DQ half (step 250) belongs to the skinCluster too
+        if skin_method.is_part(md):      # Weight Blended's DQ half belongs to the skinCluster too
             continue
         name, mtype = modifier_node(ob, md)
         out.append((f"M:{md.name}", name, mtype))
     from ..operators import prim_history
     _owner, node = prim_history.node_of(ob)
-    if node is not None:             # the primitive's creation node, the oldest history (step 129)
+    if node is not None:             # the primitive's creation node, the oldest history
         out.append(("CH", node["name"], node["type"]))
     from ..operators import material as material_ops
     for i, slot in enumerate(ob.material_slots):
         if slot.material is not None:
             # Maya: the shape's shading group, then its surface shader (pCubeShape1 | polyCube1 |
-            # initialShadingGroup | lambert1; step 100)
+            # initialShadingGroup | lambert1)
             out.append((f"SG:{i}", material_ops.shading_group_name(slot.material), "shadingEngine"))
             out.append((f"MAT:{i}", slot.material.name, material_type(slot.material)))
     out += _constraint_tabs(ob)
@@ -338,7 +338,7 @@ JOINT_AXIS_NOTE = "Bone Y points to the child joint (Maya Primary Axis X)"
 
 
 def joint_orient(pb):
-    """Maya jointOrient (radians, xyz) from the joints' Maya frames (step 244: bone axes turned by
+    """Maya jointOrient (radians, xyz) from the joints' Maya frames (bone axes turned by
     ``allset_maya_frame``; a top joint in Maya's world axes)."""
     from ..operators import joints
     bone = pb.bone
@@ -354,7 +354,7 @@ def draw_joint_orient(layout, context, pb):
     for v in joint_orient(pb):
         row.label(text=cb_entry.fmt_number(math.degrees(v)))   # Maya numbers: no "-0"
     from . import notices
-    notices.tip(row, JOINT_AXIS_NOTE)    # a tooltip, not a Blender sentence in the AE (step 106)
+    notices.tip(row, JOINT_AXIS_NOTE)    # a tooltip, not a Blender sentence in the AE
 
 
 def draw_joint_stiffness(layout, context, pb):
@@ -383,7 +383,7 @@ def draw_smooth_mesh(layout, context, ob):
 
 
 def draw_light_decay(layout, context, ob):
-    """Maya Decay Rate (operators/lights.py, step 137); where the render can't follow it, the tooltip says why."""
+    """Maya Decay Rate (operators/lights.py); where the render can't follow it, the tooltip says why."""
     from ..operators import lights
     from . import notices
     light = getattr(ob, "data", None)
@@ -431,7 +431,7 @@ def draw_row(layout, context, ob, target, row):
             _k, socket, label = row
             maya_prop = None
         from ..operators import material as _material
-        # "Base Color" of a lambert-family material = its Maya Diffuse node's B (Maya Color, step 214)
+        # "Base Color" of a lambert-family material = its Maya Diffuse node's B (Maya Color)
         inp = _material.maya_input(target, socket)
         if inp is None:
             if maya_prop is not None and principled(target) is not None and hasattr(target, maya_prop):
@@ -447,7 +447,7 @@ def draw_row(layout, context, ob, target, row):
             row.prop(inp, "default_value", text=label)
         else:
             row.label(text=label)
-        # Maya's map (checker) button: Create Render Node / Break Connection (operators/shading_maps.py, step 67)
+        # Maya's map (checker) button: Create Render Node / Break Connection (operators/shading_maps.py)
         op = row.operator("allset.ae_map", text="", icon='TEXTURE')
         op.material, op.socket = target.name, socket
         if inp.is_linked and source.type == 'TEX_IMAGE':
@@ -513,7 +513,7 @@ def draw_history(layout, context, ob, md):
         # Tension / Solidify / Sculpt, Morph / Jiggle and sweepMeshCreator draw their Maya attributes
         drawn = deformers_205a.draw_ae(col, md) or deformers_205b.draw_ae(col, md) or sweep_mesh.draw_ae(col, md)
         if md.type == 'ARMATURE' and hasattr(ob, "allset_skinning_method"):
-            col.prop(ob, "allset_skinning_method")       # Maya skinCluster Skinning Method (step 250)
+            col.prop(ob, "allset_skinning_method")       # Maya skinCluster Skinning Method
         for ident in ([] if drawn else modifier_props(md)):
             col.prop(md, ident, text=attr_label(context, md.bl_rna.properties[ident].name, ident))
     row = layout.row(align=True)
@@ -561,7 +561,7 @@ def draw_extra(layout, owner, layout_id):
 
 def draw_extrude_history(layout, context, rec):
     """The polyExtrudeFace tab: Maya's "Poly Extrude Face History" with the kit record's values (the same text
-    proxies as Channel Box INPUTS, ui/in_view.py); also polyExtrudeEdge / Vertex and polyBevel3 (step 139)."""
+    proxies as Channel Box INPUTS, ui/in_view.py); also polyExtrudeEdge / Vertex and polyBevel3."""
     header, body = layout.panel("allset_ae_history_extrude", default_closed=False)
     header.label(text=f"{nice_type(rec.spec.node_type)} History")
     if body is None:
@@ -575,7 +575,7 @@ def draw_extrude_history(layout, context, rec):
 
 
 def content_width(context):
-    """Px the dock's panel content spans: region minus Blender's panel margins and the Maya tab strip (step 142)."""
+    """Px the dock's panel content spans: region minus Blender's panel margins and the Maya tab strip."""
     region = getattr(context, "region", None)
     if region is None or region.width <= 1:
         return None
@@ -603,7 +603,7 @@ def text_widths(context, labels, extra_units=None):
 
 def wrap_rows(context, labels, equal=True, extra_units=None):
     """``labels`` split into rows that each fit the dock, so no tab / button / menu text is cut ("pCubeS...",
-    "Sele...", step 192 dogfood, #104). Maya's AE is wider and scrolls its tab bar; the kit dock can be
+    "Sele...", #104). Maya's AE is wider and scrolls its tab bar; the kit dock can be
     narrower (event-simulated sessions don't fit it, users drag it): rows wrap like a narrow Qt bar.
     ``equal``: an aligned row gives every button the same width, so a row needs n × its widest label; else the
     labels keep their natural widths (left / right aligned rows). Without a region (tests with a fake layout) one
@@ -801,7 +801,7 @@ BOTTOM = (("allset.ae_select", "Select"), ("allset.ae_load", "Load Attributes"),
 
 
 def draw_bottom(layout, context=None):
-    """Maya's bottom buttons: Select, Load Attributes, Copy Tab (wrapped when the dock is too narrow, step 197)."""
+    """Maya's bottom buttons: Select, Load Attributes, Copy Tab (wrapped when the dock is too narrow)."""
     layout.separator()
     col = layout.column(align=True)
     groups = wrap_rows(context, [t for _o, t in BOTTOM]) if context is not None else [list(range(len(BOTTOM)))]
@@ -942,7 +942,7 @@ class ALLSET_OT_ae_select(bpy.types.Operator):
 
 
 def show_dock(context, dock):
-    """Raise ``dock`` in the Maya tab stack, or open it as a floating window (ui/maya_dock.py, step 116)."""
+    """Raise ``dock`` in the Maya tab stack, or open it as a floating window (ui/maya_dock.py)."""
     from . import maya_dock
     return maya_dock.show(context, dock)
 
@@ -1011,7 +1011,7 @@ class ALLSET_OT_object_attributes(bpy.types.Operator):
 
 
 def _redraw(context):
-    """The dock areas (Properties editors, any window, step 116) and the 3D Views."""
+    """The dock areas (Properties editors, any window) and the 3D Views."""
     for window in context.window_manager.windows:
         for area in window.screen.areas:
             if area.type in {'VIEW_3D', 'PROPERTIES'}:
@@ -1020,10 +1020,9 @@ def _redraw(context):
 
 # --- panels ----------------------------------------------------------------------------------
 
-# --- dock state (step 99, step 116) ------------------------------------------------------------
+# --- dock state --------------------------------------------------------------------
 # WindowManager.allset_dock = the tab the Maya tab stack shows (Channel Box / Layer Editor, Attribute Editor,
-# Modeling Toolkit; ui/maya_dock.py). Until step 116 these were 3D View sidebar tabs kept in step by a timer; now the
-# stack is its own area and simply redraws.
+# Modeling Toolkit; ui/maya_dock.py). The stack is its own area and simply redraws.
 
 
 def _dock_update(self, context):
@@ -1049,7 +1048,7 @@ def draw_panel(layout, context):
     draw(layout, context, ob)
 
 
-# --- Maya AE chrome (step 106) ---------------------------------------------------------------------------------
+# --- Maya AE chrome ---------------------------------------------------------------------------------
 # Menus, buttons and tooltips like Maya 2022's Attribute Editor (bars, widgets).
 
 ATTRIBUTE_NAMES = (('NICE', "Nice", "Readable names (Translate X)"),
@@ -1077,7 +1076,7 @@ def fits(context, entries):
         return True
     scale = context.preferences.system.ui_scale or 1.0
     need = sum(len(label) * 7 + 14 for label, _m in entries) * scale
-    from . import maya_dock     # the dock's vertical tab strip takes the right edge (step 142)
+    from . import maya_dock     # the dock's vertical tab strip takes the right edge
     return need <= region.width - 20 * scale - maya_dock.area_reserved_px(context)
 
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's wire deformer (Deform > Wire and Deform > Wire >, step 169).
+"""Maya's wire deformer (Deform > Wire and Deform > Wire >).
 
 Maya rule: for a deformed point p, c = the nearest point of the
 *base* wire (a hidden copy of the curve made with the deformer, ``curve1BaseWire``) at parameter u, c' = the wire at

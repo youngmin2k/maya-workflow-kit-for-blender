@@ -1,4 +1,4 @@
-"""Step 129, issue #14: Maya's shaded mode (5) shows the material colour. Blender's Solid shading with colour type
+"""Maya's shaded mode (5) shows the material colour. Blender's Solid shading with colour type
 MATERIAL draws ``Material.diffuse_color`` (the viewport display colour), which the Principled Base Color the
 kit's materials / Attribute Editor edit doesn't change — so a kit material's display colour follows its Maya
 colour (and transparency)."""
@@ -55,7 +55,7 @@ def test_colour_edit_reaches_viewport_colour():
     ob.data.materials.clear()
     ob.data.materials.append(mat)
     bsdf = _principled(mat)
-    # = AE Color (since step 214 the Maya Diffuse node's B input; Blender's panel shows Base Color as linked)
+    # = AE Color (the Maya Diffuse node's B input; Blender's panel shows Base Color as linked)
     material.color_socket(mat).default_value = (0.9, 0.1, 0.05, 1.0)
     bsdf.inputs["Alpha"].default_value = 0.4                           # = AE Transparency
     bpy.context.view_layer.update()

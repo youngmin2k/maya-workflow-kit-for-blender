@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Insert Edge Loop, Offset Edge Loop and Slide Edge (step 144, GitHub #31).
+"""Maya Insert Edge Loop, Offset Edge Loop and Slide Edge (GitHub #31).
 
 Maya behaviour:
 - Insert Edge Loop (polySplitRing): the press on an edge inserts the loop at that point at once, dragging slides it
@@ -469,7 +469,7 @@ def _region_xy(region, rv3d, world):
 
 
 class _PreMesh:
-    """The mesh as it was at the press: every drag step rebuilds from it (step 65 restore_pre pattern)."""
+    """The mesh as it was at the press: every drag step rebuilds from it (the extrude record's restore_pre pattern)."""
 
     def __init__(self, bm):
         self.me = bpy.data.meshes.new(PRE_MESH)

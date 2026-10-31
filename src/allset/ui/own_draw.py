@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Swap only a Blender UI class's *own* draw function (step 115).
+"""Swap only a Blender UI class's *own* draw function.
 
 Blender keeps a header / panel / menu's draw functions in a list once anything is appended or prepended to it
 (``bpy_types._GenericUI._dyn_ui_initialize``, the mechanism ``append`` / ``prepend`` use). Where the kit has to draw

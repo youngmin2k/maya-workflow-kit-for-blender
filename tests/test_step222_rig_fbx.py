@@ -1,4 +1,4 @@
-"""Step 222 (Issue #132): rig FBX like Maya — joint orient as PreRotation (rotate 0 at rest), joint
+"""Issue #132: rig FBX like Maya — joint orient as PreRotation (rotate 0 at rest), joint
 translations in cm, no armature Null; the joint world positions the file describes (T . Pre . R . S) equal
 Blender's at every frame.
 """

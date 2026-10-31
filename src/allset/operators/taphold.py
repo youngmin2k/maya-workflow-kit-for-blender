@@ -3,7 +3,7 @@
 
 Maya hold keys: on press Maya builds a marking menu on
 LMB; if no menu was posted before release, the release runs the default
-action (``a`` tap = FrameAll), step 3.
+action (``a`` tap = FrameAll).
 
 API (used by the marking-menu step): subclass ``TapHoldBinding``, then
 ``register_binding(MyBinding())``; bind ``allset.tap_hold`` with
@@ -204,12 +204,12 @@ class SoftSelectBinding(TapHoldBinding):
 
 class SelectAllBinding(TapHoldBinding):
     """A: tap = frame all; hold + LMB = the Maya marking menu SELECT_ALL
-    (delete history, freeze; step 10)."""
+    (delete history, freeze)."""
     name = "select_all"
     label = "Frame All / History Menu"
 
     def tap(self, context):
-        from . import view   # Maya fit (fit factor 0.95, sidebar excluded), step 17
+        from . import view   # Maya fit (fit factor 0.95, sidebar excluded)
         area, region = context.area, context.region
         if area is not None and area.type == 'VIEW_3D' and region is not None and region.type == 'WINDOW':
             view.frame_region(context, area, region, selected=False)
@@ -229,7 +229,7 @@ def playback_range(scene):
 
 
 def frames_per_pixel(scene, width):
-    """K drag speed: the editor's width spans the playback range once (step 56),
+    """K drag speed: the editor's width spans the playback range once,
     never slower than 1 frame per 50 px."""
     a, b = playback_range(scene)
     return max((b - a + 1) / max(width, 1), 0.02)

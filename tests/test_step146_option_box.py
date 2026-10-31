@@ -1,4 +1,4 @@
-"""Step 146 (#82): Maya option boxes open without a drag.
+"""#82: Maya option boxes open without a drag.
 GUI: tests/gui/gui_step146_option_box.py (hold Display > Grid, Key > Set Key, Constrain > Parent, let go)."""
 
 import types

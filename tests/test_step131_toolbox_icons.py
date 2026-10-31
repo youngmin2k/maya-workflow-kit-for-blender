@@ -1,4 +1,4 @@
-"""Step 131 lane TOOLBOX (#23): kit-drawn Maya icons for the Tool Box tools and quick layouts, the Layer Editor
+"""Lane TOOLBOX (#23): kit-drawn Maya icons for the Tool Box tools and quick layouts, the Layer Editor
 toolbar and the Outliner rows the kit draws (ui/kit_icons.py).
 GUI: tests/gui/gui_step131_toolbox_icons.py."""
 

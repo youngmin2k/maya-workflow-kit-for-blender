@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Four View = four real 3D View panels (step 237, Issue #148).
+"""Maya Four View = four real 3D View panels (Issue #148).
 
 Blender's Quad View splits one 3D View region in four: one header, one shading / overlay set for all four panes. A
 Maya model panel has its own camera, shading, Show settings and panel menu bar, so the kit's four view is four 3D
@@ -9,7 +9,7 @@ View *areas* (``screen.area_split`` three times), each with its own ``SpaceView3
     ------+------
     front | side
 
-Blender's split rules (steps 49 / 106 / 116; ``hypershade_layout`` docstring): HORIZONTAL with
+Blender's split rules (``hypershade_layout`` docstring): HORIZONTAL with
 factor > 0.5 puts the new area on top, VERTICAL with factor < 0.5 on the left — so the panels' places are known
 without reading rects (areas get their rects one tick after a split).
 
@@ -390,7 +390,7 @@ def leave(context, keep=None, window=None, role=None):
     if keep is None or keep.as_pointer() not in {a.as_pointer() for a in placed.values()}:
         keep = placed[role or "persp"]
     keep_role = next(r for r, a in placed.items() if a == keep)
-    if bpy.app.background:           # screen.area_join crashes without a UI (step 49)
+    if bpy.app.background:           # screen.area_join crashes without a UI
         return None
     keep_ptr = keep.as_pointer()
     _join_into(context, window, placed, keep_role)

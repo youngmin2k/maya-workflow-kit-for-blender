@@ -1,4 +1,4 @@
-"""Step 36: Maya symmetric modelling (Status Line Symmetry, W/E/R marking menu Symmetry ▸).
+"""Maya symmetric modelling (Status Line Symmetry, W/E/R marking menu Symmetry ▸).
 
 One global Maya state (Scene.allset_symmetry) drives Blender's per-mesh mirror flags.
 """

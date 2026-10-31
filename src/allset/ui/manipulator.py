@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya-shaped Move / Rotate / Scale manipulators (step 59).
+"""Maya-shaped Move / Rotate / Scale manipulators.
 
 Blender's transform gizmo (``VIEW3D_GGT_xform_gizmo``) is C and its shape can't be
 changed: thick axes, small cones, a white centre
@@ -9,15 +9,15 @@ circle. Maya's:
   plane handles (normal-axis colour), the active handle drawn yellow (M2).
 - Rotate: axis rings (front half), a camera ring, a grey trackball — Blender's C rotate gizmo
   already has this layout, so the Rotate tool keeps it (with the axis colours of the user's theme: the kit never
-  writes a theme). The Move / Scale handles here use Maya's own axis colours (``MAYA_AXIS``, step 142).
+  writes a theme). The Move / Scale handles here use Maya's own axis colours (``MAYA_AXIS``).
 - Scale: axis lines with cubes at the ends, a yellow centre cube, plane handles.
 - Pivot edit mode (D / Insert): Move plus small rings to orient the pivot (M7).
 - Constant screen size: 108 px for the Move Y arrow (M3, M4).
 
 ``ALLSET_GGT_xform`` draws that and runs Blender's own transform operators from each
 handle (``target_set_operator``), so snapping, constraints, numeric input, Smart
-Duplicate/Extrude (step 22/26) and the active handle (step 28) keep working. The Scale centre and axis handles run
-``allset.manip_scale`` (operators/manip_scale.py), Maya's scale drag on top of Blender's resize (step 275). It becomes
+Duplicate/Extrude and the active handle keep working. The Scale centre and axis handles run
+``allset.manip_scale`` (operators/manip_scale.py), Maya's scale drag on top of Blender's resize. It becomes
 the widget of the Move and Scale tools in object, mesh edit and lattice edit mode by swapping their
 ToolDefs in ``VIEW3D_PT_tools_active._tools`` for copies with another ``widget`` (same
 idname, so ``wm.tool_set_by_id`` still finds them); tools already active are set up
@@ -47,7 +47,7 @@ ARROW_PX = 108.0
 CENTER_HALF = 0.083      # hollow centre square: 18 px
 CONE_LEN, CONE_R = 0.13, 0.045
 LINE_START = 0.0
-# Plane handles (step 185): Maya's YZ / XY squares span 0.52-0.68
+# Plane handles: Maya's YZ / XY squares span 0.52-0.68
 # arrow units along both axes: a 1 px rim in the
 # axis colour around a translucent fill (pixels over the #767676 top face: red #b6655f, blue #5f63db).
 PLANE_AT, PLANE_HALF = 0.60, 0.08
@@ -56,7 +56,7 @@ CENTER_CUBE_HALF = 0.06
 PIVOT_RING_R = 0.32      # pivot orientation rings (M7, offset 50)
 PICK_R = 0.05            # half width of the invisible pick shape around a thin line
 YELLOW = (1.0, 1.0, 0.0)  # hovered handle (displayColor manipCurrent #ffff00)
-# Active handle and centre as Maya draws them on screen (step 185): #fdff88 for the active handle, the centre
+# Active handle and centre as Maya draws them on screen: #fdff88 for the active handle, the centre
 # light blue #64dcff while an axis is active (81 px of #fdff88 / #64dcff in the square).
 ACTIVE = (0xfd / 255, 1.0, 0x88 / 255)
 CENTER_IDLE = (0x64 / 255, 0xdc / 255, 1.0)
@@ -247,7 +247,7 @@ def slot_type(scene, kind):
 
 def pivot_frame(context, kind):
     """(centre, 3x3 axes, orientation type) of the manipulator of ``kind``: where it draws and how its axes point
-    (step 85: Shift+MMB picks one of these axes). Centre None = nothing selected."""
+    (Shift+MMB picks one of these axes). Centre None = nothing selected."""
     scene = context.scene
     otype = slot_type(scene, kind)
     if context.mode != 'OBJECT':
@@ -262,7 +262,7 @@ def pivot_frame(context, kind):
 
 
 def _edit_normal_axes(context):
-    """Approximation of Blender's NORMAL orientation of the selection (step 59)."""
+    """Approximation of Blender's NORMAL orientation of the selection."""
     ob = context.edit_object
     if ob is None or ob.type != 'MESH':
         return None
@@ -371,7 +371,7 @@ def _has_selection(context):
     return False
 
 
-# Step 142 (#76): kit-fixed Maya-style axis colours instead of the user's theme gizmo axes (Blender's #ff3653 /
+# #76: kit-fixed Maya-style axis colours instead of the user's theme gizmo axes (Blender's #ff3653 /
 # #8adb00 / #3b64a5): X #e60000, Y #00e600, Z #0000ff. The active and the hovered handle stay yellow #ffff00. Gizmo
 # colours are sRGB like the theme values they replace (the gizmo shaders convert). Rotate keeps Blender's C gizmo, whose
 # rings read the theme's axis colours: Python can't recolour it without writing the theme, so it keeps the user's theme
@@ -395,7 +395,7 @@ def plane_fill(colour):
 
 
 def _active_handle(kind):
-    """The remembered handle of ``kind`` (operators/manip.HANDLES, step 28): None = centre."""
+    """The remembered handle of ``kind`` (operators/manip.HANDLES): None = centre."""
     from ..operators import manip
     return manip.HANDLES.get(kind)
 
@@ -450,7 +450,7 @@ class ALLSET_GT_maya_handle(Gizmo):
 
 
 # Maya = / - (operators/manip.ALLSET_OT_manip_size): the kit manipulator's own size factor for this session. Not
-# Blender's gizmo_size preference, which the kit never writes (step 130).
+# Blender's gizmo_size preference, which the kit never writes.
 SIZE = [1.0]
 PIVOT_RING_CACHE = {}  # region pointer -> (plain numeric signature, projected ring paths)
 _PIVOT_RING_POINTS = tuple(Vector(p) for p in _ring(1.0, 48)[::2])
@@ -483,7 +483,7 @@ def scale_basis(context):
     return ARROW_PX / 75.0 * context.preferences.view.gizmo_size * SIZE[0] / BASE_PX_PER_UNIT
 
 
-# Pixels one gizmo unit spans with use_draw_scale and scale_basis 1 at gizmo_size 75 (step 59).
+# Pixels one gizmo unit spans with use_draw_scale and scale_basis 1 at gizmo_size 75.
 BASE_PX_PER_UNIT = 75.0
 
 
@@ -499,7 +499,7 @@ class ALLSET_GGT_xform(GizmoGroup):
     @classmethod
     def setup_keymap(cls, keyconfig):
         # Same keymap as Blender's transform gizmo: the Maya keyconfig's Smart Duplicate / Extrude
-        # and active-handle items sit in front of gizmo_tweak there (step 22/26/28).
+        # and active-handle items sit in front of gizmo_tweak there.
         return keyconfig.keymaps.new(name="Generic Gizmo Maybe Drag", space_type='EMPTY', region_type='WINDOW')
 
     @classmethod
@@ -510,7 +510,7 @@ class ALLSET_GGT_xform(GizmoGroup):
         if tool_kind(context) is None or not _has_selection(context):
             return False
         from . import in_view
-        return not in_view.manip_visible(context)   # Maya: the extrude manipulator replaces it (step 65)
+        return not in_view.manip_visible(context)   # Maya: the extrude manipulator replaces it
 
     def setup(self, context):
         self.handles = []      # (gizmo, role, data)
@@ -524,7 +524,7 @@ class ALLSET_GGT_xform(GizmoGroup):
     def _new(self, kind, role=None, axis=None):
         gz = self.gizmos.new(GIZMO)
         gz.build(kind)
-        gz.handle_role, gz.handle_axis = role, axis       # read by operators/manip.py Ctrl+LMB (step 85)
+        gz.handle_role, gz.handle_axis = role, axis       # read by operators/manip.py Ctrl+LMB
         gz.use_draw_scale = True
         gz.use_draw_modal = True
         gz.use_tooltip = False                           # Maya manipulators show no tooltip (#98)
@@ -573,7 +573,7 @@ class ALLSET_GGT_xform(GizmoGroup):
             op = "allset.pivot_translate"
         for gz, role, data in self.handles:
             if kind == 'RESIZE' and role in ('AXIS', 'PLANE', 'CENTER'):
-                # step 275 (#200): Maya's scale drag (operators/manip_scale.py)
+                # #200: Maya's scale drag (operators/manip_scale.py)
                 props = gz.target_set_operator("allset.manip_scale")
                 props.mode = role
                 if role == 'AXIS':
@@ -667,7 +667,7 @@ class ALLSET_GGT_xform(GizmoGroup):
                 gz.color = ACTIVE if _is_active(kind, axes) else colours[normal]
             elif role == 'CENTER':
                 # Maya: the centre (free move / uniform scale) is the active handle by default, drawn #fdff88;
-                # light blue while an axis or plane is active (step 185)
+                # light blue while an axis or plane is active
                 rot = frame if kind == 'RESIZE' else view
                 gz.color = ACTIVE if _is_active(kind, None) else CENTER_IDLE
             else:   # PIVOT_RING
@@ -711,7 +711,7 @@ def draw_tool_settings(self, context):
     mode = snap_align.step_snap_mode(ts, kind)
     for m in ('OFF', 'RELATIVE', 'ABSOLUTE'):
         cell = row.row(align=True)
-        # step 263: Move offers Absolute only with World axes (Maya)
+        # Move offers Absolute only with World axes (Maya)
         cell.enabled = m != 'ABSOLUTE' or snap_align.absolute_offered(scene, kind)
         op = cell.operator("allset.step_snap", text=m.title(), depress=mode == m)
         op.kind, op.mode = kind, m
@@ -720,7 +720,7 @@ def draw_tool_settings(self, context):
     elif kind == 'RESIZE':
         layout.label(text="Step: 0.1")
     else:
-        # Blender's increment is the grid step: 1 Maya unit in the Maya Workflow Kit template (step 25).
+        # Blender's increment is the grid step: 1 Maya unit in the Maya Workflow Kit template.
         layout.label(text="Step: one grid unit", icon='SNAP_INCREMENT')
     if kind == 'TRANSLATE':
         # Blender snapping always keeps the selection's spacing (on by default, like Maya; off = not possible).

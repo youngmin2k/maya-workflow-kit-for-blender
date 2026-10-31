@@ -1,4 +1,4 @@
-"""Step 50: Maya editor chrome — Channel Box / Layer Editor / Outliner menu bars, empty Channel Box text,
+"""Maya editor chrome — Channel Box / Layer Editor / Outliner menu bars, empty Channel Box text,
 Time Slider buttons in the timeline sidebar, Range Slider order. GUI: tests/gui/gui_step50_chrome.py."""
 
 from importlib import import_module
@@ -73,7 +73,7 @@ def test_layer_editor_tabs_and_menus():
 
 
 def test_outliner_header_is_maya():
-    assert maya_outliner._draw in bpy.types.OUTLINER_HT_header.draw._draw_funcs   # own draw swapped (step 115)
+    assert maya_outliner._draw in bpy.types.OUTLINER_HT_header.draw._draw_funcs   # own draw swapped
     rec = Recorder()
     chrome.menu_bar(rec, maya_outliner.MENU_BAR)
     assert rec.texts("menu") == ["Display", "Show", "Help"]
@@ -88,7 +88,7 @@ def _timeline_ctx():
 
 
 def test_range_slider_order_and_menus_moved():
-    buttons, menus = time_slider.header_classes()   # Blender 5.x: the Dope Sheet's (step 53)
+    buttons, menus = time_slider.header_classes()   # Blender 5.x: the Dope Sheet's
     assert buttons.draw_header.__name__ in ("draw_header", "_header_5")
     assert "draw_collapsible" in menus.__dict__
     rec = Recorder()

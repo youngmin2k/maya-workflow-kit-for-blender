@@ -1,4 +1,4 @@
-"""Step 64 in a real UI (Maya modeling workflow): Shift+RMB N = Target Weld Tool ->
+"""In a real UI (Maya modeling workflow): Shift+RMB N = Target Weld Tool ->
 F9 vertex mode -> drag a vertex onto its neighbour -> 8 -> 7 vertices at the target; Ctrl+Z; Ctrl+Shift+X Multi-Cut ->
 Ctrl+click on an edge -> an edge loop where clicked; Shift+click -> the cut starts at the Snap Step point; Crease
 Tool -> MMB drag right -> creased edges, 3 = smooth preview (screenshots)."""

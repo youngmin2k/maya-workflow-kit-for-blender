@@ -1,4 +1,4 @@
-"""Step 8 in a real UI: Maya marking menus as pies — RMB press-drag-release over the cube,
+"""In a real UI: Maya marking menus as pies — RMB press-drag-release over the cube,
 Shift+RMB / Ctrl+RMB pies, W hold + LMB tool options; screenshots."""
 
 import os
@@ -35,7 +35,7 @@ def s_setup():
 
 
 def _drawn(key="N", dx=0, dy=DRAG):
-    """Where the drag to the radial box ``key`` ends: (dx, dy) from the press (step 193: the ring stays at the press
+    """Where the drag to the radial box ``key`` ends: (dx, dy) from the press (the ring stays at the press
     point wherever the list goes)."""
     return C["x"] + dx, C["y"] + dy
 
@@ -109,7 +109,7 @@ def s_back_release():
 @step
 def s_object_mode():
     check("RMB in component mode, drag NE = Object Mode", bpy.context.mode == 'OBJECT')
-    slot = bpy.context.scene.transform_orientation_slots[1]   # the Move tool's axis (step 59)
+    slot = bpy.context.scene.transform_orientation_slots[1]   # the Move tool's axis
     slot.type = 'LOCAL'
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"])
     ev('W', 'PRESS')
@@ -141,7 +141,7 @@ def s_w_key_release():
 
 @step
 def s_w_done():
-    slot = bpy.context.scene.transform_orientation_slots[1]   # the Move tool's axis (step 59)
+    slot = bpy.context.scene.transform_orientation_slots[1]   # the Move tool's axis
     check(f"W + LMB drag west = World orientation (got {slot.type})", slot.type == 'GLOBAL')
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"])
     for o in bpy.context.view_layer.objects:

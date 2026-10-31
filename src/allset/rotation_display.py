@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Quaternion / axis-angle rotations shown as Rotate X / Y / Z (step 221, Issue #131).
+"""Quaternion / axis-angle rotations shown as Rotate X / Y / Z (Issue #131).
 
 A received rig keeps its rotation mode (Rigify / FBX bones are
 QUATERNION) — the Channel Box *shows* Euler and *writes* the quaternion back. Maya's rotation channels are always
@@ -7,7 +7,7 @@ Rotate X / Y / Z. Shown values are converted compatible with the last value
 shown for that node (``Quaternion.to_euler(order, compat)``): a typed 270 comes back as 270, not -90 (2000 random
 inputs within 0.002 deg). The last shown Euler is kit state, never written to the file.
 
-``euler_curve`` is the same compat chain over a sequence of quaternions — the rule the rig FBX export (step 222)
+``euler_curve`` is the same compat chain over a sequence of quaternions — the rule the rig FBX export
 uses to rebuild rotation curves.
 """
 

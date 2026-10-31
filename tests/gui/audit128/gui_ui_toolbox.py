@@ -1,6 +1,6 @@
 """Audit 128 (UI lane), GitHub issue #3: double-clicking a Tool Box tool icon (Maya: opens that tool's Tool
 Settings Tool Box) should open the Tool Settings dock. event_simulate can't send
-DOUBLE_CLICK (step 73), so this sends two press/release pairs on the Move icon in one tick (and,
+DOUBLE_CLICK, so this sends two press/release pairs on the Move icon in one tick (and,
 as a second try, in two ticks 0.2 s apart). PASSES when the Tool Settings dock is shown afterwards.
 Screenshot: audit128_toolbox_dbl.png."""
 

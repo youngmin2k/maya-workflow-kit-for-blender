@@ -1,8 +1,8 @@
-"""QA step 240, activity C: toggle state invariants (UI state == Blender setting == effect), pairwise matrix and
+"""Release QA, activity C: toggle state invariants (UI state == Blender setting == effect), pairwise matrix and
 seeded random walk. Engine module (no test_* functions); the runner modules are tools/qa/qa_toggles*.py.
 
 Every toggle is read the way its draw code reads it and changed through the same kit function / operator the
-button calls (called like a UI button: ``op('EXEC_DEFAULT', True, ...)`` = undo depth 0, step 147).
+button calls (called like a UI button: ``op('EXEC_DEFAULT', True, ...)`` = undo depth 0).
 
 Oracles (qa_plan_240 3.1-1 internal consistency, 3.1-2 metamorphic):
   I1  ui == rna            after every action (per toggle ``check``)
@@ -262,7 +262,7 @@ class Step(Toggle):
         if u != 'OFF' and not stepping:
             out.append(f"{self.name}: shows {u} but Blender increment snap is not active for it")
         if u != 'OFF':
-            # step 263 (#153): Relative / Absolute is per tool; Blender's one flag takes this tool's mode when a
+            # #153: Relative / Absolute is per tool; Blender's one flag takes this tool's mode when a
             # transform of the tool starts (snap_align.apply_tool) and the other tools keep showing their own
             others = {k: snap_align.step_snap_mode(t, k) for k in snap_align.STEP_FLAGS if k != self.kind}
             saved = t.use_snap_grid_absolute

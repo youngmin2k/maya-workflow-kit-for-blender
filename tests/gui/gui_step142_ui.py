@@ -1,4 +1,4 @@
-"""Step 142 lane UI in a real window. Run at the default 1.25, ``--ui-scale 0.8`` (1.0)
+"""In a real window. Run at the default 1.25, ``--ui-scale 0.8`` (1.0)
 and ``--ui-scale 1.2`` (1.5) in the 1600 x 900 test window.
 
 #78: a new Maya scene fits the tab stack to Maya's Channel Box width (vertical tab strip on its right edge, no tab
@@ -21,7 +21,7 @@ from sim import (MODULE, check, dock_area, dock_region, dock_tab_point, ev, load
                  screenshot, setup, step, tap, view3d, win)
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
-os.environ["ALLSET_FIT_WARP"] = "1"   # the cursor fit is off in event-simulated sessions unless asked for (step 99)
+os.environ["ALLSET_FIT_WARP"] = "1"   # the cursor fit is off in event-simulated sessions unless asked for
 C = {}
 
 
@@ -115,7 +115,7 @@ def s_cb_width():
     main, _r = view3d()
     C["cb"] = dock.width
     check(f"Channel Box raised: the stack is Maya-narrow at UI scale {s:.2f} ({dock.width} px, rule "
-          f"{tb.dock_width(s, prefs().pixel_size)}, Maya {round(tb.DOCK_MAYA_PX * s)}; step 135 had "
+          f"{tb.dock_width(s, prefs().pixel_size)}, Maya {round(tb.DOCK_MAYA_PX * s)}; the old fixed width was "
           f"{ {1.0: 466, 1.25: 574, 1.5: 672}.get(round(s, 2), '?') })", want is not None and abs(dock.width - want) <= 3)
     check(f"the viewport takes the rest ({main.width} px, its right edge {main.x + main.width} / dock {dock.x})",
           abs(main.x + main.width - dock.x) <= 8)

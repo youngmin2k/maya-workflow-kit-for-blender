@@ -1,4 +1,4 @@
-"""Step 254 (#170 #172): the UV Editor froze on dense meshes in the Maya layout — the UV HUD statistics and the shell /
+"""#170 #172: the UV Editor froze on dense meshes in the Maya layout — the UV HUD statistics and the shell /
 texture borders were recomputed in Python on every redraw after a mesh or selection change (1.2-1.9 s each on a
 48 400-face sphere), and Cut UV Edges scanned the whole shell per cut vertex (36 s).
 

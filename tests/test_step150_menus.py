@@ -1,4 +1,4 @@
-"""Step 150 lane A (#96): Maya Graph Editor View / Show items — Auto Frame, Auto Frame Time, Curve Name, Show >
+"""Lane A (#96): Maya Graph Editor View / Show items — Auto Frame, Auto Frame Time, Curve Name, Show >
 Clear Below / Subdiv Objects mapped (ui/graph_view.py); the rest greyed with a one-line notice."""
 
 from importlib import import_module
@@ -23,12 +23,12 @@ MAPPED = {
     f"{GE}/View/Curve Name/Never": ("prop", "addon_prefs.graph_curve_names", {"value": 'NEVER'}),
     f"{GE}/View/Curve Name/Active Only": ("prop", "addon_prefs.graph_curve_names", {"value": 'ACTIVE'}),
 }
-GREYED_VIEW = ("Undo View Change", "Redo View Change", "Clip Time", "Show Results",  # step 198: Show Buffer Curves works
+GREYED_VIEW = ("Undo View Change", "Redo View Change", "Clip Time", "Show Results",  # Show Buffer Curves works
                "Show Play Range Shades", "Lock Play Range Shades", "Highlight Affected Curves", "Keys/Never",
                "Key View/Detailed", "Key View/Simple", "Time Ruler Placement/Top", "Time Ruler Placement/Bottom",
                "Theme/Dark", "Theme/Light", "Theme/TRS Distinct", "Theme/Colorblind Compatible", "Theme/Classic",
                "Theme/Export Current Theme", "Simple Toolbar")
-# step 203: IkHandles / Sets / Characters and the Hidden / Driven by / User Defined filters work (test_step203_list)
+# IkHandles / Sets / Characters and the Hidden / Driven by / User Defined filters work (test_step203_list)
 GREYED_SHOW = ("Objects/Asset", "Objects/Characters", "Objects/Clips",
                "Objects/MASH", "Attributes/Published", "Show Selected Type(s)", "Select Attributes...", "Create Entry...",
                "Delete Entry...", "Show Auxiliary Nodes", "Auxiliary Nodes...")
@@ -87,7 +87,7 @@ def _view(region):
 def test_show_items_mapped():
     for ed in ("Graph Editor", "Dope Sheet"):
         assert menu_map.spec(f"{ed}/Show/Objects/Clear Below")[1] == "allset.graph_show_clear"
-        assert menu_map.spec(f"{ed}/Show/Attributes/Clear Below")[1] == "allset.graph_attr_clear"   # step 203
+        assert menu_map.spec(f"{ed}/Show/Attributes/Clear Below")[1] == "allset.graph_attr_clear"
         assert menu_map.spec(f"{ed}/Show/Objects/Subdiv Objects") == (
             "prop", "space_data.dopesheet.show_meshes", {})
 
@@ -118,7 +118,7 @@ def _canvas_values(w, area, region):
 
 
 def test_auto_frame_frames_the_new_selection():
-    """Maya Auto Frame (step 281): the value axis is refit to the curves shown (25 % margins), the time range stays."""
+    """Maya Auto Frame: the value axis is refit to the curves shown (25 % margins), the time range stays."""
     a, b = _scene()
     w, area, region = _graph()
     p = _prefs()
@@ -219,8 +219,8 @@ def test_curve_names_drawn_per_mode():
 def test_still_greyed_items_have_a_notice():
     paths = [f"{GE}/View/{i}" for i in GREYED_VIEW] + [f"{ed}/Show/{i}" for ed in (GE, "Dope Sheet")
                                                          for i in GREYED_SHOW]
-    paths.remove(f"{GE}/Show/Objects/Characters")      # step 197: character nodes in the kit Graph Editor outliner
-    paths.remove("Dope Sheet/Show/Objects/Characters")  # step 203: their members in the Dope Sheet
+    paths.remove(f"{GE}/Show/Objects/Characters")      # character nodes in the kit Graph Editor outliner
+    paths.remove("Dope Sheet/Show/Objects/Characters")  # their members in the Dope Sheet
     leaves = {p for p, _it in menu_sets.iter_items()}
     for path in paths:
         assert path in leaves, path
@@ -231,4 +231,4 @@ def test_still_greyed_items_have_a_notice():
     for item in GREYED_VIEW:
         if not item.startswith("Theme/"):
             assert f"{GE}/View/{item}" in notices.NOTICES, item
-    assert f"{GE}/View/Show Buffer Curves" in menu_map.MAP      # step 198: kit buffer curves
+    assert f"{GE}/View/Show Buffer Curves" in menu_map.MAP      # kit buffer curves

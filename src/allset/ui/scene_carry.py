@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's tool settings and UI don't come from the scene file (step 138, issues #63 #64).
+"""Maya's tool settings and UI don't come from the scene file (issues #63 #64).
 
 Global tool settings (#64): Maya keeps each tool context's settings in its preferences
 and symmetry / soft select in global options, so they survive File > New Scene / Open. Blender keeps them per scene (``Scene.tool_settings``, the transform orientation
-slots, the kit's scene property groups), and a new / opened file brings its own. Like step 93's selection masks
+slots, the kit's scene property groups), and a new / opened file brings its own. Like the selection masks
 (``ui/status_line._masks_before_load``), load_pre reads them from the current scene and load_post writes them into
 every scene of the loaded file — every load: File > Open, Open Recent, Revert, New Scene (the kit's startup.blend) and
 Blender's File > New. What is carried is ``TOOL_SETTINGS`` / ``SCENE_GROUPS`` / ``SCENE_PROPS`` / the orientation
@@ -218,7 +218,7 @@ def maya_workspace():
 
 def show_maya_layout(window):
     """The Maya layout in ``window``: the file's own Maya workspace, else the bundled one appended. Returns the
-    workspace or None. Step 93's selection masks (applied by load_post to the file's views) are copied onto the
+    workspace or None. The selection masks (applied by load_post to the file's views) are copied onto the
     new views too."""
     from .. import switch
     from . import status_line

@@ -1,4 +1,4 @@
-"""Step 25 in a real UI: X hold + Move gizmo drag snaps to whole Maya units (1 cm) in the
+"""In a real UI: X hold + Move gizmo drag snaps to whole Maya units (1 cm) in the
 Maya Workflow Kit layout and with Maya Units on, to whole metres in the factory scene; the grid
 shows in the Maya Workflow Kit persp view (screenshot)."""
 
@@ -111,7 +111,7 @@ def s_template_drag():
 @step
 def s_template_done():
     check_snap("Maya Workflow Kit layout", "cm")
-    # Step 45: the view draws the Maya grid (Blender floor off), its lines are every Maya unit, so the
+    # the view draws the Maya grid (Blender floor off), its lines are every Maya unit, so the
     # snapped copy sits on a grid line inside the 12-unit grid; the grid was drawn (draw time > 0).
     grid = import_module(MODULE + ".ui.maya_grid")
     space = area3d().spaces.active

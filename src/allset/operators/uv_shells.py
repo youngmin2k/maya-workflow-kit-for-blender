@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Editor shell commands (step 155).
+"""Maya UV Editor shell commands.
 
 Shell = the step-66 island rule (`uv_tools.islands`, shared UV coordinates); any selected UV / edge / face of a shell picks
 the whole shell for the shell commands. A "UV" = the loops of one vertex that share

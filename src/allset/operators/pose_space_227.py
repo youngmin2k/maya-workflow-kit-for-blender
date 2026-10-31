@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 227: Pose Space Deformation (Pose Interpolator, Pose Editor).
+"""Pose Space Deformation (Pose Interpolator, Pose Editor).
 
 Maya: Deform > Pose
 Space Deformation > Create Pose Interpolator on a joint makes ``<joint>_poseInterpolator`` (driver = the joint, factory
@@ -87,7 +87,7 @@ def weight(interp, name):
 
 def _axis_local(pb, axis):
     """Tip offset in the bone's tail frame (BONE parenting puts a child at the tail): the twist axis tip at the
-    bone's length from the head. Maya joint X / Y / Z = bone Y / Z / X (step 57)."""
+    bone's length from the head. Maya joint X / Y / Z = bone Y / Z / X."""
     length = pb.bone.length
     if axis == 0:
         return Vector((0.0, 0.0, 0.0))
@@ -291,7 +291,7 @@ def add_shape(context, interp, name, mesh):
 
 
 def _blend_shape_name():
-    """The Key datablock = Maya's blendShape node (``blendShapeN``, one past the highest; step 213)."""
+    """The Key datablock = Maya's blendShape node (``blendShapeN``, one past the highest)."""
     from . import naming
     return f"blendShape{naming.next_number('blendShape', {k.name for k in bpy.data.shape_keys})}"
 

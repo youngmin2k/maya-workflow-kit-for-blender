@@ -1,4 +1,4 @@
-"""Step 149 #91 in the Maya Workflow Kit layout: the lead's green selection wire follows a
+"""#91 in the Maya Workflow Kit layout: the lead's green selection wire follows a
 skinned cylinder while the scene plays and after it stops. Shots with ``--shots``.
 
 Maya-unit chain (0,8,0) (0,4,0) (0,0,0) + the factory cylinder scaled (0.5, 4, 0.5), Bind Skin, joint2 Rotate X 0 at

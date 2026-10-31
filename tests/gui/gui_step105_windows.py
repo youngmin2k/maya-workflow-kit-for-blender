@@ -1,4 +1,4 @@
-"""Step 105 in a real UI: the Maya Workflow Kit layout, pCube1 with lambert1 + a Blinn, then Windows > Rendering Editors >
+"""In a real UI: the Maya Workflow Kit layout, pCube1 with lambert1 + a Blinn, then Windows > Rendering Editors >
 Hypershade, Render > Render Settings, Windows > General Editors > Script Editor in new windows -> Maya menu bars,
 Browser tabs, Blender's Render tab, history over MEL / Python input (screenshots with ALLSET_GUI_SHOTS)."""
 
@@ -84,7 +84,7 @@ def hs_window():
 @step
 def s_hs():
     C.setdefault("hs_wait", 0)
-    if hs_window() is None and C["hs_wait"] < 40:       # the layout is split one area per tick (step 131)
+    if hs_window() is None and C["hs_wait"] < 40:       # the layout is split one area per tick
         C["hs_wait"] += 1
         sys.modules["sim"]._steps.insert(0, s_hs)
         redraw()

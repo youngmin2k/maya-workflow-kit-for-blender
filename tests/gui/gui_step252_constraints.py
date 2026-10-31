@@ -1,4 +1,4 @@
-"""Step 252 (#168) in a real UI, in a Maya user's hand order: two locators turned 30 / 150 deg and a cube ->
+"""#168: in a real UI, in a Maya user's hand order: two locators turned 30 / 150 deg and a cube ->
 Constrain > Orient (targets first, the cube last) -> Channel Box INPUTS orientConstraint1 shows Interp Type = Average
 and the cube is turned 90 deg -> click the Interp Type drop-down, pick Shortest (S) -> BW1 = 3 -> Ctrl+Z ->
 save, open -> Constrain > Aim with World up type Object up. Shots: gui_step252_*.png."""
@@ -144,7 +144,7 @@ def s_shortest():
     check(f"picked Shortest ({ci().mode_of(cube(), g)})", ci().mode_of(cube(), g) == ci().SHORTEST)
     check("Shortest needs no kit blend (Blender influence only)", ci().blend_constraint(cube(), g) is None)
     w = cm().weights(cube(), g)
-    cube()[w[1][0]] = 3.0                                   # BW1 = 3 (typed in the Channel Box: step 38)
+    cube()[w[1][0]] = 3.0                                   # BW1 = 3 (typed in the Channel Box)
     cube().update_tag()
     redraw()
 

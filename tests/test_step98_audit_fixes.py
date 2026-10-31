@@ -1,4 +1,4 @@
-"""Step 98: kit bug the audit-7 session found — the Channel Box depsgraph handler raised AttributeError when the context
+"""Kit bug the audit-7 session found — the Channel Box depsgraph handler raised AttributeError when the context
 (a File Browser / Preferences window) has no ``active_object`` member."""
 
 from importlib import import_module
@@ -28,4 +28,4 @@ def test_lead_without_active_object_member():
     assert cb.pose_armature(ctx) is None
     assert cb.placing_joints(ctx) is False
     assert cb.lead(ctx) == ob, cb.lead(ctx)
-    cb.rebuild_rows(ctx)   # raised AttributeError in the depsgraph handler before step 98
+    cb.rebuild_rows(ctx)   # raised AttributeError in the depsgraph handler before

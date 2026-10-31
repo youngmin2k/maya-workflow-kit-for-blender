@@ -1,4 +1,4 @@
-"""Step 183 (#82): a click on the option box ❒ of a Maya menu item opens its option window; a click on the label
+"""#82: a click on the option box ❒ of a Maya menu item opens its option window; a click on the label
 runs the command.
 
 1. Geometry: menus opened from the Maya menu bar (File, Edit, Create, Modify, Display, Edit Mesh, Help) — the
@@ -159,7 +159,7 @@ def geometry_case(label):
                     rights.append(xs.max() + max(0, int(left) - 12))
             ml, mr = sorted(lefts)[len(lefts) // 2], sorted(rights)[len(rights) // 2]
             # 5.x: areas beside a menu (the Tool Box column, the outliner) share the menu back colour, so the scan
-            # can only read the menu wider than it is, never narrower (step 200: Create left 92 / 104, File right
+            # can only read the menu wider than it is, never narrower (Create left 92 / 104, File right
             # 355 / 345, screenshots show the model's edges); the ❒ cell below is the click check that matters
             wider_ok = True
             check(f"{label}: menu left model {left:.0f} / screen {ml} (tol 4 px)",

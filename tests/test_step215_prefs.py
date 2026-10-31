@@ -1,4 +1,4 @@
-"""Step 215 (#121): Maya's Preferences window (ui/maya_prefs.py, ui/maya_prefs_data.py).
+"""#121: Maya's Preferences window (ui/maya_prefs.py, ui/maya_prefs_data.py).
 
 Category tree = Maya 2022's (38 rows, Interface / Display / Settings /
 Security / Modules / Applications). Rows are kit add-on preferences, scene values, read-only Blender preferences (the

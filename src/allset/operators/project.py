@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya projects, scene saving and references (step 69).
+"""Maya projects, scene saving and references.
 
 Blender has no project system. A Maya Workflow Kit project is a root folder with Maya's standard sub-folders
 (Project Window) and a marker file; the current project and Recent Projects live in
@@ -12,8 +12,7 @@ the add-on preferences (like Maya keeps the workspace in its prefs). Effects:
 - opening a ``.blend`` under ``<root>/scenes`` of a marked project makes it the current project.
 
 Create Reference (Ctrl+R) = link the other file's scene contents and make them editable with a library override
-(Maya reference edits), under a ``<namespace>`` collection with ``ns:`` name prefixes (Blender has no namespaces);
-step 69.
+(Maya reference edits), under a ``<namespace>`` collection with ``ns:`` name prefixes (Blender has no namespaces).
 """
 
 import json
@@ -228,7 +227,7 @@ class ALLSET_OT_project_window(bpy.types.Operator):
     bl_idname = "allset.project_window"
     bl_label = "Project Window"
 
-    # The Blender notice is this field's tooltip, not a paragraph in the window (step 106).
+    # The Blender notice is this field's tooltip, not a paragraph in the window.
     name: StringProperty(name="Current Project", default=DEFAULT_NAME, description=NOTICE)
     location: StringProperty(name="Location", subtype='DIR_PATH')
 
@@ -294,8 +293,8 @@ class ALLSET_MT_recent_projects(bpy.types.Menu):
 
 def browse_from_later(folder, op_idname="WM_OT_open_mainfile", tries=40):
     """Point the file browser that ``op_idname`` opens at ``folder`` once it is there (a few ticks later).
-    Blender's Open dialog starts at the most recent file whatever ``filepath`` it is given (step 97:
-    Ctrl+O goes to Documents), unlike Save As."""
+    Blender's Open dialog starts at the most recent file whatever ``filepath`` it is given (Ctrl+O
+    goes to Documents), unlike Save As."""
     left = [tries]
 
     def tick():
@@ -467,7 +466,7 @@ class ALLSET_OT_create_reference(bpy.types.Operator):
             return {'CANCELLED'}
         ns = (self.namespace.strip() or os.path.splitext(os.path.basename(path))[0]).replace(":", "_")
         from . import references
-        node = references.new_node_name(ns, context.scene)       # Maya: propRN, then propRN1 (step 209)
+        node = references.new_node_name(ns, context.scene)       # Maya: propRN, then propRN1
         order = references.next_order(context.scene)
         ns = unique_namespace(ns, context.scene)
         try:

@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""GPU drawing of the marking menu engine and the hotbox (step 9).
+"""GPU drawing of the marking menu engine and the hotbox.
 
 POST_PIXEL draw handlers per editor type and region type, added once at register.
-Maya's menus float over the whole window (step 52): the modal operators work in the
+Maya's menus float over the whole window: the modal operators work in the
 coordinates of the region they were invoked in, and every region of that window draws
 the same picture moved by its offset from that region (each region clips its own
 part), so menus also cover sidebars, toolbars and neighbouring editors. Other
@@ -28,16 +28,15 @@ ACTIVE = {}
 # Editors the menus open in (marking menus, hotbox) ...
 SPACES = (bpy.types.SpaceView3D, bpy.types.SpaceOutliner, bpy.types.SpaceGraphEditor,
           bpy.types.SpaceDopeSheetEditor, bpy.types.SpaceNodeEditor, bpy.types.SpaceImageEditor)
-# ... and every editor they may cover (step 52).
+# ... and every editor they may cover.
 COVER_SPACES = SPACES + tuple(getattr(bpy.types, n) for n in (
     "SpaceProperties", "SpaceNLA", "SpaceSequenceEditor", "SpaceClipEditor", "SpaceTextEditor",
     "SpaceConsole", "SpaceInfo", "SpaceFileBrowser", "SpaceSpreadsheet", "SpacePreferences")
     if hasattr(bpy.types, n))
-# 'HUD' = the Adjust Last Operation panel, drawn over the view: without it the RMB list went under it (step 91).
+# 'HUD' = the Adjust Last Operation panel, drawn over the view: without it the RMB list went under it.
 REGION_TYPES = ('WINDOW', 'UI', 'TOOLS', 'HEADER', 'TOOL_HEADER', 'CHANNELS', 'FOOTER', 'HUD')
 
-# Maya-style greys and selection blue #5285A6. Menu boxes and the list body: #525252
-# (step 52).
+# Maya-style greys and selection blue #5285A6. Menu boxes and the list body: #525252.
 BG = (0x52 / 255, 0x52 / 255, 0x52 / 255, 1.0)
 DIVIDER = (0x3a / 255, 0x3a / 255, 0x3a / 255, 1.0)
 BG_HOVER = (0.32, 0.52, 0.65, 1.0)
@@ -56,13 +55,13 @@ def ui_scale():
 
 def font_size():
     # Menu text: Segoe UI 11 px = Blender's 11 pt
-    # widget text at an effective scale of 1.0 (step 44).
+    # widget text at an effective scale of 1.0.
     # blf font 0 is the interface font, so it is Segoe UI when view.font_path_ui points there.
     return max(8, round(11 * ui_scale()))
 
 
 # Submenu arrow: drawn as a triangle, not the "▸" glyph. A UI font without it (Segoe UI, the Maya Font
-# preference) makes blf.dimensions return millions of pixels (step 52: the RMB list spanned the view).
+# preference) makes blf.dimensions return millions of pixels (the RMB list spanned the view).
 ARROW = " ▸"
 
 
@@ -159,7 +158,7 @@ CHECK = (0.45, 0.72, 0.95, 1.0)
 
 
 def checked(action):
-    """On/off state of a toggle item (None for other items); step 26."""
+    """On/off state of a toggle item (None for other items)."""
     if not engine.is_toggle(action):
         return None
     op, props = action
@@ -175,13 +174,13 @@ def checked(action):
         if op == "allset.symmetry":
             from ..operators import symmetry
             return symmetry.item_state(props["mode"])
-        if op == "allset.pivot_option":          # pivot edit menu check boxes (step 94)
+        if op == "allset.pivot_option":          # pivot edit menu check boxes
             from ..operators import pivot_menu
             return pivot_menu.option(props["option"])
-        if op == "allset.mm_camera_based":        # Camera-Based Selection = select-through off (step 136)
+        if op == "allset.mm_camera_based":        # Camera-Based Selection = select-through off
             from .. import preferences
             return not preferences.get(bpy.context).select_through
-        if op == "allset.component_mask":        # Shift+Q check boxes = the mesh select modes (step 93)
+        if op == "allset.component_mask":        # Shift+Q check boxes = the mesh select modes
             mask = bpy.context.scene.tool_settings.mesh_select_mode
             return bool(mask[engine.MASK_CHECKS.index(props["kind"])])
         from ..operators import manip
@@ -193,7 +192,7 @@ def draw_session(s, now):
     if not s.visible(now):
         _line(s.trail, LINE, 2.0)  # a quick mark: only the stroke
         return
-    layers = s.layers()   # a list row's open cascade is drawn over the menu it hangs from (step 129)
+    layers = s.layers()   # a list row's open cascade is drawn over the menu it hangs from
     _lay, (cx, cy), _hover = layers[0]
     _circle(cx, cy, s.params.dead, LINE)
     _line([(cx, cy), s.pos], LINE, 1.5)
@@ -213,7 +212,7 @@ def _draw_layout(lay, cx, cy, hover):
         radial = it.kind == "radial"
         if radial:
             # the 1 px border on the box's outer pixels: a line on the rect's sides drew a box 1 px too tall / wide
-            # (22 px instead of 21, step 151)
+            # (22 px instead of 21)
             r = it.rect
             _outline((r[0] + 0.5, r[1] + 0.5, r[2] - 0.5, r[3] - 0.5), EDGE, cx, cy)
             text = engine.Layout.ring_text(it.label, it.action)
@@ -252,7 +251,7 @@ def _draw_list_body(lay, cx, cy):
         _outline(body, EDGE, cx, cy)
         for a, b in zip(rows, rows[1:]):
             # a Maya divider sits between the rows (their list indices skip it); a gap where a row only stepped over an
-            # area border (step 136) gets no line
+            # area border gets no line
             if isinstance(a.key, int) and isinstance(b.key, int) and b.key - a.key > 1:
                 y = (a.rect[1] + b.rect[3]) / 2 + cy
                 _line([(body[0] + cx + 4, y), (body[2] + cx - 4, y)], DIVIDER, 1.0)
@@ -306,7 +305,7 @@ def activate(window, region, **state):
 
 
 def _draw_last():
-    """Move the handlers to the end of every region's draw list (step 136, #56): Blender draws a region's
+    """Move the handlers to the end of every region's draw list (#56): Blender draws a region's
     POST_PIXEL handlers in the order they were added, and kit handlers registered after ``marking`` (Time Slider
     numbers / key ticks, Range Slider, shelf, Outliner set rows) drew over the open menu
     (Time Slider frame numbers on the list)."""
@@ -315,7 +314,7 @@ def _draw_last():
         register_handlers()
 
 
-# Area borders (step 136, #56): Blender draws them after every region (ED_screen_draw_edges), so no POST_PIXEL
+# Area borders (#56): Blender draws them after every region (ED_screen_draw_edges), so no POST_PIXEL
 # handler can draw over them. In the Maya Workflow Kit layout at UI scale 1.0 and 1.25
 # areas are 3 px apart and a 2 px rim is drawn over each area's
 # edge at both scales (the border width preference is in pixels, it does not follow the UI scale). +1 px for the
@@ -386,7 +385,7 @@ def window_bounds(window, region):
 
 
 def menu_up():
-    """True while a marking menu or the hotbox is drawn (step 197, #104): kit overlays that Maya's hotbox covers
+    """True while a marking menu or the hotbox is drawn (#104): kit overlays that Maya's hotbox covers
     (in-view messages, the In-View Editor box) skip their draw then."""
     return bool(ACTIVE)
 

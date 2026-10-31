@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya option windows (the □ option box of a menu item), step 103.
+"""Maya option windows (the □ option box of a menu item).
 
 Maya opens a window per command with its fields (labels right-aligned, field + slider), an Edit menu (Save Settings /
 Reset Settings) and three buttons: the command ("Create", "Extrude", ...), Apply (run, keep the window) and Close; the
@@ -52,7 +52,7 @@ class Window:
                  click_saved=True):
         self.key, self.title, self.action = key, title, action
         # a plain menu click runs the window's command with the saved values (Maya); False = the click keeps running
-        # the menu's own action (Display > Grid toggles the grid, its window only sets how it looks; step 152)
+        # the menu's own action (Display > Grid toggles the grid, its window only sets how it looks)
         self.click_saved = click_saved
         self.apply_text = apply_text  # Maya's middle button (Offset Edge Loop: "Enter Tool")
         self.match = match            # (operator id, props subset) of the menu action this window belongs to
@@ -75,7 +75,7 @@ def _k(context):
 
 
 _AXES = {"X": (1.0, 0.0, 0.0), "Y": (0.0, 1.0, 0.0), "Z": (0.0, 0.0, 1.0)}
-# option window field -> Maya creation node attribute (step 129: the window fills the node, operators/prim_history.py)
+# option window field -> Maya creation node attribute (the window fills the node, operators/prim_history.py)
 _NODE_FIELDS = {
     'CUBE': {"width": "width", "height": "height", "depth": "depth", "width_div": "subdivisionsWidth",
              "height_div": "subdivisionsHeight", "depth_div": "subdivisionsDepth"},
@@ -146,7 +146,7 @@ def _last_constraint(context):
 
 
 def _group_axes(cons, ctype, v):
-    """Constraint axes on every Blender constraint of a kit multi-target group (step 226): the parent group's Copy
+    """Constraint axes on every Blender constraint of a kit multi-target group: the parent group's Copy
     Location members take Translate, its Copy Rotation members Rotate (Maya Z = Blender -Y, Maya Y = Blender Z)."""
     for con in cons:
         if ctype == 'CHILD_OF':
@@ -222,14 +222,14 @@ def _run_combine(context, v):
 
 
 def _run_smooth(context, v):
-    """Maya Smooth with the window's values: real Catmull-Clark geometry (operators/poly_maya.py, step 139)."""
+    """Maya Smooth with the window's values: real Catmull-Clark geometry (operators/poly_maya.py)."""
     if context.mode != 'EDIT_MESH' and not any(o.type == 'MESH' for o in context.selected_objects):
         raise RuntimeError("Select a mesh first.")
     return bpy.ops.allset.smooth('EXEC_DEFAULT', divisions=v["levels"])
 
 
 def _run_bevel(context, v):
-    # Maya polyBevel3 with the window's values (step 139: allset.bevel, editable afterwards like Ctrl+B)
+    # Maya polyBevel3 with the window's values (allset.bevel, editable afterwards like Ctrl+B)
     fraction = v["offset_type"].startswith("Fractional")
     kw = dict(segments=v["segments"], depth=max(-1.0, min(1.0, v["depth"])), offset_as_fraction=fraction)
     if fraction:
@@ -264,7 +264,7 @@ def _run_set_key(context, v):
 
 
 def _run_bake(context, v):
-    # step 217: Maya's bakeResults rules (operators/bake_maya.py). Keep unbaked keys = keys outside the range,
+    # Maya's bakeResults rules (operators/bake_maya.py). Keep unbaked keys = keys outside the range,
     # never constraint deletion
     return bpy.ops.allset.bake_simulation(
         'EXEC_DEFAULT', hierarchy_below=v["hierarchy"] == "Below", use_time_slider=v["time_range"] == "Time Slider",
@@ -301,7 +301,7 @@ def _run_uv_planar(context, v):
 
 
 def _run_uv_auto(context, v):
-    # Maya polyAutoProjection in bmesh (operators/uv_tools.auto_project, step 139); handles object mode itself.
+    # Maya polyAutoProjection in bmesh (operators/uv_tools.auto_project); handles object mode itself.
     return bpy.ops.allset.uv_automatic('EXEC_DEFAULT', planes=v["planes"], spacing=v["spacing"])
 
 
@@ -310,7 +310,7 @@ def _run_new_scene(context, v):
 
     def later():
         from .. import first_start
-        first_start.new_maya_scene()     # the Maya layout file bundled in the extension (step 130)
+        first_start.new_maya_scene()     # the Maya layout file bundled in the extension
         scene = bpy.context.scene
         us = scene.unit_settings
         if not values["keep_units"]:
@@ -326,8 +326,8 @@ def _run_new_scene(context, v):
         scene.frame_preview_start, scene.frame_preview_end = int(values["play_start"]), int(values["play_end"])
         scene.frame_current = int(values["play_start"])
         return None
-    # Maya's Save Changes prompt first (step 138, #57); never load a file inside a running operator
-    # (step 42): save_prompt runs it from a timer
+    # Maya's Save Changes prompt first (#57); never load a file inside a running operator
+    #: save_prompt runs it from a timer
     from ..ui import save_prompt
     save_prompt.ask(context, later)
     return {'FINISHED'}
@@ -476,29 +476,29 @@ WINDOWS = [
 
 
 def _extend():
-    # step 140: more windows live in their own modules (they import F / Window from here); Bind Skin and Duplicate
+    # more windows live in their own modules (they import F / Window from here); Bind Skin and Duplicate
     # Special moved there with every Maya field (option_windows_rig.bind_skin_maya / option_windows_edit)
     from . import (option_windows_curves, option_windows_deform, option_windows_display, option_windows_edit,
                    option_windows_modify, option_windows_render, option_windows_rig, option_windows_surfaces,
                    option_windows_visualize, option_windows_mesh_display)
     WINDOWS.extend(option_windows_rig.WINDOWS + option_windows_edit.WINDOWS + option_windows_deform.WINDOWS
                    + option_windows_display.WINDOWS + option_windows_render.WINDOWS + option_windows_curves.WINDOWS
-                   + option_windows_modify.WINDOWS     # step 168
-                   + option_windows_visualize.WINDOWS   # step 171
-                   + option_windows_surfaces.WINDOWS    # step 181
-                   + option_windows_mesh_display.WINDOWS)   # step 189
+                   + option_windows_modify.WINDOWS
+                   + option_windows_visualize.WINDOWS
+                   + option_windows_surfaces.WINDOWS
+                   + option_windows_mesh_display.WINDOWS)
     from . import option_windows_misc196, option_windows_prims
-    WINDOWS.extend(option_windows_prims.WINDOWS + option_windows_misc196.WINDOWS)      # step 196
+    WINDOWS.extend(option_windows_prims.WINDOWS + option_windows_misc196.WINDOWS)
     from . import option_windows_197
-    WINDOWS.extend(option_windows_197.WINDOWS)      # step 197: Mesh > Cleanup...
+    WINDOWS.extend(option_windows_197.WINDOWS)      # Mesh > Cleanup...
     from . import deformers_205a, deformers_205b, pins_205
-    WINDOWS.extend(deformers_205a.windows() + deformers_205b.windows() + pins_205.windows())   # step 205
+    WINDOWS.extend(deformers_205a.windows() + deformers_205b.windows() + pins_205.windows())
     from . import option_windows_199
-    WINDOWS.extend(option_windows_199.WINDOWS)      # step 199: Skin / Constrain tools 2
+    WINDOWS.extend(option_windows_199.WINDOWS)      # Skin / Constrain tools 2
     from . import option_windows_curves207
-    WINDOWS.extend(option_windows_curves207.WINDOWS)    # step 207: Bend / Curl / Scale Curvature
+    WINDOWS.extend(option_windows_curves207.WINDOWS)    # Bend / Curl / Scale Curvature
     from . import motion_path_228
-    WINDOWS.extend(motion_path_228.windows())    # step 228: Attach to Motion Path
+    WINDOWS.extend(motion_path_228.windows())    # Attach to Motion Path
 
 
 _extend()
@@ -526,7 +526,7 @@ def find(action):
 
 def find_path(path):
     """The option window of a Maya menu path (explicit ``paths`` first, then its menu twin's, then its action). A twin
-    (``menu_map.TWINS``) runs the same Maya command, so its box opens the same window (step 211: nHair > Modify Curves
+    (``menu_map.TWINS``) runs the same Maya command, so its box opens the same window (nHair > Modify Curves
     Bend / Curl / Scale Curvature = the Curves windows, audit 16 quant)."""
     from ..ui import menu_map
     source = menu_map.TWINS.get(path)
@@ -610,7 +610,7 @@ def _menu_path(window):
 
 
 def _record(window, context, res):
-    """A window command that ran is Maya's last command (G repeats it with the saved values, step 175)."""
+    """A window command that ran is Maya's last command (G repeats it with the saved values)."""
     if not window.click_saved or isinstance(res, str) or not (isinstance(res, set) and 'FINISHED' in res):
         return
     from ..ui import menu_map
@@ -626,7 +626,7 @@ def _apply_update(window):
     def update(self, context):
         if not self.apply_now:
             return
-        apply_run = getattr(window, "apply_run", None)   # a window whose Apply isn't its command (step 171)
+        apply_run = getattr(window, "apply_run", None)   # a window whose Apply isn't its command
         if apply_run is not None:
             res = apply_run(context, {**window.defaults(), **values_of(window, self)})
         else:
@@ -735,7 +735,7 @@ def _make(window):
 
     return type(f"ALLSET_OT_opt_{window.key}", (bpy.types.Operator,), {
         "__annotations__": ann, "bl_idname": window.idname, "bl_label": window.title,
-        "bl_description": f"Maya {window.title}", "bl_options": {'UNDO'},    # no redo panel (step 147)
+        "bl_description": f"Maya {window.title}", "bl_options": {'UNDO'},    # no redo panel
         "invoke": invoke, "draw": draw, "execute": execute})
 
 
@@ -751,7 +751,7 @@ class ALLSET_OT_option_generic(bpy.types.Operator):
     def invoke(self, context, event):
         from .option_windows_render import no_options_text
         text = no_options_text(self.item, context.scene)
-        if text:                    # Maya opens no window for these: its Help Line warning (step 152)
+        if text:                    # Maya opens no window for these: its Help Line warning
             self.report({'WARNING'}, text)
             return {'CANCELLED'}
         label = self.item.rsplit("/", 1)[-1].rstrip(".").split("#")[0]
@@ -775,7 +775,7 @@ class ALLSET_OT_option_generic(bpy.types.Operator):
             run_action(context, action, path=self.item)
         except RuntimeError as ex:
             from . import maya_errors
-            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error (step 258)
+            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error
             return {'CANCELLED'}
         return {'FINISHED'}
 

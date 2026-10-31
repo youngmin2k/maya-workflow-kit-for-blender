@@ -1,4 +1,4 @@
-"""extensions.blender.org listing media: docs/distribution/media/ (step 117, remade in step 122).
+"""extensions.blender.org listing media: docs/distribution/media/.
 
     python tools/make_listing_media.py [--blender PATH] [--no-build] [--no-shots]
 

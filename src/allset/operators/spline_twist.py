@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Spline IK Twist / Roll / Twist Type like Maya (step 249, Issue #166).
+"""Spline IK Twist / Roll / Twist Type like Maya (Issue #166).
 
 Maya 2026 ikSplineSolver (numbers in
 tests/test_step249_spline_twist.py): the handle's Twist is spread over the joints between the root and the end joint —

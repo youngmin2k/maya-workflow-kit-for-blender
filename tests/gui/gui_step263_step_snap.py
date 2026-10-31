@@ -1,4 +1,4 @@
-"""Step 263 (Issue #153) in a real UI: Move Absolute, Rotate Relative; switching tools (W / E) and pressing the
+"""Issue #153: in a real UI: Move Absolute, Rotate Relative; switching tools (W / E) and pressing the
 manipulator put that tool's own mode into Blender's shared Absolute Grid Snap flag before its transform starts, and a
 Move drag lands on whole grid units."""
 

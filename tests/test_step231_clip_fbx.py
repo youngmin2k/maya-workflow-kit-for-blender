@@ -1,4 +1,4 @@
-"""Step 231 (Issue #140): Game Exporter clip files are the same rig FBX as File > Export Selection.
+"""Issue #140: Game Exporter clip files are the same rig FBX as File > Export Selection.
 
 Audit 0.5.0 (③-16 / ⑤-9): a clip file had joints at
 1/100 size and the mirrored chain in the wrong place, and kit animation layers (NLA tracks) leaked into the file as
@@ -172,7 +172,7 @@ def test_single_file_two_clips_each_take_equals_the_rig():
 
 
 def test_rig_layout_like_export_selection():
-    """No armature Null, joints in cm with PreRotation — the same layout step 222 writes for Export Selection."""
+    """No armature Null, joints in cm with PreRotation — the same layout Export Selection writes."""
     sc = _scene()
     arm, body, k = _rig(sc)
     _clip(sc, "swing", 1, 20)

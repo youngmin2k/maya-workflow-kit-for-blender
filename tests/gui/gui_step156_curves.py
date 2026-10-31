@@ -1,4 +1,4 @@
-"""Step 156 lane T in a real UI (Maya Workflow Kit layout): EP Curve Tool -> 4 clicks in the persp view (ground) -> Enter
+"""In a real UI (Maya Workflow Kit layout): EP Curve Tool -> 4 clicks in the persp view (ground) -> Enter
 -> curve1; CV Curve Tool -> 4 clicks + Enter -> curve2 (an Enter after 3 CVs keeps waiting); Three Point Circular Arc ->
 3 clicks (finishes on the last) -> curve3. Every point on z = 0, curve ends = the first / last click."""
 

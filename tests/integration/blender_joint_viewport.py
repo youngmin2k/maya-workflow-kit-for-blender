@@ -75,7 +75,7 @@ def run():
                 assert bpy.context.mode == 'POSE' and rig.data.bones.active.name == b
             elif step == 3:
                 click((0, -3, 0))
-                # step 255 (#171): an empty click in Pose stays in Pose and clears the joint selection (Maya has no
+                # #171: an empty click in Pose stays in Pose and clears the joint selection (Maya has no
                 # selection mode to leave: an empty click clears the selection, select_priority._pose_miss)
                 assert bpy.context.mode == 'POSE'
                 assert not any(bone_selected(pb) for pb in rig.pose.bones)

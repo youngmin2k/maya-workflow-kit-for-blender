@@ -1,7 +1,7 @@
 """Helpers for GUI event-simulation tests (run inside Blender by tests/gui/run.py).
 
 Blender must run with ``--enable-event-simulate``: real input is ignored and
-``Window.event_simulate`` feeds events. Gotchas found in step 3:
+``Window.event_simulate`` feeds events. Gotchas:
 - key events carry a position (default 0,0 = status bar), so ``ev`` reuses
   the last mouse position;
 - the factory-startup splash popup eats events until ESC;
@@ -22,7 +22,7 @@ RESULT = sys.argv[sys.argv.index("--") + 1] if "--" in sys.argv else None
 
 UI_SCALE = float(os.environ.get("ALLSET_GUI_UI_SCALE", "0") or 0)
 
-# Enabling the add-on turns Blender's region overlap off ("Solid Side Panels", step 112), but region rects only
+# Enabling the add-on turns Blender's region overlap off ("Solid Side Panels"), but region rects only
 # follow at the next screen refresh: positions a test computes in its setup tick would still be the overlapping
 # ones. Start the session without overlap so the layout is final from the first step (a test of the preference
 # itself sets ALLSET_GUI_KEEP_OVERLAP=1 before importing this module).
@@ -40,7 +40,7 @@ def win():
 
 
 def view3d():
-    # the largest: the Maya Workflow Kit layout also has the narrow Tool Box 3D View (step 49)
+    # the largest: the Maya Workflow Kit layout also has the narrow Tool Box 3D View
     area = max((a for a in win().screen.areas if a.type == 'VIEW_3D'), key=lambda a: a.width * a.height)
     region = next(r for r in area.regions if r.type == 'WINDOW')
     return area, region
@@ -48,7 +48,7 @@ def view3d():
 
 def dock_area(kind=None):
     """Maya's tab stack (Channel Box / Layer Editor | Attribute Editor | Modeling Toolkit) of the main window: its
-    own area right of the viewport since step 116 (ui/maya_dock.py), made here when the screen has none (a factory
+    own area right of the viewport (ui/maya_dock.py), made here when the screen has none (a factory
     screen). Its role is set from a timer: give it one step before drawing. ``kind`` selects the tab."""
     md = import_module(MODULE + ".ui.maya_dock")
     area = md.find_stack(win().screen)
@@ -66,7 +66,7 @@ def dock_region(kind=None):
 
 
 def dock_tab_point(kind):
-    """Window point (x, y) in the middle of ``kind``'s tab on the stack's vertical tab strip (step 142: drawn on the
+    """Window point (x, y) in the middle of ``kind``'s tab on the stack's vertical tab strip (drawn on the
     right edge, ui/maya_dock.strip_tabs), or None when the strip has no such tab."""
     md = import_module(MODULE + ".ui.maya_dock")
     region = dock_region()
@@ -97,7 +97,7 @@ def find_button(where, match, store, key, step_px=10, rows=(None,), x_frac=None,
     under it; ``store[key]`` = (x, y) or None. ``where()`` returns (area, region). Default: right to left along
     ``rows`` (y offsets below the region's top in px; None = middle). ``x_frac``: top to bottom along that fraction
     of the region's width instead (from ``start_frac`` of its height down). ``y_from``: a key of ``store`` whose y is the row to sweep (found before).
-    Pixel offsets of buttons moved when the dock left the 3D View sidebar (step 116): tests look buttons up by what
+    Pixel offsets of buttons moved when the dock left the 3D View sidebar: tests look buttons up by what
     they are."""
     state = {}
 
@@ -144,7 +144,7 @@ def find_button(where, match, store, key, step_px=10, rows=(None,), x_frac=None,
             else:
                 state["x"] -= step_px
                 if state["x"] < region.x + 2 and "first" in state:
-                    # the button reaches the region's left edge (Channel Box names, step 142): keep its centre
+                    # the button reaches the region's left edge (Channel Box names): keep its centre
                     store[key] = ((state["first"] + state["last"]) // 2, state["y"])
                     return
                 if state["x"] < region.x + 2:
@@ -208,7 +208,7 @@ def scale():
 
 
 # Pixel offsets in the tests were read from screenshots at effective scale 1.25 (125 % display,
-# Resolution Scale 1.0); px() converts one to the running scale (e.g. --ui-scale 0.8, step 44).
+# Resolution Scale 1.0); px() converts one to the running scale (e.g. --ui-scale 0.8).
 MEASURED_SCALE = 1.25
 
 
@@ -221,7 +221,7 @@ def setup():
     tap('ESC')
     _keep_ui_scale()
     addon_utils.enable(MODULE, default_set=True)
-    # opt in to Maya mode (enabling alone changes nothing since step 115)
+    # opt in to Maya mode (enabling alone changes nothing)
     import_module(MODULE + ".switch").set_mode(True, layout=False)
     import_module(MODULE + ".operators.keystate").is_down = lambda t: t in _down
     _area, r = view3d()
@@ -230,7 +230,7 @@ def setup():
 
 
 def load_maya_layout():
-    """A new scene in the Maya layout (step 130: the startup.blend bundled in the extension read as an untitled file;
+    """A new scene in the Maya layout (the startup.blend bundled in the extension read as an untitled file;
     no app template, the preferences stay)."""
     import_module(MODULE + ".first_start").new_maya_scene()
 
@@ -261,7 +261,7 @@ def run(interval=0.4, first=2.0):
 
 
 def maya_keys():
-    """Maya keymap on (step 130: add-on keymap items, the active keyconfig stays Blender's)."""
+    """Maya keymap on (add-on keymap items, the active keyconfig stays Blender's)."""
     kc = bpy.context.window_manager.keyconfigs.active
     return import_module(MODULE + ".keymap").is_applied() and kc is not None and kc.name == "Blender"
 
@@ -274,7 +274,7 @@ def maya_kc():
 
 
 def open_inputs(*history):
-    """Expand the lead's Channel Box INPUTS nodes (step 135: Maya shows them collapsed until the node name is clicked):
+    """Expand the lead's Channel Box INPUTS nodes (Maya shows them collapsed until the node name is clicked):
     every modifier and constraint node, plus the kit history nodes named in ``history`` (polyCube1, polyExtrudeFace1)."""
     cb = import_module(MODULE + ".ui.channel_box")
     ob = cb.lead(bpy.context)
@@ -289,7 +289,7 @@ def open_inputs(*history):
 
 
 def scroll_channel_box(first=10 ** 6):
-    """Scroll the dock's Channel Box part to line ``first`` (default: the end, where the INPUTS nodes are). Step 135:
+    """Scroll the dock's Channel Box part to line ``first`` (default: the end, where the INPUTS nodes are).
     a long Channel Box scrolls inside its part; the wheel itself is tested in gui_step135_dock. The draw clamps it."""
     cb = import_module(MODULE + ".ui.channel_box")
     area = dock_area()

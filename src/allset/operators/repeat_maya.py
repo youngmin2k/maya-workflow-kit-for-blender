@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya G / Edit > Repeat / Recent Commands for every Maya command, not only key operators (step 175).
+"""Maya G / Edit > Repeat / Recent Commands for every Maya command, not only key operators.
 
 Maya 2022: a menu item run from the UI goes into ``repeatLast``
 (Create > Polygon Primitives > Cube → "CreatePolygonCube", G makes the next cube); an option window's Apply records the
@@ -144,7 +144,7 @@ class ALLSET_OT_repeat_last(bpy.types.Operator):
             res = repeat(context)
         except RuntimeError as ex:
             from . import maya_errors
-            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error (step 258)
+            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error
             return {'CANCELLED'}
         if res is None:
             results.result(self, "Nothing to repeat")

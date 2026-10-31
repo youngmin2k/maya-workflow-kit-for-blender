@@ -1,4 +1,4 @@
-"""Step 37 in a real UI: the 3D View header shows Maya's panel menus; click Shading and pick
+"""In a real UI: the 3D View header shows Maya's panel menus; click Shading and pick
 Wireframe, open Show (screenshots), Blender ▸ still has Blender's menus."""
 
 import os

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya editor chrome helpers (step 50): a flat menu bar row at the top of an editor
+"""Maya editor chrome helpers: a flat menu bar row at the top of an editor
 (Maya panels and docks have one: Channel Box "Channels Edit Object Show", Layer Editor "Layers Options
 Help", Outliner "Display Show Help")
 and greyed menu items for Maya entries the kit has no equivalent for."""
@@ -23,7 +23,7 @@ def grey(layout, text):
 
 
 def paragraph(layout, context, text, alignment='LEFT', width=None):
-    """``text`` wrapped to the region width (about 7 px per character at UI scale 1), greyed (step 67).
+    """``text`` wrapped to the region width (about 7 px per character at UI scale 1), greyed.
     ``width``: the layout's own width in unscaled px (popups / dialogs, whose context region is the editor's)."""
     from .. import i18n
     region = context.region

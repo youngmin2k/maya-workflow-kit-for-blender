@@ -136,7 +136,7 @@ class ALLSET_PG_weight_workspace(bpy.types.PropertyGroup):
     show_commands: BoolProperty(default=False)
     show_mask: BoolProperty(default=False)
     status: StringProperty(default='')
-    # step 224: Maya 2026 fields the kit keeps itself (ctx_defaults)
+    # Maya 2026 fields the kit keeps itself (ctx_defaults)
     skin_cluster: IntProperty(name='Skin Cluster', default=0, min=0,
                               description='The skin cluster (Armature modifier) whose influences the list shows')
     normalize_mode: EnumProperty(name='Normalize Weights', items=skin.NORMALIZE, get=_normalize_mode_get,
@@ -573,7 +573,7 @@ def flood(context, operation='BRUSH'):
         w = row.get(t, 0.0)
         avg = (own[i] + sum(own[j] for j in nb[i])) / (1 + len(nb[i])) if op == 'SMOOTH' else None
         new = maya_target(op, w, value, opacity, avg)
-        new = min(lo_hi[1], max(lo_hi[0], new))         # Maya Min / Max value (step 224)
+        new = min(lo_hi[1], max(lo_hi[0], new))         # Maya Min / Max value
         if normalize:
             result = redistribute(row, t, new, locked, influences)
         else:

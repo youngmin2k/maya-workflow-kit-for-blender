@@ -1,4 +1,4 @@
-"""Step 64: Target Weld, Crease Tool, Multi-Cut feel (Ctrl+click edge loop, Shift snap step).
+"""Target Weld, Crease Tool, Multi-Cut feel (Ctrl+click edge loop, Shift snap step).
 GUI: tests/gui/gui_step64_mesh_tools.py."""
 
 import math
@@ -271,7 +271,7 @@ def test_tools_registered_with_keymaps():
     tool = bpy.context.workspace.tools.from_space_view3d_mode('EDIT_MESH')
     assert tool.idname == "allset.target_weld_tool"
     assert "drag a vertex" in command_line.help_for_tool(tool.idname)
-    assert "Ctrl+click" in command_line.help_for_tool("allset.multi_cut_tool")   # step 129
+    assert "Ctrl+click" in command_line.help_for_tool("allset.multi_cut_tool")
     assert "middle-drag" in command_line.help_for_tool("allset.crease_tool")
     bpy.ops.wm.tool_set_by_id(name="builtin.select_box", space_type='VIEW_3D')
     kit.disable()

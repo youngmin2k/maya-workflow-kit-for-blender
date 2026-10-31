@@ -1,8 +1,8 @@
-"""Step 53: Blender version compatibility and a safe install.
+"""Blender version compatibility and a safe install.
 
 Runs on the main target Blender 5.2 and on 5.0 / 5.1 (BLENDER=... python tests/run.py): the keymap patches are
-strict on 5.2 (step 272) and only show the known Industry Compatible drift elsewhere, the manifest declares the tested
-range (5.0 - 5.2 since step 279), the timeline header wrap is undone on disable. (The theme round trip tests went with the theme, step 130.)"""
+strict on 5.2 and only show the known Industry Compatible drift elsewhere, the manifest declares the tested
+range (5.0 - 5.2), the timeline header wrap is undone on disable. (The kit ships no theme, so there is no theme round trip.)"""
 
 import tomllib
 from importlib import import_module
@@ -19,7 +19,7 @@ compat = import_module(kit.MODULE + ".compat")
 time_slider = import_module(kit.MODULE + ".ui.time_slider")
 
 # Industry Compatible items the patches expect that Blender 5.0 / 5.1 don't have (none since the Node Editor Z
-# removal became optional, step 272).
+# removal became optional).
 KNOWN_5X_DRIFT = set()
 
 
@@ -35,8 +35,8 @@ def test_keymap_patches_strict_on_target_drift_known_elsewhere():
 
 def test_manifest_declares_the_tested_range():
     data = tomllib.loads((ROOT / "src" / "allset" / "blender_manifest.toml").read_text(encoding="utf-8"))
-    assert data["blender_version_min"] == "5.0.0", "0.6.2 is the last version for 4.5 (step 279)"
-    assert data["blender_version_max"] == "5.3.0", "5.0.x-5.2.x: checked since step 118; test a new version before raising"
+    assert data["blender_version_min"] == "5.0.0", "0.6.2 is the last version for 4.5"
+    assert data["blender_version_max"] == "5.3.0", "5.0.x-5.2.x checked; test a new version before raising"
     v = tuple(bpy.app.version)
     assert (5, 0, 0) <= v < (5, 3, 0), v
 

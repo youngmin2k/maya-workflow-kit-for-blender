@@ -1,4 +1,4 @@
-"""Step 106: Tool Settings dock with Maya sections, Attribute Editor history tabs / menu bar / buttons / Notes, Blender
+"""Tool Settings dock with Maya sections, Attribute Editor history tabs / menu bar / buttons / Notes, Blender
 explanation sentences moved into tooltips."""
 
 
@@ -125,7 +125,7 @@ def test_dock_hides_blender_tool_panels_only_for_maya_tools():
     try:
         ts_mod.active_tool = lambda c: SimpleNamespace(idname="builtin.move")
         assert dock_tabs._hidden(ctx)
-        ts_mod.active_tool = lambda c: SimpleNamespace(idname="builtin.knife")   # no Maya sections (step 129)
+        ts_mod.active_tool = lambda c: SimpleNamespace(idname="builtin.knife")   # no Maya sections
         assert not dock_tabs._hidden(ctx)
         ts_mod.active_tool = lambda c: SimpleNamespace(idname="builtin.rotate")
         ctx.space_data = SimpleNamespace(type='VIEW_3D')    # a 3D View main region: never
@@ -192,7 +192,7 @@ def test_modifier_tabs_have_maya_node_names():
     hist = [x for x in t if x[0].startswith("M:")]
     assert [(x[1], x[2]) for x in hist] == [("polyBevel1", "polyBevel3"), ("polyBevel2", "polyBevel3"),
                                             ("polySmoothFace", "polySmoothFace")], hist
-    # Maya order: transform, shape, history, shading group, material (initialShadingGroup | lambert1, step 100)
+    # Maya order: transform, shape, history, shading group, material (initialShadingGroup | lambert1)
     kinds = [x[0].split(":")[0] for x in t]
     assert kinds.index("M") < kinds.index("SG") < kinds.index("MAT"), kinds
     assert ae.nice_type("polyExtrudeFace") == "Poly Extrude Face"
@@ -224,7 +224,7 @@ def test_extrude_record_is_a_history_tab():
     rec = Recorder()
     in_view.draw_cb_node(rec, bpy.context, ex.active(bpy.context)[1])
     assert not any("history" in t.lower() for t in rec.texts("label")), rec.texts("label")
-    tips = rec.ops("allset.cb_node_toggle")       # the node name expands it (step 135) and carries the notice
+    tips = rec.ops("allset.cb_node_toggle")       # the node name expands it and carries the notice
     assert len(tips) == 1 and tips[0].tip == in_view.HISTORY_TIP
     bpy.ops.object.mode_set(mode='OBJECT')
 

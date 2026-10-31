@@ -1,9 +1,9 @@
-"""In-Blender part of tools/marketing/make_clips.py (step 123): records one feature clip as frames + a timeline.
+"""In-Blender part of tools/marketing/make_clips.py: records one feature clip as frames + a timeline.
 
     blender --enable-event-simulate --window-geometry 0 0 1920 1080 --python tools/marketing/clips.py -- result.json
     (env ALLSET_CLIP = clip name, ALLSET_CLIP_OUT = output folder)
 
-Recording (step 123): one action per timer tick. A tick first takes ``screen.screenshot`` (the
+Recording: one action per timer tick. A tick first takes ``screen.screenshot`` (the
 window as drawn after the previous tick's events — the screenshot shows the previous frame), then sends its action.
 The picture is what is on screen *while* that action happens, so it gets the action's duration (virtual time) and the
 cursor path (position before -> after the action). Ticks with duration 0 only give Blender time (no picture).
@@ -48,7 +48,7 @@ def _tick(fn, dur, caption, chips):
         img = f"f{REC['n']:04d}.png"
         sim.screenshot(str(OUT / img))
         REC["n"] += 1
-        # what bg_check.py samples (step 125); the picture is the frame drawn since the previous tick, so it is a
+        # what bg_check.py samples; the picture is the frame drawn since the previous tick, so it is a
         # Maya-mode picture only when Maya mode was on at the end of the previous tick and still is now
         views, maya = viewport_rects(), maya_mode_on() and REC.get("maya_after", False)
     before = list(sim._pos)
@@ -123,8 +123,8 @@ def key(kind, dur=0.2, caption=None, chips=None, **mods):
 
 
 def drag(a, b, n=12, dur=F * 2, curve=None, caption=None, chips=None, **mods):
-    """``n`` mouse moves from ``a`` to ``b`` (positions or callables), one per tick (Blender's 10 ms snap throttle,
-    step 95). ``curve(t)`` -> (dx, dy) offsets the straight path."""
+    """``n`` mouse moves from ``a`` to ``b`` (positions or callables), one per tick (Blender's 10 ms snap
+    throttle). ``curve(t)`` -> (dx, dy) offsets the straight path."""
     state = {}
 
     def mover(i):
@@ -219,12 +219,12 @@ def maya_session(kind="dog", setup_scene=None):
     @step
     def s_setup():
         setup()
-        sim.load_maya_layout()   # the Maya layout startup.blend in the extension (step 130)
+        sim.load_maya_layout()   # the Maya layout startup.blend in the extension
 
     @step
     def s_scene():
         kc = bpy.context.window_manager.keyconfigs.active
-        check("Maya keymap on in the Maya layout (add-on items, step 130)", kc is not None and mod(".keymap").is_applied())
+        check("Maya keymap on in the Maya layout (add-on items)", kc is not None and mod(".keymap").is_applied())
         maya_look()
         clear_objects()
         if setup_scene is None:
@@ -489,7 +489,7 @@ def mesh_centre(ob):
 
 
 def clip_navigation():
-    # step 125 review: the DOGWALK set is too big for a 7 s navigation demo (the tumble put the camera inside a birch
+    # review: the DOGWALK set is too big for a 7 s navigation demo (the tumble put the camera inside a birch
     # trunk, A framed a tiny world) and its snowman rig won the click (Maya selection priority); the compact Pack Bot
     # with its rig hidden reads better.
     maya_session("pack")
@@ -648,7 +648,7 @@ def clip_pivot_snap():
                 if dist < near:
                     near, who = dist, o.name
         check(f"V snap put the pivot on a vertex ({who}, {near:.5f} m off; battery {off:.5f} m; moved {moved:.3f} m)",
-              near < 5e-3 and moved > 1e-3)   # step 125: lands 2.7 mm from the nearest instanced lid vertex (unresolved)
+              near < 5e-3 and moved > 1e-3)   # lands 2.7 mm from the nearest instanced lid vertex (unresolved)
         check(f"the battery turned around it (pivot kept {(mw.translation - C['pivot']).length:.5f} m, rot z "
               f"{math.degrees(mw.to_quaternion().rotation_difference(C['rot0']).angle):.1f} deg)", (mw.translation - C["pivot"]).length < 1e-4
               and mw.to_quaternion().rotation_difference(C["rot0"]).angle > math.radians(5))
@@ -821,7 +821,7 @@ def clip_rigging():
 
     @step
     def s_paint_influence():
-        # step 125 review: the tool opened on the end joint (no weights), so the whole mesh was blue; show the
+        # review: the tool opened on the end joint (no weights), so the whole mesh was blue; show the
         # influence with the most weighted vertices (the upper arm) like a rigger would
         b = C["body"]
         count = {g.index: 0 for g in b.vertex_groups}

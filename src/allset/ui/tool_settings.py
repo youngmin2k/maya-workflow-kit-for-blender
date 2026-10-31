@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Tool Settings: Reset Tool (step 93) and the dock's Maya sections (step 106).
+"""Maya Tool Settings: Reset Tool and the dock's Maya sections.
 
 Maya's Tool Settings window has the tool name, Reset Tool / Tool Help above the active tool's options.
-Since step 106 the kit's Tool Settings is a dock
+The kit's Tool Settings is a dock
 left of the viewport (``ui/tool_dock.py``: a Properties editor on its Tool tab) that draws ``ALLSET_PT_tool_settings``:
 the head row, then for the Move / Rotate / Scale tools Maya's sections in Maya's order with Maya's rows bound to kit
 state (Maya 2022's rows; rows the kit can't do are greyed with a tooltip).
@@ -10,8 +10,8 @@ Other tools keep Blender's tool panels under the head row; the Reset Tool row is
 ``VIEW3D_PT_active_tool`` for Blender's own Tool tab / popups.
 Reset = the active tool's operator options back to their defaults (every operator of the tool's keymap) and, for
 the Move / Rotate / Scale tools, the default tool options like Maya: axis World / Object / Object, the
-manipulator at the lead object's pivot (step 59), Step Snap off and rotate step 15
-degrees (S3), Smart Duplicate / Smart Extrude at their defaults (Move tool, step 22 / 26).
+manipulator at the lead object's pivot, Step Snap off and rotate snap 15
+degrees (S3), Smart Duplicate / Smart Extrude at their defaults (Move tool).
 """
 
 import math
@@ -35,17 +35,17 @@ TOOL_OPERATORS = {"builtin.move": ("transform.translate",), "builtin.rotate": ("
                   "builtin.select_lasso": ("view3d.select_lasso",), "builtin.select_circle": ("view3d.select_circle",),
                   "builtin.loop_cut": ("mesh.loopcut_slide",), "builtin.edge_slide": ("transform.edge_slide",)}
 
-# Step 129: the other tools with Maya Tool Settings sections. Maya tool
+# the other tools with Maya Tool Settings sections. Maya tool
 # (Maya runTimeCommand) -> Blender tool; sections as in Maya 2022.
 TOOLS = {"builtin.select_box": 'SELECT', "builtin.select": 'SELECT',               # SelectTool (Marquee / Tweak)
          "builtin.select_lasso": 'LASSO', "builtin.select_circle": 'PAINT_SELECT',  # LassoTool, ArtPaintSelectTool
-         # SplitEdgeRingTool, SlideEdgeTool, (step 144 LOOP) the kit tools of ui/mesh_tools_loop.py
+         # SplitEdgeRingTool, SlideEdgeTool, the kit tools of ui/mesh_tools_loop.py
          INSERT_TOOL: 'INSERT_EDGE_LOOP', SLIDE_TOOL: 'SLIDE_EDGE', OFFSET_TOOL: 'OFFSET_EDGE_LOOP',
          TARGET_WELD_TOOL: 'TARGET_WELD', CREASE_TOOL: 'CREASE',                    # MergeVertexTool, PolyCreaseTool
-         # step 144: the kit's QuadDrawTool / CreatePolygonTool / AppendToPolygonTool (ui/mesh_tools_poly.py)
+         # the kit's QuadDrawTool / CreatePolygonTool / AppendToPolygonTool (ui/mesh_tools_poly.py)
          QUAD_DRAW_TOOL: 'QUAD_DRAW', CREATE_TOOL: 'CREATE_POLYGON', APPEND_TOOL: 'APPEND_POLYGON'}
 POLY_KINDS = ('QUAD_DRAW', 'CREATE_POLYGON', 'APPEND_POLYGON')
-LOOP_KINDS = ('INSERT_EDGE_LOOP', 'OFFSET_EDGE_LOOP', 'SLIDE_EDGE')     # step 144 LOOP
+LOOP_KINDS = ('INSERT_EDGE_LOOP', 'OFFSET_EDGE_LOOP', 'SLIDE_EDGE')     # kit edge loop tools
 _LOOP_SETTINGS = {'INSERT_EDGE_LOOP': 'INSERT', 'OFFSET_EDGE_LOOP': 'OFFSET', 'SLIDE_EDGE': 'SLIDE'}
 KIND_OF = {**KINDS, **TOOLS}
 MANIP = ('TRANSLATE', 'ROTATE', 'RESIZE')
@@ -61,7 +61,7 @@ def tool_operators(context, tool):
     except (AttributeError, TypeError):
         item = None
     names = getattr(item, "keymap", None) or ()
-    # the merged keymaps (user = active keyconfig + add-on items: the Maya items live in the add-on one, step 130)
+    # the merged keymaps (user = active keyconfig + add-on items: the Maya items live in the add-on one)
     keymaps = context.window_manager.keyconfigs.user.keymaps if context.window_manager.keyconfigs.user else {}
     for name in names if isinstance(names, (tuple, list)) else ():
         km = keymaps.get(name) if isinstance(name, str) else None
@@ -123,7 +123,7 @@ def reset_tool(context):
     elif kind is not None:
         reset_kind_defaults(context, kind, tool)
     from ..operators import multi_cut
-    if tool.idname == multi_cut.TOOL:       # step 129: Multi-Cut keeps its Maya options on the scene
+    if tool.idname == multi_cut.TOOL:       # Multi-Cut keeps its Maya options on the scene
         multi_cut.reset_settings(multi_cut.mesh_tools.settings(context))
     return tool.idname, n
 
@@ -187,16 +187,16 @@ def draw_reset_row(self, context):
     self.layout.operator(ALLSET_OT_reset_tool.bl_idname, icon='LOOP_BACK')
 
 
-# --- Tool Settings dock: Maya sections (step 106) -------------------------------------------------------------
+# --- Tool Settings dock: Maya sections -------------------------------------------------------------
 # Section order, default open state and rows as in Maya 2022 (Move / Rotate / Scale Tool Settings).
 # Rows without kit state are greyed with a tooltip (TS_NOTICES).
 
 TOOL_NAMES = {'TRANSLATE': "Move Tool", 'ROTATE': "Rotate Tool", 'RESIZE': "Scale Tool",
-              # step 129: Maya 2022 Tool Settings titles
+              # Maya 2022 Tool Settings titles
               'SELECT': "Select Tool", 'LASSO': "Lasso Tool", 'PAINT_SELECT': "Paint Selection Tool",
               'INSERT_EDGE_LOOP': "Insert Edge Loop Tool", 'SLIDE_EDGE': "Slide Edge Tool",
               'TARGET_WELD': "Target Weld Tool", 'CREASE': "Crease Tool", 'QUAD_DRAW': "Quad Draw Tool",
-              # step 144: Maya 2022 Tool Settings titles
+              # Maya 2022 Tool Settings titles
               'CREATE_POLYGON': "Create Polygon Tool", 'APPEND_POLYGON': "Append To Polygon Tool",
               'OFFSET_EDGE_LOOP': "Offset Edge Loop Tool"}
 SETTINGS = {'TRANSLATE': "Move Settings", 'ROTATE': "Rotate Settings", 'RESIZE': "Scale Settings"}
@@ -226,7 +226,7 @@ SECTIONS = (
 )
 # Maya Rotate / Scale Center (rotate_ts / scale_ts) -> Blender pivot point (Default = the manipulator at
 # the lead's pivot, the kit's default MAYA_PIVOT like Maya; Object = each object's own pivot; Manip = where the component
-# pivot edit put the manipulator, the 3D cursor (step 77); Selection = the selection's centre).
+# pivot edit put the manipulator, the 3D cursor; Selection = the selection's centre).
 CENTERS = {'ROTATE': (("Default", 'ACTIVE_ELEMENT'), ("Object", 'INDIVIDUAL_ORIGINS'), ("Manip", 'CURSOR'),
                       ("Selection", 'BOUNDING_BOX_CENTER')),
            'RESIZE': (("Default", 'ACTIVE_ELEMENT'), ("Object", 'INDIVIDUAL_ORIGINS'), ("Manip", 'CURSOR'))}
@@ -257,7 +257,7 @@ TS_NOTICES = {
     f"{TS}/Free Rotate": ("the white ring / trackball",
                           "Blender's rotate manipulator has the free trackball rotation built in"),
 }
-# Step 129: greyed rows of the other tools (Maya 2022 rows) -> (substitute, one line).
+# greyed rows of the other tools (Maya 2022 rows) -> (substitute, one line).
 _SPACE = "Blender's selection tools work in screen space"
 TS_NOTICES.update({f"{TS}/{k}": v for k, v in {
     "Lasso/Open": ("Closed lasso", "Blender's lasso always closes the shape from the last point to the first"),
@@ -284,7 +284,7 @@ TS_NOTICES.update({f"{TS}/{k}": v for k, v in {
 
 
 def in_dock(context):
-    """A Properties Tool tab that isn't a Maya panel's dock area (ui/maya_dock.py, step 116)."""
+    """A Properties Tool tab that isn't a Maya panel's dock area (ui/maya_dock.py)."""
     space = getattr(context, "space_data", None)
     if space is None or space.type != 'PROPERTIES':
         return False
@@ -294,7 +294,7 @@ def in_dock(context):
 
 
 def tool_kind(context):
-    """The active tool's kind when it has Maya sections ('TRANSLATE' / 'ROTATE' / 'RESIZE' and the step 129 kinds of
+    """The active tool's kind when it has Maya sections ('TRANSLATE' / 'ROTATE' / 'RESIZE' and the other kinds of
     ``TOOLS``), else None (Blender's tool panels are drawn)."""
     tool = active_tool(context)
     return KIND_OF.get(tool.idname) if tool is not None else None
@@ -399,7 +399,7 @@ def draw_settings(layout, context, kind):
     mode = snap_align.step_snap_mode(ts, kind)
     for m in ('OFF', 'RELATIVE', 'ABSOLUTE'):
         cell = row.row(align=True)
-        # step 263: Move offers Absolute only with World axes (like Maya)
+        # Move offers Absolute only with World axes (like Maya)
         cell.enabled = m != 'ABSOLUTE' or snap_align.absolute_offered(scene, kind)
         op = cell.operator("allset.step_snap", text=m.title(), depress=mode == m)
         op.kind, op.mode = kind, m
@@ -408,7 +408,7 @@ def draw_settings(layout, context, kind):
     elif kind == 'RESIZE':
         _labelled(layout, "").label(text="Step: 0.1")
     else:
-        # Blender's increment is the grid step: 1 Maya unit in the Maya Workflow Kit template (step 25).
+        # Blender's increment is the grid step: 1 Maya unit in the Maya Workflow Kit template.
         _labelled(layout, "").label(text="Step: one grid unit", icon='SNAP_INCREMENT')
     _labelled(layout, "Preserve Children:").prop(ts, "use_transform_skip_children", text="")
     _labelled(layout, "Preserve UVs:").prop(ts, "use_transform_correct_face_attributes", text="")
@@ -474,7 +474,7 @@ def draw_section(layout, context, key, kind):
         OTHER_SECTIONS[key](layout, context, kind)
 
 
-# --- step 129: the other tools' sections -------
+# --- the other tools' sections -------
 
 def _radio(layout, text, on, option, value):
     """A Maya radio button bound through allset.ts_option."""
@@ -590,7 +590,7 @@ def draw_description(layout, context, kind):
 
 
 def edge_loop_position(context):
-    """Maya Insert Edge Loop "Maintain position" of the kit tool (Scene.allset_loop_tools, step 144 LOOP)."""
+    """Maya Insert Edge Loop "Maintain position" of the kit tool (Scene.allset_loop_tools)."""
     from ..operators import edge_loops
     return edge_loops.settings(context).iel_position
 
@@ -607,7 +607,7 @@ def set_edge_loop_position(context, value):
 
 
 def _draw_loop(kind):
-    def draw(layout, context):     # step 144 LOOP: the kit tools' Maya fields (ui/mesh_tools_loop.py)
+    def draw(layout, context):     # the kit loop tools' Maya fields (ui/mesh_tools_loop.py)
         from . import mesh_tools_loop as mtl
         {'INSERT_EDGE_LOOP': mtl.draw_insert, 'OFFSET_EDGE_LOOP': mtl.draw_offset,
          'SLIDE_EDGE': mtl.draw_slide}[kind](layout, context)
@@ -629,7 +629,7 @@ def _draw_crease(layout, context):
 
 
 def _draw_poly(kind):
-    def draw(layout, context):     # step 144: the kit tools' Maya fields (ui/mesh_tools_poly.py)
+    def draw(layout, context):     # the kit tools' Maya fields (ui/mesh_tools_poly.py)
         from . import mesh_tools_poly as mtp
         {'QUAD_DRAW': mtp.draw_quad_draw, 'CREATE_POLYGON': mtp.draw_create,
          'APPEND_POLYGON': mtp.draw_append}[kind](layout, context)
@@ -653,7 +653,7 @@ def draw_live(layout, context, kind):
 
 def keymap_rows(context, name):
     """[(keys, operator name)] of a tool keymap as Blender uses it (the user keyconfig = active keyconfig + add-on
-    items, where the Maya items are since step 130; empty in -b)."""
+    items, where the Maya items are; empty in -b)."""
     kc = context.window_manager.keyconfigs.user
     km = kc.keymaps.get(name) if kc is not None else None
     out = []

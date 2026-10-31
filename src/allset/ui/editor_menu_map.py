@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Graph Editor / Dope Sheet / UV Editor / UV Toolkit menu items -> Blender actions (step 104).
+"""Maya Graph Editor / Dope Sheet / UV Editor / UV Toolkit menu items -> Blender actions.
 
 Keys are ``editor_menu_data`` paths ("Graph Editor/Keys/Insert Key Tool"); values use ``menu_map``'s forms plus
 ``("prop", "<context path>")`` = a Maya check item drawn as Blender's own check box (``{"value": v}`` = one choice
-of a radio collection). ``menu_map`` merges ``MAP`` into its own, so the step 101 rules (every leaf mapped or greyed
+of a radio collection). ``menu_map`` merges ``MAP`` into its own, so the menu rules (every leaf mapped or greyed
 with a notice) cover these menus too. Menu structure: Maya 2026's editor menus
-(since step 269; Maya 2022 before); Blender counterparts checked in 4.5.
+; Blender counterparts checked in 4.5.
 """
 
 import math
@@ -47,7 +47,7 @@ TANGENT_KINDS = {"Spline": "SPLINE", "Linear": "LINEAR", "Clamped": "CLAMPED", "
                  "Stepped Next": "STEPPED_NEXT", "Flat": "FLAT", "Fixed": "FIXED", "Plateau": "PLATEAU"}
 AUTO_KINDS = ("Auto Span", "Auto Ease", "Auto Mix", "Auto Custom")
 
-# Default In / Out Tangent (step 157): kit add-on prefs the kit's own keys use (operators/graph_key_menu.after_insert);
+# Default In / Out Tangent: kit add-on prefs the kit's own keys use (operators/graph_key_menu.after_insert);
 # Blender's preference is never written (store review, #40 / #43). Maya's Auto variants are one Auto.
 _PREFS_ANIMATION = ("screen.userpref_show", {"section": 'ANIMATION'})
 DEFAULT_TANGENT_LABELS = {**{label: 'AUTO' for label in AUTO_KINDS}, "Spline": 'SPLINE', "Clamped": 'CLAMPED',
@@ -99,7 +99,7 @@ def _curves_menu(ed, graph):
             f"{ed}/Curves/Resample Curve": "graph.bake_keys",
         })
     else:
-        # step 166: Maya's Dope Sheet runs the Graph Editor's curve commands (the same commands)
+        # Maya's Dope Sheet runs the Graph Editor's curve commands (the same commands)
         m.update({f"{ed}/Curves/{label}": ("allset.dope_graph_op", {"command": cmd}) for label, cmd in (
             ("Isolate Curve", 'ISOLATE'), ("Smooth Filter (Butterworth)", 'BUTTERWORTH'),
             ("Smooth Filter (Gaussian)", 'GAUSSIAN'), ("Euler Filter", 'EULER'), ("Resample Curve", 'RESAMPLE'))})
@@ -140,7 +140,7 @@ def _keys_menu(ed, graph):
         f"{ed}/Keys/Convert to Key": _key("TO_KEY") if graph else ("action.keyframe_type", {"type": 'KEYFRAME'}),
         f"{ed}/Keys/Convert to Breakdown": _key("TO_BREAKDOWN") if graph else
         ("action.keyframe_type", {"type": 'BREAKDOWN'}),
-        # step 157: the editor's curves after the current time (Maya Add / Remove Inbetween), per-key mute =
+        # the editor's curves after the current time (Maya Add / Remove Inbetween), per-key mute =
         # graph_key_menu
         f"{ed}/Keys/Add Inbetween": ("allset.graph_inbetween", {"delta": "ADD"}),
         f"{ed}/Keys/Remove Inbetween": ("allset.graph_inbetween", {"delta": "REMOVE"}),
@@ -159,14 +159,14 @@ def _keys_menu(ed, graph):
 _DS = "space_data.dopesheet"
 SHOW_OBJECTS = {"Geometry": "show_meshes", "Polygon Objects": "show_meshes", "NURBS Objects": "show_curves",
                 "GPU Cache": "show_cache_files", "Cameras": "show_cameras", "Joints": "show_armatures",
-                # step 150: a Blender subdivision surface is a mesh with a Subdivision modifier
+                # a Blender subdivision surface is a mesh with a Subdivision modifier
                 "Subdiv Objects": "show_meshes"}
 # Maya attribute groups -> the channel name filter (Blender names: Location / Rotation / Scale)
 SHOW_ATTRIBUTES = {"Translate": "Location", "Rotate": "Rotation", "Scale": "Scale", "Scale Rotate Translate": "",
                    "Keyable": ""}
 
 
-# step 203 (#110): the kit's Show / List check items (WindowManager flags, ui/editor_chrome.FLAGS)
+# #110: the kit's Show / List check items (WindowManager flags, ui/editor_chrome.FLAGS)
 SHOW_ATTRIBUTE_FLAGS = {"Hidden": "hidden", "Driven by Anim Curve": "anim_curve",
                         "Driven by Expression": "expression", "Driven by Driven Key": "driven_key",
                         "User Defined": "user_defined"}
@@ -175,7 +175,7 @@ _WM = "window_manager"
 
 def _list_show_menus(ed):
     m = {
-        # step 203: Auto Load = Blender's Only Show Selected unless the kit keeps the list (ui/editor_chrome.py)
+        # Auto Load = Blender's Only Show Selected unless the kit keeps the list (ui/editor_chrome.py)
         f"{ed}/List/Auto Load Selected Objects": _prop(f"{_WM}.allset_auto_load"),
         f"{ed}/List/Load Selected Objects": ("allset.graph_list", {"action": "LOAD"}),
         f"{ed}/List/Add Selected Objects": ("allset.graph_list", {"action": "ADD"}),
@@ -183,14 +183,14 @@ def _list_show_menus(ed):
         f"{ed}/Show/Objects/Sets": _prop(f"{_WM}.allset_show_sets"),
         f"{ed}/Show/Objects/Characters": _prop(f"{_WM}.allset_show_characters"),
         f"{ed}/Show/Invert Shown": _prop(f"{_DS}.use_filter_invert"),
-        # step 203: Maya's Show All also unchecks every attribute filter
+        # Maya's Show All also unchecks every attribute filter
         f"{ed}/Show/Show All": "allset.graph_attr_clear",
-        # step 150: Maya's Clear Below leaves no entry checked = nothing filtered (ui/graph_view.py)
+        # Maya's Clear Below leaves no entry checked = nothing filtered (ui/graph_view.py)
         f"{ed}/Show/Objects/Clear Below": "allset.graph_show_clear",
         f"{ed}/Show/Attributes/Clear Below": "allset.graph_attr_clear",
     }
     m.update({f"{ed}/Show/Objects/{label}": _prop(f"{_DS}.{attr}") for label, attr in SHOW_OBJECTS.items()})
-    # step 203: the Graph Editor's kit outliner filters its rows; Blender's Dope Sheet channel list can't drop single
+    # the Graph Editor's kit outliner filters its rows; Blender's Dope Sheet channel list can't drop single
     # channels, so there they keep the objects with such an attribute (ui/editor_chrome.row_objects)
     m.update({f"{ed}/Show/Attributes/{label}": _prop(f"{_WM}.allset_attr_{flag}")
               for label, flag in SHOW_ATTRIBUTE_FLAGS.items()})
@@ -209,7 +209,7 @@ def _list_show_menus(ed):
 
 
 def _depth2(ed):
-    """Step 198: items Maya has in both the Graph Editor and the Dope Sheet menus (same annotations)."""
+    """Items Maya has in both the Graph Editor and the Dope Sheet menus (same annotations)."""
     return {
         f"{ed}/Edit/Transformation Tools/Retime Tool": "allset.retime_tool",
         f"{ed}/Edit/Select Unsnapped": "allset.select_unsnapped",
@@ -269,7 +269,7 @@ MAP = {
     f"{GE}/View/Normalized View": _prop(f"{_SP}.use_normalization", True),
     f"{GE}/View/Renormalize": _prop(f"{_SP}.use_auto_normalization"),
     f"{GE}/View/Show Pins": _prop(f"{_WM}.allset_show_pins"),     # Maya 2026; the kit outliner's pin icons
-    # step 157: Maya's Select menu sets what a click / drag picks (selectType)
+    # Maya's Select menu sets what a click / drag picks (selectType)
     f"{GE}/Select/All": ("allset.graph_select_type", {"preset": "ALL"}),
     f"{GE}/Select/Only Curve": ("allset.graph_select_type", {"preset": "ONLY_CURVE"}),
     f"{GE}/Select/Curve": _prop("addon_prefs.graph_select_curve"),
@@ -277,7 +277,7 @@ MAP = {
     f"{GE}/Select/In Tangent": _prop("addon_prefs.graph_select_in"),
     f"{GE}/Select/Out Tangent": _prop("addon_prefs.graph_select_out"),
     f"{GE}/Select/Snap time to selection": _prop("addon_prefs.snap_time_to_selection"),
-    # step 198 (#105): Graph Editor depth 2 (Dope Sheet twins below)
+    # #105: Graph Editor depth 2 (Dope Sheet twins below)
     **_depth2(GE),
     f"{GE}/View/Show Buffer Curves": _prop("addon_prefs.graph_show_buffers"),
     f"{GE}/Curves/Buffer Curve/Snapshot": "allset.buffer_snapshot",
@@ -303,7 +303,7 @@ MAP = {
     f"{DS}/Edit/Select Unsnapped": "allset.select_unsnapped",
     **_help_menu(DS, "editors/dope_sheet/index.html"),
 
-    # --- UV Editor (textureWindow menus); kit UV commands from step 66 ---
+    # --- UV Editor (textureWindow menus); kit UV commands ---
     f"{UV}/Edit/Copy": "uv.copy",
     f"{UV}/Edit/Paste": "uv.paste",
     f"{UV}/Edit/Pin Selection": "uv.pin",
@@ -311,7 +311,7 @@ MAP = {
     f"{UV}/Edit/Unpin Selection": ("uv.pin", {"clear": True}),
     f"{UV}/Create/Assign Checker Shader": "allset.checker_shader",
     f"{UV}/Create/Automatic": "allset.uv_automatic",
-    f"{UV}/Create/Best Plane": "allset.uv_planar",          # same actions as the main UV menu (step 139, U2)
+    f"{UV}/Create/Best Plane": "allset.uv_planar",          # same actions as the main UV menu (U2)
     f"{UV}/Create/Contour Stretch": "allset.uv_contour",
     f"{UV}/Create/Camera-based": ("v3d", "uv.project_from_view", {}),
     f"{UV}/Create/Normal-based": "allset.uv_planar",
@@ -331,7 +331,7 @@ MAP = {
     **{f"{UV}/Select/Convert Selection/{label}": ("allset.uv_component", {"mode": mode})
        for label, mode in (("To Vertices", "VERTEX"), ("To Edges", "EDGE"), ("To Faces", "FACE"), ("To UVs", "UV"),
                            ("To UV Shell", "SHELL"))},
-    # Step 141: the main Select menu's conversions (operators/select_convert.py; with UV Sync Selection off they read
+    # the main Select menu's conversions (operators/select_convert.py; with UV Sync Selection off they read
     # the selected UVs as their vertices)
     **{f"{UV}/Select/{label}": ("allset.select_convert", {"kind": kind})
        for label, kind in (("Grow Along Loop", 'GROW_LOOP'), ("Shrink Along Loop", 'SHRINK_LOOP'),
@@ -344,8 +344,8 @@ MAP = {
                            ("Convert Selection/To UV Edge Loop", 'UV_EDGE_LOOP'))},
     f"{UV}/Cut/Sew/Cut": "allset.uv_cut",
     f"{UV}/Cut/Sew/Sew": "allset.uv_sew",
-    f"{UV}/Cut/Sew/Merge": "allset.uv_merge",     # step 196: Maya polyMergeUV
-    f"{UV}/Cut/Sew/Move and Sew": "allset.uv_move_sew",      # step 155
+    f"{UV}/Cut/Sew/Merge": "allset.uv_merge",     # Maya polyMergeUV
+    f"{UV}/Cut/Sew/Move and Sew": "allset.uv_move_sew",
     f"{UV}/Cut/Sew/Create UV Shell": "allset.uv_create_shell",
     f"{UV}/Cut/Sew/Stitch Together": "uv.stitch",
     f"{UV}/Modify/Align": ("uv.align", {"axis": 'ALIGN_AUTO'}),
@@ -369,7 +369,7 @@ MAP = {
     f"{UV}/Tools/Move UV Shell": "allset.uv_move_shell",
     f"{UV}/View/Toggle Shell Borders": ("allset.uv_display", {"mode": 'SHELL_BORDERS'}),
     f"{UV}/View/Texture Borders": _prop("window_manager.allset_uv_texture_borders"),
-    # Shaded = faces shown + coloured by UV winding, Wireframe = no faces (opacity 0 still drew fills, step 155)
+    # Shaded = faces shown + coloured by UV winding, Wireframe = no faces (opacity 0 still drew fills)
     f"{UV}/View/Shaded": _prop("window_manager.allset_uv_face_colors", True),
     f"{UV}/View/Wireframe": _prop("window_manager.allset_uv_face_colors", False),
     f"{UV}/View/Isolate Select/View Selected": "allset.uv_isolate",
@@ -379,14 +379,14 @@ MAP = {
     f"{UV}/Modify/Straighten Shell": "uv.follow_active_quads",
     f"{UV}/Modify/Straighten UVs": ("uv.align", {"axis": 'ALIGN_S'}),
     f"{UV}/Modify/Unfold": "allset.uv_unfold",
-    # step 178: Maya-style UV commands (operators/uv_modify.py)
+    # Maya-style UV commands (operators/uv_modify.py)
     f"{UV}/Modify/Map Border": "allset.uv_map_border",
     f"{UV}/Modify/Straighten Border": "allset.uv_straighten_border",
     f"{UV}/Modify/Match Grid": "allset.uv_match_grid",
     f"{UV}/Modify/Layout Along": "allset.uv_layout_along",
     f"{UV}/Modify/Stack Similar Shells": "allset.uv_stack_similar",
     f"{UV}/Modify/Distribute UVs": "allset.uv_distribute_uvs",
-    # step 178: selection / isolate (operators/uv_select_178.py, ui/uv_display.py)
+    # selection / isolate (operators/uv_select_178.py, ui/uv_display.py)
     f"{UV}/Select/Unmapped Faces": "allset.uv_select_unmapped",
     f"{UV}/Select/Back-Facing": ("allset.uv_select_facing", {"front": False}),
     f"{UV}/Select/Front-Facing": ("allset.uv_select_facing", {"front": True}),
@@ -424,7 +424,7 @@ MAP = {
     f"{UV}/UV Sets/Copy UVs to UV Set/Copy into New UV Set": "mesh.uv_texture_add",
     f"{UV}/UV Sets/Create Empty UV Set": "mesh.uv_texture_add",
     f"{UV}/UV Sets/Delete Current UV Set": "mesh.uv_texture_remove",
-    # step 206 (operators/uv_206.py, ui/uv_hud.py)
+    # operators/uv_206.py, ui/uv_hud.py
     f"{UV}/Cut/Sew/Auto Seams": "allset.uv_auto_seams",
     f"{UV}/Cut/Sew/Create Shell (Grid)": "allset.uv_grid_shell",
     f"{UV}/Cut/Sew/Split": "allset.uv_split",
@@ -597,7 +597,7 @@ MAP.update({
     f"{SE}/Edit/Clear History": ("allset.script_clear", {"what": "HISTORY"}),
     f"{SE}/Edit/Clear Input": ("allset.script_clear", {"what": "INPUT"}),
     f"{SE}/Edit/Clear All": ("allset.script_clear", {"what": "ALL"}),
-    # History menu = Maya scriptEditorInfo options as add-on preferences (step 216, command_line/runner.py)
+    # History menu = Maya scriptEditorInfo options as add-on preferences (command_line/runner.py)
     f"{SE}/History/Batch Render Messages": _prop("addon_prefs.se_batch_render_messages"),
     f"{SE}/History/Echo All Commands": _prop("addon_prefs.se_echo_all"),
     f"{SE}/History/Line numbers in errors": _prop("addon_prefs.se_line_numbers"),
@@ -623,7 +623,7 @@ MAP.update({
 })
 
 
-# step 209: the Reference Editor (operators/references.py; literal: no bpy imports)
+# the Reference Editor (operators/references.py; literal: no bpy imports)
 RE = "Reference Editor"
 
 
@@ -655,7 +655,7 @@ MAP.update({
 MAP.update(_hs_nodes())
 
 
-# step 213: Component / Shape / Connection Editor windows (ui/component_editor.py, shape_editor.py,
+# Component / Shape / Connection Editor windows (ui/component_editor.py, shape_editor.py,
 # connection_editor.py; literal: no bpy imports)
 CE, SH, CN = "Component Editor", "Shape Editor", "Connection Editor"
 MAP.update({
@@ -668,7 +668,7 @@ MAP.update({
     f"{SH}/Shapes/Mirror Target": ("allset.shape_mirror", {"direction": "POSITIVE"}),
     f"{SH}/Shapes/Key": "allset.shape_key",
     f"{SH}/Shapes/Reset": "allset.shape_reset",
-    # step 227 (#137): in-between and combination targets (operators/blend_shapes_227.py)
+    # #137: in-between and combination targets (operators/blend_shapes_227.py)
     f"{SH}/Create/Add In-Between Target": "allset.shape_add_inbetween",
     f"{SH}/Create/Add Selection as In-Between Target": ("allset.shape_add_inbetween", {"selection": True}),
     f"{SH}/Create/Add Combination Target": "allset.shape_add_combination",
@@ -692,7 +692,7 @@ MAP.update({
 MAP.pop(f"{SH}/Help/Help on {SH}", None)    # Maya titles it Help on Shape Authoring
 
 
-# step 203: Change Rotation Interp / Key Sync / Peak Removal / Select Curve Nodes (operators/graph_curves_203.py);
+# Change Rotation Interp / Key Sync / Peak Removal / Select Curve Nodes (operators/graph_curves_203.py);
 # Maya 2026's Dope Sheet has no Curves menu / Select Curve Nodes
 # (literal here: tools/menu_count.py loads the menu maps without bpy)
 _ROT_MODES = {"Independent Euler": "NONE", "Synchronized Euler": "EULER", "Quaternion Slerp": "SLERP",

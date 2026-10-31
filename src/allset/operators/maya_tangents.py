@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya tangent shapes: Auto, Spline, Clamped, Plateau and Flat (steps 257, 310; Issues #151, #210).
+"""Maya tangent shapes: Auto, Spline, Clamped, Plateau and Flat (Issues #151, #210).
 
 Every Maya tangent type computes its own slope m (value per frame) from the keys; the curve between two keys is a
 plain cubic Hermite in time, i.e. Bezier handles at a third of each interval: in = (-h-/3, -m h-/3),

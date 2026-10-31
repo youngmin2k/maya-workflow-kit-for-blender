@@ -1,4 +1,4 @@
-"""Step 248 (Issue #165): Maya pick-walk order and joint display.
+"""Issue #165: Maya pick-walk order and joint display.
 
 Maya pick-walk:
 spine's children L_arm, R_arm, neck in creation order; Left / Right walk the siblings in that order and wrap; Down = the
@@ -55,7 +55,7 @@ def _walk(ob, name, direction, skip=True):
 
 
 def test_creation_order_not_names():
-    # created z_arm before a_arm: Maya walks in that order (the kit sorted by name before step 248)
+    # created z_arm before a_arm: Maya walks in that order (the kit used to sort by name)
     ob = _build([("root", (0, 0, 0), None), ("z_arm", (2, 0, 0), "root"), ("a_arm", (-2, 0, 0), "root"),
                  ("m_arm", (0, 2, 0), "root")])
     assert _walk(ob, "root", "DOWN") == "z_arm"

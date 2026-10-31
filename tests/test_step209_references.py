@@ -1,4 +1,4 @@
-"""Step 209: Reference Editor (Issue #116) — Maya reference commands on Blender links + library overrides
+"""Reference Editor (Issue #116) — Maya reference commands on Blender links + library overrides
 (operators/references.py, ui/reference_editor.py). Maya rules: reload
 keeps edits and shows the source's other changes, unload / load keep edits, replace re-applies edits by node name,
 import makes the nodes local with their ns: names, remove takes nodes and namespace, a second reference of a file is

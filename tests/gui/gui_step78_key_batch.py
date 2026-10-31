@@ -1,4 +1,4 @@
-"""Step 78 in a real UI: Alt+Q hold + LMB east = Edges, Shift+Q hold + LMB = the pick mask menu (screenshot, SE =
+"""In a real UI: Alt+Q hold + LMB east = Edges, Shift+Q hold + LMB = the pick mask menu (screenshot, SE =
 Faces toggled on), Shift+G repeats the last create at the mouse, Ctrl+Shift+C = camera from the view, Graph Editor
 3 / 1 = normalized / absolute."""
 

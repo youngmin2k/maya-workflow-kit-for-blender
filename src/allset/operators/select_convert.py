@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Select menu / Ctrl+RMB (CTRL_CONVERT) conversions Blender has no operator for (step 141):
+"""Maya Select menu / Ctrl+RMB (CTRL_CONVERT) conversions Blender has no operator for:
 Grow / Shrink Along Loop, To Vertex / Edge / Face Perimeter, To Face Path, To Shell Border, To UV Shell Border,
 To UVs, To UV Perimeter, To UV Edge Loop.
 
@@ -21,9 +21,9 @@ Every rule is Maya 2022's, checked on a 4 x 4 plane, a 6 x 6 plane and a cube.
 - To UVs (PolySelectConvert 4): faces -> their UVs; edges -> their UVs in the faces beside them; vertices -> every UV.
 
 Blender has no UV component in the 3D View: a UV result is the UV Editor's selection with UV Sync Selection off
-(the kit's Maya UV component, operators/uv_tools.set_component, step 66). In that state the selection *is* the UV
+(the kit's Maya UV component, operators/uv_tools.set_component). In that state the selection *is* the UV
 selection, so a conversion reads it as vertices (the selected UVs' vertices); sync off alone is Blender's factory
-state, so ``uv_source`` decides (step 141).
+state, so ``uv_source`` decides.
 """
 
 import bmesh
@@ -405,7 +405,7 @@ def uv_border_loops(bm, uv, loops):
 
 
 def uv_source(context, bm, uv):
-    """Is the selection UVs (the kit's Maya UV component, step 66)? Sync off is also Blender's factory state, so
+    """Is the selection UVs (the kit's Maya UV component)? Sync off is also Blender's factory state, so
     only in the UV Editor, or in the 3D View when every shown face is selected (how uv_tools.set_component shows
     the UVs) and some but not all UVs are."""
     if uv is None or context.scene.tool_settings.use_uv_select_sync:

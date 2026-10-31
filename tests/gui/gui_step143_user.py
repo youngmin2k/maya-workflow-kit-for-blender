@@ -1,13 +1,13 @@
-"""Step 143 user reports in a real UI.
+"""User reports in a real UI.
 
 - #82: a Maya menu item's option box (Display > Grid): a click on the box mark runs the command (Python can't tell
   where on the item a click landed); press and hold the item, drag onto the "Option Box" row Blender opens below it
-  and release = the option box (``allset.menu_option_box``). Step 146 makes the hold work without the drag
+  and release = the option box (``allset.menu_option_box``). The hold also works work without the drag
   (gui_step146_option_box.py); the drag keeps working.
 - #80: face -> Ctrl+E -> extrude manipulator; W then shows the Move manipulator, and its centre drag moves the new
   faces; F9 / F10 / F11 switch the component mode with the mouse over the viewport.
 - #84: the double-click loop pick (``allset.loop_pick`` invoked at the mouse; event simulation can't send
-  DOUBLE_CLICK, step 73) raises nothing (5.1+ has no ``ring`` keyword).
+  DOUBLE_CLICK) raises nothing (5.1+ has no ``ring`` keyword).
 """
 
 import os
@@ -97,7 +97,7 @@ def open_display():
         bpy.ops.wm.call_menu(name=mod(".ui.menu_sets").menu_idname("mainDisplayMenu"))
 
 
-# Maya 2026 Display menu (step 219): shot 143_display_menu.png of step 229 = Grid's row 9 px above the mouse
+# Maya 2026 Display menu: Grid's row is 9 px above the mouse
 GRID_ROW_UP = 9
 
 
@@ -147,7 +147,7 @@ def s_clicked_box():
     C["click"] = list(C["calls"])
     del C["calls"][:]
     print("GUI143 click on the box mark:", C["click"], flush=True)
-    # #82 (0.4.0): the item is one button (a second button on a menu line staircases the menu, step 103) and Python
+    # #82 (0.4.0): the item is one button (a second button on a menu line staircases the menu) and Python
     # can't tell where on it the click landed (the operator runs with the opener's region), so a click on
     # the box mark runs the command like a click on the label
     check(f"#82 a click on Grid's box mark runs the command ({C['click']})",
@@ -211,7 +211,7 @@ def s_option_box_result():
     shot("143_option_box.png")
     print("GUI143 calls after hold:", C["after_hold"], "after click:", C["calls"], flush=True)
     check(f"#82 press and hold on Grid runs nothing yet ({C['after_hold']})", not C["after_hold"])
-    check(f"#82 hold, drag onto the hold menu's Option Box row, release: the option box ({C['calls']})", ("box", "Display/Grid") in C["calls"])     # step 146: box_hold, then box
+    check(f"#82 hold, drag onto the hold menu's Option Box row, release: the option box ({C['calls']})", ("box", "Display/Grid") in C["calls"])     # box_hold, then box
     tap('ESC')
 
 

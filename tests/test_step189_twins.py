@@ -1,4 +1,4 @@
-"""Step 189 (audit 13 #10, BS1): greyed twins found through runTimeCommand aliases, panel Show rows the kit has,
+"""Audit 13 #10: greyed twins found through runTimeCommand aliases, panel Show rows the kit has,
 Surfaces > Insert Isoparms' Maya window.
 """
 

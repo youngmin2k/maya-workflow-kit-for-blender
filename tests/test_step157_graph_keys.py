@@ -1,4 +1,4 @@
-"""Step 157: Graph Editor keys in Maya terms — key windows on the selected keys, Add / Remove Inbetween on the
+"""Graph Editor keys in Maya terms — key windows on the selected keys, Add / Remove Inbetween on the
 editor's curves, per-key Mute / Unmute (Maya holds), Select masks, Default In / Out Tangent."""
 
 from importlib import import_module

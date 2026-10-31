@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 140 Maya option windows: modeling, parenting and key commands (issues #33, #35).
+"""Maya option windows: modeling, parenting and key commands (issues #33, #35).
 
 Same spec as operators/option_windows.py (``F`` fields, ``Window`` = one ``allset.opt_<key>`` operator); labels and
 what the values do follow Maya.
@@ -62,7 +62,7 @@ def _gkm():
 
 def _on_selected(context, v):
     """Maya fromGraphEditor rule (Cut / Copy / Paste Keys & co.): a key window opened from a Graph Editor / Dope Sheet
-    menu with keys selected and Method Keys acts on those keys, not on the nodes' time range (step 157)."""
+    menu with keys selected and Method Keys acts on those keys, not on the nodes' time range."""
     g = _gkm()
     return g.in_key_editor(context) and v.get("method", "Keys") == "Keys" and g.has_selected_keys(context)
 
@@ -129,7 +129,7 @@ def _run_snap(context, v):
 
 
 def _paths(command, edit):
-    """Main-menu paths of a key window + the Graph Editor / Dope Sheet Edit menu box (step 157)."""
+    """Main-menu paths of a key window + the Graph Editor / Dope Sheet Edit menu box."""
     return (f"Key/{command}", f"Edit/Keys/{command}", f"Graph Editor/Edit/{edit}", f"Dope Sheet/Edit/{edit}")
 
 
@@ -208,7 +208,7 @@ def _run_duplicate_special(context, v):
     return bpy.ops.allset.duplicate_special(
         'EXEC_DEFAULT', geometry_type=v["geometry_type"].upper(),
         group_under={"Parent": 'PARENT', "World": 'WORLD', "New group": 'NEW_GROUP'}[v["group_under"]],
-        # Maya Y up: Maya Y -> Blender Z, Maya Z -> Blender -Y (step 57)
+        # Maya Y up: Maya Y -> Blender Z, Maya Z -> Blender -Y
         translate=Vector((v["translate"][0], -v["translate"][2], v["translate"][1])) * k,
         rotate=tuple(math.radians(a) for a in (v["rotate"][0], -v["rotate"][2], v["rotate"][1])),
         scale=(v["scale"][0], v["scale"][2], v["scale"][1]), copies=v["copies"])
@@ -224,7 +224,7 @@ EDIT_WINDOWS = [
     Window("ungroup", "Ungroup Options", "Ungroup", ("allset.ungroup", {}), [
         F("under", "Ungroup under:", "enum", "Parent", items=("Parent", "World")), _PRESERVE], _run_ungroup,
         paths=("Edit/Ungroup",)),
-    # step 103's window (option_windows.py "duplicate_special") plus Smart transform, which the kit has
+    # the window of option_windows.py "duplicate_special" plus Smart transform, which the kit has
     # too; the main loop deletes the old spec at merge
     Window("duplicate_special_maya", "Duplicate Special Options", "Duplicate Special", None, [
         F("geometry_type", "Geometry type:", "enum", "Copy", items=("Copy", "Instance")),
@@ -275,8 +275,8 @@ _MAINTAIN = {"Relative distance from edge": 'RELATIVE', "Equal distance from edg
 
 
 def insert_edge_loop_options(context, v):
-    """Put the Insert Edge Loop window's values on the kit tool's settings (Scene.allset_loop_tools, step 144 LOOP;
-    step 140 put them on Blender's Loop Cut tool). Returns the settings."""
+    """Put the Insert Edge Loop window's values on the kit tool's settings (Scene.allset_loop_tools).
+    Returns the settings."""
     from . import edge_loops
     s = edge_loops.settings(context)
     s.iel_position = _MAINTAIN[v["maintain"]]
@@ -288,7 +288,7 @@ def insert_edge_loop_options(context, v):
 
 
 def offset_edge_loop_options(context, v):
-    """The Offset Edge Loop Options values on the kit tool's settings (step 144 LOOP)."""
+    """The Offset Edge Loop Options values on the kit tool's settings."""
     from . import edge_loops
     s = edge_loops.settings(context)
     s.oel_delete_edge = v["delete_edge"]
@@ -342,7 +342,7 @@ MESH_WINDOWS = [
         F("smoothing", "Smoothing angle:", "float", 30.0, lo=0.0, hi=180.0)], _run_insert_edge_loop,
         paths=("Mesh Tools/Insert Edge Loop",),
         missing=("Use Equal Multiplier (always on)", "Auto complete (always on)", "Fix Quads (always on)")),
-    # step 144 LOOP: Maya's box is a window with Enter Tool And Close / Enter Tool / Close
+    # Maya's box is a window with Enter Tool And Close / Enter Tool / Close
     Window("offset_edge_loop", "Offset Edge Loop Options", "Enter Tool And Close", None, [
         F("delete_edge", "", "bool", True, text="Delete edge (maintain 4-sided polygons)"),
         F("edge_flow", "", "bool", False, text="Insert with edge flow"),
@@ -354,7 +354,7 @@ MESH_WINDOWS = [
         missing=("Start/End vertex offset (0)", "Tool completion: Press enter (the loops are made on release)")),
 ]
 
-# --- Edit > Delete by Type > Non-Deformer History ❒ (step 162) ---------------------------------------------------
+# --- Edit > Delete by Type > Non-Deformer History ❒ ---------------------------------------------------
 # Maya "Delete Non Deformer History Options": Delete: All non-deformer history (default) /
 # History before deformers only; buttons Delete / Apply / Close.
 NONDEF_ALL = "All non-deformer history"

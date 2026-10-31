@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya animation layer commands, part 4 (step 204, Issue #111).
+"""Maya animation layer commands, part 4 (Issue #111).
 
 Maya 2022 Layer Editor Anim tab (its menus and labels),
 re-implemented on the kit's NLA layers (operators/anim_layers.py):
@@ -17,7 +17,7 @@ re-implemented on the kit's NLA layers (operators/anim_layers.py):
   on the selected layers, then a key on ``<layer>.weight`` at the current time. The kit's weight is each member's
   strip influence, so the key goes on every member's influence curve.
 - Layer Editor Ctrl / Shift click (Qt tree view): several selected layers (``picked`` flags); the last picked one stays
-  ``allset_anim_layer_index`` (keys and the Graph Editor's editable curves, step 194), ui/graph_layers.py draws the
+  ``allset_anim_layer_index`` (keys and the Graph Editor's editable curves), ui/graph_layers.py draws the
   other selected layers' curves.
 
 Maya 2022:

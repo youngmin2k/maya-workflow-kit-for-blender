@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya NURBS surface maths, bpy-free (step 181).
+"""Maya NURBS surface maths, bpy-free.
 
 Conventions (Maya's):
 - knot lists are Maya lists (no phantom end knots: len = CVs + degree - 1);
@@ -748,7 +748,7 @@ def _orient(s, edge, to_end):
 
 
 def _join_line(ca, ka, cb, kb, degree, method, bias):
-    """The step 156 curve Attach (cm.attach) with the ends already chosen: A's end meets B's start."""
+    """The curve Attach (cm.attach) with the ends already chosen: A's end meets B's start."""
     shift = ka[-1] - kb[0]
     if method == "CONNECT":
         return list(ca) + list(cb[1:]), list(ka) + [k + shift for k in kb[degree:]]
@@ -760,7 +760,7 @@ def _join_line(ca, ka, cb, kb, degree, method, bias):
 
 def attach(a, b, method="BLEND", bias=0.5):
     """Maya Attach: the pair of edges (a's vs b's) whose CV lines are nearest (mean CV distance,
-    either line direction) joins; copies are turned so a's U end meets b's U start, then the step 156 curve rule
+    either line direction) joins; copies are turned so a's U end meets b's U start, then the curve rule
     (Blend: bias, joint knot multiplicity 1; Connect: full multiplicity) runs on every CV line along U."""
     best = None
     for ea in _edges(a):
@@ -864,7 +864,7 @@ def rebuild(s, spans_u=4, spans_v=4, degree_u=3, degree_v=3):
     """Maya Rebuild (factory Uniform, 4 x 4 spans, cubic, range 0..1, keep ends) [U algorithm]: per direction, every
     CV line is mapped linearly onto 0..1 and interpolated at the Greville points of the default knots (clamped
     uniform over 0..1, exact). Exact when the new space contains the old one (e.g. 2 -> 4 spans); otherwise
-    an approximation (the step 156 curve model, equal-arc-length least squares per line, fits worse: per-line arc
+    an approximation (the curve model, equal-arc-length least squares per line, fits worse: per-line arc
     lengths disagree)."""
     out = s
     for direction, spans, deg in (("U", spans_u, degree_u), ("V", spans_v, degree_v)):

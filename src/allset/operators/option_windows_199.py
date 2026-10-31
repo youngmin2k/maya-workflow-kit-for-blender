@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 199 (#106): Maya option windows of the new Skin / Constrain commands.
+"""#106: Maya option windows of the new Skin / Constrain commands.
 
 Titles, buttons, labels and default values match the Maya option windows.
 Fields the kit can't honour

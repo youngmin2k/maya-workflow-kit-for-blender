@@ -1,4 +1,4 @@
-"""Step 136 lane ITEMS (#74 #62): marking-menu entries run their main-menu items, greyed entries have notices,
+"""Lane ITEMS (#74 #62): marking-menu entries run their main-menu items, greyed entries have notices,
 component-mode RMB Select All / Deselect All / Invert follow the main menu's component rules."""
 
 from importlib import import_module
@@ -15,7 +15,7 @@ engine = import_module(kit.MODULE + ".marking.engine")
 menu_map = import_module(kit.MODULE + ".ui.menu_map")
 notices = import_module(kit.MODULE + ".ui.notices")
 
-# Before step 136 (af51cd0): menus.walk over MENUS = 464 entries, 128 greyed (None or an empty Sub).
+# Baseline (af51cd0): menus.walk over MENUS = 464 entries, 128 greyed (None or an empty Sub).
 BASELINE = (464, 128)
 
 # Greyed marking entries whose Maya command already worked from the main menus.

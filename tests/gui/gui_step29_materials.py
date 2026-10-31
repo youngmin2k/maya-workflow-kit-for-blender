@@ -1,4 +1,4 @@
-"""Step 29 in a real UI: material items of the RMB marking menu (Favorite submenu, Existing
+"""In a real UI: material items of the RMB marking menu (Favorite submenu, Existing
 popup), Lighting/Shading menu, Material Attributes in the Attribute Editor, Shift+T; screenshots."""
 
 import os
@@ -94,7 +94,7 @@ def s_favorite_shot():
 @step
 def s_favorite_done():
     mat = cube().active_material
-    # Maya numbers a new node one past the highest (steps 208 / 211, naming.next_number): blinn5 exists -> blinn6
+    # Maya numbers a new node one past the highest (naming.next_number): blinn5 exists -> blinn6
     check("Favorite > Blinn assigned blinn6 to the cube under the menu", mat is not None and mat.name == "blinn6")
     check("menu closed", not C["draw"].ACTIVE)
     rmb_click()
@@ -146,7 +146,7 @@ def s_attributes():
 @step
 def s_attributes_wait():
     md = import_module(MODULE + ".ui.maya_dock")
-    check("the Attribute Editor is shown (its own floating window: this layout has no tab stack, step 116)",
+    check("the Attribute Editor is shown (its own floating window: this layout has no tab stack)",
           md.kind_visible(bpy.context.window_manager, 'ATTRIBUTE_EDITOR'))
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"])
 

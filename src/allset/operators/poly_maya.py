@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Edit Mesh / Mesh Tools commands with Maya's results (step 110;
-step 139: Connect / Merge / Smooth / Symmetrize).
+"""Maya Edit Mesh / Mesh Tools commands with Maya's results
+(Connect / Merge / Smooth / Symmetrize too).
 Circularize, Connect, Make Hole; Connect, Merge, Smooth, Symmetrize. Pure bmesh.
 """
 
@@ -47,7 +47,7 @@ def _ordered_loops(edges):
 def circularize_loop(verts, radial_offset=0.0, twist=0.0, even=True, ref=None):
     """Put an ordered vertex loop on a circle: centre = centroid, radius = mean distance (+ ``radial_offset``), evenly
     spaced keeping the loop's mean angular position (Maya polyCircularize defaults).
-    Step 140 options: ``twist`` (radians) turns the loop
+    Options: ``twist`` (radians) turns the loop
     right-handed about ``ref`` (the faces' normal), ``even`` off keeps each vertex's own angle about the centre.
     Returns the loop's normal (oriented like ``ref``) or None."""
     from mathutils import Vector
@@ -170,7 +170,7 @@ class ALLSET_OT_circularize(bpy.types.Operator):
 
 
 # --- Connect -----------------------------------------------------------------------------------
-# polyConnectComponents (step 110, step 139). Per face the points to join
+# Maya Connect. Per face the points to join
 # are its selected vertices and the midpoints of its selected edges; they are joined as a cycle in index order, a
 # chord is skipped when its ends are neighbours on the face border or it crosses a chord already made. A selected
 # edge whose face gets no chord is left alone (one edge -> nothing). Faces: the edges shared by two selected faces are
@@ -267,7 +267,7 @@ def _orient(jobs, split):
 
 def connect(bm, mode, edge_flow=0.0, segments=1, slide=0.5):
     """Maya Connect on the selection (``mode`` 'VERT' / 'EDGE' / 'FACE'). Returns the number of new edges (0 = nothing
-    to connect); the new edges end up selected. Step 140 options: ``edge_flow`` = Adjust Edge Flow with Insert with
+    to connect); the new edges end up selected. Options: ``edge_flow`` = Adjust Edge Flow with Insert with
     edge flow on (0 = off); Connect tool ``segments`` / ``slide`` (selected edges: n points per edge, centred on
     Slide)."""
     before = len(bm.edges)
@@ -698,7 +698,7 @@ class ALLSET_OT_smooth(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_smooth_edit(bpy.types.Operator):
     """Change the last Smooth (Maya: edit the polySmoothFace node). Blender keeps no history, so only the last one
     can be changed"""

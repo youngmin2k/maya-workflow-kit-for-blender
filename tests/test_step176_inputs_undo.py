@@ -1,9 +1,9 @@
-"""Step 176 (dogfood G1): pCube1's creation node through Ctrl+D / Ctrl+G / Ctrl+Z / P.
+"""pCube1's creation node through Ctrl+D / Ctrl+G / Ctrl+Z / P.
 
 The dogfood session lost Channel Box INPUTS polyCube1 between shots 04 and 05. Its keys there are 3 -> Alt+Shift+D ->
 1 -> Ctrl+D -> Ctrl+G -> Ctrl+Z -> P; Alt+Shift+D is Maya's Delete History (``delete -ch``),
 which removes polyCube1 as in Maya. The other commands must
-keep the node, also across a real undo (``ed.undo_push`` makes the undo stack in background, step 147; the commands
+keep the node, also across a real undo (``ed.undo_push`` makes the undo stack in background; the commands
 run at undo depth 0 like a key press). GUI replay: tests/gui/gui_step176_inputs_undo.py.
 """
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya Time Slider range drag: the middle of a Shift-highlighted range moves its keys, an end arrow scales them
-(step 84).
+.
 
 The maths is bpy-free (``zone``, ``map_frame``, ``new_range``); ``Drag`` edits the F-curves of the range's keys from
 a snapshot of every key on each update, because sorting moves the points and a KeyframePoint reference would then

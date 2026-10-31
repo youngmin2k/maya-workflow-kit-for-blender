@@ -1,4 +1,4 @@
-"""Step 129 lane CB: one Maya visibility (#26), Channel Box channel ranges + one value into every selected channel
+"""One Maya visibility (#26), Channel Box channel ranges + one value into every selected channel
 (#6), Layer Editor rows / order (#7)."""
 
 from importlib import import_module

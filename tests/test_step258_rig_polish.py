@@ -1,10 +1,10 @@
-"""Step 258 lane B (Issue #155): rig polish — root joint Translate, Outliner name, Orient Joint / Ghost Selected output,
+"""Lane B (Issue #155): rig polish — root joint Translate, Outliner name, Orient Joint / Ghost Selected output,
 menu items that left pose mode, the Channel Box joint hint.
 
 Maya: a new root joint is ``joint1`` in
 the Outliner and the Channel Box, its Translate = its position; Orient Joint after success = only the command echo;
 Ghost Selected prints nothing on success, "Nothing selected can be ghosted using the current settings." when nothing
-can be ghosted). Kit axes: step 239 — the kit shows Blender's Z-up values (Maya Translate Y = kit Z).
+can be ghosted). Kit axes: the kit shows Blender's Z-up values (Maya Translate Y = kit Z).
 """
 
 import json
@@ -87,7 +87,7 @@ def test_root_joint_translate_keys_and_edit_mode_agree():
     assert fc is not None
     scene.allset_cb.tx_text = "4"
     assert _close(_numbers(scene), (4.0, -1.0, 2.0)), _numbers(scene)
-    # the same rule in Edit mode (step 243's Channel Box Translate): the root joint's rest position, kit axes
+    # the same rule in Edit mode (the Channel Box Translate): the root joint's rest position, kit axes
     for p in ob.pose.bones:
         p.location = (0.0, 0.0, 0.0)
     bpy.ops.object.mode_set(mode='EDIT')
@@ -100,7 +100,7 @@ def test_root_joint_translate_keys_and_edit_mode_agree():
 
 
 def test_child_joint_translate_unchanged():
-    """Pose-mode child joints keep showing the pose offset (step 55 rule) — only the root changed."""
+    """Pose-mode child joints keep showing the pose offset — only the root changed."""
     ob, k = _skeleton()
     cbm = joints._cb()
     for p in ob.pose.bones:
@@ -160,7 +160,7 @@ def test_ghost_selected_nothing_selected_error():
 
 # --- 5. menu items keep pose mode -------------------------------------------------------------------------------------
 
-# the #155 session, steps 17-30 — Maya has no modes: none of these changes what is selected
+# the #155 session — Maya has no modes: none of these changes what is selected
 MENU_ITEMS = (
     "Key/Hold Current Keys",
     "Key/IK/FK Keys/Move IK to FK",

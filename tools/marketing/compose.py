@@ -1,4 +1,4 @@
-"""Marketing images (step 122): captioned feature screens, key visuals and the icon, composited with Pillow from the
+"""Marketing images: captioned feature screens, key visuals and the icon, composited with Pillow from the
 GUI shots of tools/marketing/shots.py and the copy in tools/marketing/content.json.
 
     python tools/marketing/compose.py [--only NAME,...]
@@ -152,7 +152,7 @@ def fine_print(draw, content, names, x, y, width, anchor="l", top=False):
     ``top`` = first line's top at ``y`` (stacked down: credit, note), else the note's bottom at ``y`` (stacked up:
     note, credit above). ``anchor`` l / m / r = horizontal anchor at ``x``. Returns the far y (bottom / top)."""
     f = font("font-regular", fine_size(width))
-    # step 125: one row per distinct credit (two CC BY credits on one row ran into the key visual's screens)
+    # one row per distinct credit (two CC BY credits on one row ran into the key visual's screens)
     credits = [t for t in credit_line(content, names).split(" · ") if t]
     lines = credits + [t for t in (content.get("trademark_note", ""),) if t]
     step = round(f.size * 1.45)
@@ -201,7 +201,7 @@ def screen(name, title, line, callouts, out_path, credit=""):
         rows = [credit]
         line_end = tx + text_w(draw, line, lfont) + band["brand_clear"]
         if line_end > W - mx - text_w(draw, credit, cf) and " | " in credit:
-            # step 125: a long CC BY credit takes two rows (split after the author, " | "): the upper one sits
+            # a long CC BY credit takes two rows (split after the author, " | "): the upper one sits
             # between the brand mark and the line row, right of the title
             a, b = credit.split(" | ", 1)
             rows = [a + " |", b]
@@ -282,14 +282,14 @@ def perspective_coeffs(src, dst):
     return [m[i][n] / m[i][i] for i in range(n)]
 
 
-TILT_DEG = 24.0      # step 126: every turned screen = the same plane rotation ...
+TILT_DEG = 24.0      # every turned screen = the same plane rotation ...
 TILT_DEPTH = 1.6     # ... seen by the same pinhole camera: distance to the near edge = TILT_DEPTH x the plane width
 
 
 def tilt_quad(w, h, width, tilt_deg=TILT_DEG, depth=TILT_DEPTH):
     """Projected corners of a ``width`` x (``width`` h / w) screen turned ``tilt_deg`` about its near (left) vertical
     edge, away from a pinhole camera at ``depth`` x width whose focal length keeps the near edge at its own height.
-    Step 126: the old quad kept the full width (only tapered the far edge), so turned screens came out wider than the
+    The old quad kept the full width (only tapered the far edge), so turned screens came out wider than the
     capture's aspect; a real rotation projects the width to width cos(t) d / (d + width sin(t)) < width cos(t)."""
     W, H = float(width), width * h / w
     t = math.radians(tilt_deg)
@@ -340,7 +340,7 @@ def key_visual_layers(content, shots, size=(1920, 1080), square=False):
         for img, wdt, (x, y) in zip((imgs[1], imgs[0]), (1000, 1160), kv["screens_xy"]):
             add(tilted(img, wdt), x, y)
     else:
-        add(tilted(imgs[0], 1400), *kv["screens_xy"][0])   # step 126: projects to ~1020 px wide
+        add(tilted(imgs[0], 1400), *kv["screens_xy"][0])   # projects to ~1020 px wide
     tx, ty = kv["text_xy"]
     text = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(text)

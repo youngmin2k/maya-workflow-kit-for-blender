@@ -1,8 +1,8 @@
-"""Step 138 (#69): FBX / OBJ / Alembic / USD round trip the Maya way — no axis / unit conversion left on the channels,
+"""#69: FBX / OBJ / Alembic / USD round trip the Maya way — no axis / unit conversion left on the channels,
 Maya names (files in tmp/file_io138/: maya_cube138.*, kit_cube138*.*).
 
 The reference object is pCube1: polyCube 1 x 1 x 1 at Maya translate (1, 2, 3), rotate Y 28.6, tx keyed 1 at
-frame 1 and 5 at frame 10. The kit is Z up (Maya Y = Blender Z, Maya Z = Blender -Y, step 102), so in the
+frame 1 and 5 at frame 10. The kit is Z up (Maya Y = Blender Z, Maya Z = Blender -Y), so in the
 kit's Channel Box the same object reads Translate (1, -3, 2), Rotate (0, 0, 28.6), Scale 1 (in display units).
 """
 

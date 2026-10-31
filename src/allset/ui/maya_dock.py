@@ -1,17 +1,17 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya's docking model: every Maya panel is its own area or window, torn off by its ::::: handle
-(step 116).
+.
 
 Maya builds every UI element as a dockable ``workspaceControl``; the right column is one tab stack of Channel Box /
 Layer Editor, Attribute Editor and Modeling Toolkit, and a panel's
 dotted handle tears it off into a floating window. Here:
 
 - **Dock areas.** A Maya panel lives in its own Properties editor on the Tool tab, header and tab column hidden (the
-  Tool tab draws 3D View "Tool"-category panels, step 106), never in the viewport's sidebar. The area's role is kept
+  Tool tab draws 3D View "Tool"-category panels), never in the viewport's sidebar. The area's role is kept
   in the space's hidden tab flags (``ROLE_FLAGS``: Tool tab + one flag), so it survives saving and ``area_dupli``
   (the copy keeps context, flags and the hidden header). The Tool Settings dock (``tool_dock``) is the
   Tool tab with no role flag.
-- **Stack.** The ``STACK`` area shows Maya's vertical tab strip on its right edge (step 142) and the selected tab
+- **Stack.** The ``STACK`` area shows Maya's vertical tab strip on its right edge and the selected tab
   (``WindowManager.allset_dock``); kinds that have a floating window leave the strip.
 - **Tear off / dock.** The handle row (``ALLSET_OT_dock_handle``) on a docked panel opens a floating window with only
   that panel (``area_dupli`` + role); on a floating panel it offers Dock (close the window, the panel goes back) and
@@ -313,7 +313,7 @@ def open_floating(context, kind):
 # --- tear off / dock -----------------------------------------------------------------------------------------------
 # Issue #4: Blender has no API to size or place a window, and ``screen.area_dupli`` opens a window of the copied
 # area's size. So the source area is first split (``area_split`` HORIZONTAL, factor > 0.5 = the new area on top,
-# 1 - factor tall, step 129) to the content height computed by ``layout_measure``; that top piece is
+# 1 - factor tall) to the content height computed by ``layout_measure``; that top piece is
 # copied a tick later (a split area has no size before the screen refreshed: a copy in the same call opened a
 # default-size window) and closed again, which gives the source its height back.
 
@@ -334,7 +334,7 @@ def panel_rows(context, area=None):
     from . import layout_measure
     area = area or context.area
     if area is not None and area.type == 'OUTLINER':
-        n = sum(1 for _ in context.scene.objects) + 7       # objects + the startup rows Maya lists (step 99) + header
+        n = sum(1 for _ in context.scene.objects) + 7       # objects + the startup rows Maya lists + header
         return min(n, 40)
     if role(area) is None:
         from . import tool_dock
@@ -677,7 +677,7 @@ def draw_handle(layout, context=None, tabs=False):
     grip.alignment = 'LEFT'
     if tabs and context is not None:
         # Blender splits an expanded row into equal tabs ("Channel Box / Layer Editor" was cut while "Attribute
-        # Editor" got twice its text): each tab gets its text's width (step 135; the same rule sizes the dock,
+        # Editor" got twice its text): each tab gets its text's width (the same rule sizes the dock,
         # ui/toolbox.dock_need)
         row.alignment = 'LEFT'
         grip.ui_units_x = text_units(context, HANDLE, GRIP_PAD)
@@ -704,14 +704,14 @@ def text_units(context, text, pad):
     return blf.dimensions(0, text)[0] / max(u, 1) + pad
 
 
-# --- vertical tab strip (step 142, #78) ----------------------------------------------------------------------------
+# --- vertical tab strip (#78) ----------------------------------------------------------------------------
 # Maya's stack tabs are a vertical strip on the stack's right edge, so the stack is only as wide as its panel
 # (tabs from the content top, the text + a small margin at each end, close together, reading top to bottom; the
 # raised tab in the panel colour, lowered tabs and the strip darker). Blender can't lay a button out rotated, so the
 # strip is drawn here
 # (POST_PIXEL, blf rotation) in a column the panel content keeps clear of (``content_layout``), and a click on it goes
 # to ``ALLSET_OT_dock_strip_click`` (first in "View2D Buttons List", like ui/outliner_sets.py's rows). Chosen over
-# a width that follows the raised tab with horizontal tabs: the tab row alone needed 466 px at UI scale 1 (step 135).
+# a width that follows the raised tab with horizontal tabs: the tab row alone needed 466 px at UI scale 1.
 STRIP_PX = 18          # strip width at UI scale 1 (Blender's UI font is a little taller)
 STRIP_GAP_PX = 6       # between the content and the strip
 STRIP_TOP_PX = 4       # first tab below the region's top
@@ -847,9 +847,9 @@ def _strip_colours(context):
 
 
 # Maya-style dock grey #444444 (Blender's factory Properties grey is #303030). The kit
-# ships no theme (step 130), so the dock areas are lifted by the difference after drawing: an additive grey over the
+# ships no theme, so the dock areas are lifted by the difference after drawing: an additive grey over the
 # region raises the background to #444444 and the value fields with it (#1d1d1d -> #313131); text stays
-# near white (step 195). Only a theme darker than that is lifted, never a light one.
+# near white. Only a theme darker than that is lifted, never a light one.
 MAYA_DOCK_GREY = 0x44 / 255.0
 TINTED_ROLES = {'STACK', 'CHANNEL_BOX', 'ATTRIBUTE_EDITOR', 'MODELING_TOOLKIT'}
 
@@ -936,7 +936,7 @@ def _list_hole(context, region):
     limit = back * 255.0 - 4.0
     from . import channel_box
     le_top = int(region.height * (1.0 - channel_box.cb_share(region, channel_box._unit(context))))
-    # the list ends 14 px x scale above the region bottom in a tall dock, higher in a shorter one (step 202: the
+    # the list ends 14 px x scale above the region bottom in a tall dock, higher in a shorter one (the
     # Time Slider grew at UI 1.25 and the list bottom left the sampled row): sample upwards, the last hit first
     fb = gpu.state.active_framebuffer_get()
     key = region.as_pointer()
@@ -1051,7 +1051,7 @@ class ALLSET_PT_maya_dock(bpy.types.Panel):
     Toolkit, torn-off menus)"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"           # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"           # = drawn by the Properties Tool tab (like Tool Settings)
     bl_label = "Maya Panel"
     bl_options = {'HIDE_HEADER'}
     bl_order = -200
@@ -1068,7 +1068,7 @@ class ALLSET_PT_maya_dock(bpy.types.Panel):
             draw_torn_menu(layout, context)
             return
         if r == 'STACK':
-            # step 142 (#78): Maya's tabs are the vertical strip on the stack's right edge (draw_strip); the content
+            # #78: Maya's tabs are the vertical strip on the stack's right edge (draw_strip); the content
             # keeps clear of it
             layout = content_layout(layout, context)
         draw_handle(layout, context)
@@ -1082,7 +1082,7 @@ class ALLSET_PT_maya_dock(bpy.types.Panel):
         if kind == 'CHANNEL_BOX':
             units = channel_box.ALLSET_PT_channel_box.body(layout, context)
             channel_box.fill_pane(layout, context, units)
-            from . import set_driven_key    # its lists fit the room the Channel Box leaves (step 142, #77)
+            from . import set_driven_key    # its lists fit the room the Channel Box leaves (#77)
             set_driven_key.remember_room(context, units)
             from . import layer_editor      # Maya's Layer Editor under the Channel Box (or the Set Driven Key window)
             layer_editor.ALLSET_PT_layer_editor.draw(_Holder(layout), context)
@@ -1118,7 +1118,7 @@ class _Holder:
         self.layout = layout
 
 
-# Maya's torn-off menu reads like the menu, every item's text from the left edge (step 293). Outside a menu Blender
+# Maya's torn-off menu reads like the menu, every item's text from the left edge. Outside a menu Blender
 # centres an operator button's text (plain, press-and-hold for the option box, radio choice; sub-menu rows, labels
 # and check boxes stay left), and ``column.alignment`` doesn't change that: a row aligned LEFT around the button
 # sizes it to its text, which then starts at the left. The hotkey / option box column (``menu_sets.item_texts``) is

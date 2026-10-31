@@ -1,4 +1,4 @@
-"""Step 162: Maya Hypershade swatch MMB drag in a real UI. pCube1 in the Maya layout (main viewport split in two so
+"""Maya Hypershade swatch MMB drag in a real UI. pCube1 in the Maya layout (main viewport split in two so
 the Hypershade window, opened over the largest area, leaves one 3D View visible) + a new blinn1 (no user) ->
 Hypershade -> MMB press on blinn1's swatch in the Browser (Hypershade window) -> moves out of the Hypershade window
 over the cube in the main window's other 3D View -> release = pCube1 gets blinn1 (one slot); a drag of phong1 to

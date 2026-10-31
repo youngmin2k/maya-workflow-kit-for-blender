@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""UV Editor read-outs in numpy (step 254, #170 #172): the per-redraw data of the UV HUD (ui/uv_hud.py) and the shell
+"""UV Editor read-outs in numpy (#170 #172): the per-redraw data of the UV HUD (ui/uv_hud.py) and the shell
 / texture borders (ui/uv_display.py) without Python loops over every BMesh loop.
 
 On a 48 400-face sphere in the UV Editor (Blender 4.5, Maya layout) the Python versions took
@@ -7,8 +7,8 @@ On a 48 400-face sphere in the UV Editor (Blender 4.5, Maya layout) the Python v
 drag 12 s and Cut UV Edges 36 s (Windows reports "Not responding" after 5 s). These are the same rules on arrays:
 
 - topology + UVs: the evaluated edit mesh's ``to_mesh()`` (62 k faces in 8 ms) when no modifier is shown
-  in edit mode (then it is the cage; same element order as the BMesh, step 134), else one BMesh pass;
-- selection / hidden flags: always from the BMesh (the evaluated mesh's selection may lag, step 134).
+  in edit mode (then it is the cage; same element order as the BMesh), else one BMesh pass;
+- selection / hidden flags: always from the BMesh (the evaluated mesh's selection may lag).
 
 ``uv_points`` = uv_shells.uv_points (same vertex, coordinates within uv_tools.EPS, first-fit in loop-index order),
 ``maya_shells`` = uv_hud.maya_shells (faces sharing any UV), ``border_loops`` = uv_display.border_segments (an edge

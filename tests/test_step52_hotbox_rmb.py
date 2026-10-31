@@ -1,4 +1,4 @@
-"""Step 52: hotbox and RMB marking menu as Maya 2022 shows them.
+"""Hotbox and RMB marking menu as Maya 2022 shows them.
 GUI: tests/gui/gui_step52_hotbox_rmb.py."""
 
 from importlib import import_module
@@ -98,12 +98,12 @@ def test_rmb_list_is_maya_2026():
     assert tail == ["Material Attributes...", "Assign New Material", "Assign Favorite Material",
                     "Assign Existing Material"], tail                   # Maya 2026 RMB list end
     actions = {e[0]: e[1] for e in menu.items if e != mm.DIVIDER}
-    # a Sub or a Blender menu (step 136: UV Sets / Color Sets list the mesh's sets) — both show ▸
+    # a Sub or a Blender menu (UV Sets / Color Sets list the mesh's sets) — both show ▸
     assert all(isinstance(actions[n], mm.Sub) or actions[n][0] == "menu" for n in SUBMENUS), "submenus show ▸"
     assert not mm.is_unavailable(actions["Paint"]) and mm.is_unavailable(actions["Metadata"])
     assert modal.poll_action(actions["Metadata"]) is False
-    assert isinstance(actions["Inputs"], mm.NodeList) and modal.poll_action(actions["Inputs"])   # step 165
-    assert actions["Make Live"] == ("allset.mm_object_item", {"item": "Modify/Make Live"})   # step 136
+    assert isinstance(actions["Inputs"], mm.NodeList) and modal.poll_action(actions["Inputs"])
+    assert actions["Make Live"] == ("allset.mm_object_item", {"item": "Modify/Make Live"})
     assert "Select Similar" in menu.options, "Maya option box"
     assert mm.RMB_MESH.items[0][0] == mm.OBJECT_TITLE, "the shared definition keeps the placeholder"
     assert [e[0] for e in mm.RMB_CURVE.items[:7] if e != mm.DIVIDER] == [mm.OBJECT_TITLE, "Select", "Select All",
@@ -113,9 +113,9 @@ def test_rmb_list_is_maya_2026():
 
 def test_rmb_list_under_or_beside_the_ring():
     """Maya keeps the list in one column under the ring and draws the whole menu
-    higher only at the *screen* bottom. Blender can't draw outside its (smaller) window, so step 193 keeps the ring
+    higher only at the *screen* bottom. Blender can't draw outside its (smaller) window, so the kit keeps the ring
     at the press point — the marks keep working — and moves only the list: under the ring when it fits, else beside
-    it in one column (step 161 side rule), else above / pushed inside. Never over the ring, always inside."""
+    it in one column (on the side with no radial submenu), else above / pushed inside. Never over the ring, always inside."""
     b = (0.0, 0.0, 1600.0, 900.0)
     for origin in ((800.0, 680.0), (800.0, 450.0), (300.0, 380.0), (1500.0, 420.0), (800.0, 120.0)):
         s = engine.Session(mm.RMB_MESH, origin, 0.0, measure, None, None, b)
@@ -147,7 +147,7 @@ def test_rmb_list_under_or_beside_the_ring():
 
 
 def test_rmb_marks_work_where_the_list_does_not_fit():
-    """Step 193 (dogfood 192: RMB west on pCube1 in the middle of a 1600 x 900 window picked nothing): every radial
+    """RMB west on pCube1 in the middle of a 1600 x 900 window must pick its box: every radial
     mark from the press point picks its box, drawn or not, wherever the list goes."""
     b = (0.0, 0.0, 1600.0, 900.0)
     for origin in ((800.0, 450.0), (800.0, 120.0), (300.0, 380.0)):
@@ -193,7 +193,7 @@ def test_object_attributes_operator():
 
 def test_submenu_arrow_measured_without_the_glyph():
     """A UI font without "▸" (Segoe UI, Maya Font) made blf report millions of px: the RMB list spanned the
-    view (step 41 shot). The arrow is a drawn triangle of fixed width."""
+    view. The arrow is a drawn triangle of fixed width."""
     w = draw.measure("Inputs")
     assert abs(draw.measure("Inputs" + draw.ARROW) - (w + draw._arrow_w())) < 1e-6
     assert draw.measure("Assign Existing Material" + draw.ARROW) < 400

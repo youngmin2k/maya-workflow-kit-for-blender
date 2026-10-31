@@ -1,4 +1,4 @@
-"""Step 28: MMB drag = the last picked manipulator handle (Maya active handle).
+"""MMB drag = the last picked manipulator handle (Maya active handle).
 The drag itself: tests/gui/gui_step28_active_handle.py."""
 
 from importlib import import_module
@@ -41,7 +41,7 @@ def test_reset():
 def test_keymaps():
     kc = kit.maya_kc()
     for name in patches.GIZMO_KEYMAPS:
-        # step 85 puts its Ctrl+LMB item in front; the first plain item is still the handle press
+        # the kit puts its Ctrl+LMB item in front; the first plain item is still the handle press
         items = [k for k in kc.keymaps[name].keymap_items if k.active and not k.ctrl]
         first = items[0]
         assert (first.idname, first.type, first.value, first.shift) == \

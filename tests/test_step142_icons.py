@@ -1,9 +1,9 @@
-"""Step 142 (#54): kit-drawn icons for the Maya menu items that have no shelf button (ui/menu_drawings*.py, linked by
+"""#54: kit-drawn icons for the Maya menu items that have no shelf button (ui/menu_drawings*.py, linked by
 tools/gen_menu_icons.py into ui/menu_icon_data.py).
 
 Checks: every drawing is linked and every linked drawing exists; the priority menus (Deform, Mesh Display, Effects,
 Fields, Edit Mesh, Mesh Tools, Mesh) have an icon on every item Maya shows with one; drawings render at every
-menu / shelf size; two different pictures in one menu look different (the step 131 shelf rule); the 2x picture is
+menu / shelf size; two different pictures in one menu look different (the shelf rule); the 2x picture is
 the 1x drawing; the totals don't fall back.
 """
 
@@ -20,7 +20,7 @@ mi = import_module(kit.MODULE + ".ui.menu_icons")
 md = import_module(kit.MODULE + ".ui.menu_drawings")
 ms = import_module(kit.MODULE + ".ui.menu_sets")
 
-# Maya menu items that Maya shows with an icon and had none in the kit after step 131 (step 131 lane MENU "Left"),
+# Maya menu items that Maya shows with an icon and had none in the kit after the first menu icon pass,
 # in the menus #54 asks for first. Labels only (no Maya icons in the repository).
 PRIORITY = """
 Deform/Display Intermediate Objects|Deform/Edit Membership Tool|Deform/Hide Intermediate Objects|Deform/Jiggle/Jiggle Deformer
@@ -114,11 +114,11 @@ def test_drawings_and_table_agree():
 def test_counts():
     n = len(data.ICONS)
     drawn = len(_menu_pics())
-    print(f"menu items with an icon: {n} of {MAYA_ICON_ITEMS} Maya icon items (step 131: {STEP131_ICONS}); "
+    print(f"menu items with an icon: {n} of {MAYA_ICON_ITEMS} Maya icon items ({STEP131_ICONS}); "
           f"menu drawings: {len(md.DRAWINGS)} pictures on {drawn} items")
     assert n >= MIN_ICONS, n
     assert n <= MAYA_ICON_ITEMS, n
-    assert n - drawn == STEP131_ICONS, (n, drawn)        # step 131's links are untouched
+    assert n - drawn == STEP131_ICONS, (n, drawn)        # the earlier links are untouched
 
 
 def test_sizes():
@@ -140,7 +140,7 @@ def test_2x_is_the_1x_drawing():
 
 
 def test_distinct_within_each_menu():
-    """Two different pictures in one menu differ clearly (32 px, the step 131 rule); one picture on two items only
+    """Two different pictures in one menu differ clearly (32 px, the shelf rule); one picture on two items only
     where the generator linked them (Maya shows the same icon file, or the same drawing on purpose)."""
     by_menu = collections.defaultdict(dict)
     for path, pic in data.ICONS.items():

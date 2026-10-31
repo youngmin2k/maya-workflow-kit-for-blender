@@ -1,7 +1,7 @@
-"""Step 69 in a real UI (Maya scene workflow): File > Project Window (dialog shot) -> project
+"""In a real UI (Maya scene workflow): File > Project Window (dialog shot) -> project
 folders made -> Ctrl+Shift+S opens the file browser in <project>/scenes -> save shot_v001 -> Ctrl+Alt+S = Maya Increment
 and Save -> shot_v001.0001 -> Ctrl+R opens the browser in scenes -> reference shot_v001 as prop -> prop:pCube1 ->
-File > Reference Editor = the kit Reference Editor window listing propRN (step 209; screenshots)."""
+File > Reference Editor = the kit Reference Editor window listing propRN (screenshots)."""
 
 import os
 import shutil
@@ -168,7 +168,7 @@ def s_reference_editor():
     re_ = import_module(MODULE + ".ui.reference_editor")
     refs = import_module(MODULE + ".operators.references")
     listed = [(refs.node_name(r), refs.file_label(r)) for r in refs.references()]
-    # step 209: Maya's Reference Editor window (was an Outliner in Blender File view)
+    # Maya's Reference Editor window (was an Outliner in Blender File view)
     check(f"File > Reference Editor: the kit Reference Editor window listing propRN shot_v001.blend "
           f"(got {C['re']}, {a.type}, {listed})",
           len(bpy.context.window_manager.windows) == C["nwin"] + 1 and re_.is_pane(a)

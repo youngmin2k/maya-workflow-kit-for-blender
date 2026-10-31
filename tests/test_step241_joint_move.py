@@ -1,4 +1,4 @@
-"""Step 241 (Issue #156, report @cnzim): joints move after placement.
+"""Issue #156 (report @cnzim): joints move after placement.
 
 Expected:
 chain (0,0,0) (0,10,0) (0,20,0); W on joint2 by +3 X -> joint2 (3,10,0), joint3 follows to (3,20,0), joint1 stays;

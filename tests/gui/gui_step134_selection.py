@@ -1,4 +1,4 @@
-"""Step 134 lane SEL in a real UI: Maya selection colours without a theme.
+"""In a real UI: Maya selection colours without a theme.
 
 Object mode: the lead's wire is green #43ffa3, another selected object's white, an unselected object has none.
 Edit mode (ui/component_colors.py): vertex mode = selected vertex #fdff88, unselected #c800c8, edges #64dcff;
@@ -97,7 +97,7 @@ def _hull(pts):
 
 def covered(xy, ob, margin=4.0):
     """Window point ``xy`` lies on (or within ``margin`` px of) ``ob``'s screen silhouette: an edge of another object
-    drawn there may carry ``ob``'s wire colour (step 135: the narrower viewport made the cubes overlap)."""
+    drawn there may carry ``ob``'s wire colour (the narrower viewport made the cubes overlap)."""
     pts = [to_window(ob.matrix_world @ v.co) for v in ob.data.vertices]
     hull = _hull([(p[0], p[1]) for p in pts if p is not None])
     if len(hull) < 3:
@@ -263,11 +263,11 @@ def s_face_mode():
     frac = float(near(win_px, EDGE_SEL, 0.09).mean())
     check(f"face mode: selected face is the stipple #e3ac79 ({frac * 100:.0f} % of pixels, ~25 %)",
           0.15 < frac < 0.4)
-    # step 176: the pixels between the stipple dots keep the face's own grey (Blender's face tint is off)
+    # the pixels between the stipple dots keep the face's own grey (Blender's face tint is off)
     rest = win_px[~near(win_px, EDGE_SEL, 0.09)]
     sat = float((rest.max(axis=-1) - rest.min(axis=-1)).mean()) if len(rest) else 1.0
     space = view3d()[0].spaces.active
-    check(f"step 176: no Blender face tint under the stipple (show_faces {space.overlay.show_faces}, "
+    check(f"no Blender face tint under the stipple (show_faces {space.overlay.show_faces}, "
           f"grey spread {sat:.3f} < 0.05)", not space.overlay.show_faces and sat < 0.05)
     # 100k-vertex mesh in edit mode: frame time with and without the kit component colours
     area, region = view3d()
@@ -303,7 +303,7 @@ def frame_ms(n=30):
 @step
 def s_time_off():
     C["off"] = frame_ms()
-    check("step 176: preference off gives Blender's face highlight back (show_faces on)",
+    check("preference off gives Blender's face highlight back (show_faces on)",
           view3d()[0].spaces.active.overlay.show_faces)
     prefs().maya_component_colors = True
     redraw()
@@ -326,11 +326,11 @@ def s_time_on():
         t2 = time.perf_counter()
         reads.append((t2 - t) * 1000.0)
         parts.append((round((t1 - t) * 1000, 1), round((t2 - t1) * 1000, 1)))
-    print("GUI step134 read / batch ms", parts)
+    print("GUI selection read / batch ms", parts)
     # PR #125 (2e8dcde, kept by the maintainer) rebuilds from the live edit BMesh so the highlight never lags the
-    # selection: 101k vertices 36 -> 73 ms per rebuild (git bisect, step 229); the per-frame draw is unchanged.
+    # selection: 101k vertices 36 -> 73 ms per rebuild (git bisect); the per-frame draw is unchanged.
     REBUILD_MS = 90.0
-    print("GUI step134 frame ms", C["verts"], C["off"], C["on"], "rebuild ms", reads)
+    print("GUI selection frame ms", C["verts"], C["off"], C["on"], "rebuild ms", reads)
     check(f"{C['verts']} vertices in edit mode: frame {C['off']:.2f} -> {C['on']:.2f} ms with Maya component "
           f"colours, cache rebuild {min(reads):.1f} ms (< {REBUILD_MS:.0f} ms)", st is not None and min(reads) < REBUILD_MS)
     shot("100k")

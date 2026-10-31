@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 228 L9: Maya Flow Path Object (lattice along the motion path).
+"""L9: Maya Flow Path Object (lattice along the motion path).
 
 Maya: Constrain > Motion Paths > Flow Path Object (Divisions 5 / 2 / 2,
 Lattice around Object, Local effect off) on an object that has a motion path makes ``flow1`` / ``ffd1`` /
@@ -7,7 +7,7 @@ Lattice around Object, Local effect off) on an object that has a motion path mak
 (each point at its own distance along the path, offset in the path's frame), the ffd deforming the object.
 
 Blender construction:
-- the kit lattice deformer of step 144 (``deformers.create('LATTICE')``: ``ffd1`` Lattice modifier + ``ffd1Base`` Hook
+- the kit lattice deformer (``deformers.create('LATTICE')``: ``ffd1`` Lattice modifier + ``ffd1Base`` Hook
   + ``ffd1Lattice``, Front / Up / Side = lattice u / w / v), interpolation Linear;
 - the lattice gets a Curve modifier ``flow1`` on the path (Blender's Curve modifier maps curve-space X to the distance
   along the path and offsets Y / Z in the path frame — the same placement as Maya's flow node: the lattice end points
@@ -16,7 +16,7 @@ Blender construction:
   fraction); the object's own Follow Path constraint is muted (the lattice now carries the motion);
 - deviation: Maya's ffd with Local off is a global Bernstein (Bezier) volume over the 5 x 2 x 2 points
   (matched offline to 1e-4); Blender lattices interpolate Linear / Cardinal / Catmull-Rom / B-spline only, Linear is
-  closest (max 0.075 on the 4-unit test cylinder, step 228 B test); beyond the path ends Blender extrapolates along
+  closest (max 0.075 on the 4-unit test cylinder); beyond the path ends Blender extrapolates along
   the end tangent, Maya differently (0.043 at frames 1 / 120).
 """
 

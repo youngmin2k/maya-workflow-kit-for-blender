@@ -5,7 +5,7 @@ Maya 2022: every model panel has a menu bar
 (View Shading Lighting Show Renderer Panels) and under it a toolbar of small icons in groups —
 camera, gates and grid, shading modes and lights, effects, isolate / X-ray — then exposure and gamma fields and the
 colour management view. Blender's 3D View header mixed Maya's menus with its own editor-type button, mode selector,
-transform orientation, pivot, snapping, proportional editing, overlays and shading (step 113).
+transform orientation, pivot, snapping, proportional editing, overlays and shading.
 
 In 3D Views of the Maya Workflow Kit layout (a screen with the Maya strip) the class's own draw of ``VIEW3D_HT_header`` is
 replaced by the Maya menu bar and the tool header's by the Maya panel toolbar (like ``editor_chrome``: only the
@@ -309,7 +309,7 @@ GLYPHS = {name[2:]: fn for name, fn in globals().items() if name.startswith("g_"
 
 # --- the toolbar (Maya 2022 order) -----
 
-# The toolbar rows: ui/panel_menu_data.TOOLBAR (bpy-free, counted by tools/menu_count.py since step 177).
+# The toolbar rows: ui/panel_menu_data.TOOLBAR (bpy-free, counted by tools/menu_count.py).
 from . import panel_menu_data  # noqa: E402
 from .panel_menu_data import TOOLBAR  # noqa: E402
 

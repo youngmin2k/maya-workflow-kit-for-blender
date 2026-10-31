@@ -1,4 +1,4 @@
-"""Step 181 (lane W): the Surfaces menu leaves mapped to the kit's NURBS surface commands, their Maya option windows
+"""The Surfaces menu leaves mapped to the kit's NURBS surface commands, their Maya option windows
 (titles / fields / defaults), shelf routing and notices.
 Geometry: tests of operators/surfaces_maya.py."""
 
@@ -105,7 +105,7 @@ def test_surfaces_menu_mapped():
         assert path in menu_map.MAP, path
         kind, target, got = menu_map.spec(path)
         assert (target, got) == (op, props), (path, target, got)
-    # no stand-ins left: the Screw modifier / curve ops were Revolve / Reverse / Insert Isoparms before step 181
+    # no stand-ins left: the Screw modifier / curve ops were Revolve / Reverse / Insert Isoparms once
     for path in ("Surfaces/Revolve", "Surfaces/Reverse Direction", "Surfaces/Insert Isoparms"):
         assert menu_map.spec(path)[1].startswith("allset."), path
     # the Curves menu keeps its own Reverse Direction / Insert Knot
@@ -117,7 +117,7 @@ def test_surfaces_menu_mapped():
 
 
 def test_operators_exist_once_built():
-    # the operators come from operators/surfaces_maya.py (main lane of step 181): checked when they are registered
+    # the operators come from operators/surfaces_maya.py checked when they are registered
     missing = []
     for path, (op, _props) in MAPPED.items():
         mod, name = op.split(".")
@@ -142,7 +142,7 @@ def test_windows_bound_with_maya_titles_and_factory_values():
         name, mode, kw = _call(w)
         assert (name, mode) == (op, 'EXEC_DEFAULT'), (key, name, mode)
         assert kw == factory, (key, kw)
-        # allset.loft exists before step 181 (curve_tools' mesh loft): check the props once surfaces_maya registered
+        # allset.loft also exists as curve_tools' mesh loft: check the props once surfaces_maya registered
         if compat.has_op(bpy.ops.allset, "revolve") and compat.has_op(bpy.ops.allset, op):
             props = getattr(bpy.ops.allset, op).get_rna_type().properties
             for k, v in kw.items():
@@ -181,7 +181,7 @@ def test_window_fields_follow_maya():
     extrude = {f.name: f for f in d["surface_extrude"].fields}
     assert extrude["style"].items == ("Distance", "Flat", "Tube")
     # what the kit can't follow is listed, not hidden
-    assert any("Bezier" in m for m in d["loft"].missing)        # step 228: Polygons is made now
+    assert any("Bezier" in m for m in d["loft"].missing)        # Polygons is made now
     assert _call(d["loft"], {"output": "Polygons"})[2]["output"] == 'POLYGONS'
     assert any("tolerance" in m.lower() for m in d["revolve"].missing)
     assert any("Rotation" in m for m in d["surface_extrude"].missing)

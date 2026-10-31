@@ -1,4 +1,4 @@
-"""Step 215 (#121) in a real UI: Windows > Settings/Preferences > Preferences opens the kit's Maya Preferences window
+"""#121: in a real UI: Windows > Settings/Preferences > Preferences opens the kit's Maya Preferences window
 (Categories list, page "<Category>: <description>", Save / Cancel); picking Time Slider shows the scene's framerate /
 ranges; a change there is put back by Cancel; the Undo page shows Blender's Undo Steps read-only with the button
 that opens Blender's Preferences. Shots: the Interface page, the Time Slider page."""

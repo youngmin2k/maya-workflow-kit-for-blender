@@ -1,4 +1,4 @@
-"""Step 159 in the Maya Workflow Kit layout: a three-joint skeleton, pose mode, joint2
+"""In the Maya Workflow Kit layout: a three-joint skeleton, pose mode, joint2
 selected -> Skeleton > Joint Labelling > Label Left + Label Hip#2 (Hip), Toggle Selected Labels -> "Hip (L)" is drawn
 next to the joint (shot, pixel change near the joint). Skin > Disable Selected IK Handles on an IK handle sets its
 weight to 0."""

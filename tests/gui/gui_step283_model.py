@@ -1,4 +1,4 @@
-"""Step 283 (#182) modeling chain as a Maya user in the Maya layout: Create > Cylinder -> Ctrl+E on a side face ->
+"""#182: modeling chain as a Maya user in the Maya layout: Create > Cylinder -> Ctrl+E on a side face ->
 Ctrl+B on three top rim edges (Maya: 0.2212097 down the sides, 0.1564189 along the unbevelled rim neighbours) ->
 Multi-Cut across another side face (Ctrl+Shift+X, two clicks, RMB) -> Edit Mesh > Merge two vertices -> UV > Automatic
 -> Edit > Delete by Type > History -> Ctrl+Z -> save / open. Screenshots: gui_step283_bevel.png, gui_step283_end.png."""

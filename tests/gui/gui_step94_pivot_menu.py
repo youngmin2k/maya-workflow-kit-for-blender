@@ -1,4 +1,4 @@
-"""Step 94 in a real UI (Maya Workflow Kit layout): with a custom pivot on pCube1, hold D, hold RMB = the pivot menu (Maya
+"""In a real UI (Maya Workflow Kit layout): with a custom pivot on pCube1, hold D, hold RMB = the pivot menu (Maya
 RMB_EMPTY edit-mode branch), drag south + release = Reset Pivot (delta_location back to 0), release D =
 pivot edit off."""
 
@@ -66,8 +66,8 @@ def s_menu_shot():
     check(f"RMB shows the pivot menu ({labels})", "Reset Pivot" in labels and "Pin Component Pivot" in labels)
     if SHOTS:
         screenshot(os.path.join(SHOTS, "gui_step94_pivot_menu.png"))
-    # release on the S box: since step 151 the list starts 87 px x scale under the press point, so a longer
-    # drag south ends on the list's first row (step 153)
+    # release on the S box: the list starts 87 px x scale under the press point, so a longer
+    # drag south ends on the list's first row
     r = s.layout.radial["S"].rect if s and "S" in s.layout.radial else (0, -DRAG, 0, -DRAG)
     C["dy"] = int(round((r[1] + r[3]) / 2))
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"] + C["dy"] // 2)

@@ -1,4 +1,4 @@
-"""Step 132 (#44): in Maya mode Ctrl+N over the viewport = Maya's New Scene = a new untitled file in the Maya layout
+"""#44: in Maya mode Ctrl+N over the viewport = Maya's New Scene = a new untitled file in the Maya layout
 (Status Line + Shelf strips), like File > New Scene — not Blender's default General file."""
 
 import os
@@ -35,7 +35,7 @@ def s_press():
 
 @step
 def s_confirm_if_asked():
-    if bpy.data.is_dirty:      # unsaved changes: Maya's Save Changes menu first (step 138): D = Don't Save
+    if bpy.data.is_dirty:      # unsaved changes: Maya's Save Changes menu first: D = Don't Save
         ev('D', 'PRESS')
         ev('D', 'RELEASE')
 

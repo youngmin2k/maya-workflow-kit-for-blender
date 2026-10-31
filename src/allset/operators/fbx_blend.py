@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Blend shapes in the FBX the way Maya 2026 writes them (step 235, Issue #144).
+"""Blend shapes in the FBX the way Maya 2026 writes them (Issue #144).
 
-Blender's writer gives every shape key its own BlendShapeChannel, so a kit in-between (step 227: a hidden key
+Blender's writer gives every shape key its own BlendShapeChannel, so a kit in-between (a hidden key
 ``<target>_ib<w>`` plus the ``<target>_ibfix`` copy, operators/blend_shapes_227.py) reached Maya / engines as extra
 targets, and the BlendShape deformer was named after the mesh. Maya writes one channel per target holding its
 in-between shapes, FullWeights = the in-between weights x 100 then 100 (bulge items 5500 / 6000),

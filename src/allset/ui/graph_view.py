@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Graph Editor View / Show modes Blender lacks (step 150 lane A, #96).
+"""Maya Graph Editor View / Show modes Blender lacks (#96).
 
 Maya 2022's Graph Editor View menu (with its factory
 states) has check / radio items Blender's Graph Editor has no setting for. The kit adds them as add-on
@@ -9,12 +9,12 @@ Blender preference, store review #40) mapped in ``editor_menu_map``:
 * **Auto Frame** (on by default, like Maya: the view refits when the selection changes): a timer compares the object
   / pose-bone selection; when it changes, every Graph Editor in F-Curve mode refits its value axis to every curve it
   draws with Maya's Frame All rule (``operators/graph_frame.py``: 25 % value margins) and keeps its time range
-  (step 281; Blender lists the selected objects' curves with Only Show Selected, so that frames them).
+  (Blender lists the selected objects' curves with Only Show Selected, so that frames them).
 * **Auto Frame Time** (factory off, "... reframe ... along the time axis"): the time axis too, with Maya-style 10 % time
   margins (alone: only the time axis). A normalised view gets Blender's View All.
 * **Curve Name** Always / Never / Active Only (factory Never): a WINDOW POST_PIXEL handler writes each visible
   curve's Maya plug name ("pCube1.translateX") in the curve colour just right of its last key (clamped into the
-  view), at the curve's stored value — the view's value axis is the stored value (step 137). Normalized views
+  view), at the curve's stored value — the view's value axis is the stored value. Normalized views
   (``use_normalization``) are skipped: Blender's normalisation factor isn't exposed.
 * **Show > Objects > Clear Below**: Maya's result (no object-type filter left = every type shown) = Blender's type
   filters back on (``allset.graph_show_clear``).
@@ -27,7 +27,7 @@ import bpy
 
 from .. import live_refs
 
-POLL = 0.25                       # s between selection checks (like operators/graph_keys snap time, step 92)
+POLL = 0.25                       # s between selection checks (like operators/graph_keys snap time)
 TIME_MARGIN = 0.05                # Auto Frame Time: share of the key span added before / after
 LABEL_POINTS = 11.0               # Blender's default UI text size
 LABEL_DX = 6.0                    # px right of the last key (x UI scale)
@@ -218,7 +218,7 @@ _sidebar_done = set()       # Graph Editor areas whose sidebar the kit already c
 
 
 def hide_sidebars(context):
-    """Maya's Graph Editor has no side panel (step 198, #105; audit 14 b04_graph_editor.png showed Blender's Active
+    """Maya's Graph Editor has no side panel (#105; audit 14 b04_graph_editor.png showed Blender's Active
     F-Curve / "RNA Array Index" sidebar in a Graph Editor shown in a main pane). Close it once per Graph Editor area
     while the kit's editor chrome is on; N opens it again and stays open."""
     from . import editor_chrome
@@ -241,7 +241,7 @@ def hide_sidebars(context):
             if space.show_region_ui:
                 with context.temp_override(window=window, area=area):
                     space.show_region_ui = False
-    _sidebar_done.intersection_update(live)     # freed area pointers are reused (step 9)
+    _sidebar_done.intersection_update(live)     # freed area pointers are reused
 
 
 def _tick():
@@ -250,15 +250,15 @@ def _tick():
         step(bpy.context, preferences.get())
         hide_sidebars(bpy.context)
         from . import editor_chrome
-        editor_chrome.sync(bpy.context)                   # step 203: loaded lists, pins, Show filters
+        editor_chrome.sync(bpy.context)                   # loaded lists, pins, Show filters
         from ..operators import graph_weights
-        watch = getattr(graph_weights, "watch", None)     # step 198: non-weighted / locked tangent lengths
+        watch = getattr(graph_weights, "watch", None)     # non-weighted / locked tangent lengths
         if watch is not None:
             watch(bpy.context)
         from ..operators import maya_tangents
-        maya_tangents.watch(bpy.context)                  # step 310: Maya tangent shapes after Blender edits
+        maya_tangents.watch(bpy.context)                  # Maya tangent shapes after Blender edits
         from ..operators import graph_menu_198
-        graph_menu_198.watch(bpy.context)                 # step 198: Set Curve Colors rules on new curves
+        graph_menu_198.watch(bpy.context)                 # Set Curve Colors rules on new curves
     except (KeyError, AttributeError, ReferenceError, RuntimeError):
         pass
     return POLL
@@ -470,7 +470,7 @@ class ALLSET_OT_graph_show_clear(bpy.types.Operator):
         for attr in OBJECT_FILTERS:
             setattr(ds, attr, True)
         wm = context.window_manager
-        for attr in KIT_OBJECT_FILTERS:      # step 203: the kit's Show > Objects check items
+        for attr in KIT_OBJECT_FILTERS:      # the kit's Show > Objects check items
             if getattr(wm, attr, False):
                 setattr(wm, attr, False)
         return {'FINISHED'}

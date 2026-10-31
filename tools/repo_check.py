@@ -1,4 +1,4 @@
-"""Distribution round trip through a self-hosted extension repository (step 61).
+"""Distribution round trip through a self-hosted extension repository.
 
     python tools/repo_check.py [--blender PATH] [--no-build]
 
@@ -121,15 +121,15 @@ def main(argv=None):
           and kit in s["addons"])
     check("the user's add-ons and theme are kept", s and set(snap["before"]["addons"]) < set(s["addons"])
           and s["theme"] == snap["before"]["theme"])
-    # step 115: installing + enabling changes nothing until the user opts in
+    # installing + enabling changes nothing until the user opts in
     check(f"keymap untouched before the opt-in (got {s and s['active_keyconfig']})",
           s and s["active_keyconfig"] == snap["before"]["active_keyconfig"])
 
     # 2. Make Blender feel like Maya (the opt-in), then disable
     step("make", probe + ["make", str(SANDBOX / "made.json")], "made")
-    check("Make Blender Maya keeps the user's theme (step 130)",
+    check("Make Blender Maya keeps the user's theme",
           snap["made"] and snap["made"]["theme"] == snap["before"]["theme"])
-    check(f"active keymap unchanged by the opt-in (got {snap['made'] and snap['made']['active_keyconfig']}, step 130)",
+    check(f"active keymap unchanged by the opt-in (got {snap['made'] and snap['made']['active_keyconfig']})",
           snap["made"] and snap["made"]["active_keyconfig"] == snap["before"]["active_keyconfig"])
     step("disable", probe + ["disable", str(SANDBOX / "disabled.json")], "disabled")
     diff, s = same_as_before("disabled")

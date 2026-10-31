@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Hide Blender's 3D View "Tool" panels where a Properties Tool tab hosts a Maya panel (step 49,
-step 106, step 116).
+"""Hide Blender's 3D View "Tool" panels where a Properties Tool tab hosts a Maya panel.
+
 
 A Properties editor on its Tool tab draws the 3D View "Tool"-category panels. The kit's Maya dock areas
 (``ui/maya_dock.py``: Channel Box / Layer Editor, Attribute Editor, Modeling Toolkit, torn-off menus) and the Tool
 Settings dock (``ui/tool_dock.py``) are such editors, so Blender's panels that were registered when the kit was
-enabled are hidden there by wrapping their ``poll`` (only in a Properties WINDOW region; until step 116 also in the
+enabled are hidden there by wrapping their ``poll`` (only in a Properties WINDOW region; earlier also in the
 3D View sidebar, which then hosted the dock). Blender stores a panel's poll callback when the class is registered
 and only calls Python if the class had a ``poll`` then, so each panel is unregistered, given the
 wrapper and registered again (children first out, parents first in; all of them, so their order
@@ -22,20 +22,20 @@ def _hidden(context):
     region = context.region
     if region is None or region.type != 'WINDOW':
         return False
-    # A Maya panel's own dock area (ui/maya_dock.py, step 116) shows only that panel.
+    # A Maya panel's own dock area (ui/maya_dock.py) shows only that panel.
     from . import maya_dock
     if maya_dock.area_role(context) is not None:
         return True
-    from . import hypershade         # a Hypershade pane (step 131) shows only its own panel
+    from . import hypershade         # a Hypershade pane shows only its own panel
     if hypershade.context_pane(context) is not None:
         return True
-    from . import reference_editor   # the Reference Editor window (step 209) shows only its own panel
+    from . import reference_editor   # the Reference Editor window shows only its own panel
     if reference_editor.context_pane(context):
         return True
-    from . import marked_window      # Component / Shape / Connection Editor windows (step 213), same
+    from . import marked_window      # Component / Shape / Connection Editor windows, same
     if marked_window.context_kind(context) is not None:
         return True
-    # The Tool Settings dock (a Properties Tool tab, step 106): Maya sections replace Blender's tool panels
+    # The Tool Settings dock (a Properties Tool tab): Maya sections replace Blender's tool panels
     # for Move / Rotate / Scale.
     from . import tool_settings
     return tool_settings.hides_blender_panels(context)
@@ -88,7 +88,7 @@ def register():
     for cls in sidebar_panels():
         raw = cls.__dict__.get("poll")
         kids = list(_children(cls, everything))
-        # A panel Blender won't re-register (another add-on's) stays as it was instead of stopping the kit (step 279)
+        # A panel Blender won't re-register (another add-on's) stays as it was instead of stopping the kit
         if _reregister(cls, kids, _make_poll(getattr(cls, "poll", None)), raw):
             _wrapped.append((cls, raw, kids))
 

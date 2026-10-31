@@ -1,4 +1,4 @@
-"""Step 82 in a real UI: Outliner drags parent the Maya way — LMB drop (Blender's drag, redone), MMB drag onto /
+"""In a real UI: Outliner drags parent the Maya way — LMB drop (Blender's drag, redone), MMB drag onto /
 between / empty space, selection kept, reorder, undo; screenshot of the MMB drop highlight."""
 
 import math
@@ -24,7 +24,7 @@ def row_xy(i, frac=0.5):
     _a, r = outl()
     h = 20 * bpy.context.preferences.system.ui_scale
     _x, y = r.view2d.view_to_region(0, -(i + frac) * h, clip=False)
-    # on the row's (one-letter) name: from ~2.25 units without the mode column (step 202; it was ~3.25 with it)
+    # on the row's (one-letter) name: from ~2.25 units without the mode column (it was ~3.25 with it)
     return r.x + int(2.5 * h), r.y + int(y)
 
 
@@ -229,7 +229,7 @@ def s_empty_check():
 
 
 # rows: A, C (child), D, B — the Maya Outliner is unsorted (creation order) and Maya lists an unparented node last
-# among the world's nodes (step 211, ui/outliner_order.py)
+# among the world's nodes (ui/outliner_order.py)
 rows_check(["A", "C", "D", "B"], "rows: A C D B (unparented B last)")
 
 

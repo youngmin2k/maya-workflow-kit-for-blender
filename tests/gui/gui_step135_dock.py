@@ -1,4 +1,4 @@
-"""Step 135 lane CB (#55) in a real UI: new scene in the Maya layout, a kit cube selected -> the dock's Layer Editor
+"""Lane CB (#55) in a real UI: new scene in the Maya layout, a kit cube selected -> the dock's Layer Editor
 (Display / Anim tabs) is on screen at Maya's split, Channel Box INPUTS shows polyCube1 collapsed; a click on the name
 expands it (Width ... rows) and the Layer Editor stays where it was; a second click collapses it. A long history
 (six expanded bevel nodes) scrolls inside the Channel Box part (wheel) and the Layer Editor still stays.
@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sim import MODULE, check, dock_area, ev, find_button, run, screenshot, setup, step, view3d, win, load_maya_layout  # noqa: E402
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
-os.environ["ALLSET_FIT_WARP"] = "1"   # the dock / column fit as on a user's screen (step 132)
+os.environ["ALLSET_FIT_WARP"] = "1"   # the dock / column fit as on a user's screen
 C = {}
 GUI_TIMEOUT = 480
 
@@ -103,7 +103,7 @@ step(find_button(dock, le_tab, C, "le_tab", x_frac=0.15, step_px=5))
 @step
 def s_scroll_to_inputs():
     """A short dock (1600x900 at 1.25 / 1.5) scrolls the Channel Box part to show INPUTS — wheel it down like a user;
-    the wheel passes through when nothing overflows (step 135)."""
+    the wheel passes through when nothing overflows."""
     area, region = dock()
     x = region.x + region.width // 2
     y = region.y + region.height - int(region.height * 0.25)

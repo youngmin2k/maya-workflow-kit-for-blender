@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Shell selection in the 3D viewport and the UV Editor (step 256, #172).
+"""Maya UV Shell selection in the 3D viewport and the UV Editor (#172).
 
 Maya 2026:
 - The mask is one global state (``cmds.selectType(meshUVShell=True)``), turned on by RMB > UV > UV Shell, Select >
@@ -12,7 +12,7 @@ Maya 2026:
   Plain = replace, Shift = toggle the shell (by the clicked face's state), Ctrl = remove, Ctrl+Shift = add; a
   plain click on nothing clears.
 - A box (or lasso) picks every face under it — occluded ones too in the 3D View (camera-based selection off; the kit's
-  box already selects through, step 30) — and grows each to its shell: plain = replace, Shift = add, Ctrl = remove.
+  box already selects through) — and grows each to its shell: plain = replace, Shift = add, Ctrl = remove.
 - Shell = UVs connected through faces in the **current UV set** (Maya's shell selection takes
   ``currentMapSetId`` and grows a UV bit field with ``extendToShell``; a shared corner UV joins faces, a second
   UV set has other shells). Blender's active UV layer is the current set; ``uv_arrays.uv_points`` + ``components``

@@ -1,20 +1,19 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""The Maya layout as a new file, "Make Blender Maya" and starting Blender in the Maya layout (step 42,
-reworked in step 130).
+"""The Maya layout as a new file, "Make Blender Maya" and starting Blender in the Maya layout.
 
 - ``allset.new_maya_scene`` ("New Scene in Maya Layout"): a new untitled file read from the layout file bundled inside
   the extension (``app_template.STARTUP``) with ``wm.read_homefile(filepath=...)``. Unlike the app template of
-  steps 5–129 nothing is copied into the user's scripts folder, and the preferences are kept (step 130).
+  older versions nothing is copied into the user's scripts folder, and the preferences are kept.
 - ``allset.make_maya``: "Start in Maya Layout" on (this add-on's own setting) and the Maya layout now: a new Maya
   scene when the open file is untouched, else the layout workspace appended to the open file
   (``switch.enter_layout``). It writes none of Blender's preferences: the Maya theme, splash, density, font, wire,
-  navigation, undo and panel presets of steps 42–112 are gone (step 130).
+  navigation, undo and panel presets of older versions are gone.
 - Start in the Maya layout: armed on register, the first load_post (Blender's startup file, loaded right after the
   add-ons register) opens a new Maya scene when Blender started without a file; the first timer tick disarms it, so
   File > New later is left alone.
 
 Operators never load a file themselves (Blender crashed reporting an operator whose class was re-registered
-meanwhile, step 42): ``open_layout_later`` does it from a timer after the operator has returned.
+meanwhile): ``open_layout_later`` does it from a timer after the operator has returned.
 """
 
 import bpy
@@ -37,7 +36,7 @@ def new_maya_scene():
     else:
         with bpy.context.temp_override(window=win, screen=win.screen):
             res = bpy.ops.wm.read_homefile(filepath=app_template.STARTUP, load_ui=True)
-    # Maya's startup cameras persp / top / front / side head the new scene's DAG (step 211, #117)
+    # Maya's startup cameras persp / top / front / side head the new scene's DAG (#117)
     from .operators import startup_cameras
     scene = bpy.context.scene or (bpy.data.scenes[0] if bpy.data.scenes else None)
     if scene is not None:
@@ -51,7 +50,7 @@ def make(context, open_layout=True):
     prefs = preferences.get(context)
     prefs.start_in_maya_layout = True
     prefs.welcome_done = True
-    # This add-on's own settings changed: marked for Blender's Auto-Save Preferences (never saved by the kit, step 115)
+    # This add-on's own settings changed: marked for Blender's Auto-Save Preferences (never saved by the kit)
     context.preferences.is_dirty = True
     if open_layout:
         new_maya_scene()
@@ -99,7 +98,7 @@ class ALLSET_OT_new_maya_scene(bpy.types.Operator):
     bl_options = {'INTERNAL'}
 
     def invoke(self, context, event):
-        # Maya's "Save changes?" dialog before File > New Scene / Ctrl+N (step 138, #57; ui/save_prompt.py)
+        # Maya's "Save changes?" dialog before File > New Scene / Ctrl+N (#57; ui/save_prompt.py)
         from .ui import save_prompt
         return save_prompt.ask(context, new_maya_scene)
 

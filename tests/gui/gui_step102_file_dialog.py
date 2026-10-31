@@ -1,4 +1,4 @@
-"""Step 102 in a real UI: File > Import opens the Maya file dialog (Blender file browser window) in the default
+"""In a real UI: File > Import opens the Maya file dialog (Blender file browser window) in the default
 project's scenes folder, with Files of type + the Maya preset in the Options panel and the Current Project folder
 list on the left; File > Export Selection with OBJ starts in the project's data folder (Maya file rule);
 screenshots (ALLSET_GUI_SHOTS) to compare with Maya's File > Open dialog."""

@@ -36,8 +36,7 @@ GREY = {
     "Modeling Toolkit/Soft Selection/Global": (
         "Volume / Surface", "Blender's proportional editing works on the selected mesh only (no Global / Object falloff)."),
 }
-# Real Maya menu items: their notices also show in the menus (ui/notices.NOTICES). Target Weld got its tool
-# in step 64.
+# Real Maya menu items: their notices also show in the menus (ui/notices.NOTICES). Target Weld has its tool.
 MENU_NOTICES = {}
 NOTE = "Maya's colour falloff on the vertices: Blender shows the radius as a circle"
 
@@ -121,13 +120,13 @@ class ALLSET_OT_soft_falloff_mode(bpy.types.Operator):
 
 
 def draw_soft(layout, context):
-    """Maya Soft Selection (Modeling Toolkit and the Tool Settings dock, step 106)."""
+    """Maya Soft Selection (Modeling Toolkit and the Tool Settings dock)."""
     from . import notices
     ts = context.scene.tool_settings
     row = layout.row(align=True)
     # One Maya setting for object and component mode (operators/soft_select.py, issue #15).
     row.prop(context.scene, "allset_soft_select", text="Soft Select")
-    notices.tip(row, NOTE)          # Blender explanation as a tooltip, not a sentence (step 106)
+    notices.tip(row, NOTE)          # Blender explanation as a tooltip, not a sentence
     col = layout.column(align=True)
     col.active = context.scene.allset_soft_select
     col.prop(context.scene, "allset_soft_radius")
@@ -170,7 +169,7 @@ def _grid(layout, items, context):
     grid = layout.grid_flow(row_major=True, columns=2, even_columns=True, align=True)
     for label, path, icon in items:
         if label == "Extrude":
-            grid.operator("allset.extrude", text=label, icon=icon)   # polyExtrudeFace (step 65)
+            grid.operator("allset.extrude", text=label, icon=icon)   # polyExtrudeFace
         else:
             _button(grid, label, path, icon)
 
@@ -252,7 +251,7 @@ def draw(layout, context):
                 mesh_tools_poly.draw_shortcuts(shortcuts, mesh_tools_poly.QUAD_DRAW_SHORTCUTS)
 
 
-# Drawn by the dock's Modeling Toolkit tab (channel_box.ALLSET_PT_dock_modeling_toolkit, step 99).
+# Drawn by the dock's Modeling Toolkit tab (channel_box.ALLSET_PT_dock_modeling_toolkit).
 classes = (ALLSET_OT_soft_select_reset, ALLSET_OT_soft_falloff_mode)
 
 

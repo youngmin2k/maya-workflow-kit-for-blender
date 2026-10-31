@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Kit-drawn pictures for Maya menu items that have no shelf button (step 142, issue #54).
+"""Kit-drawn pictures for Maya menu items that have no shelf button (issue #54).
 
-Step 131 gave a Maya menu item the kit drawing of the shelf button / Status Line / Tool Box glyph of the same command
+A Maya menu item gets the kit drawing of the shelf button / Status Line / Tool Box glyph of the same command
 (``menu_icon_data``). Maya 2022 also draws an icon on many items that are on no shelf (Deform deformers, Mesh Display,
 Effects, Fields, Edit Mesh / Mesh Tools tools ...). This module draws those, from scratch, in the shelf's vocabulary
 (``shelf_icons``: one hue per kind, dark outline, light from the upper left, tool parts light grey, the action mark

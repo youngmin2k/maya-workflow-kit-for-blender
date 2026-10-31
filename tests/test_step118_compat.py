@@ -1,6 +1,5 @@
-"""Step 118: Blender 5.x compatibility — every version difference goes through src/allset/compat.py.
-Runs on every Blender the suite runs on; each check holds on 5.0-5.2 (4.5 dropped in
-step 279)."""
+"""Blender 5.x compatibility — every version difference goes through src/allset/compat.py.
+Runs on every Blender the suite runs on; each check holds on 5.0-5.2 (4.5 dropped)."""
 
 import re
 from importlib import import_module
@@ -28,7 +27,7 @@ def test_version_checks_only_in_compat():
             if re.search(r"bpy\.app\.version\b(?!_string)", code):
                 bad.append(f"{path.relative_to(ROOT)}:{n}")
     assert not bad, bad
-    assert compat.IS_TARGET == (tuple(bpy.app.version[:2]) == (5, 2))      # main target since step 272
+    assert compat.IS_TARGET == (tuple(bpy.app.version[:2]) == (5, 2))      # main target
     assert compat.IS_STRICT == (tuple(bpy.app.version[:2]) == (5, 2))
     assert compat.STRICT_VERSIONS == ((5, 2),) and compat.VERSION >= (5, 0)
 

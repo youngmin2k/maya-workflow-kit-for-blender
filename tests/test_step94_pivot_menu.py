@@ -1,4 +1,4 @@
-"""Step 94: the pivot-edit RMB marking menu (D / Insert) — Maya positions, when it opens, check boxes, Reset
+"""The pivot-edit RMB marking menu (D / Insert) — Maya positions, when it opens, check boxes, Reset
 (objects and components), Pin Component Pivot, Exit."""
 
 from importlib import import_module
@@ -39,7 +39,7 @@ def test_menu_matches_maya():
     assert {pos: label for pos, (label, _a) in m.radial.items()} == {
         "N": "Pin Component Pivot", "S": "Reset Pivot", "NW": "Snap Pivot Orientation", "NE": "Snap Pivot Position",
         "SW": "Reset Pivot Orientation", "SE": "Reset Pivot Position", "W": "Show Orientation Handle", "E": "Exit"}
-    assert m.items[0] == ("Bake Pivot Orientation", ("item", "Modify/Bake Pivot"))   # step 136
+    assert m.items[0] == ("Bake Pivot Orientation", ("item", "Modify/Bake Pivot"))
     assert menus.MENUS["PIVOT_EDIT"] is m
 
 

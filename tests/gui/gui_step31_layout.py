@@ -1,4 +1,4 @@
-"""Step 31 in a real UI: Maya Workflow Kit layout Outliner (width, DAG rows), leaving four views keeps the
+"""In a real UI: Maya Workflow Kit layout Outliner (width, DAG rows), leaving four views keeps the
 picked view's name, W hold menu toggles show their state (engine and pie fallback), timeline;
 screenshots."""
 
@@ -81,7 +81,7 @@ def s_layout_shot():
 
 @step
 def s_quad_wait():
-    redraw()                  # step 237: the top row splits one tick later
+    redraw()                  # the top row splits one tick later
 
 
 @step
@@ -129,7 +129,7 @@ def s_single_shot():
     with bpy.context.temp_override(window=win(), area=area, region=region):
         bpy.ops.allset.view_home()   # Maya persp again for the menu shots
     bpy.context.scene.frame_set(8)
-    # step 237: a move in its own tick first (the first key after a layout change is lost under event simulation)
+    # a move in its own tick first (the first key after a layout change is lost under event simulation)
     ev('MOUSEMOVE', 'NOTHING', x=area.x + area.width // 3, y=area.y + area.height // 2)
     redraw()
 

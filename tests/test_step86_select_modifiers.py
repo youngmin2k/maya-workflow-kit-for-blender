@@ -1,4 +1,4 @@
-"""Step 86: Maya selection modifiers in the Dope Sheet, NLA and Node Editor (Shift toggle, Ctrl deselect,
+"""Maya selection modifiers in the Dope Sheet, NLA and Node Editor (Shift toggle, Ctrl deselect,
 Ctrl+Shift add). GUI: tests/gui/gui_step86_select_modifiers.py."""
 
 from importlib import import_module
@@ -25,7 +25,7 @@ def test_dopesheet_and_nla_clicks():
         assert set(m) == {(False, False), (True, False), (False, True), (True, True)}, (km, list(m))
         plain = m[(False, False)].properties
         assert plain.deselect_all and not plain.extend
-        for mods in ((True, False), (False, True), (True, True)):      # no deselect option: toggle (step 2)
+        for mods in ((True, False), (False, True), (True, True)):      # no deselect option: toggle
             assert m[mods].properties.extend, (km, mods)
     m = _by_mods(_items("Dopesheet", "action.clickselect", 'PRESS'))
     assert not m[(False, False)].properties.column and not m[(False, False)].properties.channel
@@ -45,7 +45,7 @@ def test_node_clicks():
 
 
 def test_boxes():
-    # step 170: the Dope Sheet Shift box runs as SET, allset.select_2d_box (first) makes it Maya's toggle
+    # the Dope Sheet Shift box runs as SET, allset.select_2d_box (first) makes it Maya's toggle
     for km, idname, want in (("Dopesheet", "action.select_box", {(False, False): 'SET', (True, False): 'SET',
                                                                   (False, True): 'SUB', (True, True): 'ADD'}),
                              ("NLA Editor", "nla.select_box", {(False, False): 'SET', (True, False): 'ADD',

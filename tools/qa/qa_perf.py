@@ -1,4 +1,4 @@
-"""QA activity G (step 240): relative performance budget on a heavy scene, kit off / on (Maya mode) / off again.
+"""QA activity G: relative performance budget on a heavy scene, kit off / on (Maya mode) / off again.
 
 Headless test module (tests/_bootstrap.py runs it; it enables the kit itself):
 
@@ -10,7 +10,7 @@ Headless test module (tests/_bootstrap.py runs it; it enables the kit itself):
 Scene: a 102k-vertex grid skinned to a 120-bone chain keyed over 250 frames, plus 600 linked cubes. Timed: frame
 changes (playback without drawing), depsgraph updates from a moved object, selection changes, edit mode in / out,
 save + open. The kit's own handlers are wrapped while it is on: cumulative time per handler (top 10).
-Budget (step 240; step 286, #191: update / select tightened from +5 ms to +2 ms): on / off ratio —
+Budget (#191: update / select tightened from +5 ms to +2 ms): on / off ratio —
 frame ≤ 1 / 0.85 (or ≤ +2 ms), update handlers ≤ +2 ms median, selection change ≤ +2 ms median, open ≤ 1.3× (or
 ≤ +250 ms).
 """
@@ -237,7 +237,7 @@ def test_budget():
     OUT.write_text(json.dumps(RESULT, indent=1), encoding="utf-8")
     print("ratios", RESULT["ratios"], flush=True)
     problems = []
-    # ratios of ~2 ms numbers are mostly noise: a budget fails only past an absolute floor too (step 240)
+    # ratios of ~2 ms numbers are mostly noise: a budget fails only past an absolute floor too
     if on["frame_ms_median"] > off["frame_ms_median"] / 0.85 and on["frame_ms_median"] - off["frame_ms_median"] > 2:
         problems.append(f"frame {on['frame_ms_median']} ms vs {off['frame_ms_median']} ms off (budget 1/0.85)")
     if on["update_ms_median"] - off["update_ms_median"] > 2:

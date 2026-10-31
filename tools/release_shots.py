@@ -41,7 +41,7 @@ def ui_region():
 
 
 def goto_tab(category, then):
-    """Show ``category`` in Maya's tab stack (its own area since step 116; made right of the view if missing)."""
+    """Show ``category`` in Maya's tab stack (its own area; made right of the view if missing)."""
     kinds = {"Channel Box / Layer Editor": 'CHANNEL_BOX', "Attribute Editor": 'ATTRIBUTE_EDITOR',
              "Modeling Toolkit": 'MODELING_TOOLKIT'}
 
@@ -59,19 +59,19 @@ def s_first_start():
     prefs = bpy.context.preferences
     check("extension enabled by the command-line install", MODULE in prefs.addons)
     kc = bpy.context.window_manager.keyconfigs.active
-    # step 115: enabling alone changes nothing; the user opts in (welcome dialog / preferences button)
+    # enabling alone changes nothing; the user opts in (welcome dialog / preferences button)
     check(f"keymap untouched until the user opts in (got {kc.name if kc else None})",
           kc is not None and kc.name == "Blender")
     check("Maya mode off until the user opts in", not prefs.addons[MODULE].preferences.maya_mode)
     setup()   # closes the splash, opts in to Maya mode
-    # step 130: no app template is installed; the Maya layout is the bundled startup.blend (New Scene)
+    # no app template is installed; the Maya layout is the bundled startup.blend (New Scene)
     import_module(MODULE + ".first_start").new_maya_scene()
 
 
 @step
 def s_scene():
     kc = bpy.context.window_manager.keyconfigs.active
-    check("Maya keymap still on after loading the layout (add-on items, step 130)",
+    check("Maya keymap still on after loading the layout (add-on items)",
           kc is not None and sys.modules[MODULE + ".keymap"].is_applied())
     check("layout has the Maya strip (Status Line + Shelf)",
           bpy.data.masks.get(".AllsetStrip") is not None)
@@ -201,7 +201,7 @@ def s_ae_hist_shot():
 
 @step
 def s_outliner():
-    # step 49: the Outliner is the layout's own column left of the view (the sidebar is the dock only)
+    # the Outliner is the layout's own column left of the view (the sidebar is the dock only)
     outl = [a for a in win().screen.areas if a.type == 'OUTLINER']
     check("layout has the Outliner column", len(outl) == 1)
     if outl:

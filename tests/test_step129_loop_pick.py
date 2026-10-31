@@ -1,4 +1,4 @@
-"""Step 129, issue #22: Maya double-click component selection — double-click = loop (Blender's loop pick at the
+"""Maya double-click component selection — double-click = loop (Blender's loop pick at the
 mouse), Shift+double-click a second component = the run between the two picks along their common loop
 (edge / vertex / face), on the "Mesh" keymap's LEFTMOUSE DOUBLE_CLICK."""
 

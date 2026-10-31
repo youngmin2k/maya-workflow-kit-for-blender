@@ -1,4 +1,4 @@
-"""One Blender session of the step 130 install / remove check (run by test_step130_lifecycle.py, not a test file).
+"""One Blender session of the install / remove check (run by test_step130_lifecycle.py, not a test file).
 
     blender -b --python tests/lc130_session.py -- <out.json> <action> [<action> ...]
 

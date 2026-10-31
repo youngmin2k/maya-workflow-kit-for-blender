@@ -2,12 +2,12 @@
 """Maya-style names: ``pCube1`` / ``pCubeShape1``.
 
 Maya numbers a new node with a trailing integer and renames the shape to match
-the transform. The number is one past the highest ``<base>N`` that exists, gaps are not filled (step 208,
-sets / layers / anim layers / characters / bookmarks too, step 211);
+the transform. The number is one past the highest ``<base>N`` that exists, gaps are not filled (
+sets / layers / anim layers / characters / bookmarks too);
 Blender names are unique per datablock type, so it must be free for both the
 object and its data.
 
-Step 149 (#93): Maya names are unique among nodes that exist. Deleting a Blender object leaves its mesh with zero
+#93: Maya names are unique among nodes that exist. Deleting a Blender object leaves its mesh with zero
 users until the file is saved or purged, so that orphan held ``pCubeShape1`` and the next cube became ``pCube2``.
 An orphan (local, no users, no fake user — Blender drops it on save anyway) whose name the kit wants is removed first.
 """
@@ -28,7 +28,7 @@ def base_name(name):
 
 def next_number(base, taken, shape_taken=(), shape_base=None):
     """Maya's ``<base>#`` number: one more than the highest N of a taken name that starts with ``base`` + digits, then
-    up past any ``shape_base+N`` already taken. Maya doesn't fill gaps (step 208, pCube2 / pCube3 left ->
+    up past any ``shape_base+N`` already taken. Maya doesn't fill gaps (pCube2 / pCube3 left ->
     pCube4; pCube10 -> pCube11; pCube1x -> pCube2; a renamed shape pCubeShape6 doesn't count)."""
     shape_base = shape_base or f"{base}Shape"
     pattern = re.compile(re.escape(base) + r"(\d+)")

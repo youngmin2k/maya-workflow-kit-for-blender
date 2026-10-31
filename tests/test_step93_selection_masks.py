@@ -1,4 +1,4 @@
-"""Step 93: Shift+Q check marks, selection masks kept across File > New / Open (Maya: they are session
+"""Shift+Q check marks, selection masks kept across File > New / Open (Maya: they are session
 state), Tool Settings Reset Tool."""
 
 import math

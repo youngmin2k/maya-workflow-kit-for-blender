@@ -1,4 +1,4 @@
-"""Step 277 (#203) in a real UI: Render Settings reopens at the size and place it had; a place off the screen comes
+"""#203: in a real UI: Render Settings reopens at the size and place it had; a place off the screen comes
 back inside the Blender window; the main layout is the same afterwards. Screenshot: gui_step277_main.png (main
 window after the reopen, layout unchanged)."""
 

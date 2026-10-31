@@ -1,4 +1,4 @@
-"""Step 18 in a real UI: mesh component keys — Shift+> / Shift+<,
+"""In a real UI: mesh component keys — Shift+> / Shift+<,
 Ctrl+F9 / Ctrl+F11, Ctrl+E, Ctrl+B, D component pivot hold / tap, Alt+D."""
 
 import os
@@ -55,7 +55,7 @@ def tool_id():
     return t.idname if t else None
 
 
-# PR #125's always-running window watchers are not a user modal (step 229)
+# PR #125's always-running window watchers are not a user modal
 WATCHERS = {'ALLSET_OT_joint_outliner_select', 'ALLSET_OT_pose_empty_click'}
 
 
@@ -109,7 +109,7 @@ def s_to_faces():
 
 @step
 def s_extrude_modal():
-    # Maya polyExtrudeFace since step 65: extruded right away (zero length) + manipulator, no modal
+    # like Maya Extrude: extruded right away (zero length) + manipulator, no modal
     ex = sys.modules["sim"].import_module(sys.modules["sim"].MODULE + ".operators.extrude")
     _o, rec = ex.active(bpy.context)
     check(f"Ctrl+E: polyExtrudeFace right away, no drag modal ({rec and rec.name}, {list(win().modal_operators)})",
@@ -126,7 +126,7 @@ def s_extruded():
 
 @step
 def s_bevel_modal():
-    # Maya polyBevel3 since step 139 (#16): beveled right away, no drag modal
+    # like Maya Bevel (#16): beveled right away, no drag modal
     ex = sys.modules["sim"].import_module(sys.modules["sim"].MODULE + ".operators.extrude")
     _o, rec = ex.active(bpy.context)
     mods = [op.bl_idname for op in win().modal_operators if op.bl_idname not in WATCHERS]
@@ -137,7 +137,7 @@ def s_bevel_modal():
 
 @step
 def s_beveled():
-    # step 139: the cap of a zero-length extrusion bevels into an inset like Maya (12/20/10 stays, cap shrinks)
+    # the cap of a zero-length extrusion bevels into an inset like Maya (12/20/10 stays, cap shrinks)
     check(f"Ctrl+B on the extruded cap: Maya inset, same face count ({C['faces']} -> {len(bm().faces)})",
           len(bm().faces) == C["faces"])
     ts().transform_pivot_point = 'MEDIAN_POINT'

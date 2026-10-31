@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2022 Hypershade window layout as Blender area splits (no bpy: tested headless; step 131).
+"""Maya 2022 Hypershade window layout as Blender area splits (no bpy: tested headless).
 
 Maya's standard Hypershade is a
 menu bar over five docked panels: Browser top-left, Material Viewer top-right, Create
 bottom-left, the Graph work area (node editor) between Create and the right column, Property Editor bottom-right.
 ``MAYA_RECTS`` are those panels (x, y, w, h; y down, window px); ``plan`` turns them into
 ``screen.area_split`` calls on one area (the whole new window), ``simulate`` replays a plan on a rectangle with
-Blender's split rules (steps 49 / 106 / 116):
+Blender's split rules:
 
 - HORIZONTAL, factor > 0.5: the new area is the top part, ``1 - factor`` of the height;
 - VERTICAL, factor > 0.5: the new area is the right part, ``1 - factor`` of the width;

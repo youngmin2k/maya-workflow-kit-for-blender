@@ -1,21 +1,21 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya's extrude manipulator, In-View Editor and the INPUTS rows of the last extrusion
-(step 65).
+.
 
 - Visible while the active edit object's last kit extrusion is valid and its extruded faces are the selection
   (operators/extrude.py). Maya swaps the Move manipulator for the extrude one: the kit Move/Scale manipulator
   (ui/manipulator.py) hides meanwhile.
-- The manipulator is a Python gizmo group (Blender's C transform gizmo can't be extended). Step 151:
+- The manipulator is a Python gizmo group (Blender's C transform gizmo can't be extended).
   Maya's polyExtrudeFace manipulator in the faces' local frame - three
   arrows (Local Translate X red / Y green / Z blue = the normal), a cube past each cone (Local Scale X / Y / Z), three
   plane handles (two Local Translate values) and a light-blue centre square (uniform Local Scale). Every handle runs
   ``allset.extrude_drag`` with its ``handle``; release = one undo step (``extrude.set_params``). Edge / vertex
   extrusions and bevels keep the single arrow of their ``Spec.arrow``. No Blender tooltips (Maya manipulators have
   none).
-- The In-View Editor box is drawn by a POST_PIXEL handler; 2D gizmos only pick its rows (the shelf's way, step 51).
+- The In-View Editor box is drawn by a POST_PIXEL handler; 2D gizmos only pick its rows (the shelf's way).
   Dragging a row sideways changes the value, a click without a drag types it, Keep Faces Together toggles.
 - Channel Box INPUTS: the node and five rows (WindowManager text proxies: a UI edit of a WM property pushes no
-  undo step, the edit itself is one, step 38) + the "only the last one" notice.
+  undo step, the edit itself is one) + the "only the last one" notice.
 """
 
 import blf
@@ -28,18 +28,18 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Matrix, Vector, geometry
 
 from . import cb_entry, manipulator
-from ..operators import bevel_maya, extrude, units   # bevel_maya: registers the polyBevel spec (step 139)
-from ..operators import uv_tools  # noqa: F401  registers the polyAutoProj spec (step 257)
+from ..operators import bevel_maya, extrude, units   # bevel_maya: registers the polyBevel spec
+from ..operators import uv_tools  # noqa: F401  registers the polyAutoProj spec
 
 ROW_H = 16          # px at UI scale 1 (Maya In-View rows)
 WIDTH = 180
-GAP = (150, -6)     # box top-left from the manipulator centre on screen: right of the X / Y handles (step 151;
+GAP = (150, -6)     # box top-left from the manipulator centre on screen: right of the X / Y handles (
                     # Maya: past the manipulator, 250 px from its centre at a 100 px rotate ring)
 FLOAT_STEP = 0.01   # Maya units per px of a sideways drag
 DIV_PX = 20         # px per division
 KINDS = {"thickness": "NONE", "local_translate_z": "NONE", "offset": "NONE", "divisions": "INT",
          "keep_faces_together": "BOOL"}
-# every field of every recorded node (Channel Box text proxies, step 139: edge / vertex extrusion, bevel)
+# every field of every recorded node (Channel Box text proxies: edge / vertex extrusion, bevel)
 ALL_FIELDS = tuple(dict.fromkeys(f for spec in extrude.SPECS.values() for f in spec.fields))
 MAX_ROWS = max(len(spec.fields) for spec in extrude.SPECS.values())
 BOOL_FIELDS = {f for spec in extrude.SPECS.values() for f, k in spec.kinds.items() if k == "BOOL"}
@@ -193,7 +193,7 @@ def draw_box():
     if rec is None:
         return
     from ..marking import draw as marking_draw
-    if marking_draw.menu_up():   # Maya's hotbox / marking menus cover the In-View Editor (step 197)
+    if marking_draw.menu_up():   # Maya's hotbox / marking menus cover the In-View Editor
         return
     s = _scale()
     size = 11 * s
@@ -257,7 +257,7 @@ class ALLSET_GGT_in_view(bpy.types.GizmoGroup):
             gz.target_set_operator(ALLSET_OT_inview_drag.bl_idname).row = i
 
 
-# --- the extrude manipulator (3D gizmo, step 151) --------------------------------------------------
+# --- the extrude manipulator (3D gizmo) --------------------------------------------------
 
 # Maya 2022 polyExtrudeFace manipulator (top face of a cube,
 # local mode): lengths in "arrow units" (centre -> scale cube = 1): cone 0.64 -> 0.86 (radius 0.05), cube half 0.07,
@@ -330,7 +330,7 @@ def unit_px(context):
 def handles_hit(context, region, rv3d, mouse, reach):
     """True when ``mouse`` (region px) is within ``reach`` px of a shown handle of the extrude manipulator: the
     pre-selection gizmo (operators/preselect.py, a 2D test_select that would win over these 3D-picked handles)
-    declines there, like it does on the Move manipulator (step 97)."""
+    declines there, like it does on the Move manipulator."""
     ob, rec = record(context)
     frame = manip_frame(ob, rec) if rec is not None else None
     if frame is None:
@@ -723,7 +723,7 @@ def cb_record(context, ob):
     if ob is None:
         return None
     if ob is not getattr(context, "edit_object", None):
-        return extrude.object_record(ob)        # a node editable in object mode (UV > Automatic, step 257)
+        return extrude.object_record(ob)        # a node editable in object mode (UV > Automatic)
     return extrude.current(ob)
 
 
@@ -780,8 +780,8 @@ HISTORY_TIP = "Blender keeps no edit-mode history: only the last operation can b
 
 def draw_cb_node(layout, context, rec):
     """The polyExtrudeFace node in Channel Box INPUTS; the Blender notice is the node name's
-    tooltip (step 106: no Blender sentences in Maya windows). Collapsed until its name is clicked, like Maya
-    (step 135)."""
+    tooltip (no Blender sentences in Maya windows). Collapsed until its name is clicked, like Maya
+   ."""
     from . import channel_box
     lines = channel_box.as_lines(layout)
     ob = channel_box.lead(context)

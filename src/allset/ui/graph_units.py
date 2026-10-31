@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Graph Editor value axis in display units (#66, step 137).
+"""Graph Editor value axis in display units (#66).
 
 Blender's Graph Editor draws F-curve values as stored and converts only rotations (C ``ANIM_unit_mapping_get_factor``),
 so in the Maya Workflow Kit scene (cm shown, ``scale_length`` 1) a 5 cm Translate X curve reads
@@ -9,7 +9,7 @@ Blender's numbers, one axis can't carry two units.
 
 Blender 4.5 draws those numbers in the WINDOW region's *overlay* (``graph_main_region_draw_overlay`` ->
 ``UI_view2d_draw_scale_y__values``, Blender source space_graph.cc:352-358, view2d_draw.cc:340-400), which is drawn
-after every Python POST_PIXEL handler of the region: a POST_PIXEL cover stays under them (step 137).
+after every Python POST_PIXEL handler of the region: a POST_PIXEL cover stays under them.
 The only Python drawing that comes after a region overlay is a window-manager draw cursor
 (``WindowManager.draw_cursor_add``, wm_draw ``wm_paintcursor_draw``), which Blender draws for the region under the
 mouse only. So:
@@ -280,7 +280,7 @@ def _snapshot():
         return
     px = np.array(buf.to_list(), dtype=np.float32).reshape(by1 - by0, bx1 - bx0, 4) / 255.0
     # pasted as they are: the draw cursor draws into the window framebuffer, where 'IMAGE' doesn't convert
-    # (an sRGB -> linear round trip came out dark, step 137 shot)
+    # (an sRGB -> linear round trip comes out dark)
     px[..., 3] = 1.0
     data = gpu.types.Buffer('FLOAT', px.size, px.ravel())
     tex = gpu.types.GPUTexture((bx1 - bx0, by1 - by0), format='RGBA32F', data=data)
@@ -323,7 +323,7 @@ def _cursor(*_args):
         uv += [((a - bx0) / bw, (b - by0) / bh) for a, b in quad]
     # the window projection of a draw cursor is shifted by Blender's 0.375 px pixel offset (GLA_PIXEL_OFS), which
     # resamples the pasted pixels and blurs glyphs: draw with an exact pixel ortho (crisp like Blender's own labels,
-    # step 137)
+    # pixel exact)
     import mathutils
     _vx, _vy, vw, vh = gpu.state.viewport_get()
     gpu.matrix.push_projection()

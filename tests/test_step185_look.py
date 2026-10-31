@@ -1,4 +1,4 @@
-"""Step 185: selected edges and manipulator look.
+"""Selected edges and manipulator look.
 
 Edges: Blender's sharp-edge overlay is switched off with the face overlay in Maya layout views, the hilite wire is
 1.5 px (just covers Blender's own 2 px edit edge), selected edges 2 px with a larger depth bias. Manipulator: plane

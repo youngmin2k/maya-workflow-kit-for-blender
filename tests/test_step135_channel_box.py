@@ -1,4 +1,4 @@
-"""Step 135 lane CB (#55): Channel Box INPUTS nodes collapsed by default, Maya's click-the-name expansion (reset when the
+"""Lane CB (#55): Channel Box INPUTS nodes collapsed by default, Maya's click-the-name expansion (reset when the
 lead changes), the fixed Channel Box / Layer Editor split with a scrolling Channel Box part, the dock's tab widths.
 Maya-style layout. Real dock: tests/gui/gui_step135_dock.py."""
 

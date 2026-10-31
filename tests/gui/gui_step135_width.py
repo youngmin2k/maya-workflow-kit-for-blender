@@ -1,5 +1,5 @@
-"""Step 135 lane WIDTH (#60) in a real UI: a new Maya scene fits the Maya tab stack to the running UI scale
-(toolbox.dock_width: Channel Box labels left of the vertical tab strip since step 142; between 277 and 480 px
+"""Lane WIDTH (#60) in a real UI: a new Maya scene fits the Maya tab stack to the running UI scale
+(toolbox.dock_width: Channel Box labels left of the vertical tab strip; between 277 and 480 px
 times the scale) through
 ALLSET_OT_fit_columns, the viewport takes the remaining width, the AE menu bar is one row, the longest Channel Box
 label fits its column. Run at the default 1.25, ``--ui-scale 0.8`` (1.0) and ``--ui-scale 1.2`` (1.5)."""
@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sim import MODULE, check, dock_area, ev, run, step, setup, screenshot, view3d, win, load_maya_layout  # noqa: E402
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
-os.environ["ALLSET_FIT_WARP"] = "1"   # the cursor fit is off in event-simulated sessions unless asked for (step 99)
+os.environ["ALLSET_FIT_WARP"] = "1"   # the cursor fit is off in event-simulated sessions unless asked for
 C = {}
 
 
@@ -77,10 +77,10 @@ def s_width():
     reg = next(r for r in dock.regions if r.type == 'WINDOW')
     u = tb._unit(scale, pixel)
     longest = max(tb.text_px(t, scale) for t in tb.LONG_LABELS)
-    content = reg.width - mod("ui.maya_dock").reserved_px(scale)   # left of the vertical tab strip (step 142)
+    content = reg.width - mod("ui.maya_dock").reserved_px(scale)   # left of the vertical tab strip
     check(f"the longest Channel Box label fits its half of the dock ({longest:.0f} px in {(content - 0.8 * u) / 2:.0f})",
           (content - 0.8 * u) / 2 >= longest + 0.8 * u)
-    # step 142 (#78): the tabs are Maya's vertical strip, the AE gets its own width when raised (gui_step142_ui.py)
+    # #78: the tabs are Maya's vertical strip, the AE gets its own width when raised (gui_step142_ui.py)
     area, region = view3d()
     with bpy.context.temp_override(window=win(), area=area, region=region):
         bpy.ops.allset.create(kind='CUBE')
@@ -96,7 +96,7 @@ def s_cb_shot():
     redraw()
 
 
-for _i in range(6):         # step 142: raising the AE widens the stack (tab change -> cursor fit)
+for _i in range(6):         # raising the AE widens the stack (tab change -> cursor fit)
     step(redraw)
 
 

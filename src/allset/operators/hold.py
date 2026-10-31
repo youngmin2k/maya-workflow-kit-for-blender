@@ -3,8 +3,7 @@
 
 Maya press/release hotkeys, D hold /
 Insert, X grid, C curve, V point; j =
-MoveRotateScaleToolToggleSnapMode press/release. Design and limits:
-step 3.
+MoveRotateScaleToolToggleSnapMode press/release.
 
 ``begin``/``end`` are plain functions (headless-testable). The operator
 ``allset.hold`` wraps them in a modal that waits for the key's RELEASE.
@@ -61,7 +60,7 @@ class SnapGroup(HoldGroup):
 class PivotGroup(HoldGroup):
     """D hold: transform affects only object origins and
     not the children; ``pivot.watch`` rewrites each such transform the Maya way (channels
-    stay, step 59)."""
+    stay)."""
 
     def capture(self, ts):
         return (ts.use_transform_data_origin, ts.use_transform_skip_children)
@@ -136,7 +135,7 @@ class ComponentPivotGroup(HoldGroup):
 
 
 class PreserveChildrenGroup(HoldGroup):
-    """D hold on joints in Edit mode (step 243, #160): Maya moves the joint only, its children stay
+    """D hold on joints in Edit mode (#160): Maya moves the joint only, its children stay
     (``cmds.move(preserveChildPosition=True)``). The picked joints are
     re-selected head-only while held."""
 
@@ -172,7 +171,7 @@ def component_pivot_after(saved, moved):
     return 'BOUNDING_BOX_CENTER' if saved == 'CURSOR' else saved
 
 
-# --- component pivot edit: D hold and Insert toggle in mesh edit mode (step 77) ----------
+# --- component pivot edit: D hold and Insert toggle in mesh edit mode ----------
 
 CURSOR_TOOL = "builtin.cursor"
 CURSOR_OP = "view3d.cursor3d"
@@ -203,13 +202,13 @@ def _set_cursor_orientation(context, value):
 
 
 def cursor_orientation(context):
-    """The cursor tool orientation for the Maya Snap Pivot Orientation option (step 94; default on = GEOM)."""
+    """The cursor tool orientation for the Maya Snap Pivot Orientation option (default on = GEOM)."""
     from .pivot_menu import option
     return PIVOT_CURSOR_ORIENTATION if option("SNAP_ORI", context) else 'NONE'
 
 
 def apply_cursor_options(context):
-    """Snap Pivot Orientation / Position -> the active cursor tool's orientation / surface projection (step 94)."""
+    """Snap Pivot Orientation / Position -> the active cursor tool's orientation / surface projection."""
     from .pivot_menu import option
     _set_cursor_orientation(context, cursor_orientation(context))
     try:
@@ -304,8 +303,8 @@ def _restore_selection_flags(flags):
 
 
 class ComponentPivotEdit:
-    """One edit-mode pivot edit: the 3D cursor is the pivot, the cursor tool places it (step 18), a
-    changed cursor rotation becomes the "Maya Pivot" Move orientation (step 59 P8, now in edit mode)."""
+    """One edit-mode pivot edit: the 3D cursor is the pivot, the cursor tool places it, a
+    changed cursor rotation becomes the "Maya Pivot" Move orientation (as in object mode)."""
 
     def __init__(self):
         self.on = False
@@ -313,7 +312,7 @@ class ComponentPivotEdit:
         self.pending_tool = None      # tool to bring back on the next mesh edit mode entry
         self.custom = False           # a placed custom pivot is in use (pivot point CURSOR after finish)
         self.sel_sig = None           # the selection it was placed for (Pin Component Pivot off: reset on change)
-        self.cursors = set()          # 3D views whose hidden cursor this edit shows (step 134)
+        self.cursors = set()          # 3D views whose hidden cursor this edit shows
         self.outside = None           # (pivot point, Move / Rotate orientation types) before the component pivot
         self.turned_axes = False      # this component pivot set the "Maya Pivot" axes
 
@@ -427,7 +426,7 @@ class ComponentPivotEdit:
 
     def tick(self, context):
         """Timer: close a toggled session that left edit mode; restore its tool when edit mode is back; drop an
-        unpinned custom pivot when the selection changes (Maya Pin Component Pivot off, step 94)."""
+        unpinned custom pivot when the selection changes (Maya Pin Component Pivot off)."""
         if self.on and context.mode != EDIT_MODE:
             self.finish(context)
         elif self.pending_tool and context.mode == EDIT_MODE:
@@ -455,9 +454,9 @@ def _view3d_spaces(screens=None):
 
 
 def show_cursors(screens=None):
-    """Show the 3D cursor in every 3D View that hides it (the Maya layout views, step 134 #59); returns their space
+    """Show the 3D cursor in every 3D View that hides it (the Maya layout views, #59); returns their space
     pointers for ``hide_cursors``. Spaces are looked up afresh from ``bpy.data.screens`` (default) every time: no
-    reference is kept across a closed window (step 129 #36)."""
+    reference is kept across a closed window (#36)."""
     shown = set()
     for space in _view3d_spaces(screens):
         if not space.overlay.show_cursor:
@@ -661,7 +660,7 @@ class ALLSET_OT_hold(bpy.types.Operator):
                     return self._latch(context)
                 return self._finish(context)
             if event.is_repeat:
-                # Step 265 (Issue #178): the OS repeats a held key (~30 / s). A *handled* key event cancels the
+                # Issue #178: the OS repeats a held key (~30 / s). A *handled* key event cancels the
                 # pending LMB CLICK_DRAG (wm_event_system.cc 4.5 :3740-3749 "CLICK_DRAG: canceling (button event
                 # was handled)"), so the manipulator's drag — gizmo_tweak is a CLICK_DRAG item — only started when
                 # the mouse crossed the drag threshold before the next repeat: D + drag "sometimes" grabbed the
@@ -674,7 +673,7 @@ class ALLSET_OT_hold(bpy.types.Operator):
         if event.type == 'TIMER' and keystate.is_down(self._key) is False:
             # RELEASE was consumed by another modal (e.g. a transform drag). Wait for that
             # transform to end: it writes its snap state back to the tool settings when it
-            # finishes, which would undo a restore made during the drag (step 59).
+            # finishes, which would undo a restore made during the drag.
             window = context.window
             from .manip_scale import TRANSFORM_MODALS
             if window is not None and any(op.bl_idname.startswith(TRANSFORM_MODALS)
@@ -692,11 +691,11 @@ class ALLSET_OT_pivot_toggle(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     def execute(self, context):
-        if context.mode == 'EDIT_ARMATURE':   # step 243: Insert on joints = Preserve Children on / off
+        if context.mode == 'EDIT_ARMATURE':   # Insert on joints = Preserve Children on / off
             preserve_children_set(not preserve_children_set(None))
             _redraw()
             return {'FINISHED'}
-        if context.mode == EDIT_MODE:     # Maya component mode Insert (step 77): the 3D cursor pivot edit
+        if context.mode == EDIT_MODE:     # Maya component mode Insert: the 3D cursor pivot edit
             if COMPONENT.on:
                 COMPONENT.finish(context)
             else:

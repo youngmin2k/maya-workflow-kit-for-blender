@@ -1,4 +1,4 @@
-"""Step 188: animation layer follow-ups, like Maya:
+"""Animation layer follow-ups, like Maya:
 Auto Key on a layered object keys the selected layer only where that attribute already has keys on it, solved so the
 result is the typed value; Channel Box > Channels > Add to / Remove From Selected Layers edit the layer's attributes
 (a key on a non-member attribute goes to BaseAnimation, removing a keyed attribute deletes its layer curve);

@@ -1,4 +1,4 @@
-"""Step 74: pre-selection highlight for vertices, edges and faces, also with the transform tools.
+"""Pre-selection highlight for vertices, edges and faces, also with the transform tools.
 GUI: tests/gui/gui_step74_preselect.py."""
 
 from importlib import import_module

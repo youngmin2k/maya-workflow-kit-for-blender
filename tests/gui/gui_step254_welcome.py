@@ -1,4 +1,4 @@
-"""Step 254 (#170): the welcome dialog opened at the main window's last pointer position. After installing from
+"""#170: the welcome dialog opened at the main window's last pointer position. After installing from
 Edit > Preferences that was the menu bar, so the dialog sat over File / Edit / ... and swallowed every click there
 ("top menus not responding" on 5.2.2; same in 4.5). Now it waits (allset.welcome_wait) until the
 pointer moves inside the main window clear of the menu bar, and opens there. Look at the shots: ALLSET_GUI_SHOTS."""
@@ -101,7 +101,7 @@ def s_into_view():
 
 @step
 def s_opened():
-    # step 260: the dialog counts its showings (welcome_done only once confirmed or shown WELCOME_SHOWS times)
+    # the dialog counts its showings (welcome_done only once confirmed or shown WELCOME_SHOWS times)
     check("pointer in the viewport: the dialog opens (welcome shown)", _prefs().welcome_shown == 1)
     check("the wait operator ended", not _waiting())
 

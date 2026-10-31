@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya ikRPsolver on chains of 3+ bones (step 282, #181): how Maya splits the bend over the in-between joints.
+"""Maya ikRPsolver on chains of 3+ bones (#181): how Maya splits the bend over the in-between joints.
 
 No bpy: plain maths on numpy arrays (column vectors), so the rule can be tested headless.
 

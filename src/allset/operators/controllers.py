@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Control > Tag As Controller / Parent Controller on bones (step 217).
+"""Control > Tag As Controller / Parent Controller on bones.
 
 Maya's ``controller`` command (menu Tag As Controller) tags nodes as controllers with
 an empty parent controller; ``cmds.controller(parent=True)`` (Parent Controller) makes the last selected node the

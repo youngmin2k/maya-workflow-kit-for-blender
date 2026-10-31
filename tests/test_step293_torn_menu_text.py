@@ -1,4 +1,4 @@
-"""Step 293: a torn-off menu draws its items' text from the left edge, like the menu (Blender centres an operator
+"""A torn-off menu draws its items' text from the left edge, like the menu (Blender centres an operator
 button's text outside a menu). Each operator / press-and-hold / radio button goes into its own row aligned LEFT;
 sub-menu rows, check boxes and labels stay on the column; the window height estimate is unchanged."""
 

@@ -1,4 +1,4 @@
-"""Step 183 (#82): option box click zone (ui/option_click.py). Headless: the row texts the zone is built on are the
+"""#82: option box click zone (ui/option_click.py). Headless: the row texts the zone is built on are the
 texts the Maya menus draw, the zone model is off where it can't be trusted (no window / not opened from the menu
 bar), the click-point operator exists, and an option-box item still runs its command when nothing says "box".
 The geometry against real menus: tests/gui/gui_step183_option_click.py (UI scale 1.0 and 1.25)."""
@@ -19,7 +19,7 @@ def test_rows_are_the_drawn_texts():
     assert out[0][0] == import_module(kit.MODULE + ".ui.maya_dock").TEAR_LINE
     bevel = texts["Edit Mesh/Bevel"]
     assert bevel.startswith("Bevel") and bevel.endswith("❒"), bevel
-    assert "Ctrl+B" in bevel, bevel            # Maya hotkey before the box (step 108)
+    assert "Ctrl+B" in bevel, bevel            # Maya hotkey before the box
     sub, sub_texts = oc.rows("Create/Polygon Primitives")
     assert sub_texts["Create/Polygon Primitives/Cube"].endswith("❒")
     assert not any(is_sub for _t, is_sub in sub)

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya ikRPsolver on a kit IK handle (step 245, Issue #162).
+"""Maya ikRPsolver on a kit IK handle (Issue #162).
 
 Maya 2026:
 - a new RP handle gets a **default pole vector**: with the chain at its preferred angles, the joint whose offset from
@@ -7,7 +7,7 @@ Maya 2026:
   joint's offset perpendicular to the chain), length 2 × jointDisplayScale, stored in the handle's parent space
   (world); a straight chain (every |p × d|² < 1e-10) falls back to e_k ⊥ d, k = the smallest |component| of d in the
   start joint's frame, pv = d × n;
-- step 266: for an RP handle on exactly 3 joints whose middle joint has
+- for an RP handle on exactly 3 joints whose middle joint has
   preferredAngle ≈ 0, jointOrient ≈ 0 (≤ 3e-5° bends, ≥ 1e-4° doesn't) and rotate 0 and a straight chain, ``ikHandle``
   first writes preferredAngle (0, 90, 0) on the middle joint, so the pv comes from that bent pose (along X with equal
   bones: (1.414, 0, 1.414)) and the chain bends that way; every other straight chain (4+ joints, a jointOrient on the
@@ -19,7 +19,7 @@ Blender (4.5): the IK constraint's pole target at root + R(u, twist)·pv with
 pole_angle = −signed_angle(base bone X -> rest bend direction about the rest chain axis) gives Maya's elbow for
 reachable goals (out of reach Blender's IK keeps a sliver of bend). A straight chain
 needs a starting bend (Blender's IK starts from the pose): the in-between joints get their preferred angle, else 1°
-toward the pole (step 245: 0.01 rad is enough, less is not).
+toward the pole (0.01 rad is enough, less is not).
 
 Kit pieces: the handle's custom properties ``poleVectorX/Y/Z`` (Maya units, Maya axes) and ``twist`` (degrees) are
 its Channel Box channels; a hidden empty ``<handle>Pole`` (at the chain's start joint + the turned pv, world, like
@@ -81,7 +81,7 @@ def chain_points(arm, bones, preferred=True):
 
 
 def straight_fallback(d_local):
-    """Maya's straight-chain normal in the start joint's frame (A2 step 3): the axis e_k of the smallest |component|
+    """Maya's straight-chain normal in the start joint's frame: the axis e_k of the smallest |component|
     of d, made perpendicular to d."""
     ax, ay, az = (abs(c) for c in d_local)
     if az <= ay:
@@ -113,7 +113,7 @@ def default_pole_vector(points, length, start_frame=None):
     return v.normalized() * length
 
 
-# R4 (step 266): Maya writes the middle joint's preferred angle (0, 90, 0) — 90° about its Maya Y = the bone's Z
+# R4: Maya writes the middle joint's preferred angle (0, 90, 0) — 90° about its Maya Y = the bone's Z
 # (joints.JOINT_AXES), as pose Euler XYZ in bone axes like rig_maya.PREFERRED_PROP — when the 3-joint chain is
 # straight. Straightness: the kit takes 1e-3 of the chain length; jointOrient: 1e-6 rad (5.7e-5°).
 AUTO_PREFERRED = (0.0, 0.0, 90.0)
@@ -249,7 +249,7 @@ def setup(context, arm, ik_bone, con, handle, display_scale=1.0):
     helper[OWNER] = handle.name
     # parented to the start joint's parent (bone, or the skeleton object): the helper follows the skeleton without a
     # dependency on the IK chain itself (a Copy Location of the start joint made a cycle — the IK reads the helper —
-    # and the GUI evaluated the pole stale, step 245)
+    # and the GUI evaluated the pole stale)
     helper.parent = arm
     if bones[0].parent is not None:
         helper.parent_type = 'BONE'
@@ -262,7 +262,7 @@ def setup(context, arm, ik_bone, con, handle, display_scale=1.0):
     con.pole_target = helper
     con.pole_angle = pole_angle(arm, bones, bend)
     if straight and (len(bones) == 2 or (_has_preferred(bones) and multi_chain(handle) is None)):
-        # Maya: a straight 3+ joint chain without preferred angles stays straight (step 251)
+        # Maya: a straight 3+ joint chain without preferred angles stays straight
         _prebend(arm, bones, bend)
     update_handle(handle)
     return helper
@@ -371,7 +371,7 @@ def unregister_handlers():
     _solvers.clear()
 
 
-# --- step 282 (#181): 3+ bone chains bend like Maya ------------------------------------------------------------------
+# --- #181: 3+ bone chains bend like Maya ------------------------------------------------------------------
 # Maya splits the bend of a chain of three or more bones its own way (operators/ik_rp_multi.py); Blender's IK
 # constraint spreads it differently. On such a chain the kit solves Maya's rule and hands each joint's result to a
 # Copy Rotation constraint (world space) on its bone, reading a hidden helper empty the solve places: the FK channels

@@ -1,4 +1,4 @@
-"""Step 255 (#171): on a Rigify rig in Maya mode, clicking a control dropped the rig out of Pose mode — the click watcher
+"""#171: on a Rigify rig in Maya mode, clicking a control dropped the rig out of Pose mode — the click watcher
 (ui/toolbox pose_empty_click) tested only bone head-tail lines, so a click on a custom-shape widget away from its bone
 counted as empty space; a near miss went select_object_at -> Object mode; with the Move tool an unkeyed rig went to
 Edit mode. Maya has no selection mode: picking a control never changes the mode, a click on nothing clears the

@@ -1,4 +1,4 @@
-"""Step 131 lane TOOLBOX (#23) in a real UI: the Maya Workflow Kit layout's Tool Box column shows the kit-drawn Maya
+"""Lane TOOLBOX (#23) in a real UI: the Maya Workflow Kit layout's Tool Box column shows the kit-drawn Maya
 tool and quick-layout icons (unscaled, at the toolbar's icon size), the Layer Editor toolbar and the Outliner's
 default rows show kit glyphs in Maya-style colours, and a Tool Box click still sets the tool. Screenshots of the
 column / Outliner / Layer Editor go to ALLSET_GUI_SHOTS (run once with --ui-scale 0.8 = effective 1.0 on a 125 %
@@ -125,7 +125,7 @@ def s_check():
     sets_ = [rw for rw in rows if rw[2] == 'DEFAULT_SET']
     if sets_:
         y0, y1 = sets_[0][0], sets_[0][1]
-        lead = u if outl.spaces.active.show_mode_column else 0   # step 202: no mode column in the Maya Outliner
+        lead = u if outl.spaces.active.show_mode_column else 0   # no mode column in the Maya Outliner
         cxi = reg.x + round(lead + 1.5 * u)
         cyi = reg.y + round((y0 + y1) / 2)
         crop = px[cyi - n_small // 2 - 1:cyi + n_small // 2 + 1, cxi - n_small // 2 - 1:cxi + n_small // 2 + 1]
@@ -138,7 +138,7 @@ def s_check():
     stack = dock_area()
     sreg = next(rg for rg in stack.regions if rg.type == 'WINDOW')
     crop = px[sreg.y:sreg.y + sreg.height, sreg.x:sreg.x + sreg.width]
-    # the dock's additive lift to the dock grey (step 195, maya_dock.draw_tint) also lifts the icons drawn under it
+    # the dock's additive lift to the dock grey (maya_dock.draw_tint) also lifts the icons drawn under it
     lift = import_module(MODULE + ".ui.maya_dock").dock_lift(bpy.context)
     t = near(crop, np.clip(TEAL + lift, 0.0, 1.0))
     check(f"Layer Editor toolbar icons in the Maya-style teal ({int(t.sum())} px)", t.sum() > 12)

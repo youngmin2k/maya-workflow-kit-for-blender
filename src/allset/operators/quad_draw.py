@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Quad Draw (Mesh Tools > Quad Draw, Ctrl+Shift+Q): retopology on a live surface (step 144,
-GitHub #30).
+"""Maya Quad Draw (Mesh Tools > Quad Draw, Ctrl+Shift+Q): retopology on a live surface
+(GitHub #30).
 
 The kit tool ``allset.quad_draw_tool`` (edit mode, ui/mesh_tools_poly.py) edits one mesh — the selected one, or a new
 empty ``polySurfaceN`` (``allset.quad_draw_start``) — on the Make Live mesh list, or Maya's construction plane

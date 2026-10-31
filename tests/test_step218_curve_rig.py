@@ -1,4 +1,4 @@
-"""Step 218 lane C: Spline IK on an existing curve (L6) and clusters on curve CVs (L7) against the expected numbers
+"""Spline IK on an existing curve (L6) and clusters on curve CVs (L7) against the expected numbers
 Maya (x, y, z) = Blender (x, -z, y), factory scene = 1 unit.
 
 Scene: joint1..joint5 at Maya (0, 2i, 0); spineCurve = degree 3, CVs (1,0,0) (2,2,0) (1,4,1) (0,6,0) (1,8,0).
@@ -45,7 +45,7 @@ def _curve(name="spineCurve", cvs=CVS, resolution=12):
     for p, c in zip(sp.points, cvs):
         p.co = (*B(c), 1.0)
     sp.order_u = 4
-    sp.use_endpoint_u = True        # Maya clamped uniform knots (step 156)
+    sp.use_endpoint_u = True        # Maya clamped uniform knots
     ob = bpy.data.objects.new(name, cu)
     bpy.context.collection.objects.link(ob)
     return ob

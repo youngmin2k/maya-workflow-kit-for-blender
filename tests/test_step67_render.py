@@ -49,7 +49,7 @@ class Rec:
 
 
 def swatches(rec):
-    """Materials of the Browser swatch buttons a draw made (step 162: ``Material.allset_hs_pick`` toggles)."""
+    """Materials of the Browser swatch buttons a draw made (``Material.allset_hs_pick`` toggles)."""
     return {e[1][0].name for e in rec.log if e[0] == "prop" and e[1][1:2] == ("allset_hs_pick",)}
 
 
@@ -197,7 +197,7 @@ def test_hypershade_browser_create_assign():
         with bpy.context.temp_override(area=area, space_data=space):
             assert bpy.ops.allset.hs_create(kind='STANDARD_SURFACE') == {'FINISHED'}
         mat = bpy.data.materials["standardSurface1"]
-        assert mat.use_fake_user and mat.users == 1 and ob.active_material is not mat   # (ob has lambert1, step 100)
+        assert mat.use_fake_user and mat.users == 1 and ob.active_material is not mat   # (ob has lambert1)
         assert hs.current(bpy.context) == mat and wm.allset_hs_material == mat.name
         assert space.pin and space.node_tree == mat.node_tree, "not on the object: the graph is pinned to it"
         # Assign Material To Selection
@@ -216,7 +216,7 @@ def test_hypershade_browser_create_assign():
         hs.draw_browser(rec, bpy.context)
         assert swatches(rec) == {mat.name, other.name, "lambert1"}
         rec = Rec()
-        wm.allset_hs_create_cat = 'SURFACE'          # step 131: Create pane = Maya's category tree + node list
+        wm.allset_hs_create_cat = 'SURFACE'          # Create pane = Maya's category tree + node list
         hs.draw_create(rec, bpy.context)
         made = [p.item.rsplit("/", 1)[-1] for i, p in rec.ops() if i == "allset.menu_item"]
         # + the Maya materials Blender builds from other nodes (hair, USD Preview, Shading Map)
@@ -270,7 +270,7 @@ def test_keep_image_render_slots():
 def test_light_decay_rate_row():
     for kind in ("POINT", "SPOT", "AREA"):
         rows = [row for _d, sec in ae_layout.walk(ae_layout.BY_KIND[kind][0]) for row in sec.rows]
-        # step 137: a real Decay Rate row (Light.allset_decay, operators/lights.py)
+        # a real Decay Rate row (Light.allset_decay, operators/lights.py)
         assert ("draw", "light_decay") in rows, kind
     rows = [row for _d, sec in ae_layout.walk(ae_layout.BY_KIND["SUN"][0]) for row in sec.rows]
     assert ("draw", "light_decay") not in rows, "directional lights have no decay"

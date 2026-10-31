@@ -1,4 +1,4 @@
-"""Step 286 (Issue #191): with many objects a move, a mesh edit or a selection change no longer makes the kit walk the
+"""Issue #191: with many objects a move, a mesh edit or a selection change no longer makes the kit walk the
 whole scene, and everything those walks keep up to date still follows the edits that matter: Outliner rows (rename,
 parent, unparent, add, delete, edit-mode bones, undo), DAG visibility of children, symmetry on entering edit mode,
 lambert1 on new objects, Outliner order and joint labels."""

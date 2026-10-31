@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya view keys, batch 3: Alt+A cycle display, Alt+P camera persp / ortho, Alt+arrows 1-pixel move,
-` hold = tweak mode, \\ hold = 2D pan / zoom (step 87).
+` hold = tweak mode, \\ hold = 2D pan / zoom.
 
 Maya-style hotkeys: Alt+A display cycle,
 CameraModeToggle (orthographic / perspective), Alt+arrow pixel move, ` tweak mode,
@@ -51,7 +51,7 @@ def apply_display(context, space, mode):
     space.show_object_viewport_armature = show
     space.show_object_viewport_curve = show
     space.show_object_viewport_mesh = True
-    from ..ui import curve_controls        # step 262: curve-shaped bone controls follow
+    from ..ui import curve_controls        # curve-shaped bone controls follow
     curve_controls.sync(space, scene)
 
 
@@ -124,7 +124,7 @@ def pixel_delta(region, rv3d, center, dx, dy):
     return region_2d_to_location_3d(region, rv3d, p + Vector((dx, dy)), center) - center
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_pixel_move(bpy.types.Operator):
     """Move the selection one pixel in the view plane (Maya Alt+arrow keys)"""
     bl_idname = "allset.pixel_move"

@@ -1,4 +1,4 @@
-"""Step 240 (release QA, activity J): tests for mutants that survived the mutation sample (tools/qa/qa_mutants.py).
+"""Release QA, activity J: tests for mutants that survived the mutation sample (tools/qa/qa_mutants.py).
 
 - status_line.snap_on must read Blender's use_snap: an element left in snap_elements while snapping is off is not "on"
   (the Status Line icon would show on while Move doesn't snap, #139 class).

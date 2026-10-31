@@ -1,4 +1,4 @@
-"""Step 233 (Issue #142): constraints on a CHILD joint move it like Maya.
+"""Issue #142: constraints on a CHILD joint move it like Maya.
 
 Expected: joints (0, 10, 0) ->
 (6, 10, 0) -> (12, 10, 0) (cmds.joint), transforms ctrlA t (12, 10, 0) r (0, 0, 30) and ctrlB t (12, 14, 0)
@@ -36,10 +36,10 @@ MAYA_R = {"point": {"w11": I3, "w13": I3, "moved": I3},
           "parent_nomo": {**PARENT_R, "moved": PARENT_R["w13"]},
           "parent_mo": {"w11": I3, "w13": I3, "moved": I3},
           "orient": PARENT_R,
-          # aim: position only — two aim targets are not a weighted target average in the kit (step 226 scope;
+          # aim: position only — two aim targets are not a weighted target average in the kit (out of scope;
           # Maya aims at (12, 12, 0) here), and its up vector is parallel to the aim (degenerate)
           "aim": {}}
-# kit - expected axis differences (deg) allowed where the kit's blend isn't Maya's (step 226: orient = Blender's
+# kit - expected axis differences (deg) allowed where the kit's blend isn't Maya's (orient = Blender's
 # weighted rotation mix, not Maya's)
 ROT_TOL = {"orient": 1.0}
 

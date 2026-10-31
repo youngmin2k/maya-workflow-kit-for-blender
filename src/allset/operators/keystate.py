@@ -2,12 +2,12 @@
 """Ask the OS whether a key is physically held.
 
 Fallback for hold modals whose RELEASE event was eaten by another modal
-(e.g. the transform modal while dragging), step 3.
+(e.g. the transform modal while dragging).
 
 Windows only: a read-only ``user32.GetAsyncKeyState`` query through ctypes (no hook,
 no other OS call). Elsewhere, or if the call fails, ``is_down`` returns None
 ("unknown"); every caller acts only on an explicit False, so the hold then ends on
-Blender's RELEASE event alone (step 115).
+Blender's RELEASE event alone.
 """
 
 import sys

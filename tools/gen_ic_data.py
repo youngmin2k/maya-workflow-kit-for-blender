@@ -3,7 +3,7 @@
     python tools/gen_ic_data.py                 # the default 5.2 + every portable 5.x in allset_blenders (ALLSET_BLENDERS)
     python tools/gen_ic_data.py --blender EXE   # one Blender only
 
-The kit's Maya keymap = this data + keymap/maya_patches.py. Until step 130 the add-on
+The kit's Maya keymap = this data + keymap/maya_patches.py. Earlier the add-on
 loaded Blender's ``presets/keyconfig/keymap_data/industry_compatible_data.py`` at run time with
 ``bpy.utils.execfile``; the extensions store review rejects any exec-style loading (GitHub #40), so this tool
 runs that file here, outside the add-on, and writes the result (``generate_keymaps(Params())``) as plain data.

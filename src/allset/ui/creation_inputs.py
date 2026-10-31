@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Channel Box INPUTS / Attribute Editor tab for the creation node of a primitive (#11, #12, step 129).
+"""Channel Box INPUTS / Attribute Editor tab for the creation node of a primitive (#11, #12).
 
 ``polyCylinder1`` with Radius, Height, Subdivisions Axis / Height / Caps ... (Maya's Channel Box
-attribute names). Values are typed like every Channel Box field (step 38:
+attribute names). Values are typed like every Channel Box field (
 ``+=2``, ``*2``, units) into text proxies on the Scene (UI edits of Scene properties push an undo step) and go to
 every selected object whose node has the same type; ``operators/prim_history.rebuild`` remakes the shape.
 """
@@ -126,7 +126,7 @@ def has_node(ob):
 
 
 def draw_cb(layout, context, ob):
-    """The node in Channel Box INPUTS: its name (click = expand / collapse, collapsed at first like Maya, step 135)
+    """The node in Channel Box INPUTS: its name (click = expand / collapse, collapsed at first like Maya)
     and, expanded, one text row per attribute."""
     _owner, node = prim_history.node_of(ob)
     if node is None:

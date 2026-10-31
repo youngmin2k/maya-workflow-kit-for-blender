@@ -1,4 +1,4 @@
-"""Step 136 (#56): marking menu lists / boxes are never cut by an area border. Blender draws the borders between
+"""#56: marking menu lists / boxes are never cut by an area border. Blender draws the borders between
 editors after every region, so the engine keeps rows and radial boxes off the border bands (``edges``): a row goes
 below a horizontal band (one column, like Maya), the next column starts only at the window bottom, lists and boxes
 move sideways off vertical bands (engine, no bpy UI). GUI: tests/gui/gui_step136_edges.py."""
@@ -99,7 +99,7 @@ def test_rmb_and_shift_menus_never_on_a_border():
         menu = mm.with_object_name(mm.MENUS[name], "pCube1")
         for origin in _origins():
             s = _session(menu, origin)
-            # the ring stays at the press point (step 193: only the list moves)
+            # the ring stays at the press point (only the list moves)
             assert s.center == origin, (s.center, origin)
             _check_layout(s.layout, s.center, (name, origin))
     total = len(MENUS) * len(_origins())
@@ -122,7 +122,7 @@ def test_list_cascades_never_on_a_border():
 
 def test_row_below_the_band_keeps_one_column():
     # Low in the view: the list runs over the View / Time Slider border into the Time Slider. The row that would
-    # straddle the border goes below it; the column only wraps at the window bottom (step 52).
+    # straddle the border goes below it; the column only wraps at the window bottom.
     menu = mm.with_object_name(mm.RMB_MESH, "pCube1")
     s = _session(menu, (VIEW.width / 2, 220.0))
     rows = sorted((it for it in s.layout.items if it.kind == "list"), key=lambda it: it.key)

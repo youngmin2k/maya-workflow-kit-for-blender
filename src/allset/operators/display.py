@@ -59,11 +59,11 @@ class ALLSET_OT_display_mode(bpy.types.Operator):
 # --- 1/2/3 smooth mesh preview ------------------------------------------------
 # Maya: 1 = no smoothing, 2 = cage + smooth,
 # 3 = smooth mesh preview; per selected shape, geometry unchanged. Blender form:
-# the kit's own preview Subsurf (never the user's Subsurf, step 15) plus a
+# the kit's own preview Subsurf (never the user's Subsurf) plus a
 # "Set Shade Smooth" geometry-nodes modifier right before it, so the preview looks
 # smooth without touching the mesh's sharp_face data. The Subsurf stays last in the
 # stack, which keeps Blender's GPU subdivision. Both are display only: not history
-# (operators/history.py keeps them), hidden from INPUTS (step 15).
+# (operators/history.py keeps them), hidden from INPUTS.
 
 PREVIEW_MOD_NAME = "Maya Smooth Preview"
 PREVIEW_SHADE_NAME = "Maya Smooth Preview Shading"
@@ -270,7 +270,7 @@ class ALLSET_OT_component_mode(bpy.types.Operator):
 
 
 # Shift+Q marking menu check boxes: Maya pick-mask
-# types that Blender has = the mesh select modes (step 78).
+# types that Blender has = the mesh select modes.
 MASK_KINDS = (("VERT", "Poly Vertices", ""), ("EDGE", "Poly Edges", ""), ("FACE", "Faces", ""),
               ("ALL", "All Components On", ""))
 _MASK_INDEX = {"VERT": 0, "EDGE": 1, "FACE": 2}
@@ -302,7 +302,7 @@ class ALLSET_OT_component_mask(bpy.types.Operator):
     def execute(self, context):
         ts = context.scene.tool_settings
         # a hidden object: Maya sets the pick mask silently; Blender can't
-        # enter edit mode on it, so only the mask changes (step 258)
+        # enter edit mode on it, so only the mask changes
         from . import live
         if context.mode != 'EDIT_MESH' and context.active_object.visible_get() and not live.contains(context.scene, context.active_object):
             bpy.ops.object.mode_set(mode='EDIT')

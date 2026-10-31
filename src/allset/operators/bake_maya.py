@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Key > Bake Simulation (Edit > Keys > Bake Simulation, shelf, option window), step 217 lane L18.
+"""Maya Key > Bake Simulation (Edit > Keys > Bake Simulation, shelf, option window).
 
 Maya 2026 rules of ``bakeResults`` and the menu's default flags:
 
@@ -18,7 +18,7 @@ Maya rules run on the baked F-curves. Rule 5 = **mute** every non-IK constraint 
 has no disconnect; the constraint stays and shows as off) and every driver on a baked channel (a driver would win over
 the baked curve; Maya's bake replaces any input connection). Limit constraints stay: Maya's transform
 limits are attributes, not constraint nodes. Rule 6 = an IK constraint (kit IK handle, operators/skin.py)
-whose chain holds a baked bone and whose target is not baked gets influence 0 (step 159: ikBlend = influence).
+whose chain holds a baked bone and whose target is not baked gets influence 0 (ikBlend = influence).
 Visibility (rule 1) is not baked: Maya visibility = ``hide_viewport``, which no constraint drives.
 """
 
@@ -35,7 +35,7 @@ _EPS = 1e-4
 
 
 def time_slider_range(scene):
-    """Maya Time Slider = the playback range: the preview range while it is on (step 20)."""
+    """Maya Time Slider = the playback range: the preview range while it is on."""
     if scene.use_preview_range:
         return scene.frame_preview_start, scene.frame_preview_end
     return scene.frame_start, scene.frame_end
@@ -101,7 +101,7 @@ def bake(context, objects=None, bones=None, start=1, end=10, step=1, keep_unbake
     from . import anim_layers
     layered = [idb for idb in ids if anim_layers.has_layers(idb)]
     for idb in layered:
-        # step 234 (Issue #143): bake onto BaseAnimation (the active action is the shown layer at influence 0,
+        # Issue #143: bake onto BaseAnimation (the active action is the shown layer at influence 0,
         # anim_layers.show) — then solved below so base + layers give the baked result (Maya 2026: the pose doesn't
         # change and the layers stay)
         anim_layers.show_base(idb)
@@ -111,7 +111,7 @@ def bake(context, objects=None, bones=None, start=1, end=10, step=1, keep_unbake
     res = bpy.ops.nla.bake('EXEC_DEFAULT', frame_start=int(start), frame_end=int(end), step=max(1, int(step)),
                            only_selected=True, visual_keying=True, clear_constraints=False, clear_parents=False,
                            use_current_action=True, clean_curves=False, bake_types={'POSE'} if pose else {'OBJECT'},
-                           # step 234: Blender refuses custom-property keys of NLA-layered data ("Due to the NLA stack
+                           # Blender refuses custom-property keys of NLA-layered data ("Due to the NLA stack
                            # setup ..." per key); a layered rig bakes its transforms only
                            channel_types={'LOCATION', 'ROTATION', 'SCALE'} | (set() if layered else {'PROPS'}))
     if res != {'FINISHED'}:
@@ -164,7 +164,7 @@ def bake(context, objects=None, bones=None, start=1, end=10, step=1, keep_unbake
                         target_baked = False      # pose-mode bakes never include the handle object
                     if not target_baked:
                         from . import ik_fk
-                        ik_fk.set_blend(arm, pb, con, 0.0)      # Ik Blend 0 (drives the Influence, step 223)
+                        ik_fk.set_blend(arm, pb, con, 0.0)      # Ik Blend 0 (drives the Influence)
                         iks += 1
     for idb in layered:
         anim_layers.settle_base(context.scene, idb, [_prefix(o) for o in owners if o.id_data == idb])
@@ -179,7 +179,7 @@ class ALLSET_OT_bake_simulation(bpy.types.Operator):
     driving the baked channels (muted, kept)"""
     bl_idname = "allset.bake_simulation"
     bl_label = "Bake Simulation"
-    bl_options = {'UNDO'}         # Maya has no redo panel (step 147); the option window holds the values
+    bl_options = {'UNDO'}         # Maya has no redo panel; the option window holds the values
 
     hierarchy_below: BoolProperty(name="Hierarchy: Below", default=False, options={'SKIP_SAVE'})
     use_time_slider: BoolProperty(name="Time Slider", default=True, options={'SKIP_SAVE'})

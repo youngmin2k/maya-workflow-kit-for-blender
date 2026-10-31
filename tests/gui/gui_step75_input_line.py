@@ -1,10 +1,10 @@
-"""Step 75 in a real UI (Maya Workflow Kit layout): type into the Status Line input line like a Maya user —
+"""In a real UI (Maya Workflow Kit layout): type into the Status Line input line like a Maya user —
 Absolute X = 10 moves pCube1 to x = 10 cm, Rename "crate", Select by name "pSph*".
 
 Python can't tell where a header layout put a field, so the test finds it: it moves the mouse along the
 Status Line and asks ``ui.copy_data_path_button`` which property is under it."""
 
-GUI_SKIP = "hangs without a result on this PC (Windows clipboard via wm.clipboard; same at aef175f, step 140)"   # tests/gui/run.py leaves it out (--include-skipped runs it)
+GUI_SKIP = "hangs without a result on this PC (Windows clipboard via wm.clipboard; same at aef175f)"   # tests/gui/run.py leaves it out (--include-skipped runs it)
 
 import os
 import sys

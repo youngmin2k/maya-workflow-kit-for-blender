@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2026 Skeleton > Orient Joint (step 244, Issue #161): ``cmds.joint(edit=True, oj=..., sao=..., aos=...)`` frames
+"""Maya 2026 Skeleton > Orient Joint (Issue #161): ``cmds.joint(edit=True, oj=..., sao=..., aos=...)`` frames
 from joint positions.
 
 Rules (Maya 2026 behaviour, error 0):
@@ -30,10 +30,10 @@ SAO = {"xup": (0, 1.0), "xdown": (0, -1.0), "yup": (1, 1.0), "ydown": (1, -1.0),
 EPS = 1e-9
 # Maya flips n only when n . up < 0 (strict); its view-plane clicks are exact, so a chain drawn
 # in the front / side view has n . up = 0 and keeps n. The kit's clicks carry float32 noise, so it treats |n . up|
-# below this as that 0 (kit input tolerance, step 252)
+# below this as that 0 (kit input tolerance)
 TIE = 1e-6
 # The maths runs in float64 (numpy): mathutils is float32, and the bend normal of a nearly straight joint lost 3e-6
-# that way (step 244). Frames come back as mathutils Matrix (columns = Maya X, Y, Z).
+# that way. Frames come back as mathutils Matrix (columns = Maya X, Y, Z).
 
 
 def _v(x):

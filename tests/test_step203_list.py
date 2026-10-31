@@ -1,4 +1,4 @@
-"""Step 203 lane B (#110): Graph Editor / Dope Sheet List > Load / Add Selected Objects with Auto Load, Curves > Pin /
+"""Lane B (#110): Graph Editor / Dope Sheet List > Load / Add Selected Objects with Auto Load, Curves > Pin /
 Unpin Channel, Show > Attributes filters (Hidden, Driven by Anim Curve / Expression / Driven Key, User Defined),
 Show > Objects > IkHandles / Sets / Characters, List > Show Upstream Curves / Hierarchy Below (ui/editor_chrome.py),
 like Maya."""

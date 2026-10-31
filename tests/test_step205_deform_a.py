@@ -1,4 +1,4 @@
-"""Step 205 lane A (#112): Maya Deform > Tension / Solidify / Sculpt as kit Geometry Nodes deformers
+"""Lane A (#112): Maya Deform > Tension / Solidify / Sculpt as kit Geometry Nodes deformers
 (operators/deformers_205a.py) against the expected results;
 every "O" case must match within its tol (1e-4); "U" cases only print their residual."""
 

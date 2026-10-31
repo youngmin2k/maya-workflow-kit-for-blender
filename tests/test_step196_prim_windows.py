@@ -1,4 +1,4 @@
-"""Step 196 (#103): Create > Polygon Primitives (Disc ... Ultra Shape) and Create > NURBS Primitives option boxes open
+"""#103: Create > Polygon Primitives (Disc ... Ultra Shape) and Create > NURBS Primitives option boxes open
 Maya's option windows (default values) and fill the kit's Maya
 creation node (operators/option_windows_prims.py)."""
 
@@ -130,7 +130,7 @@ def test_changed_fields_change_the_geometry():
         n0 = _points(_run(key))
         n1 = _points(_run(key, **values))
         assert n1 != n0, (key, n0, n1)
-    # Axis X: the pipe lies along Blender X (polyPipe is half its Height attribute tall, step 190);
+    # Axis X: the pipe lies along Blender X (polyPipe is half its Height attribute tall);
     # Create UVs off: no UV map
     ob = _run("poly_pipe", axis="X", create_uvs=False, height=8.0)
     dims = ob.dimensions

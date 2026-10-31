@@ -1,4 +1,4 @@
-"""Step 190 in a real UI: the seven new Create > Polygon Primitives (Pipe, Helix, Gear, Soccer Ball, Super Ellipse,
+"""In a real UI: the seven new Create > Polygon Primitives (Pipe, Helix, Gear, Soccer Ball, Super Ellipse,
 Spherical Harmonics, Ultra Shape) made from the Create menu actions in the Maya Workflow Kit layout, laid out in a row
 and framed (shot); the last one's node shows in Channel Box INPUTS."""
 

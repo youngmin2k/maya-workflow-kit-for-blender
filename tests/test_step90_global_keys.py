@@ -1,4 +1,4 @@
-"""Step 90: global key batch 4 — Ctrl+X cut, Alt+X walk, Alt+\\ playback range = animation range, Alt+1 / 2 / 4 show
+"""Global key batch 4 — Ctrl+X cut, Alt+X walk, Alt+\\ playback range = animation range, Alt+1 / 2 / 4 show
 toggles, Ctrl+` / Shift+~ / Ctrl+Shift+~ smooth proxy; Edit > Cut."""
 
 from importlib import import_module
@@ -53,7 +53,7 @@ def test_keymap_items():
         one(km, 'ACCENT_GRAVE', "allset.smooth_proxy", {"action": 'TOGGLE'}, ctrl=True)
         one(km, 'ACCENT_GRAVE', "allset.smooth_proxy", {"action": 'BOTH'}, shift=True)
     one("Object Mode", 'ACCENT_GRAVE', "allset.smooth_proxy", {"action": 'CREATE'}, ctrl=True, shift=True)
-    one("3D View", 'ACCENT_GRAVE', "allset.tweak_hold")      # plain ` stays step 87's tweak hold
+    one("3D View", 'ACCENT_GRAVE', "allset.tweak_hold")      # plain ` stays the tweak hold
 
 
 def test_cut_takes_the_hierarchy_and_paste_brings_it_back():
@@ -70,7 +70,7 @@ def test_cut_takes_the_hierarchy_and_paste_brings_it_back():
     assert "group1" not in bpy.data.objects and "pCube1" not in bpy.data.objects and other.name == "pCube2"
     del child
     assert bpy.ops.allset.paste() == {'FINISHED'}
-    # Maya pasteScene (step 211): pasted__ names under a new "group"
+    # Maya pasteScene: pasted__ names under a new "group"
     objs = bpy.data.objects
     assert "pasted__group1" in objs and "pasted__pCube1" in objs, sorted(objs.keys())
     assert objs["pasted__pCube1"].parent == objs["pasted__group1"]

@@ -1,4 +1,4 @@
-"""Step 129, issue #4: a torn-off panel / menu window is sized to its content — the content height comes from
+"""A torn-off panel / menu window is sized to its content — the content height comes from
 a stand-in layout (ui/layout_measure.py) and clamped (ui/maya_dock.content_height)."""
 
 from importlib import import_module

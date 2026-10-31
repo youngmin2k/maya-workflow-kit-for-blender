@@ -1,4 +1,4 @@
-"""Step 276 (#201) in a real UI: Maya Workflow Kit layout, Create > Lights shows Dome Light last; running it with an
+"""#201: in a real UI: Maya Workflow Kit layout, Create > Lights shows Dome Light last; running it with an
 image gives the World an environment texture and a selected domeLight1 locator with Intensity in the Channel Box;
 the viewport (Material Preview) shows the image; one Ctrl+Z takes it all back.
 Screenshots: gui_step276_menu.png (Create > Lights), gui_step276_dome.png (dome on)."""

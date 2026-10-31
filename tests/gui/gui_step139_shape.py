@@ -1,4 +1,4 @@
-"""Step 139 lane SHAPE in a real UI (#70 M4, #16): component mode, Ctrl+B on an edge -> polyBevel1 exists at once
+"""In a real UI (#70 M4, #16): component mode, Ctrl+B on an edge -> polyBevel1 exists at once
 (no modal), Esc keeps it -> the In-View Editor's Segments row dragged to 2 -> Ctrl+Z = Segments 1, Ctrl+Z = no bevel
 (one undo step each) -> Ctrl+E on two edges = polyExtrudeEdge1 at once (12/18/8, Maya) -> Ctrl+E on a vertex =
 polyExtrudeVertex1 at once (11/18/9)."""
@@ -86,7 +86,7 @@ def combo(key, **mods):
     ev(key, 'RELEASE', **mods)
 
 
-# PR #125's always-running window watchers are not a user modal (step 229)
+# PR #125's always-running window watchers are not a user modal
 WATCHERS = {'ALLSET_OT_joint_outliner_select', 'ALLSET_OT_pose_empty_click'}
 
 

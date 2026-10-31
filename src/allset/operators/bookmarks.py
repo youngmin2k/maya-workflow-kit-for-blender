@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Time Slider bookmarks as Blender timeline markers (step 107).
+"""Maya Time Slider bookmarks as Blender timeline markers.
 
 Maya hotkeys: Alt+T makes a Time Slider bookmark from the selected range (a name dialog first), Alt+Shift+T makes
 one at once, ' / ; go to the next / previous bookmark, Shift+| fits the playback range to the current bookmark,
@@ -7,7 +7,7 @@ Shift+" / Shift+: frame the next / previous one.
 
 A Maya bookmark is a time range; a Blender marker is one frame. The kit bookmark = a marker at the range start; its
 end is kept in the scene ID property ``allset_bookmarks`` {marker name: end frame} when the bookmark was made from a
-selected Time Slider range (``WindowManager.allset_time_range``, step 56), else it ends one frame before the next
+selected Time Slider range (``WindowManager.allset_time_range``), else it ends one frame before the next
 marker (or at the scene end).
 """
 
@@ -30,7 +30,7 @@ def next_name(scene):
 
 
 def selected_range(context):
-    """(start, end) of the Time Slider's Shift-drag range, or None (ui/time_slider, step 56)."""
+    """(start, end) of the Time Slider's Shift-drag range, or None (ui/time_slider)."""
     wm = context.window_manager
     if not getattr(wm, "allset_time_range_on", False):
         return None

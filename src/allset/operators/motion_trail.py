@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2026 Visualize > Motion Trail Editor on Blender motion paths (step 225, Issue #135).
+"""Maya 2026 Visualize > Motion Trail Editor on Blender motion paths (Issue #135).
 
 Maya 2026 replaced "Create Editable Motion Trail" with the Motion Trail Editor
 (labels and defaults like Maya's Motion Trail Editor): Create

@@ -1,4 +1,4 @@
-"""Step 168 in a real UI: Modify > Evaluate Nodes draws Maya's check items (one unticked after Constraints is
+"""In a real UI: Modify > Evaluate Nodes draws Maya's check items (one unticked after Constraints is
 switched off), the Align Tool popup shows its X / Y / Z x Min / Mid / Max buttons, and Smooth Mesh Preview to
 Polygons from the menu turns a 3-key preview into polygons; screenshots (ALLSET_GUI_SHOTS)."""
 

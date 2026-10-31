@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 228: Maya Attach to Motion Path / Set Motion Path Key on Follow Path.
+"""Maya Attach to Motion Path / Set Motion Path Key on Follow Path.
 
 - Attach to Motion Path (default option values): the
   selected objects + one curve in any order (Maya takes the curve as the path). Per
@@ -12,7 +12,7 @@
 - Arc length: Blender's path is the evaluated polyline of the curve; at the default 12 per segment the position is
   off by 5e-3 (0.15 deg) on the test path, so the path's splines get ``PATH_POINTS`` evaluated points (resolution
   256 on the 4-span path: within about 1e-4 of the exact arc length; rotation 1e-3 deg).
-- Front / Up axis: Maya local X / Y / Z = Blender X / Z / -Y (step 57). Blender's Up is a positive axis
+- Front / Up axis: Maya local X / Y / Z = Blender X / Z / -Y. Blender's Up is a positive axis
   only: a negative up axis (Maya Up Z, or Inverse up) is the positive one plus a 180 deg delta rotation about the
   front axis (the owner's rotation is applied inside the path frame). World up: Blender keeps the up axis toward
   world Z (Maya Scene up = Vector (0, 1, 0)); on a planar path that matches Maya, on a 3D path Blender's roll rule
@@ -50,7 +50,7 @@ MSG_SELECT = "Select the objects to animate and one curve for the path."
 MSG_AXES = "The front and up axes must differ."
 MSG_NO_PATH = "Select an object attached to a motion path."
 
-# Maya local axis -> Blender local axis and sign (Maya Y-up; step 57)
+# Maya local axis -> Blender local axis and sign (Maya Y-up)
 AXIS = {"X": ("X", 1), "Y": ("Z", 1), "Z": ("Y", -1)}
 FORWARD = {("X", 1): 'FORWARD_X', ("Y", 1): 'FORWARD_Y', ("Z", 1): 'FORWARD_Z',
            ("X", -1): 'TRACK_NEGATIVE_X', ("Y", -1): 'TRACK_NEGATIVE_Y', ("Z", -1): 'TRACK_NEGATIVE_Z'}
@@ -375,7 +375,7 @@ def set_path_key(context, ob, frame=None):
 _XYZ = [(a, a, "") for a in "XYZ"]
 
 
-@undo_steps.no_redo_panel      # step 147: Maya has no redo panel
+@undo_steps.no_redo_panel      # Maya has no redo panel
 class ALLSET_OT_motion_path_attach(bpy.types.Operator):
     """Maya Attach to Motion Path: animate the selected objects along the selected curve (Follow Path constraint,
     its Offset keyed over the Time Slider)"""

@@ -6,7 +6,7 @@ Outputs:
   dist/maya-workflow-kit-<version>.zip         Blender 4.2+ extension (id ``allset`` inside)
   dist/maya-workflow-kit-<version>-legacy.zip  legacy add-on zip (folder allset/, uses bl_info)
 
-The file names follow the product name (step 125); the extension id, package and module stay ``allset``.
+The file names follow the product name; the extension id, package and module stay ``allset``.
 
 The extension is built with ``blender --command extension build`` (it also
 validates the manifest). When Blender is not available it falls back to a
@@ -28,13 +28,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "src" / "allset"
 DIST = ROOT / "dist"
-# Main target since step 272: Blender 5.2 LTS, the portable 5.2.3 build; 5.0 / 5.1 are run with
-# ``--blender`` / ``BLENDER``. Blender 4.5 is not supported since 0.7.0 (step 279).
+# Main target: Blender 5.2 LTS, the portable 5.2.3 build; 5.0 / 5.1 are run with
+# ``--blender`` / ``BLENDER``. Blender 4.5 is not supported since 0.7.0.
 BLENDER_52 = os.path.join(os.environ.get("LOCALAPPDATA", ""), "allset_blenders", "blender-5.2.3-windows-x64",
                           "blender.exe")
 DEFAULT_BLENDER = BLENDER_52
 
-# Zip file name stem = the product name (step 125). `extension build` would name the file after the
+# Zip file name stem = the product name. `extension build` would name the file after the
 # manifest id; the output path is passed explicitly.
 ZIP_STEM = "maya-workflow-kit"
 
@@ -103,7 +103,7 @@ def build_extension_fallback(out):
 
 
 def legacy_bl_info():
-    """The legacy add-on's ``bl_info``, from the manifest (the extension source has none, step 114)."""
+    """The legacy add-on's ``bl_info``, from the manifest (the extension source has none)."""
     version = tuple(int(p) for p in manifest_value("version").split("."))
     blender = tuple(int(p) for p in manifest_value("blender_version_min").split("."))
     return ("\n\n# Legacy add-on metadata, added by tools/build.py (extensions read blender_manifest.toml).\n"

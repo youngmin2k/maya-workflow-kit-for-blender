@@ -1,4 +1,4 @@
-"""What "the user's Blender setup" is for the step 60 round trip: every preference value, the
+"""What "the user's Blender setup" is for the switch round trip: every preference value, the
 user keyconfig (with the user's key edits), the active keyconfig, the theme as XML, the
 enabled add-ons. The kit's own add-on entry is left out (it stays installed in Blender mode)."""
 

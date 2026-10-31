@@ -1,4 +1,4 @@
-"""Step 227 (#137) in a real UI: pCube1 with a blendShape, a target and an in-between at 0.5 (Shape Editor Create >
+"""#137: in a real UI: pCube1 with a blendShape, a target and an in-between at 0.5 (Shape Editor Create >
 Add In-Between Target through the Maya menu item) and a combination target; Windows > Animation Editors > Shape Editor
 opens the kit Shape Editor, which draws the in-between as a row under its target (weight 0.500) and the combination
 target with its method; the helper keys (``_ib500`` / ``_ibfix``) are not listed. Shot: gui_step227_shape_editor.png."""

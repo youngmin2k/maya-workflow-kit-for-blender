@@ -1,4 +1,4 @@
-"""Step 46: Maya view furniture maths (ViewCube projection / hit test / face -> view axis, labels, sizes,
+"""Maya view furniture maths (ViewCube projection / hit test / face -> view axis, labels, sizes,
 layout) and the Maya Workflow Kit template flags (Blender navigation gizmo and text info off)."""
 
 import math
@@ -86,7 +86,7 @@ def test_registration_and_hud_menu():
     prefs = bpy.context.preferences.addons[kit.MODULE].preferences
     assert prefs.maya_viewcube and prefs.maya_camera_names and prefs.maya_view_axis
     menu_map = import_module(kit.MODULE + ".ui.menu_map")
-    for item in ("Camera Names", "View Axis", "ViewCube"):   # Maya 2026 label (step 219)
+    for item in ("Camera Names", "View Axis", "ViewCube"):   # Maya 2026 label
         entry = menu_map.MAP["Display/Heads Up Display/" + item]
         assert entry[0] == "wm.context_toggle" and kit.MODULE in entry[1]["data_path"], entry
     assert vf._handle

@@ -1,4 +1,4 @@
-"""Step 3: hold keys, tap/hold framework, pivot toggle, pick-walk."""
+"""Hold keys, tap/hold framework, pivot toggle, pick-walk."""
 
 import sys
 from importlib import import_module
@@ -134,7 +134,7 @@ class _Ev:
 
 
 def test_soft_select_tap_toggles_one_state():
-    """Step 129 (#15): one Maya state, both Blender flags follow it (was per mode)."""
+    """#15: one Maya state, both Blender flags follow it (was per mode)."""
     ts = _ts()
     b = taphold.get_binding("soft_select")
     ts.use_proportional_edit_objects = False
@@ -193,7 +193,7 @@ def test_pick_walk():
     vl = bpy.context.view_layer
     vl.update()  # sync new objects into view_layer.objects
     assert pickwalk.walk(vl, a, "UP") == root
-    # creation order b, a, c: Maya walks down to the first child made (step 266)
+    # creation order b, a, c: Maya walks down to the first child made
     assert pickwalk.walk(vl, root, "DOWN") == b          # the first child made
     assert pickwalk.walk(vl, b, "RIGHT") == a
     assert pickwalk.walk(vl, a, "RIGHT") == c
@@ -242,7 +242,7 @@ def test_pivot_and_pick_walk_keys():
         items = _kmis("Object Mode", key)
         assert [(k.idname, k.properties.direction) for k in items] == \
             [("allset.pick_walk", direction)], key
-    # Pose mode arrows walk joints since step 57 (frames: Alt+, / Alt+.); other modes keep IC's.
+    # Pose mode arrows walk joints (frames: Alt+, / Alt+.); other modes keep IC's.
     assert [k.idname for k in _kmis("Pose", "LEFT_ARROW")] == ["allset.pick_walk_joint"]
 
 

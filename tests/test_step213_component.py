@@ -1,4 +1,4 @@
-"""Step 213 lane CE: Maya's Component Editor — Smooth Skins weights table with
+"""Maya's Component Editor — Smooth Skins weights table with
 Hold / Hide Zero Columns / Interactive normalisation (Maya's rule), Polygons positions in Maya units, cell
 edits through the Scene proxies (undoable), Auto Update and the window's classes / properties."""
 
@@ -55,7 +55,7 @@ def _scene(cm=False):
         prev = eb
     bpy.ops.object.mode_set(mode='OBJECT')
     me = bpy.data.meshes.new("pCylinderShape1")
-    import_module(kit.MODULE + ".compat").mesh_from_pydata(me, POINTS, [], FACES)   # 5.0.1 .select_edge (step 229)
+    import_module(kit.MODULE + ".compat").mesh_from_pydata(me, POINTS, [], FACES)   # 5.0.1 .select_edge
     ob = bpy.data.objects.new("pCylinder1", me)
     bpy.context.scene.collection.objects.link(ob)
     for n in NAMES:

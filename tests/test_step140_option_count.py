@@ -1,8 +1,8 @@
-"""Step 140: what every Maya option box opens, counted like audit 8
+"""What every Maya option box opens, counted like audit 8
 (window / dialog / tool / redo / generic / dead). Writes the table to
 tmp/<sandbox>/results/option_kinds.json for ``python tools/menu_count.py --options``.
 
-Baseline (step 133, 0.2.1): 507 boxes, dead 231, generic 62, window 48."""
+Baseline (0.2.1): 507 boxes, dead 231, generic 62, window 48."""
 
 import collections
 import json
@@ -17,7 +17,7 @@ menu_map = import_module(kit.MODULE + ".ui.menu_map")
 menu_sets = import_module(kit.MODULE + ".ui.menu_sets")
 ow = import_module(kit.MODULE + ".operators.option_windows")
 
-# Daily boxes that must open a Maya window (step 140 task list; Maya menu paths)
+# Daily boxes that must open a Maya window (Maya menu paths)
 DAILY = (
     "Skeleton/Create Joints", "Skeleton/Create IK Handle", "Skin/Bind Skin", "Skin/Paint Skin Weights",
     "Edit/Parent", "Key/Delete Keys", "Key/Cut Keys", "Key/Copy Keys", "Key/Paste Keys", "Key/Scale Keys",

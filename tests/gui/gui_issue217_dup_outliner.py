@@ -79,7 +79,7 @@ def drag(name, shift, dist=70, pause=0):
     def s_press():
         p, d = C[name]
         if shift:
-            ev('LEFT_SHIFT', 'PRESS', shift=True)        # a real Shift drag (step 261)
+            ev('LEFT_SHIFT', 'PRESS', shift=True)        # a real Shift drag
         ev('LEFTMOUSE', 'PRESS', x=int(p.x), y=int(p.y), shift=shift)
 
     def s_move():

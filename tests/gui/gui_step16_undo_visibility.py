@@ -1,4 +1,4 @@
-"""Step 16 in a real UI: z / Shift+Z undo-redo (3D View and Outliner), h hide/show,
+"""In a real UI: z / Shift+Z undo-redo (3D View and Outliner), h hide/show,
 Ctrl+1 isolate in/out."""
 
 import os
@@ -50,7 +50,7 @@ def s_deleted():
 @step
 def s_z():
     check("z over the 3D View undoes (cube back)", has_cube())
-    # the kit keeps window modals of its own running since PR #125 / step 237 (step 229 note): look for zoom only
+    # the kit keeps window modals of its own running since PR #125: look for zoom only
     mods = [op.bl_idname for op in win().modal_operators]
     check(f"z starts no zoom-border modal ({mods})", not [m for m in mods if "ZOOM" in m.upper()])
     ev('Z', 'PRESS', shift=True)

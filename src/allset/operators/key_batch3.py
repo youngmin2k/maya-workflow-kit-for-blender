@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Key batch 3 (step 107): Maya keys that had no or a wrong binding.
+"""Key batch 3: Maya keys that had no or a wrong binding.
 
 Maya commands (meanings from Maya's annotations):
 - Ctrl+M ToggleMainMenubar: the main menu bar folds into Blender's top-bar menu button (``area.show_menus`` of the
@@ -15,7 +15,7 @@ from bpy.props import EnumProperty
 
 from .. import results
 
-# Background (step 120): the Maya-style Alt+B background cycle is one global state for every viewport -
+# Background: the Maya-style Alt+B background cycle is one global state for every viewport -
 #   gradient on        -> background 0 0 0, gradient off
 #   background == 0    -> 0.36 (default)
 #   background <  0.5  -> 0.631
@@ -121,7 +121,7 @@ def cycle_background(shading):
 
 
 def reset_background():
-    """the default background (flat 0.36) in every view: promotional / comparison shots use it (step 120)."""
+    """the default background (flat 0.36) in every view: promotional / comparison shots use it."""
     apply_background("GREY")
 
 

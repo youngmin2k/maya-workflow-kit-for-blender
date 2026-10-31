@@ -1,4 +1,4 @@
-"""Step 151 lane A (#99) in a real UI: RMB on pCube1 and Shift+RMB with nothing selected draw Maya 2022's compact ring
+"""Lane A (#99) in a real UI: RMB on pCube1 and Shift+RMB with nothing selected draw Maya 2022's compact ring
 (radius 55 x UI scale, boxes text + 2 x 25 px, UV with a submenu arrow, the list 21 px under the ring).
 Screenshots of the object marking menu and the Shift+RMB menu:
 gui_step151_rmb.png, gui_step151_shift_rmb.png (run with ALLSET_GUI_UI_SCALE=0.8 on a 125 % display = scale 1.0)."""
@@ -97,7 +97,7 @@ def s_rmb():
     uv = s.layout.radial.get("E")
     check("E = UV with a submenu arrow", uv is not None and uv.label == "UV" and engine().Layout.has_arrow(uv.action))
     rows = [it for it in s.layout.items if it.kind == "list"]
-    # the list goes under the ring when it fits (gap 21 px), else one column beside it (step 161)
+    # the list goes under the ring when it fits (gap 21 px), else one column beside it
     gap = s.layout.radial["S"].rect[1] - max(it.rect[3] for it in rows)
     boxes = [b.rect for b in s.layout.radial.values()]
     beside = (min(it.rect[0] for it in rows) >= max(b[2] for b in boxes)

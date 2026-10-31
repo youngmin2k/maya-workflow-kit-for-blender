@@ -1,5 +1,5 @@
-"""Step 67 in a real UI (Maya render workflow): sphere -> Windows > Rendering Editors >
-Hypershade -> a window in the Maya Hypershade layout (step 131: panes + Graph) -> Create Standard Surface -> Assign Material To
+"""In a real UI (Maya render workflow): sphere -> Windows > Rendering Editors >
+Hypershade -> a window in the Maya Hypershade layout (panes + Graph) -> Create Standard Surface -> Assign Material To
 Selection -> AE Base Color map button > File -> Render > Render Current Frame -> Keep Image -> render again -> two
 slots used; Windows > Rendering Editors > Light Editor -> an Outliner window of the lights (screenshots)."""
 
@@ -72,7 +72,7 @@ def s_setup():
 
 
 def hypershade_ready():
-    """(window, graph area, Browser pane) once the Hypershade window has all its panes (step 131), else Nones."""
+    """(window, graph area, Browser pane) once the Hypershade window has all its panes, else Nones."""
     hs = mod(".ui.hypershade")
     for w in bpy.context.window_manager.windows[1:]:
         panes = {hs.pane(a): a for a in w.screen.areas if hs.pane(a)}
@@ -96,7 +96,7 @@ def s_hypershade_open():
         bpy.ops.allset.hs_create(kind='STANDARD_SURFACE')
     mat = bpy.data.materials.get("standardSurface1")
     sphere = bpy.data.objects[C["sphere"]]
-    # step 100: the new sphere already has the default lambert1
+    # the new sphere already has the default lambert1
     check(f"Create > Standard Surface: standardSurface1, not assigned yet, graph pinned to it "
           f"({mat is not None}, {sphere.active_material and sphere.active_material.name}, {a.spaces.active.pin})",
           mat is not None and sphere.active_material is not mat and a.spaces.active.pin

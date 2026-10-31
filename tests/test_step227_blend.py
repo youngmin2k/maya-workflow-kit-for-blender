@@ -1,4 +1,4 @@
-"""Step 227 L15 (Issue #137): blendShape in-between and combination targets on shape keys
+"""L15 (Issue #137): blendShape in-between and combination targets on shape keys
 (operators/blend_shapes_227.py, ui/shape_editor.py).
 
 Expected:
@@ -212,7 +212,7 @@ def _channels(path):
 
 
 def test_fbx_export_writes_maya_blend_shapes():
-    """Kit File > Export All (FBX), step 235: Maya's blendShape layout — one channel per target, an in-between is a
+    """Kit File > Export All (FBX): Maya's blendShape layout — one channel per target, an in-between is a
     second shape of its target's channel (FullWeights 50 / 100, items 5500 / 6000), the helper keys are
     not channels; a combination target is a plain target (Maya FBX writes the combo the same way)."""
     _fresh()
@@ -235,7 +235,7 @@ def test_fbx_export_writes_maya_blend_shapes():
 
 
 def test_fbx_blend_shapes_next_to_a_cluster():
-    """Step 235 (audit ④-8): a cluster (Hook) on the mesh no longer drops the blend shapes from the FBX."""
+    """A cluster (Hook) on the mesh no longer drops the blend shapes from the FBX."""
     _fresh()
     face, key = _face(("smile", (0, 1, 0)), ("blink", (0, 1, 0)))
     bs.add_inbetween(key, "smile", 0.5)

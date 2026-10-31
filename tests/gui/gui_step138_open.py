@@ -1,4 +1,4 @@
-"""Step 138 lane CARRY (#63, #64) in a real UI: File > Open of a file saved in Blender's own layout shows the Maya
+"""Lane CARRY (#63, #64) in a real UI: File > Open of a file saved in Blender's own layout shows the Maya
 layout (Status Line strip, shelf row, Tool Box column, Maya dock) with Maya mode on and "Keep Maya Layout When Opening
 Files" on; with the option off the file's own layout stays. A file that holds a Maya workspace in the background gets
 that one back (no second copy). Tool settings set in the Maya scene survive the Open."""

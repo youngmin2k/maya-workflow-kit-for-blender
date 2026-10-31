@@ -1,4 +1,4 @@
-"""Step 161 G3 / G4 headless parts: Maya's hierarchy highlight in the selection wire, the
+"""G3 / G4 headless parts: Maya's hierarchy highlight in the selection wire, the
 four view's Maya ortho cameras."""
 
 from importlib import import_module

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Deform menu deformers (step 144, issue #34).
+"""Maya Deform menu deformers (issue #34).
 
 Maya 2022 facts: the Deform option windows (fields / defaults), the deformers made with default options
 (nodes, names, selection afterwards, Channel Box rows, Paint Weights targets) and the handle position / size.
@@ -32,7 +32,7 @@ BASES = {
     "squash": ('SIMPLE_DEFORM', "nonLinear"), "flare": ('SIMPLE_DEFORM', "nonLinear"),
     "sine": ('WAVE', "nonLinear"), "wave": ('WAVE', "nonLinear"),
     "textureDeformer": ('DISPLACE', "textureDeformer"), "curveWarp": ('CURVE', "curveWarp"),
-    "wire": ('NODES', "wire"),            # step 169: Geometry Nodes, operators/wire_deformer.py
+    "wire": ('NODES', "wire"),            # Geometry Nodes, operators/wire_deformer.py
 }
 _NAME = re.compile(r"^([A-Za-z]+?)(\d+)$")
 
@@ -53,7 +53,7 @@ def node_type(md):
 
 def is_base(md):
     """The Hook that carries a kit lattice's / wrap influence's transform (``ffd1Base``, ``wrap1Base``, see
-    ``_base_hook``), or a wrap's extra influence ``wrap1Influence2`` + its Hook ``wrap1Influence2Base`` (step 205,
+    ``_base_hook``), or a wrap's extra influence ``wrap1Influence2`` + its Hook ``wrap1Influence2Base`` (
     operators/pins_205.py): part of that node, not an INPUTS node of its own."""
     if md.type == 'SURFACE_DEFORM':
         return re.match(r"^wrap\d+Influence\d+$", md.name) is not None
@@ -173,7 +173,7 @@ ATTRS = {
     "shrinkWrap": [_prop("offset", "Offset", "LENGTH", "offset"),
                    Attr("bidirectional", "Bidirectional", "BOOL", _sw_bidir_get, _sw_bidir_set),
                    Attr("reverse", "Reverse", "BOOL", _sw_reverse_get, _sw_reverse_set),
-                   # Maya X / Y / Z = Blender X / Z / Y (Y-up -> Z-up, step 57)
+                   # Maya X / Y / Z = Blender X / Z / Y (Y-up -> Z-up)
                    _prop("alongX", "Along X", "BOOL", "use_project_x"),
                    _prop("alongY", "Along Y", "BOOL", "use_project_z"),
                    _prop("alongZ", "Along Z", "BOOL", "use_project_y")],
@@ -190,7 +190,7 @@ ATTRS = {
     "textureDeformer": [_prop("strength", "Strength", "NONE", "strength"),
                         Attr("offset", "Offset", "NONE", _tex_offset_get, _tex_offset_set)],
     "curveWarp": [],
-    # step 169: the wire modifier's inputs; Crossing Effect / Tension / Local Influence /
+    # the wire modifier's inputs; Crossing Effect / Tension / Local Influence /
     # Scale[0] have no form in the kit wire (defaults 0 / 1 / 0 / 1 = no effect)
     "wire": [Attr("envelope", "Envelope", "NONE", *_wire_input("Envelope")),
              Attr("rotation", "Rotation", "NONE", *_wire_input("Rotation")),
@@ -311,7 +311,7 @@ def _base_hook(ob, name, driver, group):
         hk.vertex_group = group
     else:
         hk.vertex_indices_set(list(range(len(ob.data.vertices))) if ob.type == 'MESH' else [])
-    hk.center = ob.matrix_world.inverted_safe() @ driver.matrix_world.translation     # scale 0 (step 258)
+    hk.center = ob.matrix_world.inverted_safe() @ driver.matrix_world.translation     # scale 0
     hk.matrix_inverse = driver.matrix_world.inverted() @ ob.matrix_world
     return hk
 
@@ -645,7 +645,7 @@ def _paint_candidates(context):
             out.append((ob, []))
         for md in driven_modifiers(ob):
             out.append((md.id_data, [md]))
-        if ob.type == 'CURVE':                     # a wire curve: the meshes its kit wires deform (step 169)
+        if ob.type == 'CURVE':                     # a wire curve: the meshes its kit wires deform
             from . import wire_deformer
             out.extend((o, [md]) for o, md in wire_deformer.wires_of_curve(ob))
     return out

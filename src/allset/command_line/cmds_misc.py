@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""maya.cmds look-alike 3 (step 216, Issue #122): node types, attribute queries, units, sets, shading nodes, polygon
+"""maya.cmds look-alike 3 (Issue #122): node types, attribute queries, units, sets, shading nodes, polygon
 queries / extrude, camera.
 
 Everything goes through the kit's own data so a script gives what the menus give:

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Editor heads-up displays (step 206): View > Heads-Up Display > Isolate Select / UV Position / UV Statistics.
+"""Maya UV Editor heads-up displays: View > Heads-Up Display > Isolate Select / UV Position / UV Statistics.
 
 Maya:
 all three are on in the factory UV Editor. Kit drawing: text #cfcfcf, ~10 px caps, 5 px from
@@ -126,7 +126,7 @@ def _edit_meshes(context):
 
 
 def collect(context):
-    """Statistics over every mesh in edit mode, cached for REFRESH_S (numpy, operators/uv_arrays.py, step 254)."""
+    """Statistics over every mesh in edit mode, cached for REFRESH_S (numpy, operators/uv_arrays.py)."""
     synced = context.scene.tool_settings.use_uv_select_sync
     key = (synced, tuple(o.as_pointer() for o in _edit_meshes(context)))
     now = time.monotonic()
@@ -137,7 +137,7 @@ def collect(context):
         # a UV drag runs: keep the last numbers, never read the mesh now (crash fix, operators/uv_arrays.py)
         return _cache["last"] if _cache["key"] == key and _cache["last"] is not None else ("", "")
     # after a depsgraph update the arrays are shared with the border drawing (uv_display); the REFRESH_S re-read
-    # reads afresh (a selection change does not always send a depsgraph update, step 134)
+    # reads afresh (a selection change does not always send a depsgraph update)
     shared = _cache["value"] is None
     tot = [0] * 6
     coords = []

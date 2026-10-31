@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 144 (#34) Maya option windows of the Deform menu: same spec as operators/option_windows.py (``F`` fields,
+"""#34: Maya option windows of the Deform menu: same spec as operators/option_windows.py (``F`` fields,
 ``Window`` = one ``allset.opt_<key>`` operator; option_windows._extend appends ``WINDOWS``).
 
 Titles, buttons, Basic tab fields in screen order and default values match Maya's Deform
@@ -117,7 +117,7 @@ WINDOWS = [
                  "Group base and lattice (ffd1Base is a Hook modifier)",
                  "Freeze geometry", "Bind original geometry",
                  "Outside lattice / Falloff distance (all group points move)") + ADVANCED),
-    # Delta Mush Options: Smoothing iterations 10, Smoothing step 0.5, Pin border vertices on
+    # Delta Mush Options: Smoothing iterations 10, Smoothing Step = 0.5, Pin border vertices on
     Window("deform_delta_mush", "Delta Mush Options", "Create", _match('DELTA_MUSH'), [
         F("iterations", "Smoothing iterations:", "int", 10, lo=0, hi=50),
         F("step", "Smoothing step:", "float", 0.5, lo=0.0, hi=1.0),
@@ -200,7 +200,7 @@ WINDOWS = [
         F("offset", "Offset:", "float", 0.0, lo=-10.0, hi=10.0)], _create('TEXTURE'), paths=("Deform/Texture",),
         missing=("Vector Strength / Vector Offset", "Vector Space Tangent", ENVELOPE,
                  "textureDeformerHandle1 (Handle = the object's up axis)")),
-    # step 169: Wire Tool settings = a window titled with
+    # Wire Tool settings = a window titled with
     # the tool name whose button makes the wire (select the objects, then the curve)
     Window("deform_wire", "Wire Tool", "Create", _match('WIRE'), [
         F("envelope", "Envelope:", "float", 1.0, lo=0.0, hi=1.0),
@@ -231,7 +231,7 @@ WINDOWS = [
     # brush"; Blend Shape: Paint Blend Shape Weights Tool), the button starts painting with them
     *[Window(f"paint_weights_{(kind or 'membership').lower()}", "Paint Blend Shape Weights Tool" if kind == "blendShape" else
              "Paint Attributes Tool", "Paint", None, PAINT_FIELDS(), _paint(kind),
-             # Maya 2026 moved Paint Weights > Set Membership to Deform > Paint Membership (step 219)
+             # Maya 2026 moved Paint Weights > Set Membership to Deform > Paint Membership
              paths=("Deform/Paint Membership",) if not kind else (f"Deform/Paint Weights/{label}",),
              missing=PAINT_MISSING)
       for label, kind in (("Blend Shape", "blendShape"), ("Cluster", "cluster"), ("Delta Mush", "deltaMush"),

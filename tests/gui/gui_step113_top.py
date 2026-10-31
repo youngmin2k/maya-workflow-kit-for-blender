@@ -1,7 +1,7 @@
-"""Step 113 in a real UI: the top area reads like Maya 2022.
+"""In a real UI: the top area reads like Maya 2022.
 
 The user's path: Maya mode switched off and on again in a factory session (Blender's theme) — the switch appends the
-Maya layout and keeps the user's theme (step 130). Then: menu bar without the menu set dropdown and with every Maya menu on
+Maya layout and keeps the user's theme. Then: menu bar without the menu set dropdown and with every Maya menu on
 screen, "Workspace:" dropdown, flat Maya / Blender switch; Status Line led by the menu set, Maya's collapsed groups;
 shelf row without a header, tab strip drawn in its WINDOW region and clickable; viewport header = Maya panel menus,
 tool header = Maya panel toolbar. Screen pixels: the theme's menu bar colour, the shelf tab strip dimmed like Maya's. Screenshots for the
@@ -96,7 +96,7 @@ def s_layout():
               for n in ms.menus_for_set(prefs.menu_set)]
     right = (7 + 4.5 + 6) * 20 * scale     # workspace label + dropdown + switch
     C["menus_px"] = round(sum(widths) + 40 * scale)
-    # step 142 (#77): when they don't (UI scale 1.5), Maya's » overflow holds the rest, like Maya at 150 %
+    # #77: when they don't (UI scale 1.5), Maya's » overflow holds the rest, like Maya at 150 %
     names, shown = mod("ui.status_line").shown_menus(win())
     if C["menus_px"] + right <= win().width:
         check(f"all {len(widths)} Maya menus fit a 1600 px window ({C['menus_px']} px + right side {round(right)}; "

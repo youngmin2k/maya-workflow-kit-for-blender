@@ -79,7 +79,7 @@ def s_vis():
     cb.set_value(b, "v", False)
     print("AUDIT CB v=0: visible", visible(b))
     try:
-        # what the Maya menu Display > Show runs (step 129: the kit item, no longer Blender's hide_view_clear)
+        # what the Maya menu Display > Show runs (the kit item, no longer Blender's hide_view_clear)
         ov(bpy.ops.allset.menu_item, item="Display/Show")
     except Exception as ex:
         print("AUDIT Display > Show", ex)

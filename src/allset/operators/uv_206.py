@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Editor depth 2 (step 206): Cut/Sew > Auto Seams / Create Shell (Grid) / Split, Modify > Cycle and
+"""Maya UV Editor depth 2: Cut/Sew > Auto Seams / Create Shell (Grid) / Split, Modify > Cycle and
 the UV Sets items Rename Current UV Set / Copy UVs to UV Set > map1 / map1.
 
 Rules follow Maya.
 Maya UVs are kit points (operators/uv_shells.uv_points: loops of one vertex sharing a
 coordinate); a Maya cut that leaves the UVs where they are can't be told apart from no cut in Blender (islands are
-made from shared coordinates, step 66), so a split UV moves uv_tools.NUDGE towards its own faces (same convention as
+made from shared coordinates), so a split UV moves uv_tools.NUDGE towards its own faces (same convention as
 Cut / Create UV Shell).
 
 - Cycle: the first face of the selection (faces, else faces touching the selection) is cut

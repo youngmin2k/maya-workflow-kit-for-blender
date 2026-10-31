@@ -1,4 +1,4 @@
-"""Step 129 (#11, #12) in a real UI: Create > Polygon Primitives > Cylinder shows polyCylinder1 in Channel Box INPUTS;
+"""#11, #12: in a real UI: Create > Polygon Primitives > Cylinder shows polyCylinder1 in Channel Box INPUTS;
 typing 2 into its Subdivisions Caps field rebuilds the caps (42 -> 82 vertices), Ctrl+Z brings the fan caps back;
 a NURBS circle's Sections field (makeNurbCircle1) takes "+=4". Screenshots."""
 
@@ -44,7 +44,7 @@ def s_setup():
         bpy.data.objects.remove(ob)
     bpy.ops.allset.create(kind='CYLINDER')
     C["ob"] = bpy.context.view_layer.objects.active.name
-    bpy.ops.ed.undo_push(message="Create Cylinder")   # script calls push no undo step (step 65): mark the start
+    bpy.ops.ed.undo_push(message="Create Cylinder")   # script calls push no undo step: mark the start
     dock_area('CHANNEL_BOX')
     redraw()
 
@@ -63,7 +63,7 @@ def s_inputs_shot():
 
 @step
 def s_open_cylinder_node():
-    open_inputs("polyCylinder1")   # step 135: INPUTS nodes start collapsed (Maya)
+    open_inputs("polyCylinder1")   # INPUTS nodes start collapsed (Maya)
     scroll_channel_box()           # ... and a long Channel Box scrolls inside its part
     for a in bpy.context.window.screen.areas:
         a.tag_redraw()

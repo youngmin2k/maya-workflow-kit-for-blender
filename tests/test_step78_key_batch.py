@@ -1,4 +1,4 @@
-"""Step 78: key batch 2 — Graph Editor 1/2/3, Shift+Q / Alt+Q select marking menus, Ctrl+Alt+Left/Right
+"""Key batch 2 — Graph Editor 1/2/3, Shift+Q / Alt+Q select marking menus, Ctrl+Alt+Left/Right
 Spin Edge, Shift+G repeat at the mouse, Ctrl+Shift+C camera from view. GUI: tests/gui/gui_step78_key_batch.py."""
 
 from importlib import import_module

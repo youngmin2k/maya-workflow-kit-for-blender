@@ -1,4 +1,4 @@
-"""Step 7 in a real UI: Maya top bar (menus, menu sets, Status Line), command line typing,
+"""In a real UI: Maya top bar (menus, menu sets, Status Line), command line typing,
 undo, Help Line, Script Editor window, tool switch from a menu; screenshots."""
 
 import os
@@ -50,9 +50,9 @@ def s_wait():
 @step
 def s_topbar():
     cls = bpy.types.TOPBAR_HT_upper_bar
-    check("top bar draws the Maya menu bar", C["sl"].draw_upper_bar in cls.draw._draw_funcs)   # own draw swapped (step 115)
+    check("top bar draws the Maya menu bar", C["sl"].draw_upper_bar in cls.draw._draw_funcs)   # own draw swapped
     area, _r = view3d()
-    # step 49: the Status Line lives in the Maya strip (step 12); step 113: the tool header row is Maya's panel toolbar
+    # the Status Line lives in the Maya strip; the tool header row is Maya's panel toolbar
     check("main 3D View: the tool header row is the Maya panel toolbar", area.spaces.active.show_region_tool_header)
     shot("gui_step7_topbar_modeling.png")
     prefs().menu_set = 'riggingMenuSet'
@@ -78,12 +78,12 @@ def s_rigging():
 def s_menu_open():
     shot("gui_step7_mesh_menu.png")
     tap('ESC')
-    # Type into the command line: click the field in the status bar (bottom row). Step 49: the Command
+    # Type into the command line: click the field in the status bar (bottom row). The Command
     # Line is right of the Help Line (command_line.HELP_UNITS), its field after the language button.
     C["n0"] = len(bpy.data.objects)
     cl = import_module(MODULE + ".command_line")
     s = bpy.context.preferences.system.ui_scale
-    k = min(s, win().width / cl.MAYA_WINDOW_PX)     # step 161: the row is shared out by the window width
+    k = min(s, win().width / cl.MAYA_WINDOW_PX)     # the row is shared out by the window width
     x = round(cl.HELP_UNITS * 20 * k + 60 * s + 150 * k)
     ev('MOUSEMOVE', 'NOTHING', x=x, y=12)  # hover first, so the field is the active button
     ev('LEFTMOUSE', 'PRESS', x=x, y=12)
@@ -166,7 +166,7 @@ def s_release():
     C["grid"] = grid.visible(v3d)
     with bpy.context.temp_override(window=win()):
         bpy.ops.allset.menu_run(op="allset.toggle_grid", props='{}')
-    check("Display > Grid toggles the viewport grid (Maya grid, step 45)", grid.visible(v3d) != C["grid"])
+    check("Display > Grid toggles the viewport grid (Maya grid)", grid.visible(v3d) != C["grid"])
     with bpy.context.temp_override(window=win()):
         bpy.ops.allset.menu_run(op="allset.toggle_grid", props='{}')
     C["windows"] = len(bpy.context.window_manager.windows)
@@ -180,7 +180,7 @@ def s_script_editor():
     check("Script Editor opens a new window", len(wins) == C["windows"] + 1)
     if len(wins) > C["windows"]:
         new = wins[len(wins) - 1]
-        # step 105: the Maya Script Editor = history (Info) over input (Text Editor)
+        # the Maya Script Editor = history (Info) over input (Text Editor)
         check("new window is the Script Editor (history over input)",
               sorted(a.type for a in new.screen.areas) == ['INFO', 'TEXT_EDITOR'])
         if SHOTS:
@@ -196,7 +196,7 @@ def s_script_editor():
 @step
 def s_tool_settings():
     shot("gui_step7_tool_settings.png")
-    # step 106: the Tool Settings dock; toggle again to close it
+    # the Tool Settings dock; toggle again to close it
     with bpy.context.temp_override(window=win()):
         bpy.ops.allset.editor_toggle(editor="TOOL_SETTINGS")
 

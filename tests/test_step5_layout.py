@@ -1,4 +1,4 @@
-"""Step 5: the Maya layout file bundled in the extension (step 130: never copied into the user's scripts folder as an
+"""The Maya layout file bundled in the extension (never copied into the user's scripts folder as an
 app template; "New Scene in Maya Layout" reads it as an untitled file)."""
 
 import os
@@ -15,14 +15,14 @@ first_start = import_module(kit.MODULE + ".first_start")
 def test_bundled_layout_files():
     src = app_template.SOURCE_DIR
     assert sorted(f for f in os.listdir(src) if not f.startswith("__pycache__")) == \
-        ["splash.png", "splash_2x.png", "startup.blend"]   # data only, no code (step 115)
+        ["splash.png", "splash_2x.png", "startup.blend"]   # data only, no code
     assert app_template.STARTUP == os.path.join(src, "startup.blend")
 
 
 # --- theme --------------------------------------------------------------------------------
 
 def test_no_theme_in_the_kit():
-    """Step 130 (#40): the kit ships no theme and has no theme operators; the user's theme is never written."""
+    """#40: the kit ships no theme and has no theme operators; the user's theme is never written."""
     import importlib.util
     assert importlib.util.find_spec(kit.MODULE + ".theme") is None
     assert not hasattr(bpy.types, "ALLSET_OT_theme_apply") and not hasattr(bpy.types, "ALLSET_OT_theme_restore")
@@ -55,17 +55,17 @@ def test_new_maya_scene_layout():
     ws = bpy.data.workspaces["General"]
     scr = ws.screens[0]
     types = sorted(a.type for a in scr.areas)
-    # Maya General (step 49): Status Line row, Shelf row, Tool Box (narrow 3D View), Outliner, view,
-    # Time + Range Slider (timeline); CB/LE, AE and MTK are Maya's right tab stack, its own Properties area (step 116).
+    # Maya General: Status Line row, Shelf row, Tool Box (narrow 3D View), Outliner, view,
+    # Time + Range Slider (timeline); CB/LE, AE and MTK are Maya's right tab stack, its own Properties area.
     assert types == ['DOPESHEET_EDITOR', 'IMAGE_EDITOR', 'IMAGE_EDITOR', 'OUTLINER', 'PROPERTIES', 'VIEW_3D',
                      'VIEW_3D'], types
     outliners = [a.spaces.active for a in scr.areas if a.type == 'OUTLINER']
     assert outliners[0].use_filter_object and not outliners[0].use_filter_object_content, "DAG-only Outliner"
     v3d = max((a for a in scr.areas if a.type == 'VIEW_3D'), key=lambda a: a.width * a.height).spaces.active
-    # no sidebar (the Maya panels are their own areas, step 116); the Tool Box column replaces the toolbar (step 49);
-    # the tool header row is Maya's panel toolbar (step 113)
+    # no sidebar (the Maya panels are their own areas); the Tool Box column replaces the toolbar;
+    # the tool header row is Maya's panel toolbar
     assert not v3d.show_region_ui and not v3d.show_region_toolbar and v3d.show_region_tool_header
-    # persp angle (35 mm on 36 mm film) = Blender viewport lens 70 (72 mm sensor; step 81)
+    # persp angle (35 mm on 36 mm film) = Blender viewport lens 70 (72 mm sensor)
     assert abs(v3d.lens - 70.0) < 1e-6
     for area in scr.areas:
         if area.type == 'VIEW_3D':
@@ -73,10 +73,10 @@ def test_new_maya_scene_layout():
 
     scene = bpy.context.scene
     assert scene.unit_settings.length_unit == 'CENTIMETERS' and scene.unit_settings.scale_length == 1.0
-    # step 20: animation range 1-200 = frame range, playback 1-120 = preview range
+    # animation range 1-200 = frame range, playback 1-120 = preview range
     assert (scene.frame_start, scene.frame_end, scene.render.fps) == (1, 200, 24)
     assert scene.use_preview_range and (scene.frame_preview_start, scene.frame_preview_end) == (1, 120)
-    # step 211: only Maya's hidden startup cameras (operators/startup_cameras.py)
+    # only Maya's hidden startup cameras (operators/startup_cameras.py)
     assert sorted(o.name for o in bpy.data.objects) == ["front", "persp", "side", "top"],         [o.name for o in bpy.data.objects]
     assert all(o.get("allset_startup_camera") and o.hide_viewport for o in bpy.data.objects)
     bpy.ops.wm.read_homefile()

@@ -1,4 +1,4 @@
-"""Step 6: Channel Box (proxies, channel selection, slider, Channels menu) and Layer Editor."""
+"""Channel Box (proxies, channel selection, slider, Channels menu) and Layer Editor."""
 
 import math
 from importlib import import_module
@@ -63,9 +63,9 @@ def test_proxy_skips_locked_and_autokeys():
     assert a.location.x == 7.0 and b.location.x == 1.0, "locked channel is not edited"
     assert cb.is_locked(b, "tx") and not cb.is_locked(a, "tx")
     sc = bpy.context.scene
-    sc.allset_auto_key = True               # the kit's Maya Auto Key (step 130), not Blender's auto keying
+    sc.allset_auto_key = True               # the kit's Maya Auto Key, not Blender's auto keying
     try:
-        # Maya Auto Key (step 70): only channels that already have keys
+        # Maya Auto Key: only channels that already have keys
         P().ty = 2.0
         assert cb.fcurve(a, "ty") is None, "Maya Auto Key doesn't key an unkeyed channel"
         a.keyframe_insert("location", index=1)
@@ -219,7 +219,7 @@ def test_layer_toggles():
     layer = le.new_layer(scene, [a])
     st = layer.allset_layer
     st.visible = False
-    assert a.hide_get() and not b.hide_get() and not a.hide_viewport, "layer V = view-layer flag (step 129)"
+    assert a.hide_get() and not b.hide_get() and not a.hide_viewport, "layer V = view-layer flag"
     st.visible = True
     st.display_type = "TEMPLATE"
     assert a.hide_select and a.display_type == 'WIRE'
@@ -247,7 +247,7 @@ def test_layer_playback_handlers():
     layer = le.new_layer(scene, [a])
     layer.allset_layer.playback = False
     le.on_playback_pre(scene)
-    assert a.hide_get() and not b.hide_get() and not a.hide_viewport, "layer V = view-layer flag (step 129)"
+    assert a.hide_get() and not b.hide_get() and not a.hide_viewport, "layer V = view-layer flag"
     le.on_playback_post(scene)
     assert not a.hide_get()
     assert le.on_playback_pre in bpy.app.handlers.animation_playback_pre

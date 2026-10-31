@@ -1,4 +1,4 @@
-"""Step 226 L1 in a real UI: a joint with a control shape (bone
+"""L1 in a real UI: a joint with a control shape (bone
 Custom Shape made by Maya ``parent -s -r``) is picked by clicking the drawn shape wire — the click selects the
 bone (Pose, joint1 = lead); a click inside the circle, on the octahedron Blender doesn't draw for a shaped bone,
 selects nothing."""

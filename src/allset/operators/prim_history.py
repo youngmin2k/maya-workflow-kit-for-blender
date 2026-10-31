@@ -5,7 +5,7 @@ Maya keeps the creation node upstream of the shape; its attributes (Width, Subdi
 show in the Channel Box INPUTS and the Attribute Editor, and editing one rebuilds the shape. Blender has no such
 node, so the kit stores it as an ID property on the shape data (``Mesh`` / ``Curve``; on the group empty for
 nurbsSquare / nurbsCube, whose parts are four / six curves) and rebuilds the data from ``prim_shapes`` when a value
-changes. Object, transforms and materials stay; Delete History drops the node (like the extrusion record of step 65).
+changes. Object, transforms and materials stay; Delete History drops the node (like the extrusion record).
 
 A node is shown only while the shape still is what the kit built (a signature of the points): Blender edits made
 after creation would be thrown away by a rebuild, and Maya would keep them as tweaks the kit can't replay.
@@ -27,7 +27,6 @@ KIND_NODES = {
     'CONE': ("polyCone", "pCone"), 'TORUS': ("polyTorus", "pTorus"), 'PLANE': ("polyPlane", "pPlane"),
     'DISC': ("polyDisc", "pDisc"), 'PLATONIC': ("polyPlatonic", "pPlatonic"), 'PYRAMID': ("polyPyramid", "pPyramid"),
     'PRISM': ("polyPrism", "pPrism"),
-    # step 190
     'PIPE': ("polyPipe", "pPipe"), 'HELIX': ("polyHelix", "pHelix"), 'GEAR': ("polyGear", "pGear"),
     'SOCCER_BALL': ("polyPrimitiveMisc", "pSolid"), 'SUPER_ELLIPSE': ("polySuperShape", "pSuperShape"),
     'SPHERICAL_HARMONICS': ("polySuperShape", "pSuperShape"), 'ULTRA_SHAPE': ("polySuperShape", "pSuperShape"),
@@ -36,7 +35,7 @@ KIND_NODES = {
     'NURBS_TORUS': ("makeNurbTorus", "nurbsTorus"), 'NURBS_CIRCLE': ("makeNurbCircle", "nurbsCircle"),
     'NURBS_SQUARE': ("makeNurbsSquare", "nurbsSquare"), 'NURBS_CUBE': ("makeNurbCube", "nurbsCube"),
 }
-# Create menu items that share a node type but start from other values (polySuperShape -shape, step 190)
+# Create menu items that share a node type but start from other values (polySuperShape -shape)
 KIND_VALUES = {'SUPER_ELLIPSE': {"shape": 0}, 'SPHERICAL_HARMONICS': {"shape": 1}, 'ULTRA_SHAPE': {"shape": 2}}
 GROUPS = {"makeNurbsSquare", "makeNurbCube"}
 SURFACES = {"makeNurbSphere", "makeNurbCylinder", "makeNurbCone", "makeNurbPlane", "makeNurbTorus", "makeNurbCube"}
@@ -162,7 +161,7 @@ def _next_name(node_type):
             if idb.users and KEY in idb:
                 taken.add(idb[KEY].get("name", ""))
     from . import naming
-    return f"{node_type}{naming.next_number(node_type, taken)}"   # Maya: one past the highest (step 208)
+    return f"{node_type}{naming.next_number(node_type, taken)}"   # Maya: one past the highest
 
 
 def drop(ob):
@@ -184,7 +183,7 @@ def fill_bmesh(bm, shape, k, uvs=True):
     """Write a ``prim_shapes.Mesh`` into an empty bmesh (Maya units -> Blender, scaled by ``k``)."""
     verts = [bm.verts.new(to_blender(p, k)) for p in shape.verts]
     bm.verts.index_update()
-    if shape.edges:     # Maya's edge ids = the bmesh edge index (step 257, bevel_maya.maya_edge_ids)
+    if shape.edges:     # Maya's edge ids = the bmesh edge index (bevel_maya.maya_edge_ids)
         for a, b in shape.edges:
             bm.edges.new((verts[a], verts[b]))
     uv = bm.loops.layers.uv.new(UV_NAME) if uvs and shape.uvs is not None else None
@@ -244,7 +243,7 @@ def new_curve_data(context, name, patch, k):
     """A Curve ('CURVE' for one row, 'SURFACE' otherwise) datablock holding ``patch``.
 
     Blender's Python API can't add rows to a NURBS surface: the rows are made by extruding the first one in edit
-    mode of a temporary object (``curve.extrude`` works in background, step 129)."""
+    mode of a temporary object (``curve.extrude`` works in background)."""
     rows, cols = len(patch.points), len(patch.points[0])
     cu = bpy.data.curves.new(name, 'SURFACE' if rows > 1 else 'CURVE')
     cu.dimensions = '3D'
@@ -380,7 +379,7 @@ def create_object(context, kind, values=None, maya_naming=True, create_uvs=True)
         owner = cu
     if maya_naming and node_type not in GROUPS:
         naming.apply_maya_name(ob, base)
-    if history_on(context):                  # off: Maya's -ch 0 primitive has no polyCube1 node (step 189)
+    if history_on(context):                  # off: Maya's -ch 0 primitive has no polyCube1 node
         _store(owner, node_type, _next_name(node_type), vals, k, extra)
     for o in context.selected_objects:
         o.select_set(False)

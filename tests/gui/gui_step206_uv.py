@@ -1,4 +1,4 @@
-"""Step 206 in a real UI: a Maya pCube1 in the UV Editor. Cut/Sew > Auto Seams, Split, Create Shell (Grid) and
+"""In a real UI: a Maya pCube1 in the UV Editor. Cut/Sew > Auto Seams, Split, Create Shell (Grid) and
 Modify > Cycle run from the menu map; the three Maya heads-up displays (UV Statistics bottom right, UV Position
 bottom left, Isolated Selection while Ctrl+1 isolates) are drawn; shots of the UV Editor."""
 

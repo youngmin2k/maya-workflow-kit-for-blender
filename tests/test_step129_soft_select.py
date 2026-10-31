@@ -1,4 +1,4 @@
-"""Step 129: one Maya soft select state (#15, #1), B + MMB radius drag (#1), falloff colour overlay (#2).
+"""One Maya soft select state (#15, #1), B + MMB radius drag (#1), falloff colour overlay (#2).
 GUI: tests/gui/gui_step129_soft_select.py."""
 
 import os

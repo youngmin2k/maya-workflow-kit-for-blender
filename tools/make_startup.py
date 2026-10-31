@@ -1,12 +1,12 @@
 """Generate the Maya layout startup.blend bundled inside the extension (in a GUI Blender; read from there by
-switch.enter_layout and "New Scene in Maya Layout", never copied out of the extension since step 130).
+switch.enter_layout and "New Scene in Maya Layout", never copied out of the extension).
 
     python tools/make_startup.py          # re-runs itself in `blender --factory-startup` (a window opens briefly)
 
-Writes src/allset/app_template/Maya_Workflow_Kit/startup.blend (a Maya-style General layout, steps 5 and 49).
+Writes src/allset/app_template/Maya_Workflow_Kit/startup.blend (a Maya-style General layout).
 It runs in a GUI Blender because the factory right column
 (Outliner + Properties) can only be removed there: in `-b` screen.area_close hangs and area_join crashes
-or adds empty areas (step 49). The window is 1600x900 at effective UI scale
+or adds empty areas. The window is 1600x900 at effective UI scale
 1.0, so area sizes are pixels at scale 1; the sidebar width is set by dragging
 its edge with simulated events (no API). User dirs point into tmp/build_env (tools/build.sandbox_env).
 """
@@ -22,32 +22,32 @@ OUT = ROOT / "src" / "allset" / "app_template" / "Maya_Workflow_Kit" / "startup.
 # Outliner 260, Channel Box / Layer Editor dock 260 (+ tab strip), Time Slider 36 (the timeline WINDOW region); the
 # Range Slider is the timeline header, flipped under it.
 OUTLINER_PX = 260
-# The right dock column (Channel Box / Layer Editor + a side tab strip) = the kit's tab-stack area, its own Properties editor right of the viewport (ui/maya_dock.py, step 116).
-# Step 135 (#60): the kit's tabs are one horizontal row, so the stack is as wide as its tab row / Channel Box labels /
+# The right dock column (Channel Box / Layer Editor + a side tab strip) = the kit's tab-stack area, its own Properties editor right of the viewport (ui/maya_dock.py).
+# #60: the kit's tabs are one horizontal row, so the stack is as wide as its tab row / Channel Box labels /
 # AE menu bar need = src/allset/ui/toolbox.dock_width(1.0) (277 <= width <= 480; kept in sync by
-# tests/test_step135_width.py); toolbox.fit_columns refits it at other UI scales. Step 142 (#78): the tabs are Maya's
+# tests/test_step135_width.py); toolbox.fit_columns refits it at other UI scales. #78: the tabs are Maya's
 # vertical strip on the stack's right edge, so the stack with the Channel Box raised is narrow again
 # (toolbox.dock_width(1.0) = the Channel Box labels + the strip).
 DOCK_PX = 286
-# Tool Box column = room for one toolbar column up to UI scale 1.6 (step 112): area sizes are pixels scaled with
+# Tool Box column = room for one toolbar column up to UI scale 1.6: area sizes are pixels scaled with
 # the window, not with the UI scale, and a toolbar wider than its area is not drawn at all (an empty strip, the
 # tools fell back into the main view). ui/toolbox.fit_columns fits it to one toolbar column when it can; until
 # then the extra width is the toolbar colour (toolbox.settle). 1.6 = 125 % display in a window down to 1280 px.
 TOOLBOX_ROOM = 1.6
-# = ui/maya_dock.ROLE_FLAGS['STACK']: Tool tab + this hidden tab flag marks the tab-stack area (step 116)
+# = ui/maya_dock.ROLE_FLAGS['STACK']: Tool tab + this hidden tab flag marks the tab-stack area
 STACK_FLAG = "show_properties_world"
 # Time Slider right end: current time field (90) + 8 transport buttons (22 each) and padding.
 TIME_CONTROLS_PX = 300   # = ui/channel_box.py CATEGORY
 TIME_SLIDER_PX = 36
-# Shelf: tab row + 32 px icon row = 64 (step 113: one WINDOW region draws both)
+# Shelf: tab row + 32 px icon row = 64 (one WINDOW region draws both)
 SHELF_PX = 64
 WINDOW_SIZE = (1600, 900)
 EDGE = 3                  # px the area edges take from a split
 # Persp view = focal length 35 on a 36 mm film back. Blender's viewport lens is on a 72 mm sensor
-# (tan(fov/2) = 36 / lens), so the same angle is lens 70; lens 35 was a 91.6 deg view (step 81).
+# (tan(fov/2) = 36 / lens), so the same angle is lens 70; lens 35 was a 91.6 deg view.
 MAYA_LENS = 70.0
 MAYA_FRAME_END = 120      # playback 1-120
-MAYA_RANGE_END = 200      # animation range 1-200 (step 20: Range Slider outer fields)
+MAYA_RANGE_END = 200      # animation range 1-200 (Range Slider outer fields)
 MAYA_RESOLUTION = (960, 540)   # HD 540
 STRIP_MARKER = ".AllsetStrip"  # = ui/shelf.py MARKER (Status Line row)
 SHELF_MARKER = ".AllsetShelf"  # = ui/shelf.py SHELF_MARKER (Shelf row)
@@ -58,7 +58,7 @@ MAYA_BG_LINEAR = round(((92 / 255 + 0.055) / 1.055) ** 2.4, 5)
 MAYA_CLIP = (0.1, 10000.0)        # cm (= operators/units.py CLIP)
 MAYA_PERSP_EYE = (28.0, -28.0, 21.0)  # cm, new-scene persp eye (= units.PERSP_EYE)
 
-# Maya-style workspaces the template carries (step 160, #81): Windows > Workspaces / the Status Line dropdown
+# Maya-style workspaces the template carries (#81): Windows > Workspaces / the Status Line dropdown
 # (= src/allset/ui/workspaces.py MAYA_WORKSPACES); "General" is shown as "Maya Classic".
 # name -> (menu set linkedMenu, raised tab of the right tab stack, recipe)
 MAYA_WORKSPACES = {
@@ -180,9 +180,9 @@ class Builder:
         assert [a.type for a in self.scr.areas] == ['VIEW_3D'], [a.type for a in self.scr.areas]
         view = self.scr.areas[0]
         hdr = _region(view, 'HEADER').height
-        # 2. Maya strip (step 12): Status Line row, then the Shelf row, over everything, full width. The Status
-        #    Line is a header-only area (Blender keeps it one header high at any UI scale, step 49); the
-        #    Shelf area = tab row (header) + icon row (WINDOW, ui/shelf.py gizmos, step 51).
+        # 2. Maya strip: Status Line row, then the Shelf row, over everything, full width. The Status
+        #    Line is a header-only area (Blender keeps it one header high at any UI scale); the
+        #    Shelf area = tab row (header) + icon row (WINDOW, ui/shelf.py gizmos).
         strip = yield from self.split(view, 'HORIZONTAL', hdr + 3 + SHELF_PX + EDGE, 'TOP')
         strip.type = 'IMAGE_EDITOR'
         yield
@@ -205,7 +205,7 @@ class Builder:
         outliner.type = 'OUTLINER'
         yield
         # 5. Maya's right tab stack (Channel Box / Layer Editor | Attribute Editor | Modeling Toolkit): its own area,
-        #    not the viewport's sidebar (step 116).
+        #    not the viewport's sidebar.
         dock = yield from self.split(self.biggest_view(), 'VERTICAL', DOCK_PX + EDGE, 'RIGHT')
         dock.type = 'PROPERTIES'
         yield
@@ -215,7 +215,7 @@ class Builder:
                       "view3d": view, "dock": dock}
         self.configure()
         yield
-        # 6. The timeline's sidebar = the Time Slider's current frame field and transport buttons (step 50): drag
+        # 6. The timeline's sidebar = the Time Slider's current frame field and transport buttons: drag
         #    its left edge (region size has no API).
         yield from self.drag_region_edge(timeline, TIME_CONTROLS_PX)
         yield from self.maya_workspaces()
@@ -254,7 +254,7 @@ class Builder:
         yield
 
     def maya_workspaces(self):
-        """Maya-style workspaces (step 160, #81): each is a copy of the finished General layout with Maya's
+        """Maya-style workspaces (#81): each is a copy of the finished General layout with Maya's
         changes (closed panels, an editor beside / under the viewport, the raised tab), marked with its template name
         so the kit can list, append and reset it (src/allset/ui/workspaces.py). Blender's factory workspaces go:
         a Maya scene lists Maya's workspaces."""
@@ -312,7 +312,7 @@ class Builder:
                 ge = yield from self.split(view, 'HORIZONTAL', round(view.height * ANIMATION_GRAPH), 'BOTTOM')
                 ge.type = 'GRAPH_EDITOR'
                 ge.ui_type = 'FCURVES'
-                ge.spaces.active.show_region_ui = False     # Maya's Graph Editor has no side panel (step 104)
+                ge.spaces.active.show_region_ui = False     # Maya's Graph Editor has no side panel
                 yield
             elif step == "shape_editor":
                 # Rigging: Node Editor / Shape Editor tabs under the viewport; Blender's rig data has no node
@@ -390,14 +390,14 @@ class Builder:
         so.use_filter_object_content = False   # Maya: DAG only, no shapes
         so.use_filter_children = True
         # Maya's Outliner lists the DAG from the world: no collection rows (display layers are the
-        # Layer Editor's) and no per-row render toggle (step 31).
+        # Layer Editor's) and no per-row render toggle.
         so.use_filter_collection = False
         so.show_restrict_column_render = False
-        so.show_restrict_column_hide = False   # no eye column: Maya hides with H (= ui/maya_outliner.setup, step 50)
-        so.show_mode_column = False             # no Blender mode column in component mode (step 202, #109)
-        so.use_sort_alpha = False               # Maya order: startup cameras, then creation order (step 211, #117)
+        so.show_restrict_column_hide = False   # no eye column: Maya hides with H (= ui/maya_outliner.setup)
+        so.show_mode_column = False             # no Blender mode column in component mode (#109)
+        so.use_sort_alpha = False               # Maya order: startup cameras, then creation order (#117)
 
-        st = a["timeline"].spaces.active       # Time Slider: no channel list; sidebar = its buttons (step 50)
+        st = a["timeline"].spaces.active       # Time Slider: no channel list; sidebar = its buttons
         st.show_region_channels = False
         st.show_region_ui = True
 
@@ -407,20 +407,20 @@ class Builder:
             marker.use_fake_user = True
             sp.mask = marker
             sp.mode = 'VIEW'
-            # the shelf row draws tab strip + icons in its WINDOW region (ui/shelf.py, step 113)
+            # the shelf row draws tab strip + icons in its WINDOW region (ui/shelf.py)
             sp.show_region_header = key == "strip"
             sp.show_region_tool_header = False
             sp.show_region_ui = False
             sp.show_region_toolbar = False
-            # step 167: no image navigation gizmo — invisible under the kit's drawing, it took clicks at the right
+            # no image navigation gizmo — invisible under the kit's drawing, it took clicks at the right
             # end of the row (the shelf scroll bar)
             sp.show_gizmo_navigate = False
 
         v3d = a["view3d"].spaces.active
-        v3d.show_region_ui = False             # Maya panels are their own areas, not the viewport's sidebar (step 116)
-        v3d.show_region_toolbar = False        # the Tool Box column replaces it (step 49)
-        v3d.show_region_tool_header = True     # = Maya's panel toolbar (ui/panel_toolbar.py, step 113)
-        v3d.show_region_header = True          # Maya panel menu bar (step 37)
+        v3d.show_region_ui = False             # Maya panels are their own areas, not the viewport's sidebar
+        v3d.show_region_toolbar = False        # the Tool Box column replaces it
+        v3d.show_region_tool_header = True     # = Maya's panel toolbar (ui/panel_toolbar.py)
+        v3d.show_region_header = True          # Maya panel menu bar
         v3d.lens = MAYA_LENS
         v3d.region_3d.view_perspective = 'PERSP'
 
@@ -457,7 +457,7 @@ class Builder:
 
 def maya_views():
     """Every 3D view of every workspace sees Maya's new-scene persp view in cm: a default
-    pCube1 (1 cm) looks the size it does in Maya (step 21)."""
+    pCube1 (1 cm) looks the size it does in Maya."""
     import bpy
     from mathutils import Vector
     eye = Vector(MAYA_PERSP_EYE) * MAYA_UNIT
@@ -468,33 +468,33 @@ def maya_views():
                     continue
                 space.clip_start, space.clip_end = (c * MAYA_UNIT for c in MAYA_CLIP)
                 space.lens = MAYA_LENS        # every view (and Four View's persp quadrant) = Maya's persp angle
-                # Finest perspective grid step = 1 cm (= units.grid_scale; step 25):
+                # Finest perspective grid step = 1 cm (= units.grid_scale):
                 # grid lines every 1 cm.
                 space.overlay.grid_scale = MAYA_UNIT
                 # Maya's grid axes are grey like the grid; Blender colours them with
-                # the user's theme axis colours (the kit ships no theme since step 130).
+                # the user's theme axis colours (the kit ships no theme).
                 space.overlay.show_axis_x = space.overlay.show_axis_y = False
                 # a finite Maya-style grid instead of Blender's floor, also in ortho side views
-                # (src/allset/ui/maya_grid.py: show_floor / show_ortho_grid off, grid_lines 0; step 45).
+                # (src/allset/ui/maya_grid.py: show_floor / show_ortho_grid off, grid_lines 0).
                 space.overlay.show_floor = space.overlay.show_ortho_grid = False
                 space.overlay.grid_lines = 0
-                # Maya view furniture (ViewCube, axis triad, camera name; ui/view_furniture.py, step 46)
+                # Maya view furniture (ViewCube, axis triad, camera name; ui/view_furniture.py)
                 # replaces Blender's navigation gizmo and text info.
                 space.show_gizmo_navigate = False
                 space.overlay.show_text = False
-                # Maya highlights a selection with its wireframe (ui/selection_wire.py), no outline (step 47).
+                # Maya highlights a selection with its wireframe (ui/selection_wire.py), no outline.
                 space.overlay.show_outline_selected = False
-                # Maya draws no line from a child to its parent (step 91); Blender's dashed relationship lines go.
+                # Maya draws no line from a child to its parent; Blender's dashed relationship lines go.
                 space.overlay.show_relationship_lines = False
                 # Maya has no 3D cursor: hidden; the component pivot edit (D / Insert,
-                # operators/hold.ComponentPivotEdit) shows it while the cursor is the pivot (step 134, #59).
+                # operators/hold.ComponentPivotEdit) shows it while the cursor is the pivot (#59).
                 space.overlay.show_cursor = False
                 # Maya has no redo panel: no Blender "Move" Adjust Last Operation after a manipulator / tool drag
-                # (step 258, #155 QA 240 H1-9). Kit option boxes of the "redo" kind open F9's popup
+                # (#155 QA 240 H1-9). Kit option boxes of the "redo" kind open F9's popup
                 # (marking/modal._call screen.redo_last), which doesn't need the HUD region.
                 space.show_region_hud = False
                 # Flat viewport grey #5c5c5c. Without the kit
-                # theme (step 130) that is view data: the view's own background colour, scene linear (#45).
+                # theme that is view data: the view's own background colour, scene linear (#45).
                 space.shading.background_type = 'VIEWPORT'
                 space.shading.background_color = (MAYA_BG_LINEAR,) * 3
                 rv3d = space.region_3d
@@ -510,19 +510,19 @@ def setup_scene():
     us.system = 'METRIC'
     us.length_unit = 'CENTIMETERS'         # display cm, keep 1 BU = 1 m
     us.scale_length = 1.0
-    # Maya animation range = frame range, playback range = preview range (step 20).
+    # Maya animation range = frame range, playback range = preview range.
     scene.frame_start, scene.frame_end = 1, MAYA_RANGE_END
     scene.use_preview_range = True
     scene.frame_preview_start, scene.frame_preview_end = 1, MAYA_FRAME_END
     scene.render.fps, scene.render.fps_base = 24, 1.0
-    # Render Settings image size: 960 x 540, pixel aspect 1 (step 137, #71). Blender's scale stays 100 %.
+    # Render Settings image size: 960 x 540, pixel aspect 1 (#71). Blender's scale stays 100 %.
     scene.render.resolution_x, scene.render.resolution_y = MAYA_RESOLUTION
     scene.render.resolution_percentage = 100
     scene.render.pixel_aspect_x = scene.render.pixel_aspect_y = 1.0
-    # Tool defaults (step 59):
+    # Tool defaults:
     # axis mode per tool (Move World, Rotate/Scale Object), the manipulator at the lead
     # object's pivot (edit mode switches to the bbox centre, operators/pivot.py), rotate
-    # step 15 degrees.
+    # snap 15 degrees.
     ts = scene.tool_settings
     slots = scene.transform_orientation_slots
     slots[0].type = 'GLOBAL'

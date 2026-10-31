@@ -1,4 +1,4 @@
-"""Step 202 (#109): Maya Workflow Kit layout details found by audit 15 (time slider current
+"""#109: Maya Workflow Kit layout details found by audit 15 (time slider current
 frame at UI 1.25). Real windows: tests/gui/gui_step202_ui.py."""
 
 import re

@@ -6,7 +6,7 @@ object-space points (Maya Y-up, cm), then one ``<weights>`` element per influenc
 other one-weight deformers: source ``baseLayer``) listing only the points with a non-zero weight. The kit writes the
 same structure, so Maya reads its files and the kit reads Maya's (and Maya's JSON variant).
 
-A kit skin = the Armature modifier (named ``skinClusterN``, step 158) + vertex groups named after its bones; a kit
+A kit skin = the Armature modifier (named ``skinClusterN``) + vertex groups named after its bones; a kit
 deformer (operators/deformers.py) owns one vertex group = its ``baseLayer`` weights.
 
 Import "Index" (the default, like Maya): an influence in the file replaces that influence's whole weight list — vertices the
@@ -35,7 +35,7 @@ NO_DEFORMER = "No deformer found.  Please select an object with a deformer."
 
 
 # --- Maya <-> Blender object space ----------------------------------------------------------------------------------
-# Maya Y-up axes map to Blender as X -> X, Y -> Z, Z -> -Y (step 57); one Maya length = units.maya_unit().
+# Maya Y-up axes map to Blender as X -> X, Y -> Z, Z -> -Y; one Maya length = units.maya_unit().
 
 def to_maya(co, k=1.0):
     """Blender object-space point -> Maya point (x, y, z)."""
@@ -417,7 +417,7 @@ class ALLSET_OT_import_deformer_weights(bpy.types.Operator):
     """Maya Import Weights: read deformer weights from an XML file (Maya's or the kit's) onto the selected object"""
     bl_idname = "allset.import_deformer_weights"
     bl_label = "Import"
-    bl_options = {'UNDO'}      # Maya has no redo panel (step 147): UNDO only
+    bl_options = {'UNDO'}      # Maya has no redo panel: UNDO only
 
     filepath: StringProperty(subtype='FILE_PATH', options={'SKIP_SAVE'})
     filter_glob: StringProperty(default="*.xml;*.json", options={'HIDDEN'})

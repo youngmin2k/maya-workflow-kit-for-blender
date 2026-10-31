@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Skeleton > Joint Labelling and Enable / Disable Selected IK Handles (step 159 lane L).
+"""Maya Skeleton > Joint Labelling and Enable / Disable Selected IK Handles.
 
 Behaviour: Maya 2022 menus.
 
-A Maya joint is a bone (step 57). Its joint label attributes live as ID properties on the bone: ``allset_side``
+A Maya joint is a bone. Its joint label attributes live as ID properties on the bone: ``allset_side``
 (Maya ``side``: 0 Center, 1 Left, 2 Right, 3 None; factory 0), ``allset_type`` (Maya ``type``, the 30-value enum
 below; factory 0 None), ``allset_other_type`` (Maya ``otherType``, factory "jaw") and ``allset_draw_label``
 (``drawLabel``, factory off). In armature edit mode they are written on the edit bone (Blender writes edit bones
@@ -473,7 +473,7 @@ class ALLSET_OT_ik_handle_enable(bpy.types.Operator):
             return {'CANCELLED'}
         from . import ik_fk
         for con in cons:
-            # Maya ikHandle -eh / -dh write ikBlend 1 / 0; Ik Blend drives the Influence (step 223)
+            # Maya ikHandle -eh / -dh write ikBlend 1 / 0; Ik Blend drives the Influence
             pb = next((p for p in con.id_data.pose.bones if any(c == con for c in p.constraints)), None)
             if con.type == 'IK' and pb is not None:
                 ik_fk.set_blend(con.id_data, pb, con, 1.0 if self.enable else 0.0)
@@ -506,7 +506,7 @@ _armature_cache = {}
 
 
 def _armatures(view_layer):
-    """The view layer's armature objects, kept until the scene's structure changes (step 286, #191: every 3D View
+    """The view layer's armature objects, kept until the scene's structure changes (#191: every 3D View
     redraw walked every object)."""
     from ..ui.outliner import structure_version
     key = (structure_version(), len(view_layer.objects))

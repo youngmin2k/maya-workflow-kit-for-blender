@@ -1,5 +1,5 @@
 {
-  "note": "Marketing-screenshot assets (not shipped in the extension, never redistributed). Fetch with tools/marketing/fetch_assets.py into the local assets folder <id>/ ('--active' skips superseded entries). Step 125 set = status 'active'; licences checked on each page on the 'checked' date; inventory kept with the local assets (not in git).",
+  "note": "Marketing-screenshot assets (not shipped in the extension, never redistributed). Fetch with tools/marketing/fetch_assets.py into the local assets folder <id>/ ('--active' skips superseded entries). The current set = status 'active'; licences checked on each page on the 'checked' date; inventory kept with the local assets (not in git).",
   "assets": [
     {
       "id": "bs_rain_v3",
@@ -285,7 +285,7 @@
       "sha256": "ec3787de70fa2200256848d74201b10f6b6c3126594e9857bf989753312c2b84",
       "notes": "Rigged humanoid for rigging / skin weights / animation / hotbox scenes. characterMedium.fbx: 1 skinned mesh (1604 tris, 32 vertex groups, Armature modifier), armature 'Root' 58 bones incl. fingers and IK/ctrl bones. Animations in separate FBX (idle 33 f, run 17 f, jump 13 f), 45 animated bones, all names match the model armature. 4 skins (Skins/*.png: criminalMaleA, cyborgFemaleA, skaterFemaleA, skaterMaleA); the FBX material has no texture and imports with Alpha 0: connect a skin PNG and set Alpha 1 in the scene (file itself unmodified). Imports ~3.76 units tall (FBX cm scale): scale to taste.",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "robot_expressive",
@@ -317,7 +317,7 @@
       "sha256": "047f5e5fb3bb6d378bd1df16ca6137f2a596c99b3a1b5690b4020c05aaf6f319",
       "notes": "Animated robot character for animation / Graph Editor / Time Slider / marking-menu scenes. 15 meshes (2 skinned + rigid parts parented to bones), 3314 tris, armature 'RobotArmature' 43 bones (fingers, IK pole targets), 4 shape keys (facial morphs). 14 actions: Dance, Death, Idle, Jump, No, Punch, Running, Sitting, Standing, ThumbsUp, WalkJump, Walking, Wave, Yes. Flat materials Main/Grey/Black (no textures). ~4.0 m tall as imported (armature scale 100).",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "ph_drill_01",
@@ -373,7 +373,7 @@
       "sha256": "b162c83a8e35c869aef4f50e2cd80a750be248389e829f6cf9ced73ba094b9db",
       "notes": "Hard-surface prop for Modeling Toolkit / component selection / pivot & snapping scenes. 1 mesh, 2926 tris, clean modelled topology (not a scan), PBR 1k textures (diff/arm/normal); no brand marks (only '18V 1.3Ah LITHIUM-ION'). 0.18 x 0.05 x 0.19 m.",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "ph_desk_lamp_arm_01",
@@ -435,7 +435,7 @@
       "sha256": "349d75e41809bf21a8c863510144eb0bc318aef00e66aece0bd229d7301965ec",
       "notes": "Mechanical rigged prop (optional 'animated machine'). .blend 1k: armature 'rig_lamp' 53 bones, 25 skinned meshes, 25710 tris, 2 curves, no actions (pose it / key it in the scene). 0.60 x 0.42 x 0.93 m. glTF export of this asset drops the rig, so the .blend is used (load with wm.append / bpy.data.libraries.load).",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "ph_barrel_01",
@@ -491,7 +491,7 @@
       "sha256": "e084945dedd6a3379c6f3e97842cac89df7169797707e123a5e5b42c135d6888",
       "notes": "Set dressing. 1 mesh, 2682 tris, PBR 1k (red explosive barrel). 0.56 x 0.56 x 0.88 m.",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "ph_cardboard_box_01",
@@ -547,7 +547,7 @@
       "sha256": "6038bcc5bba5a08a5f6643a265977e37e3d14553e62981e144c33a89f10b78e1",
       "notes": "Set dressing. 1 mesh, 16952 tris (scan-like), PBR 1k. 0.39 x 0.52 x 0.34 m.",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "ph_woodentable_01",
@@ -603,7 +603,7 @@
       "sha256": "413804e054055c397b4cfbd0916027097d2a20853b165b533007a46d131e1d17",
       "notes": "Set dressing / ground for props. 1 mesh, 952 tris, PBR 1k. 1.80 x 0.66 x 0.55 m.",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "ph_potted_plant_02",
@@ -677,7 +677,7 @@
       "sha256": "c533dcce0d1aa4379eb7db04601a04983f8df2422b28578de922655a416e64a9",
       "notes": "Set dressing. 3 meshes, 69806 tris (heaviest asset), PBR 1k. 0.70 x 0.66 x 0.84 m.",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     },
     {
       "id": "ph_metal_toolbox",
@@ -733,7 +733,7 @@
       "sha256": "9b8d240f1e41e83119771a063e4f4b4bb9ddfefd47f9f5baeda998107aa135c5",
       "notes": "Set dressing / secondary hard-surface (open lid, separate parts). 6 meshes, 14228 tris, PBR 1k. 0.40 x 0.27 x 0.31 m.",
       "status": "superseded",
-      "superseded_note": "step 125: replaced by the Blender Studio / blender.org set; still read by the step 122-124 scene.py until lane A0 switches it. Files kept, not deleted."
+      "superseded_note": "Replaced by the Blender Studio / blender.org set; still read by the older scene.py until it switches. Files kept, not deleted."
     }
   ],
   "rejected": [

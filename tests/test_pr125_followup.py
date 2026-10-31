@@ -41,7 +41,7 @@ def test_idle_poll_draws_nothing():
 
 
 def test_wheel_is_three_lines():
-    """Maya: one wheel notch = QScrollBar single step 15 px x wheelScrollLines 3 = 45 px, about 3 rows."""
+    """Maya: one wheel notch = QScrollBar singleStep 15 px x wheelScrollLines 3 = 45 px, about 3 rows."""
     assert cb.WHEEL_LINES == 3
 
 

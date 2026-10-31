@@ -1,4 +1,4 @@
-"""Step 131 (#25) in a real UI: pSphere1 with blinn1 (a checker on its Color) and pCube1 with lambert1 -> Windows >
+"""#25: in a real UI: pSphere1 with blinn1 (a checker on its Color) and pCube1 with lambert1 -> Windows >
 Rendering Editors > Hypershade -> a new window in the Maya Hypershade layout: menu strip, Browser top-left, Material
 Viewer top-right, Create bottom-left, Graph centre, Property Editor bottom-right, proportions within 4 % of the
 expected layout -> pick blinn1, Input and Output Connections -> screenshot ->

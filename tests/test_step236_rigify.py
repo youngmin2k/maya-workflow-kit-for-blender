@@ -1,4 +1,4 @@
-"""Step 236 (Issue #145): a received Rigify rig to the engine, and Maya pick walk over its controls.
+"""Issue #145: a received Rigify rig to the engine, and Maya pick walk over its controls.
 
 Audit 0.5.0 (⑤-15): Export Selection of a Rigify human wrote 278 joints
 (160 deforming + their non-deforming ancestors) that Maya named DEFFBXASC045spine...; Export All added the hidden
@@ -59,7 +59,7 @@ def _rigify():
         pb.keyframe_insert("rotation_quaternion", frame=f)
         pb = rig.pose.bones["torso"]
         # down, not up: a stretched IK leg scales its DEF bones unevenly and FBX can't hold the sheared foot (Blender's
-        # own writer misses the toe by 0.96 cm there, with or without step 236)
+        # own writer misses the toe by 0.96 cm there, with or without the kit's fix)
         pb.location = (0.0, 0.0, -0.1 * (f - 1) / 11)
         pb.keyframe_insert("location", frame=f)
     _RIG.update(rig=rig, meta=meta, body=body)
@@ -134,7 +134,7 @@ def test_export_selection_writes_the_deforming_joints_with_maya_names():
     sc.frame_set(1)
     check(worst < 1e-4, f"joints moved by the re-parenting: {worst:.2e} cm at {where}")
     check(worst_bl < 1e-4 and n_bl > 250, f"vs Blender's bones: {worst_bl:.2e} cm over {n_bl}")
-    print(f"step236: 160 joints, root DEF_spine, vs writer {worst:.2e} cm, vs Blender {worst_bl:.2e} cm ({n_bl})")
+    print(f"rigify: 160 joints, root DEF_spine, vs writer {worst:.2e} cm, vs Blender {worst_bl:.2e} cm ({n_bl})")
 
 
 def test_export_all_leaves_the_metarig_out():

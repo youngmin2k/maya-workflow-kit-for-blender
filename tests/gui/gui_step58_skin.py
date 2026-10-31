@@ -1,4 +1,4 @@
-"""Step 58 in a real UI, Maya rigging_04 hand order on the Maya Workflow Kit layout: a cylinder + a three-joint skeleton ->
+"""In a real UI, Maya rigging_04 hand order on the Maya Workflow Kit layout: a cylinder + a three-joint skeleton ->
 click the skeleton, Shift+click the cylinder (joints first, mesh last) -> Skin > Bind Skin -> Armature modifier + three
 joint groups -> Skin > Paint Skin Weights -> pick joint2 in the influence list -> paint on the mesh -> joint2's weights go
 up."""
@@ -91,7 +91,7 @@ def s_scene():
         bm.to_mesh(c.data)
         bm.free()
         bpy.ops.object.select_all(action='DESELECT')
-        sk = joints.new_skeleton(bpy.context)                # what the Joint Tool (step 57) makes
+        sk = joints.new_skeleton(bpy.context)                # what the Joint Tool makes
         parent = None
         for z in (-1.0, 0.0, 1.0):
             parent = joints.add_joint(sk, Vector((0, 0, z * k)), parent, length=k)

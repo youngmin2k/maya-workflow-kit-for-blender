@@ -6,11 +6,11 @@ Maya's shelf behaviour, tab order and buttons.
 
 - The strip is an Image Editor area marked by the hidden Mask ``.AllsetStrip``
   (``space.mask``): its header row draws the Status Line, its tool header row the
-  shelf. The Maya Workflow Kit template (step 49) uses two header-only areas instead, the strip
+  shelf. The Maya Workflow Kit template uses two header-only areas instead, the strip
   without its tool header and a shelf row marked ``.AllsetShelf`` whose header draws
   the shelf: Blender keeps every area at least one header high, so both rows follow
   the UI scale (a two-row area of fixed height lost its tool header at scale 1.25).
-- Step 51: the shelf row is a 64 px shelf: its header = the shelf
+- The shelf row is a 64 px shelf: its header = the shelf
   tabs, its WINDOW region = 32 px kit-made colour icons (``shelf_icons``) drawn and clicked as gizmos
   (``ALLSET_GGT_shelf``: a gizmo map runs before the image editor's tool keymap, gives hover and the
   operator's tooltip). Click = command; a second click within the double-click time or Ctrl+click =
@@ -22,10 +22,10 @@ Maya's shelf behaviour, tab order and buttons.
   = options (Adjust Last Operation of that run), like Maya's doubleClickCommand.
 - User shelves: ``shelves.json`` in the extension's user directory; a button runs
   its Python script (Maya ``-sourceType python``).
-- Step 109: every factory button keeps its Maya slot. Buttons without a
+- Every factory button keeps its Maya slot. Buttons without a
   Blender action are drawn greyed; their tooltip and a click show the notice (``button_notice``) in the
-  Help Line, like greyed Maya menu items (step 101).
-- Step 162: Ctrl+Shift+click on a Maya menu item adds a button for it to the shelf shown (as Maya does),
+  Help Line, like greyed Maya menu items.
+- Ctrl+Shift+click on a Maya menu item adds a button for it to the shelf shown (as Maya does),
   factory tabs included. A menu button is ``{"label", "icon", "script": "", "menu":
   <Maya menu path>}`` and runs that path like the menu; on a factory tab it is stored in ``shelves.json``
   ``"extra"[<shelf id>]`` and drawn after the factory slots, so every factory button keeps its Maya slot.
@@ -43,10 +43,10 @@ from .. import i18n, results
 from . import own_draw, shelf_data, shelf_icons, shelf_map
 
 MARKER = ".AllsetStrip"
-SHELF_MARKER = ".AllsetShelf"   # the template's shelf row (step 49)
+SHELF_MARKER = ".AllsetShelf"   # the template's shelf row
 USER_PREFIX = "USER:"
 DEFAULT_USER = {"shelves": [{"name": "Custom", "buttons": []}]}
-STRIP_PX = 68          # header + tool header rows at UI scale 1 (step 12)
+STRIP_PX = 68          # header + tool header rows at UI scale 1
 _user = {}             # cached shelves.json content
 
 
@@ -98,7 +98,7 @@ def user_shelf(name):
 
 
 def factory_extras(shelf_id, create=False):
-    """Buttons added to factory shelf ``shelf_id`` (step 162: after its Maya slots); None if there are none and
+    """Buttons added to factory shelf ``shelf_id`` (after its Maya slots); None if there are none and
     ``create`` is off."""
     extra = user_data().get("extra")
     if not isinstance(extra, dict):
@@ -205,7 +205,7 @@ def factory_buttons(name):
 
 
 def button_notice(shelf, label):
-    """(Blender substitute, line) of a factory button: its own, else its Maya menu item's (step 109)."""
+    """(Blender substitute, line) of a factory button: its own, else its Maya menu item's."""
     from . import notices
     own = shelf_map.NOTICES.get(f"{shelf}/{label}")
     if own is not None:
@@ -290,8 +290,8 @@ class ALLSET_OT_shelf_button(bpy.types.Operator):
         second = last[0] == key and now - last[1] <= limit
         if event.value == 'DOUBLE_CLICK' or second:
             # Maya doubleClickCommand = the item's option box; the first click
-            # already ran the command once (step 167: was screen.redo_last, which shows nothing since shelf runs
-            # stopped being registered in step 147). The gizmo may see two presses instead of a double click.
+            # already ran the command once (was screen.redo_last, which shows nothing since shelf runs
+            # are not registered). The gizmo may see two presses instead of a double click.
             _last_click.clear()
             self.option = True
             self.double = True
@@ -337,7 +337,7 @@ class ALLSET_OT_shelf_button(bpy.types.Operator):
         return {'CANCELLED'}
 
     def _run_menu(self, context, b):
-        """A menu button (step 162): the Maya menu item run like the menu (``allset.menu_item`` rules, saved option
+        """A menu button: the Maya menu item run like the menu (``allset.menu_item`` rules, saved option
         window values, one undo step named after it); Ctrl+click = its option box."""
         from . import menu_map
         from ..marking.modal import run_action
@@ -555,7 +555,7 @@ class ALLSET_OT_shelf_edit_button(_ButtonProps, bpy.types.Operator):
         source = self._source(context)
         old = buttons[self.index]
         new = {"label": self.label, "icon": _valid_icon(self.icon), "script": source or old["script"]}
-        if old.get("menu"):            # a menu button stays one (step 162): only its label / icon change
+        if old.get("menu"):            # a menu button stays one: only its label / icon change
             new["menu"], new["script"] = old["menu"], ""
         buttons[self.index] = new
         save_user()
@@ -718,7 +718,7 @@ class ALLSET_MT_shelf_settings(bpy.types.Menu):
         layout.separator()
         layout.operator(ALLSET_OT_shelf_add_button.bl_idname, icon='SCRIPT')
         layout.operator(ALLSET_OT_shelf_add_last_command.bl_idname, icon='CONSOLE')
-        buttons = editable_buttons(current(context))      # a factory tab's added menu buttons too (step 162)
+        buttons = editable_buttons(current(context))      # a factory tab's added menu buttons too
         if buttons:
             layout.separator()
             for i, b in enumerate(buttons):
@@ -772,7 +772,7 @@ _factory_cache = {}
 
 def icon_buttons(context):
     """(shelf id, [(button index, label, shelf colour key, mapped)]) of the current shelf, in Maya order
-    (greyed buttons keep their slot, step 109)."""
+    (greyed buttons keep their slot)."""
     cur = current(context)
     if cur.startswith(USER_PREFIX):
         s = user_shelf(cur[len(USER_PREFIX):]) or {"buttons": []}
@@ -782,7 +782,7 @@ def icon_buttons(context):
     extras = factory_extras(cur)
     if not extras:
         return cur, _factory_cache[cur]
-    n = len(_factory_cache[cur])          # added buttons after the Maya slots (step 162)
+    n = len(_factory_cache[cur])          # added buttons after the Maya slots
     return cur, _factory_cache[cur] + [(n + k, b["label"], None, _record_mapped(b)) for k, b in enumerate(extras)]
 
 
@@ -829,11 +829,11 @@ class ALLSET_OT_shelf_slot(bpy.types.Operator):
 ICON_PX = 32
 PITCH_PX = 35
 LEFT_PX = 6
-# Step 113 (Maya 2022's shelf): the shelf row is one 64 px block — an
+# Maya's shelf: the shelf row is one 64 px block — an
 # 18 px tab strip at the top (tabs from x 37, Segoe UI 11 px), the shelf menu / editor glyphs in a 16 px column at
 # x 16, icons from x 43 at y 24 under the row's top, 12 px separators between Maya's button groups
 # (``shelf_data.GAPS``). The kit draws that whole block in the shelf row's WINDOW region when the row has no
-# header (the Maya Workflow Kit template since step 113); with a header (older files) the header keeps the tab buttons.
+# header (the Maya Workflow Kit template); with a header (older files) the header keeps the tab buttons.
 TAB_PX = 19
 TAB_LEFT_PX = 37
 TAB_PAD_PX = 10
@@ -865,7 +865,7 @@ def _gaps():
     return () if cur.startswith(USER_PREFIX) else shelf_data.GAPS.get(cur, ())
 
 
-# Step 167: Maya's shelf is a flow of rows one row high — buttons that don't fit wrap to the next row, a 12 px
+# Maya's shelf is a flow of rows one row high — buttons that don't fit wrap to the next row, a 12 px
 # vertical scroll bar with up / down arrows sits at the right, the wheel over the icons moves one row
 # (Maya: scroll bar page = single row 35 px, wheel = 1 row).
 SCROLL_PX = 12
@@ -972,8 +972,8 @@ def _draw_rect(x, y, w, h, colour, texture=None):
 
 
 def _theme_colour(context):
-    """The shelf row background = the user's Image Editor header colour (read only; the kit ships no theme since
-    step 130, #40), so the shelf sits in the same colour as the Status Line row in any theme."""
+    """The shelf row background = the user's Image Editor header colour (read only; the kit ships no
+    theme, #40), so the shelf sits in the same colour as the Status Line row in any theme."""
     c = context.preferences.themes[0].image_editor.space.header
     return (c[0], c[1], c[2], 1.0)
 
@@ -1131,11 +1131,11 @@ def draw_row():
     for slot, (index, label, colour_key, mapped) in enumerate(buttons[:SLOTS]):
         x, y, size = icon_rect(region, slot, s)
         if x > region.width:
-            continue                  # another row (step 167)
+            continue                  # another row
         shown = slot + 1
         if slot == hover:
             _draw_rect(x - 2, y - 2, size + 4, size + 4, _hover_colour(base, mapped))
-        # step 131: the 2x (64 px) picture once the icon is drawn wider than 32 px (UI scale >= 1.25)
+        # the 2x (64 px) picture once the icon is drawn wider than 32 px (UI scale >= 1.25)
         if colour_key is None:
             tex = _user_texture(_cur, index, label, not mapped, shelf_icons.texture_size(size))
         else:
@@ -1181,7 +1181,7 @@ def _draw_scroll_bar(region, s, base):
 
 
 def _user_texture(shelf_id, index, label, greyed, size):
-    """Icon of a user-made button. A menu button (step 162) shows the menu item's kit picture (``menu_icon_data``:
+    """Icon of a user-made button. A menu button shows the menu item's kit picture (``menu_icon_data``:
     the same command's shelf drawing, else its Status Line / Tool Box / menu drawing), else Maya's command button
     with the label's initials (Maya: the item's image, else a default command icon with a label)."""
     rec = button_record(shelf_id, index)
@@ -1372,7 +1372,7 @@ class ALLSET_GGT_shelf(bpy.types.GizmoGroup):
             gz = self.gizmos.new(ALLSET_GT_shelf_tab.bl_idname)
             gz.slot = slot
             gz.target_set_operator(ALLSET_OT_shelf_tab.bl_idname).slot = slot
-        for slot, delta in ((0, -1), (1, 1)):          # step 167: the scroll bar's arrows
+        for slot, delta in ((0, -1), (1, 1)):          # the scroll bar's arrows
             gz = self.gizmos.new(ALLSET_GT_shelf_scroll.bl_idname)
             gz.slot = slot
             gz.target_set_operator(ALLSET_OT_shelf_scroll.bl_idname).delta = delta
@@ -1384,10 +1384,10 @@ def _draw_image_header(self, context):
         return draw_status_line(self.layout, context)
     if is_shelf_row(context.space_data):
         return draw_shelf_tabs(self.layout, context)
-    from .editor_chrome import draw_uv_header   # Maya UV Editor menu bar (step 104)
+    from .editor_chrome import draw_uv_header   # Maya UV Editor menu bar
     if draw_uv_header(self, context):
         return None
-    from .render_view import draw_header   # Render View Keep / Remove Image (step 67): first, like Maya's
+    from .render_view import draw_header   # Render View Keep / Remove Image: first, like Maya's
     draw_header(self.layout, context)       # toolbar, so a small render window doesn't clip them
     return own_draw.original("IMAGE_HT_header", _draw_image_header)(self, context)
 
@@ -1395,14 +1395,14 @@ def _draw_image_header(self, context):
 def _draw_image_tool_header(self, context):
     if is_strip(context.space_data):
         return draw_shelf(self.layout, context)
-    from .editor_chrome import draw_uv_tool_header   # Maya UV Editor icon row (step 104)
+    from .editor_chrome import draw_uv_tool_header   # Maya UV Editor icon row
     if draw_uv_tool_header(self, context):
         return None
     return own_draw.original("IMAGE_HT_tool_header", _draw_image_tool_header)(self, context)
 
 
 def patch_image_headers():
-    """Blender's own Image Editor header draws only (step 115): others' appended items keep drawing."""
+    """Blender's own Image Editor header draws only: others' appended items keep drawing."""
     own_draw.swap("IMAGE_HT_header", _draw_image_header)
     own_draw.swap("IMAGE_HT_tool_header", _draw_image_tool_header)
 
@@ -1425,7 +1425,7 @@ _handle = []
 
 
 def settle_rows():
-    """Shelf rows of files made before step 167: switch the image navigation gizmo off (it sat, undrawn, under the
+    """Shelf rows of files made by older versions: switch the image navigation gizmo off (it sat, undrawn, under the
     scroll bar and took its clicks). Run from a timer / load_post, never from drawing."""
     for window in bpy.context.window_manager.windows:
         for area in window.screen.areas:

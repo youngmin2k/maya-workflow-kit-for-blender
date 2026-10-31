@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Outliner order on Blender's Outliner: startup cameras first, then every list in creation order (step 211,
-audit 16 G2, #117).
+"""Maya Outliner order on Blender's Outliner: startup cameras first, then every list in creation order
+(#117).
 
 Maya lists DAG nodes in creation order. The Maya Outliner shows objects unsorted
 (``use_sort_alpha`` off, ui/maya_outliner.setup), so Blender builds its rows from the view layer's bases (= the
@@ -177,7 +177,7 @@ def sync(scene, view_layer, rotate=None):
     objects = list(scene.objects)
     if not objects or any(o.mode != 'OBJECT' for o in objects):
         return False
-    # the scene's own collections (kit sets / display layers are collections outside the scene, step 96)
+    # the scene's own collections (kit sets / display layers are collections outside the scene)
     if not _orderable(scene):
         return False
     in_scene = {scene.collection, *scene.collection.children_recursive}
@@ -197,7 +197,7 @@ def _tick():
         if not rotates_small_lists() or context.window_manager is None or not _maya_outliner_shown(context) \
                 or _blocked(context):
             return INTERVAL
-        # step 286 (#191): the order only changes with the structure; sync walks every object (0.25 s timer)
+        # #191: the order only changes with the structure; sync walks every object (0.25 s timer)
         from .outliner import structure_version
         version = (structure_version(), context.scene.as_pointer())
         if version == _state.get("synced") or context.mode != 'OBJECT':

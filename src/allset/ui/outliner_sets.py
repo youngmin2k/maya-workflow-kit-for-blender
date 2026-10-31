@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Outliner set rows on Blender's Outliner (step 96).
+"""Maya Outliner set rows on Blender's Outliner.
 
 Maya lists object sets after the DAG nodes, outside the hierarchy; expanding one shows its members.
 The Maya Workflow Kit layout's Outliner is Blender's C tree (``maya_outliner``),
@@ -15,13 +15,13 @@ greyed) and the sets defaultLightSet / defaultObjectSet
 selecting persp selects the hidden camera). The kit has no camera objects behind them (Blender's user views aren't
 cameras; real objects would render, export and sort among the user's objects), so they are drawn rows too: the
 cameras first, then the default sets, then the kit sets. Blender's rows can't be pushed down, so with objects in
-the scene the cameras follow the DAG rows instead of leading them (step 99). Step 211 (#117): a kit new
+the scene the cameras follow the DAG rows instead of leading them. A kit new (#117)
 Maya scene has real hidden startup cameras (operators/startup_cameras.py) that are Blender's first rows
 (ui/outliner_order.py); only scenes without them still get drawn camera rows.
 
-Blender row geometry (step 96): row height = UI_UNIT_Y = round(18 x scale) + 2 x pixel size,
+Blender row geometry: row height = UI_UNIT_Y = round(18 x scale) + 2 x pixel size,
 row k spans view y [-(k + 1)·U, -k·U]; a depth-0 row draws its disclosure triangle at ~1.6 U, the icon
-at ~2.5 U and the name from ~3.25 U (1 U less without the mode column, step 202).
+at ~2.5 U and the name from ~3.25 U (1 U less without the mode column).
 """
 
 import math
@@ -69,14 +69,14 @@ def default_entries(scene=None):
 
 
 def default_set_members(name, scene):
-    """defaultLightSet = every light in the scene (step 99); defaultObjectSet is empty in a new scene."""
+    """defaultLightSet = every light in the scene; defaultObjectSet is empty in a new scene."""
     if name == "defaultLightSet":
         return [ob for ob in scene.objects if ob.type == 'LIGHT']
     return []
 
 
 def row_icon(name, cx, cy, prefs, greyed=False):
-    """Kit-drawn Maya Outliner icon (``kit_icons`` ``outliner:SET`` / ``outliner:CAMERA``, step 131, #23) centred on
+    """Kit-drawn Maya Outliner icon (``kit_icons`` ``outliner:SET`` / ``outliner:CAMERA``, #23) centred on
     (cx, cy), drawn unscaled at Blender's icon size (16 px x UI scale)."""
     from . import kit_icons
     n = kit_icons.size_for(name, prefs.system.ui_scale)
@@ -170,7 +170,7 @@ def draw():
     gpu.state.blend_set('ALPHA')
     k0 = empty
     selected = set(context.selected_objects) if context.mode == 'OBJECT' else set()
-    # Blender keeps one unit for its mode column while it is on (any mode); the Maya Outliner has none (step 202), so
+    # Blender keeps one unit for its mode column while it is on (any mode); the Maya Outliner has none, so
     # the drawn rows line up with Blender's object rows one unit further left
     lead = 0.0 if not getattr(context.space_data, "show_mode_column", True) else u
     blf.size(0, 11.0 * prefs.system.ui_scale)

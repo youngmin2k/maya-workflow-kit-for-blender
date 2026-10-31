@@ -1,4 +1,4 @@
-"""Step 76 in a real UI: Maya selection priority in object mode — a curve in front of or behind the cube
+"""In a real UI: Maya selection priority in object mode — a curve in front of or behind the cube
 wins a click over the cube, joints (armature) too; Shift / Ctrl / Ctrl+Shift keep Maya's meaning; a click
 on the cube alone and the option off are Blender's pick."""
 

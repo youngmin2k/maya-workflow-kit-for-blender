@@ -1,4 +1,4 @@
-"""Step 39: edit-mode component pick-walk (arrow keys) and Alt+Shift axis-locked tumble/track.
+"""Edit-mode component pick-walk (arrow keys) and Alt+Shift axis-locked tumble/track.
 """
 
 import math

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Kit-made colour shelf icons, drawn by code (step 51, re-drawn in step 109, redrawn per button in step 131).
+"""Kit-made colour shelf icons, drawn by code, one drawing per button.
 
-No Maya icons. A Maya shelf shows one colour pictogram per button; step 131 (#23) gives every
+No Maya icons. A Maya shelf shows one colour pictogram per button; the kit (#23) gives every
 factory shelf button its own kit drawing that follows the Maya icon's subject, main colour, composition and size
 (clean-room descriptions of Maya's shared visual vocabulary). Shared vocabulary used here:
 
@@ -2270,7 +2270,7 @@ def i_replace_frame(cv):
     arrow(cv, (16.5, 9), (16.5, 18), w=1.6, head=3.5)
 
 
-# Maya 2026 shelf buttons (step 269) ---------------------------------------------------------------
+# Maya 2026 shelf buttons ---------------------------------------------------------------
 # Buttons whose Maya menu item already has a kit drawing (``menu_drawings``) show that picture, like Maya, where a
 # shelf button and its menu item share the runTimeCommand's icon.
 
@@ -2415,7 +2415,7 @@ def texture(label, shelf=None, greyed=False, size=32, index=None):
 
 
 def texture_of(key, make, greyed=False, size=32):
-    """Cached GPU texture of another kit picture on the shelf (step 162: a menu item's drawing): ``make(n)`` gives
+    """Cached GPU texture of another kit picture on the shelf (a menu item's drawing): ``make(n)`` gives
     the (n, n, 4) picture, top row first; ``key`` names it."""
     full = ("picture", key, greyed, size)
     tex = _textures.get(full)

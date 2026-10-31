@@ -102,7 +102,7 @@ def run_test_file(blender, path, env):
 
 
 def add_order_args(ap):
-    """QA step 240 (activity A): file order is a test input too (order-dependent failures, M59-4)."""
+    """Release QA (activity A): file order is a test input too (order-dependent failures, M59-4)."""
     ap.add_argument("--shuffle", type=int, default=None, metavar="SEED", help="run the files in a seeded random order")
     ap.add_argument("--reverse", action="store_true", help="run the files in reverse order")
     ap.add_argument("--order", default="", help="file with one test file stem per line: run exactly these, in this order")

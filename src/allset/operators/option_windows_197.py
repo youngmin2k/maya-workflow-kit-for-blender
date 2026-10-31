@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 197 (#104): Maya's Cleanup Options window for Mesh > Cleanup... (operators/poly_cleanup.py).
+"""#104: Maya's Cleanup Options window for Mesh > Cleanup... (operators/poly_cleanup.py).
 
 Title / button / labels / default values match Maya's Cleanup Options window.
 """

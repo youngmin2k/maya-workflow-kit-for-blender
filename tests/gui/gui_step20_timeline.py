@@ -1,4 +1,4 @@
-"""Step 20 in a real UI: . , Alt+. Alt+, over the 3D View and the Timeline; Maya Workflow Kit template
+"""In a real UI: . , Alt+. Alt+, over the 3D View and the Timeline; Maya Workflow Kit template
 timeline shows the playback range and follows it; Range Slider header."""
 
 import os

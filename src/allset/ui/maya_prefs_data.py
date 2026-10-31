@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2022 Preferences window, page by page (step 215, Issue #121) — pure data, no bpy.
+"""Maya 2022 Preferences window, page by page (Issue #121) — pure data, no bpy.
 
 Category tree, page titles and control labels follow Maya 2022's
 Preferences window. The kit never writes
@@ -220,7 +220,7 @@ PAGES = (
     ("UNDO", "Undo", 1, "Undo: Undo Queue Settings", [
         ("Undo", [
             ("blender", "Queue size", 'SYSTEM', "edit.undo_steps",
-             "Recommended setup: System > Undo Steps 256 (Maya: Infinite)"),
+             "Recommended setup: System > Undo Steps = 256 (Maya: Infinite)"),
         ]),
     ]),
     ("GPU_CACHE", "GPU Cache", 1, "GPU Cache: GPU Cache Preferences", [

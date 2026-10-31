@@ -1,4 +1,4 @@
-"""Step 130 (#40): the package runs no code of its own and touches no import machinery.
+"""#40: the package runs no code of its own and touches no import machinery.
 
 Extension review: no ``exec`` / ``eval`` / ``compile(..., 'exec')``, no ``__import__`` hooks or ``builtins`` changes,
 no ``sys.path`` / ``sys.modules`` access, no ``importlib`` loaders. User code (Command Line, Script Editor, shelf
@@ -26,7 +26,7 @@ PATTERNS = {
     "importlib": re.compile(r"\bimportlib\b"),
 }
 
-# Files other step 130 lanes clean up (keymap = lane K). The main session makes this empty after merging the lanes:
+# Files other lanes clean up (keymap = lane K). The main session makes this empty after merging the lanes:
 # then every hit fails.
 PENDING_OTHER_LANES = {"keymap/ic_data.py"}
 
@@ -64,5 +64,5 @@ def test_no_code_execution_or_import_machinery():
     assert not own, "\n".join(f"{r}:{i}: [{w}] {line}" for r, i, w, line in own)
     pending = [h for h in hits if h[0] in PENDING_OTHER_LANES]
     if pending:
-        print("expected to be fixed by another step 130 lane (make this test strict after the merge):\n"
+        print("expected to be fixed by another lane (make this test strict after the merge):\n"
               + "\n".join(f"  {r}:{i}: [{w}] {line}" for r, i, w, line in pending))

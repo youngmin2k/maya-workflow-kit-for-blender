@@ -1,5 +1,5 @@
-"""Step 132 / #44: Maya's New Scene key (Ctrl+N) = allset.new_maya_scene, the same as File > New Scene and the
-Status Line "new" button (not IC's wm.read_homefile, which opens Blender's default file since step 130)."""
+"""#44: Maya's New Scene key (Ctrl+N) = allset.new_maya_scene, the same as File > New Scene and the
+Status Line "new" button (not IC's wm.read_homefile, which opens Blender's default file)."""
 
 from importlib import import_module
 

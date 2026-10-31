@@ -32,7 +32,7 @@ def set_parent_maya(child, parent):
     The parent inverse stays identity unless the local matrix has shear (rotated
     child under a non-uniformly scaled parent): Maya stores that in ``shear``,
     Blender channels can't, so the residual goes into the parent inverse and the
-    channels hold the closest translate/rotate/scale (step 10).
+    channels hold the closest translate/rotate/scale.
     """
     world = child.matrix_world.copy()
     local = parent.matrix_world.inverted_safe() @ world
@@ -75,7 +75,7 @@ def parent_maya(children, parent, preserve=True):
 
 
 def _to_end(objects):
-    """Maya lists a re-parented node last among its new siblings (Outliner order, ui/outliner_order.py, step 211)."""
+    """Maya lists a re-parented node last among its new siblings (Outliner order, ui/outliner_order.py)."""
     if objects and bpy.context.scene is not None:
         from ..ui import outliner_order
         outliner_order.to_end(objects, bpy.context.scene)
@@ -108,7 +108,7 @@ def _mode(context):
         return 'MAYA'
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_parent(bpy.types.Operator):
     """Parent the selected objects under the last selected one, keeping them in place
     (Maya Edit > Parent, P)"""
@@ -146,7 +146,7 @@ class ALLSET_OT_parent(bpy.types.Operator):
         return {'FINISHED'} if done else {'CANCELLED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_unparent(bpy.types.Operator):
     """Move the selected objects to the world, keeping them in place
     (Maya Edit > Unparent, Shift+P)"""

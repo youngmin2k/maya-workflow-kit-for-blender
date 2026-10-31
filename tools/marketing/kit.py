@@ -1,8 +1,8 @@
-"""Marketing kit images (step 123): GitHub README hero + social preview, X card, Reddit image, YouTube thumbnail.
+"""Marketing kit images: GitHub README hero + social preview, X card, Reddit image, YouTube thumbnail.
 
     python tools/marketing/kit.py
 
-Inputs: the step 122 GUI shots (tmp/marketing/raw/, tools/marketing/shots.py), the step 123 switch clip frames
+Inputs: the GUI shots (tmp/marketing/raw/, tools/marketing/shots.py), the switch clip frames
 (tmp/marketing/clips/switch/, tools/marketing/clips.py), copy from tools/marketing/content.json, tokens from
 style.json. Outputs in docs/distribution/marketing/kit/ (platform sizes: GitHub social preview 1280 x 640 < 1 MB, X image ≤ 5 MB, YouTube thumbnail 1280 x 720 ≤ 2 MB).
 """
@@ -23,7 +23,7 @@ CLIPS = ROOT / "tmp" / "marketing" / "clips"
 CONTENT = json.loads((HERE / "content.json").read_text(encoding="utf-8"))
 HEADLINE = CONTENT["trailer"]["end_headline"]
 TAGLINE = "The whole Maya workflow in Blender, in one install."
-# lockup N per card (step 125: "Maya Workflow Kit" is ~3x the width of "Allset"; two-line ink width ~ 9.3 N)
+# lockup N per card ("Maya Workflow Kit" is ~3x the width of "Allset"; two-line ink width ~ 9.3 N)
 HERO_N, SOCIAL_N, X_N, SQUARE_N, BA_N, YT_N = 84, 58, 70, 92, 64, 44
 LIMITS = {"social_preview.png": 1e6, "youtube_thumbnail.png": 2e6, "x_card.png": 5e6, "readme_hero.png": 5e6,
           "reddit_before_after.png": 20e6, "reddit_square.png": 20e6}
@@ -89,7 +89,7 @@ def save(c, name):
 # --------------------------------------------------------------------------------------------- images
 def wide(size, name, lines, name_px, screen="hero", screen_w=None, text_scale=1.15):
     """Text left, one turned real screen right (vertically centred): README hero, GitHub social preview, X card.
-    ``name_px`` = lockup N (step 125: picked so the lockup ends left of the screen)."""
+    ``name_px`` = lockup N (picked so the lockup ends left of the screen)."""
     W, H = size
     s = H / 1080
     c = canvas(size, (W * 0.70, H * 0.52, H * 0.6))
@@ -149,7 +149,7 @@ def square():
     d = ImageDraw.Draw(c)
     y = brand_block(d, 92, 96, 0.82, [("Hotbox, marking menus, Channel Box,", 34, "text"),
                                       ("and plain Blender one click away.", 34, "text")], SQUARE_N)
-    place_screen(c, shot("hotbox"), 1400, 150, 560)   # step 126: a real turn projects to 0.73 x the width
+    place_screen(c, shot("hotbox"), 1400, 150, 560)   # a real turn projects to 0.73 x the width
     fine_print(d, CONTENT, ["hotbox"], 96, y + 22, W, top=True)   # the screen fills the bottom: under the text
     return save(c, "reddit_square.png")
 

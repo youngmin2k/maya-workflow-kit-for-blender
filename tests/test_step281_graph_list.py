@@ -1,4 +1,4 @@
-"""Step 281 (#192): Maya Graph Editor first week — selected objects are listed before they have keys (a bare node row),
+"""#192: Maya Graph Editor first week — selected objects are listed before they have keys (a bare node row),
 a node row also shows its shape's animated channels, the toolbar sits on its own row under the menus, tangent
 handles show on selected keys only, S keys the selected objects (ui/editor_chrome.py, keymap/maya_patches.py)."""
 

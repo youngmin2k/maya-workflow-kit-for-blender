@@ -1,7 +1,7 @@
 """Audit 128 repro (crash): a Maya menu item that opens a Properties window on a tab (Display > Wireframe Color...,
 Shape Editor, Color Set Editor, UV Set Editor, Light Linking ...) retries the tab from a timer for up to 2 s
 (operators/menu_extras.properties_tab_later). Closing that window before the timer gives up crashed Blender 4.5
-(EXCEPTION_ACCESS_VIOLATION in BKE_workspace_active_screen_get via Window.screen, menu sweep of step 128).
+(EXCEPTION_ACCESS_VIOLATION in BKE_workspace_active_screen_get via Window.screen, during a menu sweep).
 PASSes when Blender survives (the last check runs after the timer's 2 s)."""
 
 import os

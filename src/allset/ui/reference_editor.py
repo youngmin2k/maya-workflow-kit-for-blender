@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Reference Editor window (step 209, Issue #116).
+"""Maya's Reference Editor window (Issue #116).
 
 Maya 2022: menu
 bar File / Reference / Proxy / View / Help, an icon row, File Particulars (Unresolved name, Resolved name with Reload,
 Namespace, Read Only, Sharing) and the reference list — a load check box and "<reference node> <file>" per row.
 
 Blender: a new window whose area is a Properties editor on the Tool tab marked by hidden tab flags (the Hypershade
-pane mechanism, step 131: two of ``maya_dock.ROLE_FLAGS`` + constraints, so neither the Maya dock, Tool Settings nor a
+pane mechanism: two of ``maya_dock.ROLE_FLAGS`` + constraints, so neither the Maya dock, Tool Settings nor a
 Hypershade pane draws there), drawn by ``ALLSET_PT_reference_editor``. Menus come from ``editor_menu_data``
 ("Reference Editor"), actions from ``editor_menu_map``; the commands live in ``operators/references.py``.
 """
@@ -270,7 +270,7 @@ class ALLSET_PT_reference_editor(bpy.types.Panel):
     """Maya's Reference Editor (a marked Properties Tool tab in its own window)"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"            # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"            # = drawn by the Properties Tool tab
     bl_label = "Reference Editor"
     bl_options = {'HIDE_HEADER'}
     bl_order = -300

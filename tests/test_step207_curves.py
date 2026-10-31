@@ -1,4 +1,4 @@
-"""Step 207: Curves 3, like Maya.
+"""Curves 3, like Maya.
 Pure maths on the expected numbers first (1e-6), then the kit operators on
 Blender objects built from the same CVs (Maya Y-up -> Blender (X, -Z, Y))."""
 

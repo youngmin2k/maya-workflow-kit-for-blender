@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya polyBevel3 (Edit Mesh > Bevel, Ctrl+B) at once, as an editable history node like step 65's extrusion
-(#16, step 139).
+"""Maya polyBevel3 (Edit Mesh > Bevel, Ctrl+B) at once, as an editable history node like the kit's extrusion
+(#16).
 
 - Defaults: Fraction 0.5, Offset As Fraction on, Offset 0.2, Segments 1, Depth 1 (Chamfer on, Mitering auto).
 - Fraction is relative to one length for the whole selection: the shortest "slide" edge (an edge touching an end of a
@@ -12,7 +12,7 @@
   cap of a zero-length extrusion bevels into an inset (12/20/10, cap at 0.25), Fraction 1 merges (6/9/5).
 - Faces bevel their edges; Maya leaves nothing selected afterwards. Vertex mode = Chamfer Vertex (Maya's Bevel
   on vertices chamfers them: 0.25 of each edge, no editable node here).
-- Numbering (step 257, #149): kept vertices first in their old
+- Numbering (#149): kept vertices first in their old
   order, then the new vertices of each bevelled vertex, the bevelled vertices taken in the order the selected edges
   reach them (ascending Maya edge id, ends by ascending vertex id) and each one's new vertices in Maya's vertex ->
   edge order (``vertex_edges``; at a vertex that ends one bevelled edge, one new vertex on each of its other edges).
@@ -83,7 +83,7 @@ def end_scale(e, v, sel):
 
 
 def terminal_moves(edges):
-    """Step 283 (#182): the ends of an open chain (or a lone edge) between two faces. At a vertex v that ends exactly
+    """#182: the ends of an open chain (or a lone edge) between two faces. At a vertex v that ends exactly
     one bevelled edge e, every other edge t at v that lies in no face of e gets its new vertex at
     d = W x sin(alpha / 2) / s_phi from v (alpha = the angle between e's two slide edges seen along e = the dihedral
     angle of e's faces, phi = the angle between t and e, s_phi = sin phi below 90 degrees, else 1): Maya keeps that
@@ -272,10 +272,10 @@ def slide_limit(edges):
         its ends that are such chain ends);
     (c) corners where two bevelled edges of one face meet (``_corner``): the new corner slides along the bisector.
 
-    Step 239 (#124): a cylinder cap's border ring
+    #124: a cylinder cap's border ring
     has no face holding two ring edges, so Maya slides along the side / cap fan edges (length 1) — and the width is
     perpendicular, so the fan edges at 81 degrees to the ring give 0.49995 x sin 81 = 0.49379 (the side ring lands at
-    y 1.5062, the cap ring at radius 0.5); an n-gon cap gives the same through (c). Step 283: an edge in no face of the
+    y 1.5062, the cap ring at radius 0.5); an n-gon cap gives the same through (c). An edge in no face of the
     bevelled edge is no slide edge; at a chain end it is a terminal edge (part of a cap rim: the unbevelled rim
     neighbour)."""
     sel = set(edges)
@@ -321,10 +321,10 @@ def width(edges, fraction=0.5, offset_as_fraction=True, offset=0.2, unit=1.0):
     return max(0.0, offset) * unit * FIT
 
 
-# --- Maya numbering (step 257) -----------------------------------------------------------------------------------
+# --- Maya numbering -----------------------------------------------------------------------------------
 
 def maya_edge_ids(bm):
-    """{BMEdge: Maya edge id}: the mesh's edge index (kit design, step 257). It is Maya's id wherever
+    """{BMEdge: Maya edge id}: the mesh's edge index (kit design). It is Maya's id wherever
     the kit made the edges: kit polyCube / polyCylinder are built with Maya's edge order (prim_shapes ``edges``) and
     kit extrusions sort their result into polyExtrudeFacet's order (extrude.renumber),
     Maya numbers a mesh made from a face list in face-corner order; bmesh's
@@ -507,7 +507,7 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     bm.edges.index_update()
     picked = [e.index for e in edges]
     # face source indices ride along as custom data (bevel copies them onto what it makes); added before elements are
-    # collected again, since adding a layer can invalidate element references (step 64)
+    # collected again, since adding a layer can invalidate element references
     tlay = bm.verts.layers.int.new(".allset_bevel_made")
     flay = bm.faces.layers.int.new(".allset_bevel_src")
     bm.verts.index_update()
@@ -526,7 +526,7 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
                           segments=max(1, int(segments)), profile=profile(depth), affect='EDGES',
                           clamp_overlap=False, loop_slide=True)
     made = [v for v in ret["verts"] if v.is_valid]
-    # step 283: Blender puts a chain end's new vertex on a terminal edge at W along it; Maya (Fraction) at W x k. The
+    # Blender puts a chain end's new vertex on a terminal edge at W along it; Maya (Fraction) at W x k. The
     # new vertex is the one on that edge's line next to its far vertex (Blender doesn't put it on the edge when the
     # edge runs almost along the bevelled one), else the nearest made vertex on the line
     made_set = set(made)

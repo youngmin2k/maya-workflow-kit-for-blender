@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya marquee: edit-mode box / lasso selection also picks occluded components
-(step 30).
+.
 
 Maya's marquee selects everything inside the rectangle, hidden or not, unless
 "Camera based selection" is on (``selectPrefUseDepth false``).

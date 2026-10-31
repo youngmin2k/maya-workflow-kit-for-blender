@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 196 (issue #103) lane B: Maya option windows that were Blender's Adjust Last Operation ("redo") or the generic
+"""Issue #103: Maya option windows that were Blender's Adjust Last Operation ("redo") or the generic
 "no settings" window — Create Character Set / Subcharacter Set, Curves Cut / Detach / Reverse Direction / Smooth (both)
 / Straighten, the circular arc tools, UV Merge UVs / Contour Stretch, Set / Assume Preferred Angle, Add Influence.
 
@@ -8,7 +8,7 @@ menu paths; option_windows._extend appends ``WINDOWS``). Titles, buttons, labels
 option windows; fields the kit
 can't honour are only listed (``missing``), never faked. Every window run with its defaults does what the plain menu
 item does; Merge UVs / Smooth (Modify section) run the kit's Maya operators, like their plain menu items
-(menu_map, step 196).
+(menu_map).
 """
 
 import bpy
@@ -196,7 +196,7 @@ WINDOWS = [
         F("preserve_length", "", "bool", True, text="Preserve length"),
     ], _run_straighten, paths=("Curves/Straighten", "nHair/Modify Curves/Straighten")),
     # Tool Settings "Three / Two Point Arc Settings" (window = tool name,
-    # its button starts the tool, like step 140's tool boxes)
+    # its button starts the tool, like the other tool boxes)
     Window("arc3_tool", "Three Point Arc Settings", "Create Arc", None, [
         F("degree", "Circular arc degree:", "enum", "3", items=("1 Linear", "3")),
         F("sections", "Sections:", "int", 8, lo=4, hi=200),

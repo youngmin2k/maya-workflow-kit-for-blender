@@ -1,4 +1,4 @@
-"""Step 38 in a real UI: two cubes selected, type "+=5" in the Channel Box Translate X field ->
+"""In a real UI: two cubes selected, type "+=5" in the Channel Box Translate X field ->
 both move by 5 display units (each from its own value); AE tab of a Maya lambert material;
 screenshots."""
 
@@ -44,7 +44,7 @@ def s_setup():
     for o in bpy.context.view_layer.objects:
         o.select_set(o in (a, b))
     bpy.context.view_layer.objects.active = a
-    dock_area('CHANNEL_BOX')     # Maya's tab stack right of the viewport (step 116; was the 3D View sidebar)
+    dock_area('CHANNEL_BOX')     # Maya's tab stack right of the viewport (was the 3D View sidebar)
     redraw()
 
 

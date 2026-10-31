@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Not-in-Blender notices: the near substitute + one line, for Maya menu items (step 54).
+"""Not-in-Blender notices: the near substitute + one line, for Maya menu items.
 
 One table for every place a Maya item has no Blender equivalent, or a different one: the item's tooltip
 (greyed items: ``allset.menu_unavailable``; items with a substitute: ``allset.menu_item``) and the Help
@@ -20,30 +20,30 @@ METRE_SCENES = ("Blender simulates one unit as one metre: FX works in metre scen
 # path: (substitute in Blender, one line). Paths with an action in menu_map.MAP run that substitute.
 NOTICES = {
     "Mesh Display/Assign Existing Set/No bakesets defined": ("Render Properties > Bake", "Maya lists the scene's bake sets here; Blender bakes from Render Properties > Bake (Cycles)."),
-    # step 159
+    # Skin
     **{f"Skin/{item}": ("Bind Skin / Paint Skin Weights", "Blender has no volume capsules to drag: Bind Skin gives Maya's "
                         "closest-distance weights, then paint them (Skin > Paint Skin Weights).")
        for item in ("Interactive Bind Skin", "Interactive Bind Skin Tool")},
-    # Windows > Settings/Preferences (step 120)
+    # Windows > Settings/Preferences
     "Windows/Settings/Preferences/Shelf Editor": (
         "Shelves", "The shelves are Maya's standard shelves; there is no shelf editor (right-click a Blender "
         "button > Add to Quick Favorites keeps your own commands)."),
     "Windows/Settings/Preferences/Panel Editor": (
         "Workspaces", "Blender saves panel layouts as workspaces: drag area edges and save the file or "
         "use Windows > Workspaces."),
-    # Pivot / snapping (step 59)
+    # Pivot / snapping
     "Modify/Bake Pivot": (
         "Pivot orientation", "Blender has one pivot (the origin), so only the pivot orientation is baked into "
         "Rotate; the position already is the object's pivot."),
-    # Animation (W3: Time Editor / Trax -> NLA; Animation Layers real since step 188, Character Sets since step 187)
+    # Animation (W3: Time Editor / Trax -> NLA; Animation Layers and Character Sets are real)
     "Windows/Animation Editors/Trax Editor": (
         "NLA Editor", "Blender has no Trax: clips are actions laid out as NLA strips."),
     "Windows/Animation Editors/Time Editor": (
         "NLA Editor", "Blender has no Time Editor: clips are actions laid out as NLA strips."),
-    # Playback (step 56): Blender playback always loops
+    # Playback: Blender playback always loops
     **{f"Playback/Playback Looping/{kind}": (
         "Continuous", "Blender playback always loops (no Once / Oscillate).") for kind in ("Once", "Oscillate")},
-    # Sets (step 96): kit sets are collections outside the scene; Blender has no exclusive sets
+    # Sets: kit sets are collections outside the scene; Blender has no exclusive sets
     "Create/Sets/Partition": (
         "Set", "Blender has no partitions (sets whose members can't be in another set of the partition): use Create > Sets > Set."),
     # Dependency graph editors (Node Editor -> none, Hypergraph: Connections -> Drivers)
@@ -79,7 +79,7 @@ NOTICES = {
     "Render/Test Resolution": (
         "Resolution %", "Blender has no separate test size: these items set Output properties > Format > "
         "Resolution %, the size of every render."),
-    # step 109: mapped items whose Blender result differs
+    # mapped items whose Blender result differs
     "Create/NURBS Primitives/Square": (
         "Four NURBS curves", "Blender has no NURBS square: four straight NURBS curves under an empty, like Maya's group."),
     "Create/NURBS Primitives/Cube": (
@@ -115,7 +115,7 @@ NOTICES = {
     "nHair/Paint Hair Follicles": (
         "Hair Sculpt mode", "Blender hair is a Curves object groomed in Sculpt mode: on the selected mesh the kit adds "
         "an empty hair object (or picks its hair) and switches to it; paint follicles with the Add brush."),
-    # step 110: mapped items whose Blender result differs
+    # mapped items whose Blender result differs
     "Mesh Tools/Make Hole": (
         "Bridged loops", "Blender faces can't have holes: the stamp outline is bridged to the face's border with "
         "quads (select the face to cut, then the stamp face)."),
@@ -125,7 +125,7 @@ NOTICES = {
     "Skeleton/Create IK Spline Handle": (
         "Spline IK constraint", "Blender makes a Spline IK constraint on the end bone and the curve curve1; there is no "
         "ikHandle / effector node."),
-    # step 223 L14 (operators/ik_fk.py)
+    # IK / FK (operators/ik_fk.py)
     "Skeleton/Enable IK/FK Control": (
         "Always on", "Blender always lets you rotate joints in an IK chain: the rotation shows where the handle's "
         "Ik Blend is 0 (Key > IK/FK Keys)."),
@@ -139,7 +139,7 @@ NOTICES = {
         "(radius 5, smooth), driven by softModNHandle."),
     "Render/IPR Render Current Frame": (
         "Viewport Rendered", "Blender's IPR is the viewport in Rendered shading (Render Region: Ctrl+B)."),
-    # FX (step 68)
+    # FX
     **{path: ("Emit from Object", "Blender particles come from a mesh: select a mesh and use Emit from Object (a "
               "particle system on it).") for path in ("nParticles/Create Emitter", "nParticles/Create Emitter#2")},
     # creating items run Blender's own operators at real size
@@ -154,7 +154,7 @@ NOTICES = {
     **{f"nCache/{item}": (
         "Baked caches", "Blender always plays a baked cache: Delete Cache to simulate again.")
        for item in ("Enable All Caches on Selected", "Disable All Caches on Selected")},
-    # Lights (PLAN W5; step 137 operators/lights.py)
+    # Lights (operators/lights.py)
     **{f"Create/Lights/{kind} Light": (
         f"{kind} light", "Maya Decay Rate No Decay renders in Cycles; Blender EEVEE and the viewport get darker with the "
         "square of the distance, the power matching Maya intensity 1 at 10 units.") for kind in ("Point", "Spot")},
@@ -172,7 +172,7 @@ NOTICES = {
        for path in ("Skeleton/HumanIK", "Skeleton/Quick Rig", "Windows/Animation Editors/HumanIK",
                     "Windows/Animation Editors/Quick Rig")},
     # Scene / files (W3: Reference -> link + library override, Set Project -> relative paths)
-    # Scene management (step 69, operators/project.py)
+    # Scene management (operators/project.py)
     "File/Create Reference...": (
         "Link + Library Override", "Blender references are linked .blend files: Maya Workflow Kit makes them editable "
         "(library override) and prefixes the names with the namespace (ns:name)."),
@@ -182,8 +182,8 @@ NOTICES = {
     "File/Project Window": (
         "Maya Workflow Kit project", "Blender has no projects: Maya Workflow Kit makes Maya's project folders and keeps the folder "
         "as your project."),
-    # UV (step 66): Blender cuts / sews UVs in the UV Editor only
-    # Modeling (step 64): the Crease Tool works, with Blender's 0-1 crease underneath
+    # UV: Blender cuts / sews UVs in the UV Editor only
+    # Modeling: the Crease Tool works, with Blender's 0-1 crease underneath
     "Mesh Tools/Crease Tool": (
         "Edge crease", "Blender stores creases as 0-1 (1 = fully sharp). The kit shows Maya's value (sharp for that "
         "many smooth levels) and stores sqrt(value / 10); see it with 3 (smooth mesh preview)."),
@@ -196,7 +196,7 @@ NOTICES = {
 }
 
 
-# Step 101: mapped items whose Blender result differs from Maya's.
+# mapped items whose Blender result differs from Maya's.
 NOTICES.update({
     "File/Archive Scene": (
         "Pack Resources", "Blender packs textures and sounds into the .blend instead of zipping the scene folder."),
@@ -210,7 +210,7 @@ NOTICES.update({
         "Purge Unused Data", "Blender removes unused materials (and other unused data) with File > Clean Up > Purge."),
     "Modify/Replace Objects": (
         "Link Object Data", "Blender gives the selected objects the active object's mesh (Object > Link/Transfer Data)."),
-    # step 168: Evaluate Nodes items stand for Blender data
+    # Evaluate Nodes items stand for Blender data
     "Modify/Evaluate Nodes/IK Solvers": (
         "IK constraints", "Blender mutes the IK constraints (Maya switches the IK solve off); on again unmutes them."),
     "Modify/Evaluate Nodes/Expressions": (
@@ -233,7 +233,7 @@ NOTICES.update({
         "Continuous", "Blender playback always loops: Continuous is already on."),
     **{f"Display/Heads Up Display/{item} Details": (
         "Statistics overlay", "Blender's Statistics overlay shows the object and selection counts.")
-       for item in ("Object", "Select")},        # Maya 2026 label "Select Details" (step 219)
+       for item in ("Object", "Select")},        # Maya 2026 label "Select Details"
     # Display > Polygons: Blender draws polygon display as each 3D View's edit-mode overlays
     "Display/Polygons/Vertex Size...": (
         "Theme > Vertex Size", "Blender's vertex size is a theme preference: Preferences > Themes > 3D Viewport > "
@@ -282,7 +282,7 @@ NOTICES.update({
                            ("Amplify", "Sharpen"), ("Freeze", "Mask"))},
     "Deform/Cluster": ("Hook", "Blender's cluster1 is a Hook modifier driven by cluster1Handle; its weights are the "
                        "vertex group cluster1."),
-    # step 144 (#34): the Deform menu's Blender constructs and the Maya deformers
+    # #34: the Deform menu's Blender constructs and the Maya deformers
     # Blender has none of
     "Deform/Nonlinear/Sine": ("Wave modifier", "Blender has no sine deformer: sine1 is a Wave modifier along X "
                               "around sine1Handle (Blender's wave shape, no bounds)."),
@@ -551,14 +551,14 @@ CATEGORIES = {
                         "Cache File properties."),
     "Help": ("Blender Help menu", "Blender has no Autodesk account, product research or analytics services; "
              "Blender's Help menu has the manual and bug reports."),
-    # step 197: character sets are real (operators/character_sets.py); step 217: controller tags too
+    # character sets are real (operators/character_sets.py); controller tags too
     # (operators/controllers.py); what is left is HumanIK
     "Control": ("Bone collections", "Blender has no HumanIK control rigs, character mapping or redirection: bone "
                 "collections group the controls. Character sets: Control > Create Character Set."),
     # rigging / animation
     "Key": ("Copy Transforms constraints", "Blender has no character mapping or redirection: retarget with Copy "
             "Transforms constraints. Character sets: Key > Create Character Set."),
-    # step 223: Set IK/FK Key / Enable IK Solver / Move IK to FK work (operators/ik_fk.py); Connect to IK/FK is left
+    # Set IK/FK Key / Enable IK Solver / Move IK to FK work (operators/ik_fk.py); Connect to IK/FK is left
     "Key/IK": ("Ik Blend property", "Blender has no Connect to IK/FK: drive the handle's Ik Blend from a control "
                "with Key > Set Driven Key or a driver."),
     "Key/Scene Time Warp": ("NLA strip time", "Blender has no scene time warp: remap time per action with an NLA "
@@ -613,7 +613,7 @@ CATEGORIES = {
     **{f"Select/{sub}": ("Curve edit mode", "Blender selects curve and surface control points in edit mode (Tab); "
                          "hulls, isoparms and edit points aren't separate components.")
        for sub in ("Components#2", "Components#3", "CV Selection Boundary", "Surface Border", "Cluster Curve")},
-    # Step 141: the conversions work (operators/select_convert.py); Blender has no face-corner (vertex face) selection.
+    # the conversions work (operators/select_convert.py); Blender has no face-corner (vertex face) selection.
     "Select/Convert Selection": ("Faces / UV Editor", "Blender has no vertex-face component: per-corner normals and "
                                  "colours follow the selected faces (Mesh > Normals > Set from Faces); single "
                                  "corners are picked in the UV Editor with Sticky Selection off."),
@@ -644,7 +644,7 @@ CATEGORIES = {
 
 
 def _anim_editor_categories(ed):
-    """Greyed items of the Graph Editor / Dope Sheet menu bars (step 104; Maya 2026's menus since step
+    """Greyed items of the Graph Editor / Dope Sheet menu bars (Maya 2026's menus since step
     269)."""
     m = {
         f"{ed}/Edit/Transformation Tools": (
@@ -706,7 +706,7 @@ CATEGORIES.update({
     "UV Editor/View/Isolate Select": (
         "Add Selected / Remove Selected", "Blender has no saved quick-select sets to load into the isolate view: "
         "build it with Add Selected / Remove Selected (Ctrl+1 isolates the selection)."),
-    # step 178: Maya's Symmetrize UV changes UVs only after the brush's own seam pick (without it no UV changes):
+    # Maya's Symmetrize UV changes UVs only after the brush's own seam pick (without it no UV changes):
     # no rule to copy.
     "UV Editor/Modify/Symmetrize": (
         "UV > Mirror / Snap", "Blender has no UV symmetrize: mirror the UVs (Modify > Flip) and weld them (Match UVs), "
@@ -751,15 +751,15 @@ def category(path):
 
 
 def greyed_notice(path):
-    """The notice a greyed (unmapped) item shows: its own, else its category's (step 101: none without one)."""
+    """The notice a greyed (unmapped) item shows: its own, else its category's (none without one)."""
     return NOTICES.get(path) or PANEL_MENU.get(path) or category(path)
 
 
-# Notices of kit panel rows that are not Maya menu items (e.g. Modeling Toolkit options, step 63),
+# Notices of kit panel rows that are not Maya menu items (e.g. Modeling Toolkit options),
 # filled by the panels' register(); same (substitute, line) form.
 PANEL_NOTICES = {}
 
-# Greyed rows of the viewport panel menus, the panel toolbar and the Status Line (ui/panel_menu_data.leaves(), step 177):
+# Greyed rows of the viewport panel menus, the panel toolbar and the Status Line (ui/panel_menu_data.leaves()):
 # same (substitute, line) form; keys = their ``allset.menu_unavailable`` items. Not Maya main-menu paths, so kept out
 # of NOTICES (test_step54 checks those against menus.json); tests/test_step177_panel_menus.py: every greyed row has one.
 _PM, _PT, _SL = "Panel menu/", "Panel toolbar/", "Status Line/"
@@ -810,7 +810,7 @@ PANEL_MENU = {
         "Controllers", "Subdiv Surfaces", "Planes", "Dynamics", "Particle Instancers",
         "Follicles", "nCloths", "nParticles", "nRigids", "Dynamic Constraints", "Dimensions", "Handles",
         "Texture Placements", "Strokes", "Plugin Shapes", "Clip Ghosts")},
-    # step 197 (#104): in Blender 4.5 overlay display_handle NONE and vertex_opacity 0 change no pixel of a
+    # #104: in Blender 4.5 overlay display_handle NONE and vertex_opacity 0 change no pixel of a
     # NURBS surface / curve hull or CVs in Edit Mode, so no overlay toggle can stand in for these
     **{_PM + f"Show/{t}": (
         "Edit Mode", "Blender draws a curve's or surface's control points and control polygon (hull) only in Edit "
@@ -973,7 +973,7 @@ def unregister():
     _current.update(text="", until=0.0)
     _status_area.clear()
 
-# Mapped editor items that run a near substitute (step 104): Maya 2022's newer auto tangents are one Blender handle.
+# Mapped editor items that run a near substitute: Maya 2022's newer auto tangents are one Blender handle.
 NOTICES.update({
     f"{ed}/Tangents/{sub}Auto/{kind}": (
         "Auto Clamped handles", "Blender has one auto tangent (Auto Clamped): Maya's Ease / Mix / Custom weights "
@@ -982,7 +982,7 @@ NOTICES.update({
     for kind in ("Auto Ease", "Auto Mix", "Auto Custom")})
 
 
-# Step 269: Maya 2026 editor menu items with no Blender command (Maya annotations)
+# Maya 2026 editor menu items with no Blender command (Maya annotations)
 _REMOVE_KEY = {
     "Unsnapped": ("Select Unsnapped", "Blender has no command that deletes unsnapped keys: Edit > Select Unsnapped, "
                   "then Delete."),
@@ -1024,7 +1024,7 @@ NOTICES.update({
 })
 
 
-# Step 150 (#96): Graph Editor View items Blender can't do, one line each (Maya
+# #96: Graph Editor View items Blender can't do, one line each (Maya
 # annotations); the mapped ones are in ui/editor_menu_map.py + ui/graph_view.py.
 _GE_VIEW = "Graph Editor/View/"
 NOTICES.update({
@@ -1128,7 +1128,7 @@ CATEGORIES.update({
         "Command Reference)."),
     "Script Editor/Help/What's New/Highlight What's New": (
         "Release notes", "Blender doesn't highlight new menu items: Help > What's New lists them."),
-    # step 209: the Reference Editor's menu bar (ui/reference_editor.py)
+    # the Reference Editor's menu bar (ui/reference_editor.py)
     "Reference Editor/File/Save Reference Edits": (
         "Open the source .blend", "Blender can't write into a linked file from here: open the referenced .blend, make "
         "the change there and save it (Reload shows it)."),
@@ -1143,7 +1143,7 @@ CATEGORIES.update({
         "linked file."),
     "Reference Editor/Help/What's New/Highlight What's New": (
         "Release notes", "Blender doesn't highlight new menu items: Help > What's New lists them."),
-    # step 213: the Component Editor's menu bar (ui/component_editor.py)
+    # the Component Editor's menu bar (ui/component_editor.py)
     "Component Editor/Options/Right Justify Headers": (
         "Left-aligned headers", "Blender's panel layout can't right-justify a label row."),
     "Component Editor/Options/Show Namespaces": (
@@ -1166,7 +1166,7 @@ CATEGORIES.update({
         "Load Selected Components", "Blender shows the selected objects' selected vertices with Load Selected Components."),
     "Component Editor/Help/What's New/Highlight What's New": (
         "Release notes", "Blender doesn't highlight new menu items: Help > What's New lists them."),
-    # step 213: the Shape Editor's menu bar (ui/shape_editor.py)
+    # the Shape Editor's menu bar (ui/shape_editor.py)
     "Shape Editor/File": (
         "Blender files", "Blender has no blend shape file format: keep shapes in a .blend and append the mesh."),
     "Shape Editor/Edit/Group": (
@@ -1179,7 +1179,7 @@ CATEGORIES.update({
         "Edit button", "Blender draws no edit HUD here: the target being edited has the red Edit button."),
     "Shape Editor/Help/What's New/Highlight What's New": (
         "Release notes", "Blender doesn't highlight new menu items: Help > What's New lists them."),
-    # step 213: the Connection Editor's menu bar (ui/connection_editor.py)
+    # the Connection Editor's menu bar (ui/connection_editor.py)
     "Connection Editor/Options/Attribute Order": (
         "Maya list order", "Blender attributes are listed visibility, translate, rotate, scale, then custom ones (no "
         "other order)."),
@@ -1194,12 +1194,12 @@ CATEGORIES.update({
 })
 
 
-# Greyed marking-menu entries (step 136): key = "<menu>/<label path>" (the kit menu
+# Greyed marking-menu entries: key = "<menu>/<label path>" (the kit menu
 # name in marking/menus.MENUS, then the labels down to the item), same (substitute, one line) form. While a marking
 # menu hovers a greyed entry, marking/modal.py puts its line in the Help Line. tests/test_step136_items.py checks that
 # every greyed entry has one and every key is a greyed entry.
 _RMB_LIST = {
-    # DG Traversal / Inputs / Outputs list the object's nodes since step 165 (marking/rmb_nodes.py)
+    # DG Traversal / Inputs / Outputs list the object's nodes (marking/rmb_nodes.py)
     "Metadata": ("Custom properties", "Blender has no component metadata: store values as custom properties (Attribute "
                  "Editor Extra Attributes) or mesh attributes."),
     "Time Editor": ("NLA Editor", "Blender's clip-based animation editor is the NLA Editor (Windows > Animation "
@@ -1343,7 +1343,7 @@ MARKING.update({
 })
 
 
-# step 206: polyWarpImage bakes a file texture from one UV set into another as a new image file
+# polyWarpImage bakes a file texture from one UV set into another as a new image file
 # (Maya UV > Warp Image); Blender does that with a Cycles bake.
 NOTICES.update({
     "UV Editor/Modify/Warp Image": (

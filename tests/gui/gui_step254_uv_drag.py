@@ -1,4 +1,4 @@
-"""Step 254 (#170 #172): moving UVs in the Maya UV Editing workspace crashed Blender (heap corruption / access violation,
+"""#170 #172: moving UVs in the Maya UV Editing workspace crashed Blender (heap corruption / access violation,
 7 of 7 runs with 0.5.0 on 4.5.4 and 5.2.2): the kit's UV Editor draw handlers (shell / texture
 borders, UV HUD) walked the edit BMesh on every redraw of a UV drag. Now they never read the mesh while a transform /
 UV modal runs (operators/uv_arrays.editing_now) and read it with numpy otherwise.

@@ -1,4 +1,4 @@
-"""Step 218 lane P: Paint Skin Weights in Maya terms (Issue #126 A1 A2 A5 A6). Flood = Maya's formulas with
+"""Paint Skin Weights in Maya terms (Issue #126 A1 A2 A5 A6). Flood = Maya's formulas with
 redistribution / locks / selected-vertex limit, Influences RMB = Maya's items, paint keys, Mode / Select Geometry.
 
 The scene is rebuilt with Maya's vertex order (Blender index = Maya vertex id): polyCylinder

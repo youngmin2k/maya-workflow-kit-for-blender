@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Moving a joint keeps every Maya frame (step 243, Issue #160).
+"""Moving a joint keeps every Maya frame (Issue #160).
 
 Maya 2026: W on a joint changes only its
 translate, its subtree follows, and **no jointOrient changes** — the parent's X stops aiming at the moved child.
 Preserve Children (``cmds.move(preserveChildPosition=True)``) keeps the children's world positions instead. A Blender
 bone always points at its tail, so moving a connected child re-aims the parent bone; the joint's Maya frame is then
-written back into ``joints.MAYA_FRAME`` (the bone-relative frame step 232's FBX writer already reads).
+written back into ``joints.MAYA_FRAME`` (the bone-relative frame the FBX writer already reads).
 
 ``process`` runs from tool_keys' 0.25 s watch in Edit Armature mode: while no transform runs it snapshots every bone's
 (head, tail, roll, MAYA_FRAME, Maya frame); a bone whose head or tail afterwards moved with the same MAYA_FRAME (= it
@@ -52,7 +52,7 @@ def local_frame(eb):
 
 
 # A Maya frame is stored with a joint only when its bone is off by more than this (a bone carries ~1e-7 float32
-# noise; storing that would mark every joint "turned" for FBX / Mirror, step 244)
+# noise; storing that would mark every joint "turned" for FBX / Mirror)
 FRAME_TOL = 1e-6
 
 
@@ -84,7 +84,7 @@ def quat_between(base, frame):
 def _set_local_frame(eb, frame):
     base = eb.matrix.to_3x3().normalized() @ joints.JOINT_AXES
     q = quat_between(base, frame)
-    # judged by the axes, not q.angle: a float32 quaternion's angle reads 0 below ~1e-6 (step 244: a bone near -Y
+    # judged by the axes, not q.angle: a float32 quaternion's angle reads 0 below ~1e-6 (a bone near -Y
     # left 2.8e-6 unstored)
     if _frame_error(base, frame) < FRAME_TOL:
         if joints.MAYA_FRAME in eb:
@@ -209,7 +209,7 @@ def rebase(context=None):
 
 def joint_translate(eb):
     """Maya translate of a joint in rest (Blender length, armature space): the head in the parent's Maya frame. A top
-    joint's translate is its position, in the kit's Z-up axes like every object Translate (step 258: the
+    joint's translate is its position, in the kit's Z-up axes like every object Translate (the
     same numbers as the Pose-mode Channel Box, ``channel_box.root_translate``)."""
     if eb.parent is None:
         return eb.head.copy()

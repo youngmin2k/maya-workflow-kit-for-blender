@@ -1,4 +1,4 @@
-"""Step 262 (Issue #173) in a real UI: the panel Show menu's Selection Highlighting and NURBS Curves rows change
+"""Issue #173: in a real UI: the panel Show menu's Selection Highlighting and NURBS Curves rows change
 what the viewport draws (icon == setting == behaviour), judged by the screen pixels of the 3D View.
 
 Rig like the reporter's: armature `rig`, its control bone drawn as a hidden circle (bone custom shape), the default

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Kit menu pictures for Select and Modify (step 142, #54) — see ``menu_drawings``."""
+"""Kit menu pictures for Select and Modify (#54) — see ``menu_drawings``."""
 
 import math
 

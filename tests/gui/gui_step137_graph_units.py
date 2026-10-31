@@ -1,4 +1,4 @@
-"""Step 137 (#66) in a real UI: the Maya Workflow Kit layout (cm shown, scale_length 1), pCube1 Translate X keyed
+"""#66: in a real UI: the Maya Workflow Kit layout (cm shown, scale_length 1), pCube1 Translate X keyed
 0 -> 5 cm at 1 / 24, Windows > Animation Editors > Graph Editor, View All. With the mouse over the curve area the
 value numbers read 0 .. 5 (display units) instead of Blender's 0.00 .. 0.05, on Blender's own grid lines and in
 Blender's label boxes only; over the channel list Blender's numbers show (draw-cursor limit); a rotation curve shown

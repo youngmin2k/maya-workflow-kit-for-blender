@@ -1,4 +1,4 @@
-"""Step 198 (#105): Graph Editor Retime Tool — time map like Maya's
+"""#105: Graph Editor Retime Tool — time map like Maya's
 and its application to real F-curves."""
 
 from importlib import import_module

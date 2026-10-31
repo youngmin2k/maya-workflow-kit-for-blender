@@ -1,4 +1,4 @@
-"""Step 176: Maya selected-face look (no Blender face tint under the kit stipple) and Maya camera labels."""
+"""Maya selected-face look (no Blender face tint under the kit stipple) and Maya camera labels."""
 
 import importlib
 

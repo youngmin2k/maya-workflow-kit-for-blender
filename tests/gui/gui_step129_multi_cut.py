@@ -1,4 +1,4 @@
-"""Step 129 in a real UI (GitHub #27): Ctrl+Shift+X = the kit Multi-Cut tool; click an edge, hover the opposite edge
+"""In a real UI (GitHub #27): Ctrl+Shift+X = the kit Multi-Cut tool; click an edge, hover the opposite edge
 (live preview), click it, Backspace removes it, click again, RMB = a new edge across the face (+2 v / +3 e / +1 f,
 Maya polySplit) and the tool stays; Ctrl hover = loop preview, Ctrl+click = an edge loop; Shift = Snap Step;
 Esc with no points leaves the tool."""

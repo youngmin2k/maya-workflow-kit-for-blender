@@ -1,4 +1,4 @@
-"""QA activity A' (step 240): find which earlier manual-sweep group makes a later sweep check fail (order dependence).
+"""QA activity A': find which earlier manual-sweep group makes a later sweep check fail (order dependence).
 
     python tools/qa/sweep_polluter.py --victim m59_4 [--check "[M59-4]"] [--blender PATH] [--max-runs 10]
 

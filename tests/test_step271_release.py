@@ -1,4 +1,4 @@
-"""Step 271 (0.6.0 release QA): fixes found by the gate.
+"""0.6.0 release QA: fixes found by the gate.
 
 - Start-up in Maya mode registers with Blender's restricted data: the constraint helper lookup must not touch
   ``bpy.data.collections`` then (the start-up itself is checked by test_step130_lifecycle).

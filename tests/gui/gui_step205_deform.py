@@ -1,4 +1,4 @@
-"""Step 205 in a real UI: Deform > Tension on a subdivided cube from the Maya menu makes
+"""In a real UI: Deform > Tension on a subdivided cube from the Maya menu makes
 tension1 (a Geometry Nodes modifier) and its Attribute Editor tab draws Maya's attributes (Smoothing Iterations …);
 Deform > Sculpt makes sculptor1 and selects it; the Tension option box opens "Tension Options".
 Screenshots to ALLSET_GUI_SHOTS (default tmp/gui205_deform)."""

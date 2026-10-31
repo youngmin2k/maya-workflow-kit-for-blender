@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Mesh > Cleanup... as Maya's command (step 197, #104): a menu leaf with an option box, not Blender's Clean Up submenu.
+"""Mesh > Cleanup... as Maya's command (#104): a menu leaf with an option box, not Blender's Clean Up submenu.
 
 Maya 2022: the item runs ``cmds.polyCleanup`` with the Cleanup Options values
 (factory: Operation 1 "Cleanup matching polygons", Scope selected objects,

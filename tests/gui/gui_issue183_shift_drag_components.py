@@ -1,4 +1,4 @@
-"""#183 in a real UI (real Shift: the LEFT_SHIFT key goes down first, step 261): Shift+drag on the Move manipulator
+"""#183 in a real UI (real Shift: the LEFT_SHIFT key goes down first): Shift+drag on the Move manipulator
 extrudes the selected edge and the selected vertex too (Smart Extrude), not only faces; the face / object cases are
 tests/gui/gui_step26_smart_extrude.py and gui_step22_manip_duplicate.py."""
 

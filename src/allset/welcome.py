@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""The opt-in: nothing changes until the user asks for Maya (step 115).
+"""The opt-in: nothing changes until the user asks for Maya.
 
 Part of CORE (registered whenever the extension is enabled, also in Blender mode). Enabling the extension only adds
 the Maya | Blender switch, an Edit menu item, Ctrl+Alt+Shift+M and, once in a GUI session, this welcome dialog. Its
 confirm button "Make Blender feel like Maya" (also in the add-on preferences) turns on Maya mode and Make Blender
 Maya (``first_start.make``: start in the Maya layout, the layout shown now). Cancelling changes nothing. Blender's
-preferences are never written (step 130).
+preferences are never written.
 
 Not in background runs; GUI tests and tools set ``ALLSET_NO_WELCOME=1`` (the dialog would eat simulated events).
 """
@@ -40,7 +40,7 @@ def _window():
 
 def opt_in(open_layout=True):
     """Everything "Make Blender feel like Maya" does. Runs from a timer (switching registers the Maya mode
-    modules, which an operator of theirs must not do while it runs; step 42)."""
+    modules, which an operator of theirs must not do while it runs)."""
     from . import switch
     switch.set_mode(True, layout=False)
     if not switch._registered[0]:     # Maya mode could not start (reported, rolled back): nothing more to do
@@ -53,18 +53,18 @@ def opt_in(open_layout=True):
 
 
 # Body text, wrapped to the room left of the icon: fixed lines were cut ("the Maya colou...") at 125 %
-# UI scale (step 124).
+# UI scale.
 PARAGRAPHS = (
     i18n.mark("The whole Maya workflow in Blender, in one install."),
     i18n.mark("Nothing has changed yet. Make Blender feel like Maya turns on the Maya-style keys: Alt+mouse, QWER, "
               "Space hotbox, marking menus; the Maya layout, menus, Channel Box and shelf."),
     i18n.mark("Your Blender preferences are never changed: the Maya | Blender switch at the top right or "
               "Ctrl+Alt+Shift+M goes back to plain Blender at any time."),
-    # step 141 (B6): the kit may not raise Blender's undo depth itself
+    # the kit may not raise Blender's undo depth itself
     i18n.mark("Tip: Maya's undo is unlimited, Blender keeps 32 steps by default. Raise Edit > Preferences > System > "
               "Undo Steps to 256 if you like Maya's long undo."),
 )
-WELCOME_SHOWS = 2       # starts the welcome dialog opens on until it is confirmed (step 260)
+WELCOME_SHOWS = 2       # starts the welcome dialog opens on until it is confirmed
 DIALOG_WIDTH = 640      # unscaled px
 ICON_SCALE = 7.0        # template_icon scale = 20 px units
 ICON_FACTOR = (ICON_SCALE * 20 + 16) / DIALOG_WIDTH     # icon column share of the split
@@ -111,7 +111,7 @@ class ALLSET_OT_welcome(bpy.types.Operator):
     open_layout: bpy.props.BoolProperty(name="Open Maya Layout", default=True, options={'SKIP_SAVE'})
 
     def invoke(self, context, event):
-        # Step 260 (#177): a dialog closed without the confirm button (Cancel, Esc and moving away all reach Blender's
+        # #177: a dialog closed without the confirm button (Cancel, Esc and moving away all reach Blender's
         # popup cancel alike) opens once more at the next start; after WELCOME_SHOWS it stays closed (a
         # dismissed dialog left users in Blender mode without knowing, "Alt navigation doesn't work").
         prefs = preferences.get(context)
@@ -151,7 +151,7 @@ class ALLSET_OT_welcome(bpy.types.Operator):
         return {'FINISHED'}
 
 
-# Where the dialog may open (#170, step 254). Blender opens a props dialog at the window's last pointer position, clamped
+# Where the dialog may open (#170). Blender opens a props dialog at the window's last pointer position, clamped
 # into the window. Installing from Edit > Preferences leaves the main window's pointer on the menu bar, so the dialog
 # opened over File / Edit / ... and swallowed every click there, often hidden behind the Preferences window: "the top
 # menus don't respond" (GUI 4.5.4 / 5.2.2). So the kit waits until the pointer moves inside the main

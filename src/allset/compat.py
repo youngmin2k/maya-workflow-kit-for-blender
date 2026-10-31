@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Blender version differences in one place (step 118).
+"""Blender version differences in one place.
 
-The kit's main target is Blender 5.2 (step 272); it supports 5.0.0 - 5.2.x (step 279, user 10-29: 0.6.2 is the
+The kit's main target is Blender 5.2; it supports 5.0.0 - 5.2.x (0.6.2 is the
 last version for Blender 4.5, and the 4.5 paths are gone). Every check of "which Blender is this" lives here;
 feature code calls these helpers and stays the same on every version.
 """
@@ -9,13 +9,13 @@ feature code calls these helpers and stays the same on every version.
 import bpy
 
 VERSION = tuple(bpy.app.version[:2])
-TARGET = (5, 2)                         # main target since step 272 (Blender 5.2 LTS)
+TARGET = (5, 2)                         # main target (Blender 5.2 LTS)
 STRICT_VERSIONS = ((5, 2),)             # keymap patches must all apply to these minors' IC data
 IS_TARGET = VERSION == TARGET
 IS_STRICT = VERSION in STRICT_VERSIONS
 
 
-# Properties tab flags newer than 4.5 (step 118): the Maya Workflow Kit template is still a 4.5-saved file
+# Properties tab flags newer than 4.5: the Maya Workflow Kit template is still a 4.5-saved file
 # and opens in 5.x with them on, so they carry no meaning in a kit dock's role (ui/maya_dock.role).
 LATER_PROPERTIES_TABS = frozenset({"show_properties_strip", "show_properties_strip_modifier"})
 
@@ -107,8 +107,7 @@ def timeline_header_classes():
 
 
 # --- UV select mode -------------------------------------------------------------------------
-# 5.x: uv_select_mode is VERTEX / EDGE / FACE and island selection is the separate ``use_uv_select_island``
-# (step 118).
+# 5.x: uv_select_mode is VERTEX / EDGE / FACE and island selection is the separate ``use_uv_select_island``.
 
 def uv_island_mode(ts):
     return ts.use_uv_select_island
@@ -123,7 +122,7 @@ def set_uv_island_mode(ts, island):
 
 # --- Render output format -------------------------------------------------------------------
 # 5.x: ImageFormatSettings.media_type (IMAGE / MULTI_LAYER_IMAGE / VIDEO) picks which file formats exist;
-# 'FFMPEG' needs media_type 'VIDEO' first (step 118).
+# 'FFMPEG' needs media_type 'VIDEO' first.
 
 def set_file_format(image_settings, fmt):
     image_settings.media_type = ('VIDEO' if fmt == 'FFMPEG' else
@@ -132,7 +131,7 @@ def set_file_format(image_settings, fmt):
 
 
 # --- bmesh ----------------------------------------------------------------------------------
-# 5.2 renamed pointmerge_facedata's ``vert_snap`` to ``vert_target`` (bmesh.ops docstring, step 118).
+# 5.2 renamed pointmerge_facedata's ``vert_snap`` to ``vert_target`` (bmesh.ops docstring).
 
 def pointmerge_facedata(bm, verts, target):
     import bmesh
@@ -142,7 +141,7 @@ def pointmerge_facedata(bm, verts, target):
 
 # --- UV selection in bmesh ------------------------------------------------------------------
 # 5.x: one UV selection per loop, ``loop.uv_select_vert`` / ``uv_select_edge`` (BMLoopUV has only uv / pin_uv,
-# step 118). ``uv`` (the UV layer) stays in the signatures for the callers.
+# 5.x). ``uv`` (the UV layer) stays in the signatures for the callers.
 
 def uv_vert_selected(loop, uv):
     return loop.uv_select_vert
@@ -162,7 +161,7 @@ def set_uv_edge_selected(loop, uv, value):
 
 def set_uv_face_selected(face, uv, value):
     """A face's UVs picked / unpicked with UV Sync Selection off: its loops, and the face's own flag
-    (``BMFace.uv_select``, which a UV select-mode change flushes back to the loops — step 155)."""
+    (``BMFace.uv_select``, which a UV select-mode change flushes back to the loops)."""
     for loop in face.loops:
         loop.uv_select_vert = value
         loop.uv_select_edge = value
@@ -178,7 +177,7 @@ def uv_sync_from_mesh(bm):
 
 # --- Bone visibility ------------------------------------------------------------------------
 # 5.x: a bone is hidden in pose / object mode by ``PoseBone.hide``; ``Bone.hide`` only hides the edit bone
-# (step 118, api notes).
+# (api notes).
 
 def bone_hidden(pb):
     return pb.hide
@@ -195,14 +194,14 @@ def timeline_marker_menu():
 
 def save_dialog_args(op):
     """Extra arguments Blender's own Ctrl+S / Ctrl+Shift+S items pass: 5.2 adds
-    ``show_save_modified_images_dialog`` (IC keymap data, step 118); none in 5.0 / 5.1."""
+    ``show_save_modified_images_dialog`` (IC keymap data); none in 5.0 / 5.1."""
     props = op.get_rna_type().properties
     return {"show_save_modified_images_dialog": True} if "show_save_modified_images_dialog" in props else {}
 
 
 def read_region_row(fb, region, y):
     """One framebuffer row of the region (``read_color``), or None when ``y`` is outside it: 5.1+ raises on
-    out-of-bounds reads (step 118, api notes)."""
+    out-of-bounds reads (api notes)."""
     y = int(y)
     if not 0 <= y < region.height or region.width <= 0:
         return None
@@ -225,7 +224,7 @@ def material_uses_nodes(mat):
 
 
 # --- Worlds ---------------------------------------------------------------------------------
-# Like materials (5.0: ``use_nodes`` deprecated, every World has its tree; step 214).
+# Like materials (5.0: ``use_nodes`` deprecated, every World has its tree).
 
 def ensure_world_nodes(world):
     """Turn the World's nodes on; True when this call turned them on (never: 5.x worlds always use nodes)."""
@@ -237,7 +236,7 @@ def release_world_nodes(world):
 
 
 # --- Lights ---------------------------------------------------------------------------------
-# 5.1: every light has a node tree; ``Light.use_nodes`` is deprecated (warns when read or set, step 137).
+# 5.1: every light has a node tree; ``Light.use_nodes`` is deprecated (warns when read or set).
 LIGHT_ALWAYS_NODES = VERSION >= (5, 1)
 
 
@@ -256,21 +255,21 @@ def release_light_nodes(light):
 
 
 def toolbar_back(theme):
-    """The 3D View toolbar / sidebar background of the user's theme (read only — the kit never writes a theme,
-    step 130): ``regions.sidebars.back`` (5.0 theme migration table)."""
+    """The 3D View toolbar / sidebar background of the user's theme (read only — the kit never writes a theme):
+    ``regions.sidebars.back`` (5.0 theme migration table)."""
     return theme.regions.sidebars.back
 
 
 # --- GPU image shader -----------------------------------------------------------------------
 # Kit textures (shelf icons) hold scene-linear colours. From 5.0 the builtin 'IMAGE' shader draws the values as they
-# are and the converting shader is 'IMAGE_SCENE_LINEAR_TO_REC709_SRGB' (5.0 Python API notes, GPU; step 119).
+# are and the converting shader is 'IMAGE_SCENE_LINEAR_TO_REC709_SRGB' (5.0 Python API notes, GPU).
 LINEAR_IMAGE_SHADER = 'IMAGE_SCENE_LINEAR_TO_REC709_SRGB'
 
 
 # --- Unified paint settings -----------------------------------------------------------------
 # 5.0+: each paint mode has its own unified paint settings (``tool_settings.weight_paint.unified_paint_settings``)
 # and the scene size is ``unprojected_size``, a diameter (5.0.1 / 5.2.3: "Diameter of brush in Blender
-# units", step 153, #90).
+# units", #90).
 def unified_paint_settings(ts, paint="weight_paint"):
     """The unified paint settings that apply to paint mode ``paint`` (a ToolSettings member name)."""
     return getattr(ts, paint).unified_paint_settings
@@ -295,8 +294,8 @@ def brush_falloff_props(brush):
 # --- Menus closing when the mouse leaves ----------------------------------------------------
 # 5.0 keeps menus and popups open until a click, with the preference ``PreferencesView.menu_close_leave`` (default
 # off) for closing a menu the mouse left (5.0 release notes, user interface, 5953ff318c; seen on 5.2.3). Python
-# has no call that closes a popup and the kit never writes preferences (step 130), so with the 5.x default a held
-# option box can't close the Maya menu under it (step 153).
+# has no call that closes a popup and the kit never writes preferences, so with the 5.x default a held
+# option box can't close the Maya menu under it.
 def menus_close_on_leave(prefs):
     return prefs.view.menu_close_leave
 
@@ -305,7 +304,7 @@ def menus_close_on_leave(prefs):
 # 5.0 – 5.1 keep a Geometry Nodes modifier's inputs as ID properties on the modifier (``md[socket identifier]``,
 # ``<identifier>_use_attribute`` / ``_attribute_name``); 5.2 moved them to ``md.properties.inputs.<identifier>``
 # with ``value``, ``type`` ('VALUE' / 'ATTRIBUTE') and ``attribute_name``, and ``md[key] = value`` raises
-# (5.2.3, step 200).
+# (5.2.3).
 GN_INPUT_STRUCT = "properties" in bpy.types.NodesModifier.bl_rna.properties
 
 
@@ -345,7 +344,7 @@ def gn_input_attribute(md, key, attribute):
 def compare_inputs(node):
     """The (A, B) input sockets of a ``FunctionNodeCompare`` for its current data type. 5.0 – 5.1 keep every type's
     sockets on the node (A / B float first, then ``A_INT`` / ``B_INT`` ...; the others unavailable); 5.2 keeps only
-    the current type's two (an index 2 raised IndexError, step 212). Looked up by identifier, else the first two."""
+    the current type's two (an index 2 raised IndexError). Looked up by identifier, else the first two."""
     suffix = {'INT': "_INT", 'VECTOR': "_VEC3", 'RGBA': "_COL", 'STRING': "_STR"}.get(node.data_type, "")
     by_id = {s.identifier: s for s in node.inputs}
     a, b = by_id.get("A" + suffix), by_id.get("B" + suffix)
@@ -355,15 +354,15 @@ def compare_inputs(node):
 
 
 # --- Top bar: where the first menu of the Maya menu bar opens ------------------------------------------
-# Option box click model (ui/option_click.py, step 183): top bar region left -> the first Maya menu's pulldown,
-# in widget units: 1.25 on 5.0 – 5.2 (step 200, gui_step183_option_click at UI 1.0 = 25 px of 20, UI 1.25 = 31 px
+# Option box click model (ui/option_click.py): top bar region left -> the first Maya menu's pulldown,
+# in widget units: 1.25 on 5.0 – 5.2 (gui_step183_option_click at UI 1.0 = 25 px of 20, UI 1.25 = 31 px
 # of 25 on 5.0.1 / 5.1.2 / 5.2.3).
 MENU_BAR_LEAD_UNITS = 1.25
 
 
 
 # --- Mesh selection attributes ----------------------------------------------------------------------------------
-# Blender 5.0.1 (step 229; 5.2.3 makes a BOOLEAN): computing a mesh's edges (``Mesh.from_pydata`` with no
+# Blender 5.0.1 (5.2.3 makes a BOOLEAN): computing a mesh's edges (``Mesh.from_pydata`` with no
 # edges, ``Mesh.update(calc_edges=True)``) while it has a ``.select_vert`` attribute creates ``.select_edge`` as an
 # EDGE **INT32_2D** attribute (the ``.edge_verts`` layout). Blender then crashes on reading it as a selection:
 # writing ``MeshEdge.select`` (rna_MeshEdge_select_set), leaving weight paint (mesh_select_vert_flush), and edit mode

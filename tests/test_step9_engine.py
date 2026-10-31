@@ -1,4 +1,4 @@
-"""Step 9: marking menu engine logic, hotbox layout, zone menus, zone operators, keymap, prefs."""
+"""Marking menu engine logic, hotbox layout, zone menus, zone operators, keymap, prefs."""
 
 import math
 import types
@@ -142,7 +142,7 @@ def test_option_box_and_list_hits():
 
 def test_disabled_items_do_not_run():
     s = _session(mm.RMB_MESH, enabled=lambda a: a is not None)
-    assert not s.layout.radial["SW"].enabled  # Vertex Face (UV in E works since step 66)
+    assert not s.layout.radial["SW"].enabled  # Vertex Face (UV in E works)
     assert s.release(*_at("SW", 60), 0.5)[0] == "CANCEL"
 
 
@@ -185,7 +185,7 @@ def test_tap_timing():
 
 def test_hotbox_rows_follow_menu_set():
     prefs = bpy.context.preferences.addons[kit.MODULE].preferences
-    assert prefs.hotbox_all_sets, "default: Show All Menu Sets (step 52)"
+    assert prefs.hotbox_all_sets, "default: Show All Menu Sets"
     above, sides, below = modal.hotbox_rows(bpy.context)
     assert sides[0][0] == "RECENT" and [l for _k, l in above[0]][:3] == ["File", "Edit", "Create"]
     assert "Mesh" in [l for _k, l in below[0]] and len(below) == 5
@@ -295,7 +295,7 @@ def test_engine_is_default_and_pie_fallback():
 
 
 def test_draw_handlers_removed_on_disable():
-    assert len(draw._handles) >= len(draw.COVER_SPACES) * 2   # editors x region types (step 52)
+    assert len(draw._handles) >= len(draw.COVER_SPACES) * 2   # editors x region types
     kit.disable()
     try:
         assert not draw._handles and not draw.ACTIVE

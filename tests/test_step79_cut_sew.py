@@ -1,4 +1,4 @@
-"""Step 79: Maya 3D Cut and Sew UV Tool — stroke sampling, shell borders, cut / sew on a cube (islands), the tool and
+"""Maya 3D Cut and Sew UV Tool — stroke sampling, shell borders, cut / sew on a cube (islands), the tool and
 its keys, the menu / shelf / marking menu / UV Toolkit entries, Unfold + Layout.
 GUI: tests/gui/gui_step79_cut_sew.py."""
 

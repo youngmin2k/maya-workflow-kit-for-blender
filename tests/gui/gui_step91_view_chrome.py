@@ -1,4 +1,4 @@
-"""Step 91 in a real UI (Maya Workflow Kit layout): no parent relationship lines in the template views, the RMB marking-menu
+"""In a real UI (Maya Workflow Kit layout): no parent relationship lines in the template views, the RMB marking-menu
 list draws over the Adjust Last Operation (HUD) panel, and the dock stays one panel when Ctrl+A shows the Attribute
 Editor (the "Channel Box" sidebar tab no longer moves under "Item")."""
 
@@ -73,12 +73,12 @@ def s_scene():
     bpy.context.view_layer.objects.active = cube()
     ev('MOUSEMOVE', 'NOTHING', x=region.x + region.width // 2, y=region.y + region.height // 2)
     C["place"] = p
-    # step 258: the Maya layout views keep Blender's HUD region off (Maya has no redo panel); this test needs one to
+    # the Maya layout views keep Blender's HUD region off (Maya has no redo panel); this test needs one to
     # check the marking menu draws over it (set under a window override: without one Blender crashes)
     with bpy.context.temp_override(window=win(), area=area, region=region):
         area.spaces.active.show_region_hud = True
     # Alt+W (Blender's Clear Location, REGISTER + UNDO with a visible property) leaves its Adjust Last Operation panel
-    # (the HUD). Kit display / visibility keys show none since steps 134 / 147 (#58, Maya has no redo panel; Shift+H
+    # (the HUD). Kit display / visibility keys show none (#58, Maya has no redo panel; Shift+H
     # was used here before). The cube is put back where it was after the key: a Python edit doesn't close the HUD.
     key('W', alt=True)
 
@@ -89,10 +89,10 @@ def s_hud():
     check(f"the Adjust Last Operation panel is up ({h and (h.x, h.y, h.width, h.height)})", h is not None)
     _a, region = view3d()
     if h is not None:
-        # step 161: with no room under the ring the list is one column left of it (RMB on a mesh: E = UV), its right
+        # with no room under the ring the list is one column left of it (RMB on a mesh: E = UV), its right
         # edge ~190 px left of the press point, ~215 px wide (it goes right when the left has no room); press ~300 px right of
         # the HUD so that column runs over the HUD panel
-        # step 193 (as step 161): the ring stays at the press point; with no room under it the list goes beside it,
+        # the ring stays at the press point; with no room under it the list goes beside it,
         # so press ~300 px right of the HUD and the column left of the ring runs over the HUD panel
         target = (h.x + h.width - region.x + 300, region.height * 0.42)
         p = region_2d_to_location_3d(region, region.data, target, (0.0, 0.0, 0.0))
@@ -129,7 +129,7 @@ def s_menu_pixels():
     if s is not None and h is not None:
         cx, cy = s.center
         hx0, hy0, hx1, hy1 = h.x, h.y, h.x + h.width, h.y + h.height
-        # The list body (one per column, the rows plus the gaps between them; since step 136 rows step over area
+        # The list body (one per column, the rows plus the gaps between them; rows step over area
         # borders, so the HUD may sit in such a gap) drawn over the HUD; sample free body pixels, not text.
         columns = {}
         for it in s.layout.items:
@@ -196,7 +196,7 @@ def s_group_shot2():
 def s_ae():
     wm = bpy.context.window_manager
     check(f"Ctrl+A = Attribute Editor ({wm.allset_dock})", wm.allset_dock == 'ATTRIBUTE_EDITOR')
-    # step 116: the AE is a tab of Maya's tab stack (its own area) or, with no stack in this layout, a floating window
+    # the AE is a tab of Maya's tab stack (its own area) or, with no stack in this layout, a floating window
     md = import_module(MODULE + ".ui.maya_dock")
     check(f"the Attribute Editor is shown ({md.current_tab()})", md.kind_visible(wm, 'ATTRIBUTE_EDITOR'))
     for a in win().screen.areas:

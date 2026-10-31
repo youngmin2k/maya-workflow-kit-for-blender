@@ -1,4 +1,4 @@
-"""Step 129 viewport lane in a real UI:
+"""Viewport lane in a real UI:
 #8  Tool Box quick layouts: Four View = top / persp / front / side; Single Perspective is always persp, also after a
     Space tap left the four view on the top panel;
 #9  F / Alt+LMB in a view that looks through a created camera move that camera and keep the camera view; a locked
@@ -35,7 +35,7 @@ def shot(name):
 
 
 def quads():
-    """{position: WINDOW region} of the four view (tl, tr, bl, br). Since step 237 the four view is four real 3D View
+    """{position: WINDOW region} of the four view (tl, tr, bl, br). The four view is four real 3D View
     areas (ui/four_view.py), not one area's Quad View regions."""
     areas = mod("ui.four_view").panes(win().screen)
     cx = sum(a.x + a.width / 2 for a in areas) / max(len(areas), 1)

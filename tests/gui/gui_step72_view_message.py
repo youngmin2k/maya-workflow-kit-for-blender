@@ -1,4 +1,4 @@
-"""Step 72 in a real UI: Maya in-view messages (ui/view_message.py) on F8, Ctrl+G, Ctrl+H and b,
+"""In a real UI: Maya in-view messages (ui/view_message.py) on F8, Ctrl+G, Ctrl+H and b,
 drawn in the 3D View they were called from, gone after the fade."""
 
 import os

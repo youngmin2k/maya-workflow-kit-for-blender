@@ -14,5 +14,5 @@ bar banner sits in the kit layout (``HINT_REPORTS`` in tests/test_step161_messag
 def result(op, text):
     """Show ``text`` as the result of ``op`` (a kit operator) in the Command Line result field."""
     from .command_line import show_result, undo_text
-    undo_text.operator_step(op)           # its undo step's name, for Maya's "Undo: <command>" (step 176)
+    undo_text.operator_step(op)           # its undo step's name, for Maya's "Undo: <command>"
     show_result(str(text))

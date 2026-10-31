@@ -1,4 +1,4 @@
-"""Step 55: joints = pose bones in the Channel Box, Outliner and Attribute Editor; constraint
+"""Joints = pose bones in the Channel Box, Outliner and Attribute Editor; constraint
 weight rows (``locator1W0`` = influence) and constrained channels. GUI: tests/gui/gui_step55_pose.py."""
 
 import math
@@ -112,7 +112,7 @@ def test_bone_channels_paths_and_entry():
     assert cb.full_path(pb2, "rotation_euler") == 'pose.bones["joint2"].rotation_euler'
     assert all(cb.has_channel(pb2, k) for k in ("tx", "rx", "rz", "sz", "v"))
     pb3.rotation_euler[2] = math.radians(5)
-    assert cb.apply_entry("rz", "+=10") == 2           # relative per joint (step 38 rule)
+    assert cb.apply_entry("rz", "+=10") == 2           # relative per joint (Channel Box entry rule)
     assert abs(math.degrees(pb2.rotation_euler[2]) - 10) < 1e-4
     assert abs(math.degrees(pb3.rotation_euler[2]) - 15) < 1e-4
     assert bpy.context.scene.allset_cb.rz_text == "10", bpy.context.scene.allset_cb.rz_text
@@ -194,7 +194,7 @@ def test_quaternion_joint_rotate_order_button():
     pb3.rotation_quaternion.normalize()
     bpy.context.view_layer.update()
     before = pb3.matrix_basis.copy()
-    # step 221: a quaternion joint shows Maya's Rotate X / Y / Z (written back as a quaternion)
+    # a quaternion joint shows Maya's Rotate X / Y / Z (written back as a quaternion)
     assert cb.has_channel(pb3, "rx")
     rec = _draw_cb()
     assert "Rotation mode QUATERNION" not in rec.texts("label")
@@ -225,7 +225,7 @@ def test_constraint_weight_rows():
     assert cb.constrained_keys(pb2) == {"tx", "ty", "tz"}
     con2.use_y = False
     assert cb.constrained_keys(pb2) == {"tx", "tz"}
-    assert not [r for r in bpy.context.scene.allset_cb.rows if r.kind == "CONSTRAINT"], "collapsed node (step 135)"
+    assert not [r for r in bpy.context.scene.allset_cb.rows if r.kind == "CONSTRAINT"], "collapsed node"
     cb.set_open(pb2, cb.con_node(pb2, con2))          # Maya: click the node name to show its weight
     cb.rebuild_rows()
     rows = [r for r in bpy.context.scene.allset_cb.rows if r.kind == "CONSTRAINT"]
@@ -235,7 +235,7 @@ def test_constraint_weight_rows():
     rec = _draw_cb()
     labels = rec.texts("label")
     assert "INPUTS" in labels and "locator1W0" in labels, labels
-    assert "joint2_pointConstraint1" in rec.texts("operator"), "the node name is the expand button (step 135)"
+    assert "joint2_pointConstraint1" in rec.texts("operator"), "the node name is the expand button"
     blue = [kw for k, _t, kw in rec.log if k == "operator" and kw.get("depress") and _t not in
             ("Translate X", "Translate Z")]
     assert len(blue) == 2, ("Translate X / Z drawn as blue (pressed) value buttons", blue)
@@ -335,7 +335,7 @@ def test_attribute_editor_joint_tabs():
         notices.tip = tip
     labels = rec.texts("label")
     assert "joint:" in labels and "Transform Attributes" in labels and "Joint" in labels, labels
-    # the joint axis note is a tooltip (step 106: no Blender sentences in the AE)
+    # the joint axis note is a tooltip (no Blender sentences in the AE)
     assert "Joint Orient" in labels and ae.JOINT_AXIS_NOTE not in labels and ae.JOINT_AXIS_NOTE in tips
     assert "Display as Control Shape" in rec.texts("prop") and "Draw Style" in rec.texts("prop")
     ae.set_tab(bpy.context, f"C:{con.name}")

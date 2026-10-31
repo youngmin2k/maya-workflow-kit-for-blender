@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Register / unregister a list of sub-modules all or nothing (step 279, #198 #199).
+"""Register / unregister a list of sub-modules all or nothing (#198 #199).
 
 A module whose ``register()`` raised used to leave every module before it registered (the Maya menu bar, the
 Status Line, the menus) while the modules after it (the tear-off operator, the keymap ...) were missing, and the

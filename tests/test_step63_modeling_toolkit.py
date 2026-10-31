@@ -1,4 +1,4 @@
-"""Step 63: Modeling Toolkit dock, soft select in Maya units, Combine / Separate / Mirror / Boolean with Maya meaning.
+"""Modeling Toolkit dock, soft select in Maya units, Combine / Separate / Mirror / Boolean with Maya meaning.
 GUI: tests/gui/gui_step63_mtk.py."""
 
 from importlib import import_module
@@ -53,7 +53,7 @@ def test_dock_and_status_line_toggle():
     wm = bpy.context.window_manager
     wm.allset_dock = 'MODELING_TOOLKIT'
     assert ae.dock_mode(bpy.context) == 'MODELING_TOOLKIT'
-    # one dock panel draws every mode (step 91; since step 116 in the Maya dock areas)
+    # one dock panel draws every mode (in the Maya dock areas)
     assert not hasattr(bpy.types, "ALLSET_PT_modeling_toolkit") and hasattr(bpy.types, "ALLSET_PT_maya_dock")
     wm.allset_dock = 'CHANNEL_BOX'
     assert status_line.EDITORS[0][0] == "MODELING_TOOLKIT", "Maya order: MTK first"
@@ -66,7 +66,7 @@ def test_mtk_buttons_are_menu_actions():
     for label, path, _icon in mtk.MESH + mtk.COMPONENTS + mtk.TOOLS:
         if label == "Extrude":
             continue
-        assert path in menu_map.MAP, (label, path)   # Target Weld: a kit tool since step 64
+        assert path in menu_map.MAP, (label, path)   # Target Weld: a kit tool
 
 
 def test_combine_maya_name_and_centre_pivot():
@@ -211,6 +211,6 @@ def test_mtk_extrude_adds_faces():
     bpy.ops.object.mode_set(mode='OBJECT')
     cube.data.polygons[0].select = True
     bpy.ops.object.mode_set(mode='EDIT')
-    assert bpy.ops.allset.extrude() == {'FINISHED'}   # the MTK button = polyExtrudeFace since step 65
+    assert bpy.ops.allset.extrude() == {'FINISHED'}   # the MTK button = polyExtrudeFace
     bpy.ops.object.mode_set(mode='OBJECT')
     assert len(cube.data.polygons) == 10, len(cube.data.polygons)

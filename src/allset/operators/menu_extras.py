@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Operators behind Maya menu items that had no Blender action (step 34).
+"""Operators behind Maya menu items that had no Blender action.
 
 - ``allset.open_editor``: Windows > ... Editors open a floating editor window, like
   Maya's panels torn off into windows.
@@ -30,15 +30,15 @@ EDITOR_TYPES = (
     ('SEQUENCE_EDITOR', "Video Sequencer", ""), ('ShaderNodeTree', "Shader Editor", ""),
     ('UV', "UV Editor", ""), ('SPREADSHEET', "Spreadsheet", ""), ('TEXT_EDITOR', "Text Editor", ""),
     ('PROPERTIES', "Properties", ""),
-    # step 101: Windows > Command Shell / Content Browser, File > View Image
+    # Windows > Command Shell / Content Browser, File > View Image
     ('CONSOLE', "Python Console", ""), ('ASSETS', "Asset Browser", ""), ('IMAGE_EDITOR', "Image Editor", ""),
-    # Windows > Bifrost Graph Editor (menu_map) opens Geometry Nodes; it was missing here and raised (step 240 QA)
+    # Windows > Bifrost Graph Editor (menu_map) opens Geometry Nodes; it was missing here and raised
     ('GeometryNodeTree', "Geometry Node Editor", ""),
 )
 
 
 def _maya_outliner(space):
-    # Same filters as the Maya Workflow Kit layout's Outliner (Maya DAG, steps 31 and 50).
+    # Same filters as the Maya Workflow Kit layout's Outliner (Maya DAG).
     from ..ui import maya_outliner
     maya_outliner.setup(space)
 
@@ -56,9 +56,9 @@ def sidebar_tab_later(window, category, tries=100):
     """Show the sidebar of ``window``'s only area and make ``category`` its active tab.
 
     ``Region.active_panel_category`` can be set once the region has drawn its tabs (before that it raises
-    "read-only"; step 67:
+    "read-only";
     a new window's sidebar starts on the first tab, Node / Item, whatever ``bl_order`` says), and
-    ``show_region_ui`` set inside an operator doesn't stick (step 9): both run from a timer."""
+    ``show_region_ui`` set inside an operator doesn't stick: both run from a timer."""
     state = {"n": tries}
 
     ptr = window.as_pointer()
@@ -93,7 +93,7 @@ def sidebar_tab_later(window, category, tries=100):
 
 def properties_tab_later(window, tab, tries=40):
     """Put the new window's Properties editor on ``tab``: a Properties space made in this operator has no tab
-    list until it has drawn, so the assignment is retried from a timer (step 67: it stays OBJECT otherwise)."""
+    list until it has drawn, so the assignment is retried from a timer (it stays OBJECT otherwise)."""
     state = {"n": tries}
 
     ptr = window.as_pointer()
@@ -102,7 +102,7 @@ def properties_tab_later(window, tab, tries=40):
         window = live_refs.window(ptr)
         if window is None:
             return None
-        # Reading ``space.context`` before the tab list exists prints an rna enum WARN (step 98), so only a
+        # Reading ``space.context`` before the tab list exists prints an rna enum WARN, so only a
         # successful assignment is read back.
         try:
             space = window.screen.areas[0].spaces.active
@@ -138,7 +138,7 @@ class ALLSET_OT_open_editor(bpy.types.Operator):
         if window is None:
             return {'CANCELLED'}
         if self.ui_type == 'UV':
-            # Maya UV > UV Editor shows the object's UVs at once: edit mode + UV Sync Selection, one editor (step 66)
+            # Maya UV > UV Editor shows the object's UVs at once: edit mode + UV Sync Selection, one editor
             from . import uv_tools
             uv_tools.prepare(context)
             if uv_tools.find_uv_editor(context)[1] is not None:
@@ -162,7 +162,7 @@ class ALLSET_OT_open_editor(bpy.types.Operator):
         if self.ui_type == 'PROPERTIES' and self.tab:
             properties_tab_later(new, self.tab)
         if self.ui_type in {'FCURVES', 'DOPESHEET', 'UV'}:
-            from ..ui import editor_chrome   # Maya editor chrome: framing, folded rows, UV Toolkit (step 104)
+            from ..ui import editor_chrome   # Maya editor chrome: framing, folded rows, UV Toolkit
             editor_chrome.prepare_later(new, self.ui_type)
         return {'FINISHED'}
 

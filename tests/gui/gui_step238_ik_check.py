@@ -1,4 +1,4 @@
-"""Step 238 (Issue #146, audit ③-6): Key > IK/FK Keys > Enable IK Solver draws Maya's check mark (on after the first
+"""Issue #146: Key > IK/FK Keys > Enable IK Solver draws Maya's check mark (on after the first
 click). Shot with ``--shots``: the submenu opened mid-viewport."""
 
 import os

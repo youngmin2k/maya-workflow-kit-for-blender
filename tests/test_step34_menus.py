@@ -1,4 +1,4 @@
-"""Step 34: Maya menu dead ends filled — Windows editor submenus, UV Editor / Planar /
+"""Maya menu dead ends filled — Windows editor submenus, UV Editor / Planar /
 Normal-Based, Edit > Ungroup, Heads Up Display > Poly Count, File > Increment and Save,
 File > Export Selection. GUI: tests/gui/gui_step34_menus.py."""
 
@@ -18,14 +18,14 @@ extras = import_module(kit.MODULE + ".operators.menu_extras")
 
 NEW_PATHS = {
     "File/Increment and Save": "allset.increment_save",
-    "File/Export Selection...": "allset.file_export_selection",  # step 102 (was a format submenu)
+    "File/Export Selection...": "allset.file_export_selection",  # was a format submenu
     "Edit/Ungroup": "allset.ungroup",
-    "Windows/Outliner": "allset.panel_show",   # raise a docked Outliner, else a floating one (step 116)
+    "Windows/Outliner": "allset.panel_show",   # raise a docked Outliner, else a floating one
     "Windows/Node Editor": "allset.open_editor",
     "Windows/General Editors/Attribute Editor": "allset.dock_show",
     "Windows/General Editors/Script Editor": "allset.script_editor",
     "Windows/Animation Editors/Graph Editor": "allset.open_editor",
-    "Windows/Rendering Editors/Hypershade": "allset.hypershade",   # step 67: own window
+    "Windows/Rendering Editors/Hypershade": "allset.hypershade",   # own window
     "UV/UV Editor": "allset.open_editor",
     "UV/Planar": "allset.uv_planar",
     "UV/Normal-Based": "allset.uv_planar",
@@ -76,7 +76,7 @@ def test_runtime_submenus_are_menus():
         def label(self, text="", translate=True):
             pass
 
-        def row(self):     # step 108: section titles sit on a lower row
+        def row(self):     # section titles sit on a lower row
             return self
 
     cls.draw(type("M", (), {"layout": Fake()})(), bpy.context)

@@ -1,4 +1,4 @@
-"""Step 75: Maya Status Line input line (Abs / Rel transform, Rename, Select by name) and the greyed
+"""Maya Status Line input line (Abs / Rel transform, Rename, Select by name) and the greyed
 Construction History toggle. GUI: tests/gui/gui_step75_input_line.py."""
 
 from importlib import import_module
@@ -153,7 +153,7 @@ def test_history_notice_and_groups():
     sl = import_module(kit.MODULE + ".ui.status_line")
     groups = [g for g, _d in sl.GROUPS]
     assert groups.index("HISTORY") < groups.index("RENDER") < groups.index("INPUT") < groups.index("EDITORS")
-    # step 189 (BS5): Construction History is Maya's toggle now, not a greyed widget with a notice
+    # Construction History is Maya's toggle now, not a greyed widget with a notice
     assert il.HISTORY_PATH not in notices.PANEL_NOTICES
     assert bpy.context.window_manager.allset_construction_history is True
     assert isinstance(bpy.context.scene.bl_rna.properties["allset_input"], bpy.types.PointerProperty)

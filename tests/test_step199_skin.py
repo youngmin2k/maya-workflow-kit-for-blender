@@ -1,4 +1,4 @@
-"""Step 199 lane S: Skin > Move Weights to Influences, Normalize Weights modes, Export / Import Weight Maps, Substitute
+"""Skin > Move Weights to Influences, Normalize Weights modes, Export / Import Weight Maps, Substitute
 Geometry, Bake Deformation to Skin Weights. Expected numbers are written below;
 scenes are built in Maya's coordinates (the rules are the same
 in any axes), lengths in Blender metres = Maya units."""
@@ -829,7 +829,7 @@ def test_move_weights_locked_and_post_match_maya():
 
 def test_move_weights_selection_and_errors():
     arm, mesh = _move_scene()
-    cbm = import_module(kit.MODULE + ".ui.channel_box")       # Bone.select is gone in 5.x (step 200)
+    cbm = import_module(kit.MODULE + ".ui.channel_box")       # Bone.select is gone in 5.x
     for b in arm.data.bones:                      # two joints: the active (last picked) one is the target
         cbm.set_bone_selected(arm.pose.bones[b.name], b.name in ("joint2", "joint3"))
     arm.data.bones.active = arm.data.bones["joint3"]

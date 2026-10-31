@@ -1,4 +1,4 @@
-"""Step 229 (release prep 0.5.0): Modify > Reorder Rotation keeps the orientation (Maya xform -roo -p), and the
+"""Release prep 0.5.0: Modify > Reorder Rotation keeps the orientation (Maya xform -roo -p), and the
 Modify items mapped here are in the menu map."""
 
 import bpy

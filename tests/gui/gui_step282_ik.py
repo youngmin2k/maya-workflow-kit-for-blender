@@ -1,4 +1,4 @@
-"""Step 282 (#181) in a real UI: Joint Tool 4 clicks (a leg / spine of 3 bones) -> Enter -> Skeleton > Create IK
+"""#181: in a real UI: Joint Tool 4 clicks (a leg / spine of 3 bones) -> Enter -> Skeleton > Create IK
 Handle (first joint, then the last) -> the kit solves the chain Maya's way -> move the handle: the end reaches it and
 every joint sits where the Maya-style rule puts it -> Twist 45 -> Ctrl+Z -> save + open keeps it."""
 

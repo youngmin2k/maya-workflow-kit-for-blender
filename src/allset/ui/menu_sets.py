@@ -4,7 +4,7 @@
 Maya's menu sets: the common menus are always shown,
 the menu set dropdown swaps the menus after them. Structure from
 ``menu_data`` (Maya's menu structure), Blender actions from
-``menu_map``; unmapped items are drawn greyed out (step 7).
+``menu_map``; unmapped items are drawn greyed out.
 
 One ``Menu`` class per Maya menu and submenu is built from the data at import
 time. ``menu_idname(maya_name)`` is the public name for other UI (hotbox).
@@ -30,7 +30,7 @@ SET_ITEMS = tuple((sid, label, f"Maya {label} menu set")
 _SET_MENUS = {sid: tuple(m for m in menus if m in menu_data.MENUS)
               for sid, _label, menus in menu_data.MENU_SETS}
 _ALWAYS_MENUS = tuple(n for n, m in menu_data.MENUS.items() if m[1] == ALWAYS)
-# Main menu bar option boxes + the editor menu bars' (step 104)
+# Main menu bar option boxes + the editor menu bars'
 OPTION_BOXES = menu_data.OPTION_BOXES | editor_menu_data.OPTION_BOXES
 
 
@@ -94,14 +94,14 @@ def current_set(context=None):
 
 def draw_item(layout, path, label, icon_value=0, translate=True):
     """Draw one Maya menu item: its Blender action, or greyed out. An item with a "not in Blender" notice and an
-    operator substitute runs through ``allset.menu_item``, whose tooltip carries the notice (step 54). So does a
+    operator substitute runs through ``allset.menu_item``, whose tooltip carries the notice. So does a
     mapped item Blender's poll would grey out (component commands in object mode): Maya keeps its menu items
     enabled and runs or warns (``menu_map.OBJECT_MODE``). ``icon_value``: the item's kit icon
     (``menu_icons``), 0 = none. ``translate=False``: ``label`` is already in the interface language."""
     s = menu_map.spec(path)
     # Blender draws, right-aligned, a shortcut it finds in the keymaps for the very operator + properties of an
     # item (Increment and Save "Ctrl Alt S", Exit "Ctrl Q"): operator items go through ``allset.menu_item``, which
-    # no key runs, so only the Maya hotkey drawn into the label shows (step 108).
+    # no key runs, so only the Maya hotkey drawn into the label shows.
     if s is not None and s[0] == "op" and path in menu_map.GREY_ON_POLL and not op_polls(s[1]):
         draw_spec(layout, label, s, path, icon_value=icon_value, translate=translate)  # Maya greys it here
         return
@@ -171,7 +171,7 @@ def draw_spec(layout, label, s, path, icon='NONE', icon_value=0, translate=True)
         op = draw_safe.op(layout, ALLSET_OT_menu_tool.bl_idname, text=label, **iv)
         op.tool = target
         op.edit = props["edit"]
-        op.item = path              # Ctrl+Shift+click: to the shelf (step 162)
+        op.item = path              # Ctrl+Shift+click: to the shelf
     elif kind == "v3d":
         op = draw_safe.op(layout, ALLSET_OT_menu_run.bl_idname, text=label, **iv)
         op.op = target
@@ -261,10 +261,10 @@ class ALLSET_OT_menu_set_value(bpy.types.Operator):
 
 
 # Maya's option box is a small square at the right end of the item's line.
-# A second button on a Blender menu line breaks consecutive lines into a staircase (step 51; checked again in step
+# A second button on a Blender menu line breaks consecutive lines into a staircase (checked again in step
 # 103 with row / split / column / grid_flow lines), so the item stays one button:
 # its label ends with Maya's box mark, click = the command, press and hold = "Option Box" = the option window
-# (``operators/option_windows.py``) or the command's own settings. Since step 146 (#82) the hold needs no drag:
+# (``operators/option_windows.py``) or the command's own settings. Since #82 the hold needs no drag:
 # the pointer is put on the hold menu's "Option Box" row, so letting go runs it.
 BOX_MARK = "  ❒"
 BOX_TIP = i18n.mark("❒ Option box: click the box, or press and hold the item (or Shift / Ctrl+click)")
@@ -282,7 +282,7 @@ def _draw_boxed(layout, path, text, icon_value=0):
     op.item, op.clicked = path, True
 
 
-# --- Maya hotkey column (step 108) ------------------------------------------------------------------------
+# --- Maya hotkey column ------------------------------------------------------------------------
 # Maya prints an item's hotkey right-aligned (File > New Scene "Ctrl+N",
 # Edit Mesh > Bevel "Ctrl+B"), the option box after it. Blender takes no such text for a Python button,
 # so the label carries it: label + filler + "Ctrl+N  ❒", the filler sized with the menu font so the tails line
@@ -391,7 +391,7 @@ def _draw_items(layout, items, prefix, submenus):
             layout.separator()
             if it[1]:
                 # Maya section titles are small; a lower row also keeps File inside a
-                # 900 px window at 125 % (step 108)
+                # 900 px window at 125 %
                 _section_label(layout, it[1])
             continue
         iv = menu_icons.icon_value(path)
@@ -415,7 +415,7 @@ def _section_label(layout, text):
 
 
 # Blender menus a Maya item opens (Recent Files = TOPBAR_MT_file_open_recent) are drawn through a kit subclass:
-# for the original Blender prints the keymap shortcut of ``wm.call_menu`` ("Shift Ctrl O", step 108).
+# for the original Blender prints the keymap shortcut of ``wm.call_menu`` ("Shift Ctrl O").
 _proxies = {}          # Blender menu idname -> kit subclass idname
 _PROXY_CLASSES = []
 
@@ -488,9 +488,9 @@ def _menu_class(idname, label, prefix, items, submenus, top_label=None):
     def draw(self, context):
         layout = self.layout
         from . import maya_dock
-        maya_dock.draw_tear_line(layout, idname)    # Maya's dotted tear-off line (step 116)
+        maya_dock.draw_tear_line(layout, idname)    # Maya's dotted tear-off line
         if top_label:
-            option_click.note_draw(context, top_label)    # opened from the Maya menu bar? (step 183)
+            option_click.note_draw(context, top_label)    # opened from the Maya menu bar?
         _draw_items(layout, items, prefix, submenus)
         if blender:
             layout.separator()
@@ -530,7 +530,7 @@ class ALLSET_OT_menu_item(bpy.types.Operator):
     bl_options = {'INTERNAL'}
 
     item: StringProperty(options={'SKIP_SAVE'})
-    # drawn in a Maya menu (not run from Python / a marking menu): Ctrl+Shift+click adds it to the shelf (step 162)
+    # drawn in a Maya menu (not run from Python / a marking menu): Ctrl+Shift+click adds it to the shelf
     clicked: BoolProperty(options={'SKIP_SAVE', 'HIDDEN'})
 
     @classmethod
@@ -553,11 +553,11 @@ class ALLSET_OT_menu_item(bpy.types.Operator):
             return {'CANCELLED'}
         if self.clicked and add_to_shelf_if_asked(self, context, self.item):     # before Shift / Ctrl alone
             return {'FINISHED'}
-        if self.item in OPTION_BOXES and modifier_held():      # Shift / Ctrl+click = the option box (step 146)
+        if self.item in OPTION_BOXES and modifier_held():      # Shift / Ctrl+click = the option box
             return bpy.ops.allset.menu_option_box('INVOKE_DEFAULT', item=self.item)
         if self.clicked and self.item in OPTION_BOXES and option_click.on_box(context, self.item):
-            return bpy.ops.allset.menu_option_box('INVOKE_DEFAULT', item=self.item)    # a click on ❒ (step 183)
-        if context.mode == 'EDIT_MESH' and self.item in menu_map.EDIT_MODE:     # component mode (step 129)
+            return bpy.ops.allset.menu_option_box('INVOKE_DEFAULT', item=self.item)    # a click on ❒
+        if context.mode == 'EDIT_MESH' and self.item in menu_map.EDIT_MODE:     # component mode
             try:
                 return bpy.ops.allset.component_command('EXEC_DEFAULT', True, item=self.item)
             except RuntimeError as ex:      # Blender's own refusal (Select > Similar with nothing selected ...)
@@ -579,7 +579,7 @@ class ALLSET_OT_menu_item(bpy.types.Operator):
             run_action(context, action, path=self.item)
         except RuntimeError as ex:
             from ..operators import maya_errors
-            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error (step 258, #152)
+            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error (#152)
             return {'CANCELLED'}
         return {'FINISHED'}
 
@@ -608,8 +608,8 @@ def _op_description(path):
 WHOLE_MESH_PROPS = {
     "Edit Mesh/Chamfer Vertices": {"offset_type": 'PERCENT', "offset_pct": 25.0, "affect": 'VERTICES'},
     "Edit Mesh/Average Vertices": {"repeat": 10},
-    # Circularize: allset.circularize's own defaults apply (step 110); the old LoopTools "value" key made every
-    # object-mode Circularize raise TypeError (step 240 QA D-240-1)
+    # Circularize: allset.circularize's own defaults apply; the old LoopTools "value" key made every
+    # object-mode Circularize raise TypeError
 }
 
 
@@ -648,7 +648,7 @@ class ALLSET_OT_menu_whole_mesh(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_component_command(bpy.types.Operator):
     """A Maya Edit / Select / Modify command in component mode, run the way Maya runs it there
     (``menu_map.EDIT_MODE``)"""
@@ -719,10 +719,10 @@ def _run_on_owners(context, action, path):
         bpy.ops.object.mode_set(mode='EDIT')
 
 
-# --- opening the option box by holding (step 146, #82) ----------------------------------------------------------
+# --- opening the option box by holding (#82) ----------------------------------------------------------
 # Blender 4.5 (interface_handlers.cc / interface_layout.cc ui_item_menu_hold): a held
 # ``operator_menu_hold`` button opens its hold menu after BUTTON_AUTO_OPEN_THRESH (0.2 s) *below* the button, as a
-# popup of its own; letting go outside it cancels it, so before step 146 the user had to drag onto its row. Python
+# popup of its own; letting go outside it cancels it, so before #82 the user had to drag onto its row. Python
 # can't tell where on the item a click landed, Shift / Ctrl / Alt+click run nothing in event simulation, and an
 # option window opened from a timer while the menus are open leaves them open under it. So:
 # 1. when the hold menu opens, the pointer goes onto its (taller) "Option Box" row: letting go runs it;
@@ -744,7 +744,7 @@ def modifier_held():
     return any(keystate.is_down(k) for k in ("LEFT_SHIFT", "RIGHT_SHIFT", "LEFT_CTRL", "RIGHT_CTRL"))
 
 
-# --- Ctrl+Shift+click: the item to the current shelf (step 162) -------------------------------------------------
+# --- Ctrl+Shift+click: the item to the current shelf -------------------------------------------------
 # Maya: Shift+Ctrl+click on a menu item adds it to the current shelf; Maya's
 # Maya appends a shelf button with the item's label / annotation / image (running the item's command)
 # to the shelf tab shown, factory tabs included, and prints nothing. The kit button runs
@@ -804,7 +804,7 @@ def _close_menu_then_open(context, item):
     # where the pointer was is the Maya menu's next row - a submenu there opens, and Blender never mouse-outs a menu
     # while a newer one is open (interface_handlers.cc ui_mouse_motion_towards_check "annoying fix").
     # Blender 5.x (menu_close_leave off, its default) closes menus only on a click: no warp, the option window
-    # opens over the Maya menu (compat.menus_close_on_leave, step 153).
+    # opens over the Maya menu (compat.menus_close_on_leave).
     away = compat.menus_close_on_leave(context.preferences)
     if away:
         with bpy.context.temp_override(window=context.window):
@@ -954,7 +954,7 @@ class ALLSET_OT_menu_run(bpy.types.Operator):
 
     op: StringProperty(options={'SKIP_SAVE'})
     props: StringProperty(default="{}", options={'SKIP_SAVE'})
-    item: StringProperty(options={'SKIP_SAVE', 'HIDDEN'})       # the Maya menu path (drawn in a menu, step 162)
+    item: StringProperty(options={'SKIP_SAVE', 'HIDDEN'})       # the Maya menu path (drawn in a menu)
 
     @classmethod
     def description(cls, context, props):
@@ -977,7 +977,7 @@ class ALLSET_OT_menu_run(bpy.types.Operator):
                 _call(self.op, json.loads(self.props))
         except RuntimeError as ex:  # poll failed etc.
             text = str(ex).strip()
-            # a Maya-style line instead of Blender's "poll() failed, context is incorrect" (step 101)
+            # a Maya-style line instead of Blender's "poll() failed, context is incorrect"
             self.report({'WARNING'}, maya_warning(self.op, self.op) if "poll()" in text else text)
             return {'CANCELLED'}
         return {'FINISHED'}
@@ -991,7 +991,7 @@ class ALLSET_OT_menu_tool(bpy.types.Operator):
 
     tool: StringProperty(options={'SKIP_SAVE'})
     edit: BoolProperty(description="Enter mesh edit (component) mode first", options={'SKIP_SAVE'})
-    item: StringProperty(options={'SKIP_SAVE', 'HIDDEN'})       # the Maya menu path (drawn in a menu, step 162)
+    item: StringProperty(options={'SKIP_SAVE', 'HIDDEN'})       # the Maya menu path (drawn in a menu)
 
     def execute(self, context):
         if add_to_shelf_if_asked(self, context, self.item):
@@ -1005,7 +1005,7 @@ class ALLSET_OT_menu_tool(bpy.types.Operator):
                 self.report({'WARNING'}, f"{ob.name} is hidden: show it first")
                 return {'CANCELLED'}
             if context.mode != 'EDIT_MESH':
-                # its own undo step (step 129): Ctrl+Z after the tool's first edit must stay in edit mode
+                # its own undo step: Ctrl+Z after the tool's first edit must stay in edit mode
                 bpy.ops.object.mode_set('EXEC_DEFAULT', True, mode='EDIT')
         try:
             bpy.ops.wm.tool_set_by_id(name=self.tool, space_type='VIEW_3D')
@@ -1044,7 +1044,7 @@ class ALLSET_MT_menu_bar(bpy.types.Menu):
 
 
 # Maya-style menu bar items are their text plus a small padding; Blender's header pulldowns add about a UI unit, so
-# the bar overflowed a 1600 px window at 125 % (step 113). Each item gets its blf text width plus this padding.
+# the bar overflowed a 1600 px window at 125 %. Each item gets its blf text width plus this padding.
 MENU_PAD_PX = 11
 
 
@@ -1071,7 +1071,7 @@ def _menu(layout, context, idname, collapsed):
 
 def draw_menu_bar(layout, context, collapsed=False, menu_set=True):
     """Blender logo menu, Maya common menus, set menus, Cache, Help. ``menu_set``: the menu set dropdown after the
-    common menus (only when no Status Line shows it, step 113: Maya keeps it at the Status Line's left end)."""
+    common menus (only when no Status Line shows it: Maya keeps it at the Status Line's left end)."""
     from .. import preferences
     prefs = preferences.get(context)
     if collapsed:

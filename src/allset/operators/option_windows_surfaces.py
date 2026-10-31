@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 181: Maya option windows of the Surfaces menu (same spec as operators/option_windows.py; option_windows._extend
+"""Maya option windows of the Surfaces menu (same spec as operators/option_windows.py; option_windows._extend
 appends ``WINDOWS``). Titles and field labels follow Maya's option
 windows.
 Fields Blender / the kit can't follow are listed as ``missing``. Operators:
@@ -19,7 +19,7 @@ def _degree(label):
 
 
 def _run_loft(context, v):
-    # step 228: Output geometry Polygons -> a mesh (the factory NURBS call stays Maya's plain loft)
+    # Output geometry Polygons -> a mesh (the factory NURBS call stays Maya's plain loft)
     extra = {"output": 'POLYGONS'} if v.get("output") == "Polygons" else {}
     return bpy.ops.allset.loft('EXEC_DEFAULT', uniform=v["parameterization"] == "Uniform",
                                auto_reverse=v["auto_reverse"], close=v["close"], degree=_degree(v["degree"]),
@@ -90,7 +90,7 @@ WINDOWS = [
         F("close", "", "bool", False, text="Close"),
         F("degree", "Surface degree:", "enum", "Cubic", items=("Linear", "Cubic")),
         F("section_spans", "Section spans:", "int", 1, lo=1, hi=500),
-        # step 228: Polygons = a mesh with UVs that follows the curves
+        # Polygons = a mesh with UVs that follows the curves
         F("output", "Output geometry:", "enum", "NURBS", items=("NURBS", "Polygons")),
     ], _run_loft, paths=("Surfaces/Loft",),
         missing=(_RANGE, "Output geometry: Bezier not made",
@@ -156,7 +156,7 @@ WINDOWS = [
         F("direction", "Surface direction:", "enum", "U", items=("U", "V", "Swap", "Both")),
     ], _run_reverse, paths=("Surfaces/Reverse Direction",), missing=("Keep original (off)",)),
     # Surfaces > Insert Isoparms (factory:
-    # At selection, Increase, 1, Keep original off; step 189)
+    # At selection, Increase, 1, Keep original off)
     Window("surface_insert_isoparms", "Insert Isoparms Options", "Insert", ("allset.surface_insert_isoparm", {}), [
         F("location", "Insert location:", "enum", "At selection", items=("At selection", "Between selections")),
         F("multiplicity", "Multiplicity:", "enum", "Increase", items=("Set", "Increase")),
@@ -178,7 +178,7 @@ WINDOWS = [
 ]
 
 
-# step 228: Constrain > Motion Paths > Flow Path Object Options live with the operator
+# Constrain > Motion Paths > Flow Path Object Options live with the operator
 from .flow_path_228 import windows as _flow_windows  # noqa: E402
 
 WINDOWS += _flow_windows()

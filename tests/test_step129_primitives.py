@@ -1,4 +1,4 @@
-"""Step 129 (#11, #12): Maya primitive topology and creation history nodes in Channel Box INPUTS.
+"""#11, #12: Maya primitive topology and creation history nodes in Channel Box INPUTS.
 
 Counts: Create menu default option boxes.
 """

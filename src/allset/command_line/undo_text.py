@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Undo / Redo text in the Command Line result field (step 176 G2).
+"""Maya's Undo / Redo text in the Command Line result field.
 
 Maya 2022: after Ctrl+Z / z / Edit > Undo the result field reads ``Undo: <undo chunk name>``
 and after Shift+Z / Edit > Redo ``Redo: <name>`` — no ``//`` around it, normal text colour, and ``Undo: `` with
@@ -10,7 +10,7 @@ last command's ``Result: group1`` after an undo (step-176 dogfood G2).
 Blender gives Python no undo step names (``WindowManager.print_undo_steps`` only prints to the C stdout), so the kit
 keeps its own list of step names in Blender's order, from what it can see being pushed:
 
-- ``undo_steps.push`` (one step per Maya menu / shelf / marking-menu command, named after the item, step 147) and the
+- ``undo_steps.push`` (one step per Maya menu / shelf / marking-menu command, named after the item) and the
   Command Line entry (named by the typed text, like Maya);
 - a kit operator that reports a result (``results.result``) at undo depth 0 with UNDO in its options: Blender pushes
   its step named after ``bl_label`` when it finishes;
@@ -59,7 +59,7 @@ def _add(name):
 
 def _new_command():
     """A new undoable command ran: Maya's result field no longer shows the last ``Undo: <name>`` / ``Redo: <name>``
-    (step 192 G4, #104 — ``Undo: Group`` stayed through P / Delete / Ctrl+E). A command with a result writes it right
+    (#104 — ``Undo: Group`` stayed through P / Delete / Ctrl+E). A command with a result writes it right
     after (``results.result``); one without leaves the field empty (Maya clears it for commands that return
     nothing)."""
     from . import _result, show_result

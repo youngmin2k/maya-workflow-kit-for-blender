@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya DAG rules for a parent: what happens to a node's descendants (step 164).
+"""Maya DAG rules for a parent: what happens to a node's descendants.
 
 Maya: a node is drawn only while it **and every ancestor** are visible —
 hiding group1 (h, Ctrl+H, its Visibility channel, its display layer's V) hides pCube1 without touching pCube1's own
@@ -100,7 +100,7 @@ _busy = []
 
 @persistent
 def _on_depsgraph(scene, _depsgraph=None):
-    # step 286 (#191): visibility only changes with a hide, a parent change or a new / removed node — never with a
+    # #191: visibility only changes with a hide, a parent change or a new / removed node — never with a
     # move or a mesh edit; sync walks every object's ancestors
     if _busy or depsgraph_filter.only_motion(_depsgraph):
         return
@@ -128,15 +128,15 @@ def _on_load(*_args):
 def delete_hierarchy(context, objects):
     """Maya delete of transforms: the nodes and every descendant, with their now unused data. Returns the count."""
     from . import constrain_199, startup_cameras
-    # Maya refuses to delete its startup cameras ("Non-deletable node 'persp' cannot be deleted.", step 211)
+    # Maya refuses to delete its startup cameras ("Non-deletable node 'persp' cannot be deleted.")
     obs = [ob for ob in hierarchy(objects) if not startup_cameras.is_startup(ob)]
     # Maya's normal / tangent constraint node is a child of the constrained object: its kit helper empty goes too
-    # (step 202, #109; the helper has no parent — constrain_199.update clears it — so hierarchy() misses it)
+    # (#109; the helper has no parent — constrain_199.update clears it — so hierarchy() misses it)
     helpers = [h for h in constrain_199.helpers_owned_by(obs) if h not in obs]
     from . import ik_rp
-    poles = ik_rp.helpers_of(obs)          # a kit RP handle's pole helper goes with the handle (step 245)
+    poles = ik_rp.helpers_of(obs)          # a kit RP handle's pole helper goes with the handle
     from . import spline_twist
-    spline_twist.release(obs)              # a kit Spline IK handle takes its twist drivers and constraint (step 249)
+    spline_twist.release(obs)              # a kit Spline IK handle takes its twist drivers and constraint
     from . import sweep_mesh
     sweep_mesh.release(context, obs)       # a deleted curve leaves its sweeps as plain meshes, like Maya
     datas = {ob.data for ob in obs if ob.data is not None}
@@ -144,7 +144,7 @@ def delete_hierarchy(context, objects):
     for ob in reversed(obs):              # children first
         bpy.data.objects.remove(ob, do_unlink=True)
     constrain_199.remove_helpers(helpers)
-    ik_rp.drop_orphan_rotations()          # step 282: its 3+ bone chain's Copy Rotations and bone helpers too
+    ik_rp.drop_orphan_rotations()          # its 3+ bone chain's Copy Rotations and bone helpers too
     for h in poles:
         try:
             bpy.data.objects.remove(h, do_unlink=True)

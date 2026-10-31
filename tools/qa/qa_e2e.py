@@ -1,4 +1,4 @@
-"""QA step 240 activity B: one scene through the whole Maya chain, headless, with metamorphic checkpoints.
+"""QA activity B: one scene through the whole Maya chain, headless, with metamorphic checkpoints.
 
     ALLSET_SANDBOX=qa_b python tests/run.py --no-build -k __none__ --extra tools/qa/qa_e2e.py
     ALLSET_SANDBOX=qa_b52 python tests/run.py --no-build -k __none__ --extra tools/qa/qa_e2e.py --blender <5.2 exe>
@@ -52,7 +52,7 @@ FRAMES = (1, 7, 10, 15, 20)
 NDEC = 4            # cm / radians rounding of fingerprints
 
 RESULTS = {"version": VERSION, "sandbox": TAG, "checkpoints": [], "notes": []}
-_chain = []          # fingerprints of the undo steps pushed since the last load: [base, step1, step2, ...]
+_chain = []          # fingerprints of the undo steps pushed since the last load: [base, first push, second push, ...]
 
 
 # --- fingerprint ----------------------------------------------------------------------------------------------
@@ -553,7 +553,7 @@ def _truth():
         sc.frame_set(f)
         fr = {}
         for ob in sc.objects:
-            if "allset_pole_of" in ob:      # the kit's hidden RP pole helper: no Maya node, not exported (step 245)
+            if "allset_pole_of" in ob:      # the kit's hidden RP pole helper: no Maya node, not exported
                 continue
             fr[ob.name] = list(ob.matrix_world.to_translation() / k)
             if ob.type == 'ARMATURE':

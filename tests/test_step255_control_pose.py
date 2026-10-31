@@ -1,6 +1,6 @@
-"""Step 255 (#171): a bone with a Custom Shape is a control (DECISIONS7), so the Move tool never turns a pick of it into
-the Edit-mode joint move (step 241) — an unkeyed Rigify rig dropped to Edit mode on a W click. Plain joints keep
-step 241's behaviour. The click paths themselves are checked in tests/gui/gui_step255_rigify_pose.py."""
+"""#171: a bone with a Custom Shape is a control (DECISIONS7), so the Move tool never turns a pick of it into
+the Edit-mode joint move — an unkeyed Rigify rig dropped to Edit mode on a W click. Plain joints keep
+their Edit-mode joint move. The click paths themselves are checked in tests/gui/gui_step255_rigify_pose.py."""
 
 from importlib import import_module
 

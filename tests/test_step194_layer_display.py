@@ -1,4 +1,4 @@
-"""Step 194: animation layer keys stay visible. A layered object's active action is
+"""Animation layer keys stay visible. A layered object's active action is
 the selected layer's strip action at influence 0: the evaluated result is unchanged, the Time Slider ticks show the
 selected layer + the BaseAnimation keys of channels not in it, the Channel Box marks layer members (Maya teal),
 Zero Key Layer and Merge Layers follow Maya."""

@@ -1,4 +1,4 @@
-"""Step 152 (#101) lane A: Display > Grid ❒ = Maya's Grid Options, and the kit grid
+"""#101: lane A: Display > Grid ❒ = Maya's Grid Options, and the kit grid
 (ui/maya_grid.py) follows its values: length and width, grid lines every, subdivisions, colours, Display checks, in
 Maya units."""
 

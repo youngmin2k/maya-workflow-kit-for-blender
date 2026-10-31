@@ -1,4 +1,4 @@
-"""Release smoke on every supported Blender minor (step 279, #198 #199).
+"""Release smoke on every supported Blender minor (#198 #199).
 
     python tools/smoke_matrix.py                          # 5.0.1, 5.1.2, 5.2.3 (portable builds)
     python tools/smoke_matrix.py --blenders 5.1.2         # one version (or a path to blender.exe)

@@ -1,4 +1,4 @@
-"""Step 92: Graph Editor t (center the current time), Alt+/ (Snap Time To Selection toggle), i hold (Insert Key
+"""Graph Editor t (center the current time), Alt+/ (Snap Time To Selection toggle), i hold (Insert Key
 tool)."""
 
 from importlib import import_module

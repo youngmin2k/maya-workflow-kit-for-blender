@@ -1,4 +1,4 @@
-"""Step 116: Maya's docking model — Maya panels in their own dock areas (not the viewport sidebar), roles kept in the
+"""Maya's docking model — Maya panels in their own dock areas (not the viewport sidebar), roles kept in the
 area, tab stack, tear-off / dock bookkeeping, menu tear-off line. Real windows: tests/gui/gui_step116_dock.py."""
 
 from importlib import import_module
@@ -117,7 +117,7 @@ def test_stack_panel_draws_handle_tabs_and_content():
             bpy.types.ALLSET_PT_maya_dock.draw(SimpleNamespace(layout=rec), bpy.context)
         ops = [(t, a[0] if a else "") for k, t, a, _p in rec.log if k == "operator"]
         assert ops[0] == (maya_dock.HANDLE, "allset.dock_handle"), ops[:3]
-        # step 142 (#78): the tabs are Maya's vertical strip drawn on the right edge, not a button row
+        # #78: the tabs are Maya's vertical strip drawn on the right edge, not a button row
         assert not [t for t, idname in ops if idname == "allset.dock_tab"], ops[:6]
         assert maya_dock.stack_tabs(wm) == ['CHANNEL_BOX', 'ATTRIBUTE_EDITOR', 'MODELING_TOOLKIT']
         if marker:

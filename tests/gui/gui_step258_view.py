@@ -1,4 +1,4 @@
-"""Step 258 (Issue #155) in the Maya layout: after a Move (a Blender transform, like a manipulator drag) no "Move"
+"""Issue #155: in the Maya layout: after a Move (a Blender transform, like a manipulator drag) no "Move"
 redo panel shows (Maya has none; the Maya layout views keep the HUD region off); F frames pCube1 with Maya's margin; the
 Status Line Symmetry box is a drop-down. Screenshots: gui_step258_after_move.png, gui_step258_framed.png."""
 

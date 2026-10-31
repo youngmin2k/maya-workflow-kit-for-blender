@@ -1,4 +1,4 @@
-"""Step 9 in a real UI: marking menu engine (drag, click mode, flick, in-place submenu)
+"""In a real UI: marking menu engine (drag, click mode, flick, in-place submenu)
 and the hotbox (menu rows, centre zone menu, Space tap); screenshots."""
 
 import os
@@ -34,7 +34,7 @@ def obj_mode():
 
 
 def box(key):
-    """Window point of the drawn radial box ``key`` (step 193: the ring stays at the press point; a box slid inside
+    """Window point of the drawn radial box ``key`` (the ring stays at the press point; a box slid inside
     the window near its edge is aimed at as drawn)."""
     s = C["draw"].ACTIVE["session"]
     it = s.layout.radial[key]
@@ -231,7 +231,7 @@ def s_toolbox():
 
 @step
 def s_tap():
-    # step 237: Four View = four real 3D View panels (ui/four_view.py), not Quad View regions
+    # Four View = four real 3D View panels (ui/four_view.py), not Quad View regions
     fv = import_module(MODULE + ".ui.four_view")
     panes = fv.panes(win().screen)
     check(f"Space tap = four views ({len(panes)} panels)", len(panes) == 4)

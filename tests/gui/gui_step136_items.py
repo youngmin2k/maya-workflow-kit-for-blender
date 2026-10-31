@@ -1,7 +1,7 @@
-"""Step 136 lane ITEMS in a real UI: RMB in component mode — Select All / Deselect All / Invert / Select Hierarchy are
+"""In a real UI: RMB in component mode — Select All / Deselect All / Invert / Select Hierarchy are
 enabled (#62), a greyed row puts its notice in the Help Line while hovered, releasing on Select All selects every
 vertex and stays in component mode. Ctrl+RMB on the mesh in object mode opens the convert menu (Maya's Ctrl+RMB convert
-marking menu picks its items by shape type) and a row converts the whole object in component mode (main session, step 136).
+marking menu picks its items by shape type) and a row converts the whole object in component mode (main session).
 Screenshot: gui_step136_rmb_component.png."""
 
 import os

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya component-mode keys that need more than one Blender operator: Alt+D select none
-(back to object mode), Ctrl+B bevel (Maya polyBevel3 at once, Chamfer Vertex in vertex mode: step 139),
+(back to object mode), Ctrl+B bevel (Maya polyBevel3 at once, Chamfer Vertex in vertex mode),
 Ctrl+F9-F11 convert selection and Delete / Backspace on components.
 
 Alt+D = SelectNone (object selection mode, selection cleared); Ctrl+B = BevelPolygon, a Maya hotkey.
@@ -68,7 +68,7 @@ def _bevel_params(op):
     return {k: getattr(op, k) for k in BEVEL.fields}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_bevel(_BevelProps, bpy.types.Operator):
     """Bevel the selection now (Maya Ctrl+B, polyBevel3): change Fraction, Segments, Depth in the In-View Editor or
     Channel Box INPUTS; in vertex mode Chamfer Vertex"""
@@ -108,7 +108,7 @@ class ALLSET_OT_bevel(_BevelProps, bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_bevel_edit(_BevelProps, bpy.types.Operator):
     """Change the last bevel (Maya: edit the polyBevel node). Blender keeps no edit-mode history, so only the last
     one can be changed"""
@@ -191,7 +191,7 @@ def select_only(bm, target, elements):
     bm.select_flush_mode()
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_convert_selection(bpy.types.Operator):
     """Convert the selection to the vertices, edges or faces it touches (Maya Ctrl+F9-F11)"""
     bl_idname = "allset.convert_selection"

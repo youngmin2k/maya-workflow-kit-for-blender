@@ -1,4 +1,4 @@
-"""Step 221 (Issue #131): quaternion bones of a received rig show Maya's Rotate X / Y / Z in the Channel
+"""Issue #131: quaternion bones of a received rig show Maya's Rotate X / Y / Z in the Channel
 Box, typed values come back as typed (compat conversion, <= 0.002 deg), S keys the rotation (rotation_quaternion
 curves), the Graph Editor names the keyed curves; undo. The rig keeps its QUATERNION mode."""
 

@@ -1,4 +1,4 @@
-"""Step 49: Maya layout parity — Tool Box, dock-only sidebar, Help + Command row, the Maya Workflow Kit template's
+"""Maya layout parity — Tool Box, dock-only sidebar, Help + Command row, the Maya Workflow Kit template's
 areas. GUI: tests/gui/gui_step49_layout.py."""
 
 import sys
@@ -68,7 +68,7 @@ def test_only_drawing_is_filtered():
     finally:
         toolbox._drawing[0] = False
     assert drawn[:6] == list(toolbox.MAYA_TOOLS), drawn
-    # step 115: a prepend / append pair around Blender's own toolbar draw
+    # a prepend / append pair around Blender's own toolbar draw
     names = [getattr(f, '__name__', '') for f in TOOLBAR.draw._draw_funcs]
     assert names[0] == '_draw_begin' and names[-1] == '_draw_end', names
 
@@ -86,7 +86,7 @@ def test_is_toolbox_matches_generator():
                                               show_region_ui=False, show_object_viewport_mesh=False))
 
 
-# --- the viewport sidebar is Blender's again (step 116: Maya panels are their own areas) -------------------------
+# --- the viewport sidebar is Blender's again (Maya panels are their own areas) -------------------------
 
 def test_viewport_sidebar_has_no_maya_panel():
     area, regions = _view3d()
@@ -130,7 +130,7 @@ def test_template_is_maya_general():
     # full-width rows: Status Line + Shelf on top, Time + Range Slider at the bottom
     for key in ("strip", "TIMELINE"):
         assert by[key].x == 0 and by[key].width == width, (key, by[key].x, by[key].width)
-    # left to right: Tool Box | Outliner | view | Maya tab stack (its own area since step 116)
+    # left to right: Tool Box | Outliner | view | Maya tab stack (its own area)
     assert by["toolbox"].x < by["OUTLINER"].x < by["view"].x < by["PROPERTIES"].x
     assert by["PROPERTIES"].x + by["PROPERTIES"].width == width
     assert maya_dock.role(by["PROPERTIES"]) == 'STACK' and not by["view"].spaces.active.show_region_ui
@@ -141,7 +141,7 @@ def test_template_is_maya_general():
     regions = {r.type: r for r in by["TIMELINE"].regions}
     assert regions['HEADER'].y < regions['WINDOW'].y
     st = by["TIMELINE"].spaces.active
-    assert not st.show_region_channels and st.show_region_ui   # sidebar = Time Slider buttons (step 50)
+    assert not st.show_region_channels and st.show_region_ui   # sidebar = Time Slider buttons
     assert [a for a in areas if a.type == 'PROPERTIES'] == [by["PROPERTIES"]]
 
 

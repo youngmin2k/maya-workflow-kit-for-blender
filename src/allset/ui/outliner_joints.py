@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Outliner: a kit skeleton's row reads its root joint's name (step 258, Issue #155 H1-6).
+"""Maya Outliner: a kit skeleton's row reads its root joint's name (Issue #155 H1-6).
 
 Maya 2026: a new skeleton is ``joint1`` in the Outliner and in the Channel Box — a joint is one DAG node, there is no
 skeleton node above it. The kit's skeleton is an
 armature object ``skeleton<N>`` holding the joints as bones (operators/joints.py), and Blender's C Outliner shows the
 object name. Renaming the object after its root joint would put an object and a bone of the same name in the scene
 (the kit's ``maya.cmds`` look-up, FBX nodes and many rig tools find nodes by name; 100+ test references), so the kit
-draws the label instead (step 258): a WINDOW POST_PIXEL handler finds the rows whose text is the armature
+draws the label instead: a WINDOW POST_PIXEL handler finds the rows whose text is the armature
 object's name and paints the root joint's name over it. Python can't ask Blender where a row is (rows of expanded
 objects move the rest), so a row is recognised by its pixels: Blender's text of the object name is rendered offscreen
 with the same font and compared with the row's ink; a row that doesn't match keeps Blender's text. Clicks still
@@ -210,7 +210,7 @@ _named_cache = {}
 
 def _named(context, live_objects):
     """{object name: label} for the rows drawn over; kept per view layer until the structure or the live set changes
-    (step 286, #191: every Outliner redraw walked every object)."""
+    (#191: every Outliner redraw walked every object)."""
     from .outliner import structure_version
     key = (structure_version(), frozenset(o.name for o in live_objects))
     vl = context.view_layer.as_pointer()

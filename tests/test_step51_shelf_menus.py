@@ -1,4 +1,4 @@
-"""Step 51: Maya option boxes in the menus (count = Maya's), kit-made shelf icons,
+"""Maya option boxes in the menus (count = Maya's), kit-made shelf icons,
 shelf icon row (draw handler + gizmo pool). GUI: tests/gui/gui_step51_shelf_menus.py."""
 
 from importlib import import_module
@@ -77,7 +77,7 @@ def test_every_factory_button_has_a_kit_icon():
 
 
 def test_letters_fallback_and_colours():
-    # step 131: every factory button has its own drawing (no letter tiles); only user shelf buttons with a label
+    # every factory button has its own drawing (no letter tiles); only user shelf buttons with a label
     # the kit doesn't know get Maya's generic script button with the label's initials written on it
     for shelf_id, _label, buttons in shelf_data.SHELVES:
         for label, _cmd in buttons:
@@ -111,7 +111,7 @@ def test_template_shelf_row():
     bpy.ops.wm.open_mainfile(filepath=str(path), load_ui=True)
     screen = bpy.data.workspaces["General"].screens[0]
     row = shelf.shelf_row_area(screen)
-    # step 113: no header — tab strip and icons are drawn in the WINDOW region (64 px shelf block)
+    # no header — tab strip and icons are drawn in the WINDOW region (64 px shelf block)
     assert not row.spaces.active.show_region_header
     assert 60 <= row.height <= 68, row.height       # shelf 64
 

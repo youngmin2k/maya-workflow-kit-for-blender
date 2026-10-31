@@ -1,4 +1,4 @@
-"""Step 279 (#198 #199) smoke in a real UI: enable the kit, "Make Blender feel like Maya" (welcome opt-in with the
+"""#198 #199: smoke in a real UI: enable the kit, "Make Blender feel like Maya" (welcome opt-in with the
 Maya layout), open the Maya File menu (its draw runs without a Python error), switch back to Blender: the top bar,
 the toolbar tools and the workspace are Blender's again, only the always-on part of the kit stays registered.
 
@@ -93,7 +93,7 @@ def s_setup():
     C["dock_tabs_register"] = dock_tabs.register
 
     def boom():
-        raise RuntimeError("step 279 injected register failure")
+        raise RuntimeError("injected register failure")
     dock_tabs.register = boom
     opt_in()
 

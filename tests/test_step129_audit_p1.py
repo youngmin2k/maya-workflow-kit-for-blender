@@ -1,4 +1,4 @@
-"""Step 129 (audit P1, lane A): Maya menu items and keys in component mode (#39, #17, #18; Maya 2022),
+"""Maya menu items and keys in component mode (#39, #17, #18; Maya 2022),
 Paint Skin Weights normalization (#20) and the switch to Blender in the Maya
 Workflow Kit template file (#19). GUI: tests/gui/gui_step129_*.py."""
 
@@ -211,7 +211,7 @@ def _headerless_properties(screen):
 
 def test_switch_to_blender_in_the_template_file():
     # In -b a Window.workspace assignment waits for an event loop that never runs, so this checks the data; the
-    # screen itself is checked by tests/gui/gui_step129_switch_template.py. Step 130: the Maya layout file is the
+    # screen itself is checked by tests/gui/gui_step129_switch_template.py. The Maya layout file is the
     # bundled one read as a new scene (no app template), File > New stays Blender's.
     sw = _mod("switch")
     _mod("first_start").new_maya_scene()

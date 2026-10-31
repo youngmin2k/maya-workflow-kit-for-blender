@@ -1,4 +1,4 @@
-"""Step 138 (#57): Ctrl+N with unsaved changes asks Maya's Save Changes question (ui/save_prompt.py) — Save / Don't Save
+"""#57: Ctrl+N with unsaved changes asks Maya's Save Changes question (ui/save_prompt.py) — Save / Don't Save
 / Cancel — in the Maya Workflow Kit layout:
 cube -> Ctrl+N -> prompt "Warning: Scene Not Saved" / "Save changes to untitled scene?" -> Cancel keeps the cube;
 again -> Don't Save = a new empty Maya scene; a saved file + a change -> Ctrl+N -> "Save changes to <path>?" -> Save
@@ -73,7 +73,7 @@ def save_browser():
     return None, None
 
 
-# since step 211 a kit scene carries Maya's hidden startup cameras as objects
+# a kit scene carries Maya's hidden startup cameras as objects
 STARTUP_CAMERAS = {'persp', 'top', 'front', 'side'}
 
 

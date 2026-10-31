@@ -1,4 +1,4 @@
-"""Step 129, issue #4, in the Maya Workflow Kit layout: a panel torn off by its ::::: handle and a torn-off menu
+"""In the Maya Workflow Kit layout: a panel torn off by its ::::: handle and a torn-off menu
 open windows sized to their content (min / max), and the dock column gets its height back."""
 
 import os

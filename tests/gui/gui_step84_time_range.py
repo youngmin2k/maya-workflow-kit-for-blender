@@ -1,4 +1,4 @@
-"""Step 84 in a real UI: Shift-drag a Time Slider range, drag its middle = move the keys (range follows, overwrite),
+"""In a real UI: Shift-drag a Time Slider range, drag its middle = move the keys (range follows, overwrite),
 undo once, drag the right end arrow = scale the keys from the left end, a click on the range = plain click;
 screenshot of the range arrows."""
 

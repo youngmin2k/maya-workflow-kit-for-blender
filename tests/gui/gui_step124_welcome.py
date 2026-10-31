@@ -1,4 +1,4 @@
-"""Step 124: the welcome dialog's body was cut at 125 % UI scale ("the Maya colou..."): fixed lines wider than the
+"""The welcome dialog's body was cut at 125 % UI scale ("the Maya colou..."): fixed lines wider than the
 room left of the icon. welcome.wrap breaks the paragraphs by blf width. Checked on the wrapped lines and
 on a screenshot of the open dialog (look at it: ALLSET_GUI_SHOTS)."""
 

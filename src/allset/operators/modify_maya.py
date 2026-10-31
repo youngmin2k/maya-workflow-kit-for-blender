@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Modify menu commands (step 168): Convert > Smooth Mesh Preview to Polygons, Transformation Tools > Default
+"""Maya Modify menu commands: Convert > Smooth Mesh Preview to Polygons, Transformation Tools > Default
 Object Manipulator / Show Manipulator Tool, Align Tool, Snap Align Objects > Position Along Curve, Convert >
 Geometry to Bounding Box and the Evaluate Nodes check items.
 
@@ -327,7 +327,7 @@ def _bbox_material(colour):
     taken = {m.name for m in bpy.data.materials}
     mat = material.new_material('LAMBERT')
     mat.name = f"BBoxLambert{naming.next_number('BBoxLambert', taken)}"
-    material.color_socket(mat).default_value = (*colour, 1.0)     # Maya Color; diffuse 0.8 stays (step 214)
+    material.color_socket(mat).default_value = (*colour, 1.0)     # Maya Color; diffuse 0.8 stays
     material._sync_base(mat)
     material.sync_display(mat)
     return mat
@@ -437,7 +437,7 @@ class ALLSET_OT_geometry_to_bbox(bpy.types.Operator):
 # the file), each switch mutes / unmutes the Blender data standing for that Maya node type.
 
 KINDS = ("iksolver", "constraint", "expression", "fluid", "ncloth", "nparticle", "nrigid", "particle", "rigidbody",
-         "snapshot")   # step 171: snapshot = the kit snapshots' automatic updates (operators/anim_snapshot.evaluating)
+         "snapshot")   # snapshot = the kit snapshots' automatic updates (operators/anim_snapshot.evaluating)
 _IK_MUTED = "allset_eval_ik_muted"          # scene ID prop: IK constraints the kit muted (IK Solvers off)
 _IK_TYPES = {'IK', 'SPLINE_IK'}
 
@@ -610,7 +610,7 @@ def _rotation_matrix(node):
 
 def reorder_rotation(nodes, order):
     """Change the rotate order of objects / pose bones keeping their orientation (Maya's -preserve): setting
-    rotation_mode from Python only reinterprets the values (step 229), so the Euler angles are recomputed
+    rotation_mode from Python only reinterprets the values, so the Euler angles are recomputed
     from the old rotation, closest to the old angles. Keys are left as they are. Returns how many changed."""
     n = 0
     for node in nodes:

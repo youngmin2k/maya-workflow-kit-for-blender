@@ -1,4 +1,4 @@
-"""Step 88: the hand-check items of steps 59-79 that event simulation can prove, run in one Maya Workflow Kit session.
+"""The hand-check items that event simulation can prove, run in one Maya Workflow Kit session.
 
 Each check name starts with the item's id ``[M<step>-<n>]`` (n = its place in that step's list); an item counts as
 done only when all of its checks pass. Keys, clicks and drags are simulated events; a few Enter-in-a-field
@@ -292,7 +292,7 @@ def m70_3_a():
     check(f"[M70-3] A frames all keys (5..30 in view {x0:.1f}..{x1:.1f})", x0 < 5 and x1 > 30)
     kc = sys.modules["sim"].maya_kc()
     rep = [km.name for km in kc.keymaps for it in km.keymap_items
-           if it.active and it.idname in ("screen.repeat_last", "allset.repeat_last")   # step 175: Maya G
+           if it.active and it.idname in ("screen.repeat_last", "allset.repeat_last")   # Maya G
            and it.type == 'G' and not (it.shift or it.ctrl or it.alt)]
     v3d_g = [it.idname for km_name in ("3D View", "Object Mode", "3D View Generic")
              for it in kc.keymaps[km_name].keymap_items if it.active and it.type == 'G' and it.value == 'PRESS'
@@ -320,7 +320,7 @@ def m70_4_on():
     sc.frame_set(1)
     cube.keyframe_insert("location", frame=1)
     sc.frame_set(10)
-    sc.allset_auto_key = True        # step 130: the kit's own Maya Auto Key, no Blender preference
+    sc.allset_auto_key = True        # the kit's own Maya Auto Key, no Blender preference
     with override():
         bpy.ops.transform.rotate(value=0.5, orient_axis='Z')
     bpy.context.scene.allset_cb.rx_text = "30"
@@ -443,7 +443,7 @@ def m75_4():
     check(f"[M75-4] a missing name: Help Line message, the text stays ({notice()!r}, {inp().text!r})",
           bool(notice()) and inp().text == "nothing*")
     il = mod("ui.input_line")
-    # step 189: Construction History is Maya's real toggle now (no grey button, no notice)
+    # Construction History is Maya's real toggle now (no grey button, no notice)
     on = bpy.context.window_manager.allset_construction_history
     with bpy.context.temp_override(window=win()):
         bpy.ops.allset.construction_history()
@@ -709,7 +709,7 @@ def m79_3_outside_s_check():
 
 
 # =============================================================================================================
-# Step 97: the remaining simulatable items of steps 59-79.
+# the remaining simulatable hand-check items.
 # Menu / shelf / sidebar-button actions run the Maya menu path (allset.menu_item) or the button's operator: the
 # click -> operator link is what the menu / shelf / sidebar GUI tests prove (gui_step34, 51, 62, ...); keys, clicks
 # in the views and drags are simulated events.
@@ -761,8 +761,8 @@ def move_to(p):
 
 def drag(name, start, end, hold=(), button='LEFTMOUSE', moves=8, mods=None, skip=None):
     """Register a drag as steps (hover / keys + press / one move per tick / release): a transform modal started on
-    a press misses moves queued in the same tick (step 28) and snapping looks for its target at most every 10 ms
-    (step 95). ``start`` / ``end`` are callables giving window points; ``skip()`` True = do nothing."""
+    a press misses moves queued in the same tick and snapping looks for its target at most every 10 ms
+   . ``start`` / ``end`` are callables giving window points; ``skip()`` True = do nothing."""
     mods = mods or {}
     pts = {}
 
@@ -1427,7 +1427,7 @@ def _m59_9_click1():
 
 
 def click_hit(p, plane_co, plane_no):
-    """The world point a click at whole pixel ``p`` hits on a face plane (step 135: one pixel is ~0.06 cm in the
+    """The world point a click at whole pixel ``p`` hits on a face plane (one pixel is ~0.06 cm in the
     viewport beside the wider dock, so the tool's result is checked against the clicked points)."""
     from mathutils.geometry import intersect_line_plane
     from bpy_extras.view3d_utils import region_2d_to_origin_3d, region_2d_to_vector_3d
@@ -1481,7 +1481,7 @@ def prefs():
 def _m72_1_setup():
     clear()
     select_only(create('CUBE'))
-    # step 115: the kit swaps the top bar's own draw, which calls status_line.draw_left (not the class method)
+    # the kit swaps the top bar's own draw, which calls status_line.draw_left (not the class method)
     sl = mod("ui.status_line")
     C["draw_left"] = sl.draw_left
     C["drawn"] = []
@@ -1616,7 +1616,7 @@ def _m72_3_b_off():
           not ts().use_proportional_edit_objects and message() == "")
     for o in bpy.context.scene.objects:
         o.hide_set(False)
-        o.hide_viewport = False      # step 129 (#26): Maya visibility = hide_viewport
+        o.hide_viewport = False      # #26: Maya visibility = hide_viewport
     select_only(bpy.data.objects["pCube2"])
     menu("Modify/Make Live")
     check(f"[M72-3] Make Live on message ({message()!r})", "live" in message() and "pCube2" in message())
@@ -1867,7 +1867,7 @@ def _m76_setup():
     C["circle"] = make_circle("ctrl")
     for o in bpy.context.scene.objects:
         o.select_set(False)
-    # step 135: the viewport beside the wider dock is narrower, so the 0.8 cm circle was ~13 px across and its centre
+    # the viewport beside the wider dock is narrower, so the 0.8 cm circle was ~13 px across and its centre
     # lay within the 5 px (x UI scale) pick radius of its drawn chords. Zoom in 2x for this section (restored at m76_2_ik).
     rv3d = view3d()[1].data
     C["m76_view"] = rv3d.view_distance
@@ -1895,7 +1895,7 @@ def _m76_1_front():
 def _m76_1_behind():
     check(f"[M76-1] the curve behind the mesh: click on its line = still the curve ({sel()})", sel() == ["ctrl"])
     # a click on the mesh more than the pick radius from the curve line: 9 px in from the line, or the circle's centre
-    # when the circle is smaller on screen (the view is narrower beside a solid dock, step 112)
+    # when the circle is smaller on screen (the view is narrower beside a solid dock)
     p = circle_point()
     c = screen(C["circle"].matrix_world.translation)
     away = p + (c - p).normalized() * min(9, (c - p).length)
@@ -2058,7 +2058,7 @@ def _m77_1_setup():
 @named("m77_1_w")
 def _m77_1_w():
     check(f"[M77-1] F9 = vertex mode ({bpy.context.mode})", bpy.context.mode == 'EDIT_MESH')
-    with override():     # step 129: a new Maya primitive enters component mode with nothing selected
+    with override():     # a new Maya primitive enters component mode with nothing selected
         bpy.ops.mesh.select_all(action='SELECT')
     hover()
     tap('W')
@@ -2304,7 +2304,7 @@ for _n in range(3):
 
 @named("m78_4_check")
 def _m78_4_check():
-    # 0.15: one screen pixel is ~0.07 cm at this zoom in the view beside the solid dock (step 112)
+    # 0.15: one screen pixel is ~0.07 cm at this zoom in the view beside the solid dock
     ok = all(m is not None and (m - s).length < 0.15 * k() for m, s in zip(C["made"], C["spots"]))
     meshes = [o for o in bpy.context.scene.objects if o.type == 'MESH']
     check(f"[M78-4] Shift+G at three grid spots = a cube at each ({[cm(m) if m else None for m in C['made']]}, "
@@ -2321,7 +2321,7 @@ def _m78_4_side():
     p = location_3d_to_region_2d(region, region.data, C["side"])
     move_to(Vector((region.x + p.x, region.y + p.y)))
     # where the mouse really is: move_to ends at (int(x) + 1, int(y)); one pixel is ~0.06 cm in the viewport beside
-    # the wider dock (step 135), more than the 0.05 cm tolerance
+    # the wider dock, more than the 0.05 cm tolerance
     C["side_mouse"] = region_2d_to_location_3d(region, region.data, Vector((int(region.x + p.x) + 1 - region.x,
                                                                              int(region.y + p.y) - region.y)), Vector())
     ev('G', 'PRESS', shift=True)
@@ -2484,7 +2484,7 @@ def _m62_3_go():
           abs(x1 - 0.0) < 1e-4 and abs(x2 - 1.0) < 1e-4)
     fc = sdk().sdk_fcurve(cube, "ry")
     kps = list(fc.keyframe_points)
-    # step 226: the kit writes Maya 2026 auto tangents itself (ALIGNED handles, operators/driven_key.maya_auto)
+    # the kit writes Maya 2026 auto tangents itself (ALIGNED handles, operators/driven_key.maya_auto)
     check(f"[M62-3] the SDK curve is a smooth S, flat at the ends (Bezier, Maya auto, constant extrapolation: "
           f"{[(p.interpolation, p.handle_left_type) for p in kps]}, {fc.extrapolation})",
           all(p.interpolation == 'BEZIER' and p.handle_left_type in ('ALIGNED', 'AUTO_CLAMPED') for p in kps)
@@ -2526,7 +2526,7 @@ def _m62_4_pose():
     cons = arm.pose.bones["joint2"].constraints
     check(f"[M62-4] Constrain > Orient puts the constraint on the joint (bone), not the armature ({r}, "
           f"{[c.type for c in cons]}, armature {len(arm.constraints)})",
-          # step 233: a joint that follows an object's rotation is constrained to Maya's axes helper of the control
+          # a joint that follows an object's rotation is constrained to Maya's axes helper of the control
           # ("<owner>_<node>_<target>Axes", operators/constrain_multi.py), which follows the control
           len(cons) == 1 and cons[0].type == 'COPY_ROTATION' and cons[0].target is not None
           and (cons[0].target == C["ctrl"] or cons[0].target.name.endswith(C["ctrl"].name + "Axes"))
@@ -2629,7 +2629,7 @@ def edit_cube(select_faces=None):
     select_only(ob)
     with override():
         bpy.ops.object.mode_set(mode='EDIT')
-    if select_faces:   # faces are a face-mode selection (in vertex mode Maya extrudes the vertices, step 139)
+    if select_faces:   # faces are a face-mode selection (in vertex mode Maya extrudes the vertices)
         bpy.context.scene.tool_settings.mesh_select_mode = (False, False, True)
     bm = bmesh.from_edit_mesh(ob.data)
     for f in bm.faces:
@@ -2658,7 +2658,7 @@ def _m63_2_paths():
             "Modeling Toolkit/Transform Constraint", "Modeling Toolkit/UV"]
     check(f"[M63-2] greyed rows (Highlight Backfaces, Selection / Transform Constraint, UV) carry a tooltip / Help Line "
           f"notice ({[g for g in grey if g not in notes]} missing)", all(g in notes for g in grey))
-    check("[M63-2] Target Weld is a real tool now (step 64), not greyed", mm.get("Mesh Tools/Target Weld", (None,))[0] == "tool")
+    check("[M63-2] Target Weld is a real tool now, not greyed", mm.get("Mesh Tools/Target Weld", (None,))[0] == "tool")
     ob = edit_cube([0])
     C["ob"] = ob
     with override():
@@ -2690,7 +2690,7 @@ def _m63_2_components():
 
 @named("m63_2_bevel")
 def _m63_2_bevel():
-    # step 139 (#16): Maya bevels at once (polyBevel3 factory values) and Esc keeps it; no Blender modal
+    # #16: Maya bevels at once (polyBevel3 factory values) and Esc keeps it; no Blender modal
     ob_b = C["bevel_ob"]
     if bpy.context.mode == 'EDIT_MESH':
         ob_b.update_from_editmode()
@@ -2746,7 +2746,7 @@ def _m63_2_bevel():
     b.location = (0.5 * k(), 0.5 * k(), 0)
     select_only(a)
     menu("Mesh/Smooth")
-    check(f"[M63-2] Smooth = real Catmull-Clark geometry, Maya 24 faces (step 139; {len(a.data.polygons)})",
+    check(f"[M63-2] Smooth = real Catmull-Clark geometry, Maya 24 faces ({len(a.data.polygons)})",
           len(a.data.polygons) == 24)
     select_only(a, b)
     menu("Mesh/Booleans/Union")
@@ -2845,7 +2845,7 @@ def _m63_4_tap():
           abs(bpy.context.scene.allset_soft_radius - 5) < 1e-6)
     cls = mod("operators.taphold").SoftSelectBinding
     C["hdr"] = []
-    C["hdr_orig"] = cls.__dict__["_show"]      # step 129: header text + radius circle
+    C["hdr_orig"] = cls.__dict__["_show"]      # header text + radius circle
 
     def rec(context, event, size):
         C["hdr"].append(None if size is None else size / k())
@@ -2930,7 +2930,7 @@ def _m63_6_mirror():
         b = create('CUBE')
         b.location = (0.5 * k(), 0, 0)
         select_only(a, b)    # first selected - last selected
-        menu(f"Mesh/Booleans/{op} (A - B)" if op == "Difference" else f"Mesh/Booleans/{op}")   # Maya 2026 label (step 219)
+        menu(f"Mesh/Booleans/{op} (A - B)" if op == "Difference" else f"Mesh/Booleans/{op}")   # Maya 2026 label
         meshes = [o for o in bpy.context.scene.objects if o.type == 'MESH']
         xs = [(meshes[0].matrix_world @ v.co).x / k() for v in meshes[0].data.vertices] if meshes else [0]
         want = (-0.5, 0.0) if op == "Difference" else (0.0, 0.5)
@@ -3452,7 +3452,7 @@ def _m64_5_cut_check():
     hover()
     key('Z', ctrl=True)
     notes = mod("ui.notices").PANEL_NOTICES
-    grey = ["Multi-Cut/Edge Flow"]     # step 129: Smoothing Angle, Subdivisions, Slice Tool are real now
+    grey = ["Multi-Cut/Edge Flow"]     # Smoothing Angle, Subdivisions, Slice Tool are real now
     check(f"[M64-5] Tool Settings: Snap Step % + greyed Maya items with tooltip notices ({[g for g in grey if g not in notes]} "
           f"missing)", "snap_step" in mtools().settings(bpy.context).bl_rna.properties and all(g in notes for g in grey))
     set_tool("builtin.select_box")
@@ -3800,7 +3800,7 @@ def _m65_4_check():
     lay = LayoutRecorder()
     with v3d_ctx():
         iv().draw_cb_node(lay, bpy.context, rec)
-    # step 106: the 'Blender keeps no edit-mode history' notice is the node name's tooltip, not grey lines
+    # the 'Blender keeps no edit-mode history' notice is the node name's tooltip, not grey lines
     check(f"[M65-4] INPUTS: polyExtrudeFace1 with its five rows, the history notice as its tooltip "
           f"({lay.out[:1]}, {len(ex().FIELDS)} rows)",
           rec is not None and lay.out and lay.out[0].startswith("polyExtrudeFace") and len(ex().FIELDS) == 5
@@ -3888,7 +3888,7 @@ def _m65_5_other_check():
 @named("m65_5_edge_check")
 def _m65_5_edge_check():
     modal = [op.bl_idname for op in win().modal_operators]
-    # step 139 (M4): Ctrl+E on an edge = polyExtrudeEdge at once, no mouse drag
+    # M4: Ctrl+E on an edge = polyExtrudeEdge at once, no mouse drag
     rec = mod("operators.extrude").current(OB())
     check(f"[M65-5] Ctrl+E on an edge = polyExtrudeEdge at once ({modal}, {rec and rec.name}, {C['n_edge']} -> {ecounts()})",
           not any(m.startswith(("TRANSFORM_OT", "MESH_OT_extrude")) for m in modal) and ecounts()[0] > C["n_edge"][0]
@@ -3990,7 +3990,7 @@ def _m66_1_again_check():
         m = getattr(mm, name)
         if isinstance(m, mm.MarkingMenu) and m.radial.get("E", (None, None))[0] == "UV":
             obj_e = m.radial["E"][1]
-            if isinstance(obj_e, mm.Sub):      # step 151: Maya's UV submenu, UV at E
+            if isinstance(obj_e, mm.Sub):      # Maya's UV submenu, UV at E
                 obj_e = obj_e.radial["E"][1]
             break
     check(f"[M66-1] Windows > Modeling Editors > UV Editor and F12 again: still one UV Editor window ({len(uv_windows())}); "
@@ -4004,7 +4004,7 @@ def _m66_1_again_check():
 @named("m66_1_shell_check")
 def _m66_1_shell_check():
     b = ubm()
-    # step 256: Alt+F12 = Maya's UV Shell mask (sync on, face mode, selection cleared; operators/uv_shell_select.py)
+    # Alt+F12 = Maya's UV Shell mask (sync on, face mode, selection cleared; operators/uv_shell_select.py)
     check(f"[M66-1] Alt+F12 = UV Shell mask (sync {ts().use_uv_select_sync}, face mode "
           f"{tuple(ts().mesh_select_mode)}); selection cleared ({sum(f.select for f in b.faces)} of {len(b.faces)})",
           bpy.context.window_manager.allset_uv_shell_mask and ts().use_uv_select_sync
@@ -4035,7 +4035,7 @@ def _m66_3_cut_check():
     seams = sum(e.seam for e in b.edges)
     check(f"[M66-3] Shift+X: red seams on the 4 edges, the shell splits ({C['shells0']} -> {len(isls)})",
           seams == 4 and len(isls) > C["shells0"])
-    # step 129: Maya's cube UV layout is a cross strip, cutting the top splits the strip too (1 -> 3)
+    # Maya's cube UV layout is a cross strip, cutting the top splits the strip too (1 -> 3)
     C["shells_cut"] = len(isls)
     # island selection picks only one side now
     top = next(f for f in b.faces if f.normal.z > 0.9)
@@ -4179,7 +4179,7 @@ def window_with(ui_type):
 
 
 def hs_window():
-    """(window, Graph area) of the Hypershade once its layout is complete (step 131), else (None, None)."""
+    """(window, Graph area) of the Hypershade once its layout is complete, else (None, None)."""
     hs = mod("ui.hypershade")
     for w in bpy.context.window_manager.windows[1:]:
         if sum(1 for a in w.screen.areas if hs.pane(a)) == 4 and hs.graph_area(w.screen) is not None:
@@ -4378,7 +4378,7 @@ def _m67_4_menu():
         layout = rec
     with override():
         cls.draw(_M(), bpy.context)
-    # step 103: option-box items end with the box mark; step 108: right-aligned after a filler (+ Maya hotkey)
+    # option-box items end with the box mark, right-aligned after a filler (+ Maya hotkey)
     rec.out = [(kind, t.replace(ms.HAIR, "").replace(ms.BOX_MARK.strip(), "").strip() if isinstance(t, str) else t, x)
                for kind, t, x in rec.out]
     texts = [t for kind, t, _x in rec.out if kind in ("op", "menu")]
@@ -4876,7 +4876,7 @@ def _m69_5_editor():
     a = w.screen.areas[0]
     sp = a.spaces.active
     lib = os.path.basename(C["src"])
-    # since step 209 the Reference Editor is the kit's Maya window (a marked Properties Tool tab, ui/reference_editor.py)
+    # the Reference Editor is the kit's Maya window (a marked Properties Tool tab, ui/reference_editor.py)
     check(f"[M69-5] File > Reference Editor: the kit's Reference Editor window, {lib} loaded "
           f"({len(bpy.context.window_manager.windows) - C['nwin']} new, {a.type})",
           len(bpy.context.window_manager.windows) == C["nwin"] + 1 and a.type == 'PROPERTIES'
@@ -4898,7 +4898,7 @@ def _m69_5_editor():
 #             timeline = the selection's keys at the current frame (the Time Slider range when there is one); Shift+S
 #             tap does nothing; Stepped Next = Stepped + a notice ------------------------------------------------------
 
-MM_D = 110      # px past the marking menu ring (Maya radius 55 x UI scale since step 151)
+MM_D = 110      # px past the marking menu ring (Maya radius 55 x UI scale)
 VEC = {"N": (0, 1), "E": (1, 0), "S": (0, -1), "W": (-1, 0), "SW": (-0.7071, -0.7071)}
 
 
@@ -5123,7 +5123,7 @@ def cs_reset(from_object=True):
         C["obname"] = ob.name
         select_only(ob)
         # frame it (Maya F): the strokes need edges long enough on screen for 4 px samples with 6 px corner
-        # margins, and the view beside the solid dock (step 112) draws the cube smaller than the old overlapped one
+        # margins, and the view beside the solid dock draws the cube smaller than the old overlapped one
         with override():
             bpy.ops.allset.frame()
     else:
@@ -5388,7 +5388,7 @@ def _m60_maya():
 
 @named("m60_back")
 def _m60_back():
-    # the Maya workspace goes once the window has left it (a timer, step 118)
+    # the Maya workspace goes once the window has left it (a timer)
     if wait(_m60_back, lambda: not sw().is_on() and sw().WORKSPACE not in bpy.data.workspaces, limit=20):
         return
     names = [w.name for w in bpy.data.workspaces]

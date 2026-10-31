@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 168 Maya option windows of the Modify menu: Convert > Geometry to Bounding Box ❒.
+"""Maya option windows of the Modify menu: Convert > Geometry to Bounding Box ❒.
 
 Same spec as operators/option_windows.py (``F`` fields, ``Window`` = one ``allset.opt_<key>`` operator;
 option_windows._extend appends ``WINDOWS``). Title, labels, button and default values match Maya's

@@ -1,11 +1,11 @@
-"""Step 267 (Issue #177, Blender 5.1 + a 2-button mouse with a wheel): Alt+LMB tumble with Emulate 3 Button Mouse off / on.
+"""Issue #177 ( Blender 5.1 + a 2-button mouse with a wheel): Alt+LMB tumble with Emulate 3 Button Mouse off / on.
 
 1. Emulate off: Alt+LMB drag tumbles (the view rotation changes).
 2. Emulate on: Blender turns Alt+LMB into a plain MMB without Alt before any keymap sees it; with Alt still held
    (asked from the OS) the kit tumbles anyway (#242) (wm_event_system.cc
    wm_eventemulation :5637-5658, only on the GHOST path :6226 / :6276; ``event_simulate`` skips it), so the add-on only ever
    gets that MMB drag. Sent here as such: no tumble.
-3. Emulate on: the kit's hint is in the welcome dialog paragraphs and in the add-on preferences (read only, step 260).
+3. Emulate on: the kit's hint is in the welcome dialog paragraphs and in the add-on preferences (read only).
 Shots (ALLSET_GUI_SHOTS): gui_step267_welcome_emulate.png."""
 
 import os

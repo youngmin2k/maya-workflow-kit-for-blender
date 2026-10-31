@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya File > Game Exporter (step 225, Issue #135): the Model / Animation export window with
-Maya's Animation Clips list, written with the kit's Maya FBX preset (operators/file_io.py, step 222 rig post-process).
+"""Maya File > Game Exporter (Issue #135): the Model / Animation export window with
+Maya's Animation Clips list, written with the kit's Maya FBX preset (operators/file_io.py, with its rig post-process).
 
 Maya 2026 (the Game Exporter window):
 
@@ -15,8 +15,8 @@ Maya 2026 (the Game Exporter window):
   per-clip loop never clears the take list, so a later clip file repeats the earlier clips' takes — the
   kit writes only the clip's own takes (engines would import those extra clips).
 
-Blender (step 231, Issue #140): each clip is the scene's timeline take written by the kit's Maya FBX preset (the
-step 222 rig rewrite included, so a clip file has Export Selection's joints), one write per clip with the scene's
+Blender (Issue #140): each clip is the scene's timeline take written by the kit's Maya FBX preset (the
+rig rewrite included, so a clip file has Export Selection's joints), one write per clip with the scene's
 range set to the clip; several clips of one file are merged into it as takes (``merge_takes``). Blender's NLA-strip
 takes are not used: they evaluate one object at a time (``_ClipTimeline``).
 """
@@ -36,8 +36,8 @@ FACTORY = {"export_type": 'MODEL', "export_set": 'ALL', "model_file_mode": 'SING
            "include_children": False, "input_connections": False, "up_axis": 'Y', "include_cameras": True,
            "include_lights": True}
 # What a user sees: the window applies its default presets the first time it opens
-# — Model tab "Model Default", Animation Clips tab "Anim Default" (step 266 independent
-# check, both presets applied to a fresh node). The kit keeps the per-tab values.
+# — Model tab "Model Default", Animation Clips tab "Anim Default" (both
+# presets applied to a fresh node). The kit keeps the per-tab values.
 PRESET_MODEL = {"embed_media": True, "include_children": True, "input_connections": True}
 PRESET_ANIM = {"file_split": 'PER_CLIP', "embed_media": True, "include_cameras": False, "include_children": False,
                "input_connections": False}
@@ -102,7 +102,7 @@ def value(s, name):
 # --- clips -------------------------------------------------------------------------------------------------------
 
 def playback_range(scene):
-    """Maya's playback range = the kit's preview range when it is on, else the scene range (step 20)."""
+    """Maya's playback range = the kit's preview range when it is on, else the scene range."""
     if scene.use_preview_range:
         return float(scene.frame_preview_start), float(scene.frame_preview_end)
     return float(scene.frame_start), float(scene.frame_end)
@@ -182,7 +182,7 @@ ANIM_IDS = (b"AnimationStack", b"AnimationLayer", b"AnimationCurveNode", b"Anima
 class _ClipTimeline:
     """The scene's timeline = one clip while Blender's writer bakes it (its scene take, not NLA strips).
 
-    Step 231 (Issue #140): the writer's NLA-strip takes evaluate one object's strip at a time (export_fbx_bin.py
+    Issue #140: the writer's NLA-strip takes evaluate one object's strip at a time (export_fbx_bin.py
     ``bake_anim_use_nla_strips``: every other strip muted, every active action removed), so a joint chain driven
     by another object (an IK handle's keys, a constraint target) was written without that object's animation.
     The timeline take evaluates the whole scene, like Maya's exporter, and leaves the
@@ -298,7 +298,7 @@ def merge_takes(path, parts, clips):
 
 
 class _Scope:
-    """What a kit export leaves out (file_io ``_FileDialog``, steps 164 / 211 / 226): Export All = no startup
+    """What a kit export leaves out (file_io ``_FileDialog``): Export All = no startup
     cameras, never control shapes; Export Selection with Include Children = the selection with its hierarchy."""
 
     def __init__(self, context, selection, children):
@@ -421,7 +421,7 @@ class ALLSET_OT_game_clip(bpy.types.Operator):
         return {'FINISHED'}
 
 
-KIND = "GAME_EXPORTER"      # ui/marked_window.KINDS (step 263)
+KIND = "GAME_EXPORTER"      # ui/marked_window.KINDS
 
 
 def _row(layout, label):
@@ -484,13 +484,13 @@ class ALLSET_OT_game_exporter(bpy.types.Operator):
     bl_label = "Game Exporter"
 
     def execute(self, context):
-        # step 263 (Issue #154): Maya's Game Exporter is an ordinary floating window that stays open while you work
+        # Issue #154: Maya's Game Exporter is an ordinary floating window that stays open while you work
         # (a floating Maya window, B6) — a kit window, no longer a popup a click outside closed
         from ..ui import marked_window
         s = settings(context)
         if not s.export_path:
             from . import project
-            s.export_path = project.ensure_root(context)   # the default project's folders exist (step 240 QA H1-1)
+            s.export_path = project.ensure_root(context)   # the default project's folders exist
         if context.window is None:
             return {'CANCELLED'}
         if marked_window.open_window(context, KIND) is None:
@@ -521,7 +521,7 @@ class ALLSET_PT_game_exporter(bpy.types.Panel):
     bl_idname = "ALLSET_PT_game_exporter"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"            # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"            # = drawn by the Properties Tool tab
     bl_label = "Game Exporter"
     bl_options = {'HIDE_HEADER'}
     bl_order = -300

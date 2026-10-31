@@ -1,11 +1,11 @@
-"""Clip compositing and encoding (steps 123, 124): frames + timeline.json from tools/marketing/clips.py -> MP4 / GIF /
+"""Clip compositing and encoding: frames + timeline.json from tools/marketing/clips.py -> MP4 / GIF /
 trailer.
 
     python tools/marketing/clip_compose.py [--only NAME,...] [--no-trailer] [--no-gif]
 
 Each output frame (1920 x 1080, 30 fps) = the window picture in the shot rect (85 %) + a caption band below it (accent tick, clip title, the caption of the moment, key chips, one-line lockup)
 + the mouse cursor (drawn here: event simulation never moves the OS cursor). Frames are synthesised with Pillow and
-piped raw into ffmpeg (no PNG sequence on disk). Step 124 motion:
+piped raw into ffmpeg (no PNG sequence on disk). Motion:
 
 - Speed: timeline time / ``speed`` (content.json clip field, default 1.35), per caption group, so a caption still stays
   >= CAPTION_MIN (1.2 s) on screen (a short group plays slower, never below 1x). Cursor moves stay eased (drags, i.e.
@@ -31,7 +31,7 @@ piped raw into ffmpeg (no PNG sequence on disk). Step 124 motion:
   and lockup rise in, headline, the ``highlight`` CTA pill pops, then a held, gently breathing state).
 - Check: per output the longest near-static run (mean |frame - previous| < STATIC_DIFF of 255) is reported; >= 2 s
   fails, as do the size / length limits. First frames go to tmp/marketing/posters/.
-ffmpeg: PATH, or $FFMPEG, or the hermes build named in the step 123 request.
+ffmpeg: PATH, or $FFMPEG, or the hermes build.
 """
 
 import argparse

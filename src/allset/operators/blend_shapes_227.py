@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 227 L15: blendShape in-between and combination targets on shape keys.
+"""L15: blendShape in-between and combination targets on shape keys.
 
 Maya (``inbetween_one`` / ``inbetween_two`` /
 ``combination_two`` / ``combination_three``):

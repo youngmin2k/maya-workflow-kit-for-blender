@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Skin menu tools of step 199: Move Weights to Influences, Normalize Weights > Disable / Enable / Enable Post,
+"""Maya Skin menu tools: Move Weights to Influences, Normalize Weights > Disable / Enable / Enable Post,
 Export Weight Maps... / Import Weights Maps..., Substitute Geometry, Bake Deformation to Skin Weights...
 
 Every rule here follows Maya 2022.
@@ -165,7 +165,7 @@ def picked_joints(arm):
     """Selected joints of ``arm`` as (source, targets): Maya takes the first selected joint as the source; Blender
     keeps no selection order, so with two joints the active (last picked) one is the target, with more the joints
     other than the active one come in skeleton order and the first is the source."""
-    from ..ui import channel_box      # Bone.select is gone in 5.x: the shim (step 200)
+    from ..ui import channel_box      # Bone.select is gone in 5.x: the shim
     sel = [pb.name for pb in arm.pose.bones if channel_box.bone_selected(pb)]
     act = arm.data.bones.active
     act = act.name if act is not None and act.name in sel else None

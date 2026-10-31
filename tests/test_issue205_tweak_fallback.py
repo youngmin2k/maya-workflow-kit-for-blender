@@ -38,8 +38,8 @@ def test_tweak_fallback_drag_is_the_select_box_marquee():
 
 
 def test_tweak_fallback_listed_with_the_marquee_keymaps():
-    assert "3D View Tool: Tweak (fallback)" in patches.SELECT_DRAG_KEYMAPS          # select-through (step 30)
-    assert "Image Editor Tool: Uv, Tweak (fallback)" in patches.UV_SHELL_DRAG_KEYMAPS   # UV shell box (step 256)
+    assert "3D View Tool: Tweak (fallback)" in patches.SELECT_DRAG_KEYMAPS          # select-through
+    assert "Image Editor Tool: Uv, Tweak (fallback)" in patches.UV_SHELL_DRAG_KEYMAPS   # UV shell box
 
 
 def test_lasso_and_circle_fallbacks_unchanged():

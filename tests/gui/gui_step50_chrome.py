@@ -1,4 +1,4 @@
-"""Step 50 in a real UI: Maya editor chrome — Channel Box / Layer Editor menu bars, Outliner header,
+"""In a real UI: Maya editor chrome — Channel Box / Layer Editor menu bars, Outliner header,
 Time Slider buttons in the timeline sidebar, Range Slider row; screenshots."""
 
 import os
@@ -46,7 +46,7 @@ def s_check():
     tl = timeline()
     regions = {r.type: r for r in tl.regions}
     ui = regions.get('UI')
-    # Blender 5.x loads the template's timeline sidebar 1 px wide: the buttons go to the header (step 53)
+    # Blender 5.x loads the template's timeline sidebar 1 px wide: the buttons go to the header
     ts = import_module(MODULE + ".ui.time_slider")
     check(f"5.x: Time Slider buttons in the header instead ({ui and (ui.x, ui.width)})",
           not ts.has_slider_panel(tl.spaces.active, tl))

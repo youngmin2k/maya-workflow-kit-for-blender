@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Graph Editor / Dope Sheet curve commands of step 203 (Issue #110).
+"""Graph Editor / Dope Sheet curve commands (Issue #110).
 
 - Curves > Change Rotation Interp (Maya ``cmds.rotationInterpolation(convert=...)`` on the curves of
   the selected keys + the highlighted channels): one rotate curve converts the node's three. Every mode but

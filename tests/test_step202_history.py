@@ -1,4 +1,4 @@
-"""Step 202 lane X (issue #109, audit 15 NB7-NB9): Delete Non-Deformer History keeps the kit's Geometry Nodes deformers
+"""Lane X (issue #109, audit 15 NB7-NB9): Delete Non-Deformer History keeps the kit's Geometry Nodes deformers
 (wire, skin weight sum), deleting a Normal / Tangent constrained object or its constraints takes the hidden helper
 empty with it, Select / Delete All by Type > Wires, nCloths, nParticles, nRigids act on the nodes the kit makes.
 Maya: Non-Deformer History keeps deformers; Select / Delete All by Type
@@ -171,7 +171,7 @@ def test_non_deformer_history_keeps_the_weight_sum():
     assert st.is_part(cube.modifiers["skinCluster1WeightSum"])
     assert skin.normalize_mode(cube) == "NONE", "the normalization mode stays"
     assert len(cube.data.vertices) > 8
-    # weight sum 0.6 under the skin: the evaluated points are scaled by 0.6 about the world origin (Maya, step 199)
+    # weight sum 0.6 under the skin: the evaluated points are scaled by 0.6 about the world origin (Maya)
     rest = [v.co.copy() for v in cube.data.vertices]
     ev = _evaluated(cube)
     assert max((e - r * 0.6).length for e, r in zip(ev, rest)) < 1e-3

@@ -13,7 +13,7 @@ bpy.utils.user_resource('CONFIG') is inside it). Old zip default = the published
  4 session with 0.8.0: prefs / shelf / hotkey / Maya mode kept? the 0.5.0 .blend opens without tracebacks and its
    joint positions / key values / weights equal the 0.5.0 truth
  5 Disable -> Enable (0.8.0) snapshot, then Remove from inside Blender (disable(default_set) + package_uninstall)
- 6 final snapshot == factory snapshot of step 0 (keyconfig, inputs / view / edit prefs, add-ons, handlers, types)
+ 6 final snapshot == factory snapshot taken first (keyconfig, inputs / view / edit prefs, add-ons, handlers, types)
 Output tmp/qa240/qa_e.json; mismatches -> tmp/qa240/findings.jsonl.
 The script runs itself inside Blender as the probe (``-- <mode> OUT.json``).
 """
@@ -459,7 +459,7 @@ else:
         t_old, t_new = (used or {}).get("truth"), (after or {}).get("truth")
         diffs = [k for k in (t_old or {}) if (t_new or {}).get(k) != t_old[k]]
         if "scene_kit_props" in diffs and set(t_old["scene_kit_props"]) <= set(t_new.get("scene_kit_props", [])):
-            diffs.remove("scene_kit_props")     # by design: load_post scene_carry adds kit scene settings (step 138)
+            diffs.remove("scene_kit_props")     # by design: load_post scene_carry adds kit scene settings
             res["by_design"] = {"scene_kit_props_added_on_load": sorted(set(t_new["scene_kit_props"])
                                                                         - set(t_old["scene_kit_props"]))}
         check("old_blend_rig_and_keys_equal", t_old and t_new and not diffs,

@@ -1,11 +1,11 @@
-"""Scene helpers shared by tools/marketing/shots.py (step 122 stills) and tools/marketing/clips.py (step 123 clips).
+"""Scene helpers shared by tools/marketing/shots.py (stills) and tools/marketing/clips.py (clips).
 
 Runs inside a GUI Blender started with --enable-event-simulate (tests/gui/sim.py). The scene is built from the
 licensed models in the local assets folder (tools/marketing/assets.json, docs/distribution/marketing/CREDITS.md):
 Blender Studio's Rain, Pack Bot and Security Bot rigs, the Blender 4.5 splash scene DOGWALK, Cube Diorama props and
-the Poly Haven Studio Small 09 HDRI (step 125; local asset inventory).
+the Poly Haven Studio Small 09 HDRI (local asset inventory).
 
-Viewport background (step 142, #41; replaces step 125's theme gradient): the kit ships no theme since step 130 (#40),
+Viewport background (#41): the kit ships no theme (#40),
 so these captures use Blender's factory theme and never write one (``theme_unchanged`` is checked with every capture).
 The Maya layout viewport is flat grey #5c5c5c, which without a theme is view / scene
 data: Solid views get the view's own background colour (``View3DShading.background_type = 'VIEWPORT'``, what the
@@ -124,7 +124,7 @@ def look(location, rot, distance):
     rv3d.view_distance = distance
 
 
-# ------------------------------------------------------------------------------------------------ step 125 assets
+# ------------------------------------------------------------------------------------------------------ assets
 # Blender Studio / blender.org files (tools/marketing/assets.json, local asset inventory,
 # docs/distribution/marketing/CREDITS.md). Collections are appended at scale 1 (the files are metric, the template is
 # metres with cm display); the files' own cameras / lights are not used; widget / helper collections stay hidden.
@@ -603,7 +603,7 @@ def maya_mode_on():
 
 def theme_signature():
     """A hash of every value of the active theme (Blender's factory theme in the sandbox): the captures must never
-    write a theme (step 130, #40; step 142, #41)."""
+    write a theme (#40, #41)."""
     import hashlib
     out = []
 
@@ -672,7 +672,7 @@ def LOOK_KEEPER():
 
 
 def maya_look():
-    """The flat #5c5c5c viewport background without a theme (step 142, #41), no tooltips / in-view messages in
+    """The flat #5c5c5c viewport background without a theme (#41), no tooltips / in-view messages in
     the pictures. The keeper timer re-applies it to views made later; the theme is remembered so captures can check
     that nothing wrote it."""
     if LOOK_STATE["theme"] is None:

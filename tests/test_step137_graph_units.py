@@ -1,4 +1,4 @@
-"""Step 137 lane GRAPH (#66): the Graph Editor value numbers in display units. Blender's label step / format
+"""Lane GRAPH (#66): the Graph Editor value numbers in display units. Blender's label step / format
 (view2d_draw.cc ``select_major_distance`` / ``view_to_string__value``) reproduced bpy-free, the display labels for the
 cm scene, the "every shown curve is a length" rule and the handler lifecycle.
 GUI side (positions on Blender's grid lines, covering): tests/gui/gui_step137_graph_units.py."""

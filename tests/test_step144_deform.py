@@ -1,4 +1,4 @@
-"""Step 144 lane DEFORM (#34): Maya Deform menu items create Maya-like deformers (operators/deformers.py) with
+"""Lane DEFORM (#34): Maya Deform menu items create Maya-like deformers (operators/deformers.py) with
 Maya option windows (operators/option_windows_deform.py), Channel Box INPUTS rows and Paint Weights targets.
 
 The Deform option windows (fields, defaults) and the deformers created with default options
@@ -107,8 +107,8 @@ PATHS = {
     "deform_sine": "Deform/Nonlinear/Sine", "deform_squash": "Deform/Nonlinear/Squash",
     "deform_twist": "Deform/Nonlinear/Twist", "deform_wave": "Deform/Nonlinear/Wave", "deform_texture": "Deform/Texture",
 }
-# Wire / Paint Weights > Wire work since step 169 (tests/test_step169_deform.py)
-# step 205 mapped Tension / Solidify / Morph / Jiggle / Sculpt and their Paint Weights (operators/deformers_205a / _205b)
+# Wire / Paint Weights > Wire work (tests/test_step169_deform.py)
+# Mapped: Tension / Solidify / Morph / Jiggle / Sculpt and their Paint Weights (operators/deformers_205a / _205b)
 GREYED = ("Deform/Wrinkle",)
 
 

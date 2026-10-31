@@ -1,4 +1,4 @@
-"""Step 139 lane EDIT in a real UI: the Maya menu items Edit Mesh > Connect / Merge / Symmetrize and Mesh > Smooth run in
+"""In a real UI: the Maya menu items Edit Mesh > Connect / Merge / Symmetrize and Mesh > Smooth run in
 component mode through allset.menu_item (the kit menus' own operator) give Maya's counts;
 Symmetrize waits for an edge click (Esc leaves the mesh alone, a click on the
 seam edge mirrors the selected side)."""

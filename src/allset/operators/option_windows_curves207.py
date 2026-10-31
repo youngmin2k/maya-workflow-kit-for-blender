@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 207: Maya option windows of Curves > Bend / Curl / Scale Curvature (same spec as operators/option_windows.py).
+"""Maya option windows of Curves > Bend / Curl / Scale Curvature (same spec as operators/option_windows.py).
 Titles, labels and default values match Maya's Bend / Curl / Scale Curvature Options windows."""
 
 import bpy

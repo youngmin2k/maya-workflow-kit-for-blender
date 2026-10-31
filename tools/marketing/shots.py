@@ -1,4 +1,4 @@
-"""In-Blender part of tools/marketing/make_marketing.py (step 122): raw 1920 x 1080 GUI shots for the captioned
+"""In-Blender part of tools/marketing/make_marketing.py: raw 1920 x 1080 GUI shots for the captioned
 feature screens and the key visuals.
 
 Runs in a GUI Blender on a clean sandbox with the extension installed, with --enable-event-simulate
@@ -8,7 +8,7 @@ DOGWALK splash set (hero, hotbox), Pack Bot (components, Modeling Toolkit), Secu
 Attribute Editor, pivot) and Rain (marking menus, menus, skin weights, animation), lit by the Studio Small 09 HDRI in
 Material Preview over a flat #5c5c5c viewport grey (no theme, #41). Each shot is taken one tick after the UI change
 (``screen.screenshot`` shows the previous frame). meta.json records UI rects (top-down window pixels) for callouts.
-The approach (event-driven steps, menus opened from mid-window, logo painted over) follows the step 117 listing shot script (removed in step 125: nothing ran it since step 122);
+The approach (event-driven steps, menus opened from mid-window, logo painted over) follows an earlier listing shot script, since removed;
 the aborted 10-19 attempt (git stash) was read for the scene recipes only.
 """
 
@@ -86,7 +86,7 @@ def shot(name, extra=None, plain_blender=False):
 
 def hide_logo(path):
     """Paint the top bar's Blender menu icon over with the bar colour (no Blender logo in the images,
-    extensions.blender.org terms 2.2), as the step 117 listing shots did."""
+    extensions.blender.org terms 2.2), as the earlier listing shots did."""
     import numpy as np
     img = bpy.data.images.load(path)
     w, h = img.size
@@ -136,10 +136,10 @@ def s_before_shot():
 @step
 def s_opt_in():
     setup()   # opts in to Maya mode (what the dialog's button does)
-    sim.load_maya_layout()   # the Maya layout startup.blend in the extension (step 130)
+    sim.load_maya_layout()   # the Maya layout startup.blend in the extension
 
 
-# ------------------------------------------------------------------------------------------------ helpers (step 125)
+# ------------------------------------------------------------------------------------------------ helpers
 def settle(n=2):
     for _ in range(n):
         step(wait)
@@ -169,7 +169,7 @@ def tool(name):
 @step
 def s_dog():
     kc = bpy.context.window_manager.keyconfigs.active
-    check("Maya keymap on in the Maya layout (add-on items, step 130)",
+    check("Maya keymap on in the Maya layout (add-on items)",
           kc is not None and sys.modules[MODULE + ".keymap"].is_applied())
     maya_look()
     clear_objects()
@@ -245,7 +245,7 @@ def s_pack():
         bmesh.update_edit_mesh(t.data)
         bpy.ops.wm.tool_set_by_id(name="builtin.move")
     # the whole bot (about 1 m tall), not the box of its evaluated parts: in edit mode those boxes put the camera
-    # at one leg (step 125 review)
+    # at one leg
     base = C["pack_rig"].matrix_world.translation
     look(base + Vector((0, 0, 0.5)), (72, 0, -50), 2.9)
     mouse_corner()

@@ -1,4 +1,4 @@
-"""Step 196 in a real UI: the option boxes of Create > Polygon Primitives > Gear and Control > Create Character Set open
+"""In a real UI: the option boxes of Create > Polygon Primitives > Gear and Control > Create Character Set open
 Maya's option windows instead of Blender's Adjust Last
 Operation; screenshots (ALLSET_GUI_SHOTS)."""
 

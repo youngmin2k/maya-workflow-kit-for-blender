@@ -1,4 +1,4 @@
-"""Step 220 (Issue #139, user report): Snap to Grid / Points looked on but Move didn't snap. Cause: Step Snap Off
+"""Issue #139 (user report): Snap to Grid / Points looked on but Move didn't snap. Cause: Step Snap Off
 (Tool Settings, also Reset Tool) cleared Blender's use_snap_translate ("Affect: Move"), which switches *every* snap
 mode off for Move. GUI: tests/gui/gui_step220_snap.py (drag the Move manipulator)."""
 
@@ -44,7 +44,7 @@ def test_step_snap_off_first_then_grid_button():
 def test_broken_file_state_is_healed_by_the_button_and_load():
     ts = _ts()
     ts.use_snap, ts.snap_elements = True, {'GRID'}
-    ts.use_snap_translate = False                       # a file saved before step 220
+    ts.use_snap_translate = False                       # a file saved by an older kit
     assert snap_align.heal_affect(ts) == 1 and ts.use_snap_translate
     ts.use_snap_translate = False
     status_line.toggle_snap(ts, "POINT")                 # any snap button turned on heals it too

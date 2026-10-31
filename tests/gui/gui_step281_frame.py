@@ -1,4 +1,4 @@
-"""Step 281 (#192) in a real UI: Graph Editor F / A frame Maya's rectangle (operators/graph_frame.py) and View > Auto
+"""#192: in a real UI: Graph Editor F / A frame Maya's rectangle (operators/graph_frame.py) and View > Auto
 Frame refits the value axis only. pCube1 Translate Y keys (1, -10) (30, 40) and Scale X keys (1, 0) (5, 4) (10, 6)
 (15, 2) (25, 8), linear: A = time [-1.9, 32.9], value [-22.5, 52.5]; F on Scale X key 25 = time [14, 26], value
 [0.5, 9.5]; F with no key selected = A. The canvas between the time ruler strip and the scroll bar shows those

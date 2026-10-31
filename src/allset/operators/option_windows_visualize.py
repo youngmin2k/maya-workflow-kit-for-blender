@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 171 Maya windows of the Visualize menu: Create Animation Snapshot ❒ and the Ghosting Editor.
+"""Maya windows of the Visualize menu: Create Animation Snapshot ❒ and the Ghosting Editor.
 
 Same spec as operators/option_windows.py (``F`` fields, ``Window`` = one ``allset.opt_<key>`` operator;
 option_windows._extend appends ``WINDOWS``). Titles, labels and buttons follow Maya

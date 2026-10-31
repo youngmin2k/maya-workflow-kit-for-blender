@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya marking menus as plain data (step 8).
+"""Maya marking menus as plain data.
 
 Positions and labels follow Maya's own marking menus. Re-implemented: only labels, radial
 positions and the Blender action (same value forms as ``ui/menu_map.py``:
@@ -41,14 +41,14 @@ def _mod(kind):
 
 
 def _create(kind):
-    # Maya name and size in Maya units (operators/create.py, step 21).
+    # Maya name and size in Maya units (operators/create.py).
     return ("allset.create", {"kind": kind})
 
 
 def _orient(kind, slot=0):
     # Not transform.select_orientation: invoked from a menu it opens its own enum popup (GUI test).
     # W/E/R menus set their own tool's slot (1 move, 2 rotate, 3 scale): Maya keeps one axis mode
-    # per tool, Move = World and Rotate/Scale = Object by default (step 59).
+    # per tool, Move = World and Rotate/Scale = Object by default.
     return ("wm.context_set_enum", {"data_path": f"scene.transform_orientation_slots[{slot}].type", "value": kind})
 
 
@@ -60,20 +60,20 @@ def _comp(kind):
     return ("allset.mm_component", {"type": kind})
 
 
-MULTI_CUT = ("tool", "allset.multi_cut_tool", True)     # step 129
+MULTI_CUT = ("tool", "allset.multi_cut_tool", True)
 MERGE_CENTER = ("mesh.merge", {"type": 'CENTER'})
-TARGET_WELD = ("tool", "allset.target_weld_tool", True)   # step 64
+TARGET_WELD = ("tool", "allset.target_weld_tool", True)
 CREASE = ("tool", "allset.crease_tool", True)
 PRESERVE_UVS = ("wm.context_toggle", {"data_path": "scene.tool_settings.use_transform_correct_face_attributes"})
 PRESERVE_CHILDREN = ("wm.context_toggle", {"data_path": "scene.tool_settings.use_transform_skip_children"})
 TOOL_SETTINGS = ("allset.editor_toggle", {"editor": 'TOOL_SETTINGS'})
-SMART_DUPLICATE = ("allset.manip_option", {"option": 'SMART_DUPLICATE'})  # step 22
-SMART_EXTRUDE = ("allset.manip_option", {"option": 'SMART_EXTRUDE'})      # step 26
+SMART_DUPLICATE = ("allset.manip_option", {"option": 'SMART_DUPLICATE'})
+SMART_EXTRUDE = ("allset.manip_option", {"option": 'SMART_EXTRUDE'})
 
 
 def _item(path):
     """Run Maya main-menu item ``path`` exactly like the menu (``allset.menu_item``: component / object mode rules,
-    Maya warnings, option window as the option box); step 136."""
+    Maya warnings, option window as the option box)."""
     return ("item", path)
 
 
@@ -83,7 +83,7 @@ def _on_object(path):
 
 
 def _overlay(prop):
-    # Maya's Soft / Hard Edge and Normals display toggles = the 3D View's edit-mode overlays (check boxes, step 136).
+    # Maya's Soft / Hard Edge and Normals display toggles = the 3D View's edit-mode overlays (check boxes).
     return ("wm.context_toggle", {"data_path": f"space_data.overlay.{prop}"})
 
 
@@ -103,7 +103,7 @@ def _sym(mode):
 
 
 # Maya's Symmetry submenu, shown by the Move / Rotate / Scale
-# option menus at N; every item is a check box (operators/symmetry.py, step 36).
+# option menus at N; every item is a check box (operators/symmetry.py).
 SYMMETRY = ("Symmetry", Sub(radial={
     "N": ("Symmetry", _sym('ON')),
     "W": ("World", _sym('ABOUT_WORLD')),
@@ -114,8 +114,8 @@ SYMMETRY = ("Symmetry", Sub(radial={
     "SE": ("Z Axis", _sym('AXIS_Z')),
 }))
 
-# Material items at the end of the RMB object list (Maya builds them when the RMB marking menu opens,
-# step 29). ``rmb``: with nothing selected
+# Material items at the end of the RMB object list (Maya builds them when the RMB marking menu opens).
+# ``rmb``: with nothing selected
 # they act on the object the menu was opened on, like Maya.
 _FAVORITES = (("Lambert", 'LAMBERT'), ("Blinn", 'BLINN'), ("Phong", 'PHONG'),
               ("Standard Surface", 'STANDARD_SURFACE'))
@@ -139,7 +139,7 @@ def _material_items():
 # NE "Object Mode".
 
 # The list under the ring, Maya 2022 order
-# (step 52). The first row is the object's name
+#. The first row is the object's name
 # (``OBJECT_TITLE`` is replaced by it when the menu opens). An empty ``Sub`` is a greyed submenu: Maya's
 # dependency-graph / metadata / set editors have no Blender counterpart here.
 OBJECT_TITLE = "<object>..."
@@ -207,7 +207,7 @@ RMB_MESH = MarkingMenu(
         "W": ("Vertex", _comp('VERT')),
         "S": ("Face", _comp('FACE')),
         # A submenu, like Maya 2022's: the component at its own position, UV Shell at S (like Maya 2022's
-        # RMB marking menu); both open the UV Editor (step 66).
+        # RMB marking menu); both open the UV Editor.
         "E": ("UV", Sub(radial={"E": ("UV", ("allset.uv_component", {"mode": 'UV'})),
                                 "S": ("UV Shell", ("allset.uv_component", {"mode": 'SHELL'}))})),
         "SW": ("Vertex Face", None),
@@ -252,7 +252,7 @@ def with_object_name(menu, name):
     return MarkingMenu(menu.name, menu.label, menu.source, menu.radial, items, menu.options)
 
 
-# --- DG Traversal / Inputs / Outputs (step 165) ------------------------
+# --- DG Traversal / Inputs / Outputs ------------------------
 # ``nodes`` (marking/rmb_nodes.py builds it, bpy-free here): {"object": name, "inputs": [(type label, owner, key)],
 # "outputs": [...], "history": [(node name, owner, key)], "future": [...]}; owner = the object holding the node,
 # key = its Attribute Editor tab key. Maya's Inputs / Outputs submenus: Select / Enable / Disable All, the nodes by type nice name
@@ -501,7 +501,7 @@ SHIFT_VERTEX = MarkingMenu(
     "SHIFT_VERTEX", "Vertex Tools", "maya",
     radial={
         "S": ("Extrude Vertex", ("v3d", "mesh.extrude_vertices_move", {})),
-        "E": ("Chamfer Vertex", _item("Edit Mesh/Chamfer Vertices")),  # step 139
+        "E": ("Chamfer Vertex", _item("Edit Mesh/Chamfer Vertices")),
         "SW": ("Delete Vertex", "mesh.dissolve_verts"),
         "SE": ("Vertex Normals", Sub(radial={
             "S": ("Toggle Vertex Normal Display", _overlay("show_vertex_normals")),
@@ -510,7 +510,7 @@ SHIFT_VERTEX = MarkingMenu(
             "SE": ("Set Normals to Face", "mesh.set_normals_from_faces"),
         }, options={"Average Normals", "Set Normals to Face"})),
         "N": ("Merge Vertices", Sub(radial={
-            "NE": ("Merge Vertices", _item("Edit Mesh/Merge")),        # polyMergeVert (step 139)
+            "NE": ("Merge Vertices", _item("Edit Mesh/Merge")),        # polyMergeVert
             "N": ("Merge Vertices To Center", MERGE_CENTER),
             "S": ("Target Weld Tool", TARGET_WELD),
         }, options={"Merge Vertices", "Target Weld Tool"})),
@@ -520,7 +520,7 @@ SHIFT_VERTEX = MarkingMenu(
     },
     items=[
         ("Crease Tool", CREASE),
-        ("Connect Components", _item("Edit Mesh/Connect")),  # step 139
+        ("Connect Components", _item("Edit Mesh/Connect")),
         ("Detach Components", _item("Edit Mesh/Detach")),
         ("Transform Component", TRANSFORM_COMPONENT),
         ("Connect Tool", CONNECT_TOOL),
@@ -541,7 +541,7 @@ SHIFT_EDGE = MarkingMenu(
     radial={
         "S": ("Extrude Edge", ("v3d", "mesh.extrude_edges_move", {})),
         "SW": ("Delete Edge", "mesh.dissolve_edges"),
-        "E": ("Bevel Edge", _item("Edit Mesh/Bevel")),  # step 139
+        "E": ("Bevel Edge", _item("Edit Mesh/Bevel")),
         "SE": ("Soften/Harden Edges", SOFT_HARD),
         "N": ("Merge/Collapse Edges", Sub(radial={
             "NE": ("Merge Border Edges", "mesh.remove_doubles"),
@@ -569,7 +569,7 @@ SHIFT_EDGE = MarkingMenu(
         ("Bridge", "mesh.bridge_edge_loops"),
         ("Fill Hole", "mesh.fill_holes"),
         DIVIDER,
-        ("Connect Components", _item("Edit Mesh/Connect")),  # step 139
+        ("Connect Components", _item("Edit Mesh/Connect")),
         ("Detach Components", "mesh.edge_split"),
         ("Transform Component", TRANSFORM_COMPONENT),
         ("Connect Tool", CONNECT_TOOL),
@@ -586,10 +586,10 @@ SHIFT_FACE = MarkingMenu(
     "SHIFT_FACE", "Face Tools", "maya",
     radial={
         "N": ("Merge Faces To Center", MERGE_CENTER),
-        "S": ("Extrude Face", ("v3d", "allset.extrude", {})),  # step 65
+        "S": ("Extrude Face", ("v3d", "allset.extrude", {})),
         "SW": ("Wedge Face", _item("Edit Mesh/Wedge")),
         "NE": ("Poke Face", "mesh.poke"),
-        "E": ("Bevel Face", _item("Edit Mesh/Bevel")),  # step 139
+        "E": ("Bevel Face", _item("Edit Mesh/Bevel")),
         "SE": ("Face Normals", Sub(radial={
             "S": ("Toggle Face Normal Display", _overlay("show_face_normals")),
             "NE": ("Reverse Propagate", _poly('REVERSE_PROPAGATE')),     # polyNormal -normalMode 4
@@ -619,7 +619,7 @@ SHIFT_FACE = MarkingMenu(
         ("Duplicate Face", ("v3d", "mesh.duplicate_move", {})),
         ("Transform Component", TRANSFORM_COMPONENT),
         ("Connect Tool", CONNECT_TOOL),
-        ("Target Weld Tool", TARGET_WELD),  # step 64
+        ("Target Weld Tool", TARGET_WELD),
         DIVIDER,
         _mapping(),
         DIVIDER,
@@ -647,7 +647,7 @@ SHIFT_DEFAULT = MarkingMenu(
         ("Platonic Solid", _create('PLATONIC')),
         ("Pyramid", _create('PYRAMID')),
         ("Prism", _create('PRISM')),
-        ("Pipe", _create('PIPE')), ("Helix", _create('HELIX')), ("Gear", _create('GEAR')),   # step 190
+        ("Pipe", _create('PIPE')), ("Helix", _create('HELIX')), ("Gear", _create('GEAR')),
         ("Soccer Ball", _item("Create/Polygon Primitives/Soccer Ball")),
         DIVIDER,
         ("Super Ellipse", _item("Create/Polygon Primitives/Super Ellipse")),
@@ -672,7 +672,7 @@ _CS = "Select/Convert Selection/"
 
 CTRL_CONVERT = MarkingMenu(
     "CTRL_CONVERT", "Convert Selection", "maya",
-    # Every convert entry runs the Select menu item with the same runTimeCommand (step 141: menu and marking menu
+    # Every convert entry runs the Select menu item with the same runTimeCommand (menu and marking menu
     # agree); the convert-then-act items stay allset.mm_poly.
     radial={
         "N": ("To Edges", Sub(radial={
@@ -686,7 +686,7 @@ CTRL_CONVERT = MarkingMenu(
             "N": ("Shrink Selection Along Loop", _item("Select/Shrink Along Loop")),
         })),
         "E": ("To UVs", Sub(radial={
-            "E": ("To UVs", _item(_CS + "To UVs")),                         # UV selection = the UV Editor (step 66)
+            "E": ("To UVs", _item(_CS + "To UVs")),                         # UV selection = the UV Editor
             "NE": ("To UV Perimeter", _item(_CS + "To UV Perimeter")),
         })),
         "SE": ("Edge Loop Utilities", Sub(radial={
@@ -939,7 +939,7 @@ OPT_QUAD_DRAW = MarkingMenu(
 
 # --- A hold + LMB: SELECT_ALL -------------
 # Inputs/outputs = history in Maya; the Blender history equivalent (modifiers) has no
-# up/downstream selection, so W/E/N/S stay greyed (step 10).
+# up/downstream selection, so W/E/N/S stay greyed.
 
 SELECT_ALL = MarkingMenu(
     "SELECT_ALL", "Select All / History", "maya",
@@ -957,7 +957,7 @@ SELECT_ALL = MarkingMenu(
 
 # --- Shift+S hold + LMB: KEY_TANGENT (Maya's Keyframe / Tangent marking menu, Maya hotkey) --------------------
 # Maya shows the same layout inside and outside the Graph Editor; the actions pick the
-# Graph Editor's selected keys or the current-time keys themselves (operators/graph_keys.py, step 70).
+# Graph Editor's selected keys or the current-time keys themselves (operators/graph_keys.py).
 
 def _tan(kind):
     return ("allset.set_tangent", {"kind": kind})
@@ -1156,7 +1156,7 @@ HB_CENTER = MarkingMenu(
 
 HOTBOX_ZONES = {"N": HB_NORTH, "S": HB_SOUTH, "E": HB_EAST, "W": HB_WEST, "C": HB_CENTER}
 
-# --- UV Editor (step 66) ------------------------------------------------------------------------
+# --- UV Editor ------------------------------------------------------------------------
 
 def _uvc(mode):
     return ("allset.uv_component", {"mode": mode})
@@ -1187,7 +1187,7 @@ UV_MAPPING = Sub(radial={
     "S": ("Best Plane", _item("UV/Best Plane")),
     "SW": ("Spherical", ("v3d", "uv.sphere_project", {})),
     "W": ("Contour Stretch", _item("UV/Contour Stretch")),
-    "NW": ("Automatic", _item("UV/Automatic")),               # polyAutoProj (step 139)
+    "NW": ("Automatic", _item("UV/Automatic")),               # polyAutoProj
 }, options={"Planar", "Normal-Based", "Camera-Based", "Cylindrical", "Spherical", "Contour Stretch", "Automatic"})
 # SetMeshGrabUVTool: Maya grabs UVs from the 3D View; these menus open in the UV Editor, whose Grab tool does it.
 GRAB_UV = _item("UV Editor/Tools/Grab")
@@ -1200,11 +1200,11 @@ SHIFT_UV = MarkingMenu(
         "N": ("Mapping", UV_MAPPING),
         "NE": ("3D Grab UV Tool", GRAB_UV),
         "E": ("Sew UVs", "allset.uv_sew"),
-        "SE": ("Create UV Shell", "allset.uv_create_shell"),  # step 155
+        "SE": ("Create UV Shell", "allset.uv_create_shell"),
         "S": ("Merge UVs", "allset.uv_merge"),
-        "SW": ("Delete UVs", "allset.uv_delete"),  # step 155
+        "SW": ("Delete UVs", "allset.uv_delete"),
         "W": ("Cut UVs", "allset.uv_cut"),
-        "NW": ("3D Cut and Sew UV Tool", "allset.cut_sew_tool_set"),  # step 79
+        "NW": ("3D Cut and Sew UV Tool", "allset.cut_sew_tool_set"),
     },
     items=[("Auto Seams", _item("UV/Auto Seams")), *_UV_TAIL],
     options={"3D Grab UV Tool", "Merge UVs", "3D Cut and Sew UV Tool", "Auto Seams"})
@@ -1219,7 +1219,7 @@ SHIFT_UV_SHELL = MarkingMenu(
         "S": ("Auto Seams", _item("UV/Auto Seams")),
         "SW": ("Layout", "allset.uv_layout"),
         "W": ("Unfold", "allset.uv_unfold"),
-        "NW": ("3D Cut and Sew UV Tool", "allset.cut_sew_tool_set"),  # step 79
+        "NW": ("3D Cut and Sew UV Tool", "allset.cut_sew_tool_set"),
     },
     items=list(_UV_TAIL),
     options={"3D Grab UV Tool", "Optimize", "Flip", "Auto Seams", "Layout", "Unfold", "3D Cut and Sew UV Tool"})
@@ -1260,7 +1260,7 @@ def walk(sub, path):
 
 def label_walk(sub, path):
     """Like ``walk`` with label paths ("SHIFT_FACE/Face Normals/Reverse Propagate"): the keys of
-    ``ui/notices.MARKING`` (step 136)."""
+    ``ui/notices.MARKING``."""
     for pos in RADIALS:
         if pos in sub.radial:
             label, action = sub.radial[pos]

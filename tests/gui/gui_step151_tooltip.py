@@ -1,4 +1,4 @@
-"""Step 151 #98: resting the mouse on the Maya Move manipulator's X arrow shows no tooltip (Maya manipulators have
+"""#98: resting the mouse on the Maya Move manipulator's X arrow shows no tooltip (Maya manipulators have
 none; Blender showed "Move selected items"). The window right after the hover and ~1.6 s later must look the same
 next to the cursor (a tooltip is a box of text there). Shots with ``--shots``."""
 
@@ -39,7 +39,7 @@ def shot(name):
 
 
 def x_arrow_point(frac=0.7):
-    """Window point ``frac`` along the Move manipulator's X arrow (step 59's rule)."""
+    """Window point ``frac`` along the Move manipulator's X arrow."""
     area, region = view3d()
     c = bpy.data.objects["pCube1"].matrix_world.translation
     p = location_3d_to_region_2d(region, region.data, c)

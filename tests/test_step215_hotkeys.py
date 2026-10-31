@@ -1,4 +1,4 @@
-"""Step 215 (#121): Maya's Hotkey Editor (ui/hotkey_editor.py, keymap/hotkey_rows.py).
+"""#121: Maya's Hotkey Editor (ui/hotkey_editor.py, keymap/hotkey_rows.py).
 
 Rows = Maya's standard hotkeys (keymap/hotkey_data.py) joined with
 keymap/mapping.py; a kit binding is changed on the ``keyconfigs.user`` item (Blender's keymap editor does the same),

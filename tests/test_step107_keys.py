@@ -1,4 +1,4 @@
-"""Step 107: wrong daily keys fixed (Alt+R, Ctrl+I, F1, Alt+C, m, Ctrl+PgUp/PgDn, Ctrl+,), missing keys bound (menu
+"""Wrong daily keys fixed (Alt+R, Ctrl+I, F1, Alt+C, m, Ctrl+PgUp/PgDn, Ctrl+,), missing keys bound (menu
 bars, Alt+B, skin paint, sculpt, Graph Editor h / j, Time Slider bookmarks), every Maya hotkey row classified."""
 
 from importlib import import_module
@@ -136,7 +136,7 @@ def test_skin_paint_keys():
     assert k.properties.data_path_primary.endswith("brush.weight")
     k = _one("Weight Paint", 'B', "wm.radial_control")
     assert k.properties.data_path_primary.endswith("brush.size")
-    _one("Weight Paint", 'F', "allset.flood_weights", alt=True)     # step 218 A2: Maya Flood (Alt+F)
+    _one("Weight Paint", 'F', "allset.flood_weights", alt=True)     # Maya Flood (Alt+F)
     _one("Mesh", 'C', "allset.copy_vertex_weights", ctrl=True, alt=True)
     _one("Mesh", 'V', "allset.paste_vertex_weights", ctrl=True, alt=True)
     assert hasattr(bpy.types, "ALLSET_MT_paint_operation")
@@ -209,7 +209,7 @@ def test_other_keys():
     _one("Screen", 'F', "wm.search_menu", ctrl=True)
     _one("3D View", 'FIVE', "allset.panel_set", {"key": 'DEFAULT_MATERIAL'}, ctrl=True, shift=True)
     _one("UV Editor", 'SEVEN', "wm.context_toggle", {"data_path": "space_data.uv_editor.show_stretch"})
-    _one("UV Editor", 'FIVE', "allset.uv_display", {"mode": 'SHADED'})     # step 155: Maya 5 = shaded (set, not toggle)
+    _one("UV Editor", 'FIVE', "allset.uv_display", {"mode": 'SHADED'})     # Maya 5 = shaded (set, not toggle)
     assert "show_faces" in bpy.types.SpaceUVEditor.bl_rna.properties
     assert "show_stretch" in bpy.types.SpaceUVEditor.bl_rna.properties
 

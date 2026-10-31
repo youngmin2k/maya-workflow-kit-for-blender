@@ -1,8 +1,8 @@
-"""Background check for promotional captures (step 142, #41; was step 125's gradient check): every Maya-mode 3D
+"""Background check for promotional captures (#41; was a gradient check): every Maya-mode 3D
 viewport in a screenshot / key visual / clip frame must show the flat background #5c5c5c.
-The kit ships no theme since step 130 (#40): the captures use Blender's
+The kit ships no theme (#40): the captures use Blender's
 factory theme and the flat grey is view / scene data (tools/marketing/scene.py ``maya_look``), so Blender's factory
-theme background (#3d3d3d) or a theme gradient (step 125's #889db3 top) fail here.
+theme background (#3d3d3d) or a theme gradient (the old #889db3 top) fail here.
 
     python tools/marketing/bg_check.py <png> <x,y,w,h> [<x,y,w,h> ...]     (rects: 3D View WINDOW regions, top-down
                                                                          window pixels, as shots.py / clips.py record)
@@ -22,9 +22,9 @@ MAYA_FLAT = (0x5c, 0x5c, 0x5c)         # Maya-style flat viewport background
 BLENDER_FACTORY = (0x3d, 0x3d, 0x3d)   # Blender 4.5 factory theme 3D View background (what a missed view shows)
 
 # Thresholds. A capture passes when the top background (searched in the top TOP_BAND) is within DE_FLAT_MAX of
-# #5c5c5c. Step 142: Solid views with the view colour show #5c5c5c / #5d5d5d, Material Preview with the
+# #5c5c5c. Solid views with the view colour show #5c5c5c / #5d5d5d, Material Preview with the
 # marketing world #5a5a5a under AgX (dE00 0.8). Blender's factory #3d3d3d is dE00 10.6 away, a light grey
-# #a1a1a1 26, step 125's gradient top #889db3 27.
+# #a1a1a1 26, the old gradient top #889db3 27.
 DE_FLAT_MAX = 3.0
 TOP_BAND = 0.15
 STRIP_STEP = 10              # px between sampled strips (each strip = 2 rows)

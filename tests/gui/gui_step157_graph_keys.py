@@ -1,4 +1,4 @@
-"""Step 157 in a real UI (Maya Workflow Kit layout, the big view switched to the Graph Editor): Select > Only Curve
+"""In a real UI (Maya Workflow Kit layout, the big view switched to the Graph Editor): Select > Only Curve
 makes a click on a key pick its whole curve, Select > All picks the key again; Keys > Mute Key holds the muted key's
 value (screenshot)."""
 

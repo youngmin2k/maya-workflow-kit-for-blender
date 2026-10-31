@@ -20,13 +20,13 @@ def _raise(ex):
 
 def fcurves(anim_id):
     """The F-curve collection the ID's animation plays (its action slot's channelbag; Blender 5.0 removed
-    ``Action.fcurves``, step 118)."""
+    ``Action.fcurves``)."""
     from importlib import import_module
     return import_module(MODULE + ".compat").id_fcurve_collection(anim_id)
 
 
 def enable(maya=True):
-    """Enable the extension; ``maya`` also opts in to Maya mode (since step 115 enabling alone changes nothing)."""
+    """Enable the extension; ``maya`` also opts in to Maya mode (enabling alone changes nothing)."""
     mod = addon_utils.enable(MODULE, default_set=True, handle_error=_raise)
     assert mod is not None, f"addon_utils.enable({MODULE!r}) returned None"
     assert MODULE in bpy.context.preferences.addons, f"{MODULE} not in preferences.addons"
@@ -42,7 +42,7 @@ def maya_mode_on():
 
 class _MayaKeymap:
     """One Maya keymap as Blender uses it: the add-on keymap's items in merged (effective) order — Blender puts
-    add-on items at the head one by one, so the kit stores them reversed (step 130) — or, for a modal map, the
+    add-on items at the head one by one, so the kit stores them reversed — or, for a modal map, the
     active keyconfig's modal map with the items that are on."""
 
     def __init__(self, km, modal):
@@ -103,7 +103,7 @@ class _MayaKeyconfig:
 
 
 def maya_kc():
-    """The Maya keymap for tests: since step 130 its items are add-on keymap items (non-modal) plus the active
+    """The Maya keymap for tests: its items are add-on keymap items (non-modal) plus the active
     keyconfig's modal maps patched in memory — no keyconfig of its own."""
     return _MayaKeyconfig()
 
@@ -159,44 +159,44 @@ def snapshot():
         funcs = getattr(draw, "_draw_funcs", None)
         if funcs and len(funcs) > 1:
             snap["ui_extensions"][name] = [getattr(f, "__qualname__", repr(f)) for f in funcs]
-    # Methods the add-on swaps on Blender UI classes (step 7: Maya top bar).
+    # Methods the add-on swaps on Blender UI classes (Maya top bar).
     topbar = bpy.types.TOPBAR_HT_upper_bar
-    # step 20: Time / Range Slider in the Timeline header (Blender 5.x: the Dope Sheet's, step 53)
+    # Time / Range Slider in the Timeline header (Blender 5.x: the Dope Sheet's)
     time_buttons, time_menus = _timeline_classes()
     snap["ui_methods"] = [f"{f.__module__}.{f.__qualname__}" for f in
                           (topbar.draw_left, topbar.draw_right, time_buttons.draw_header)]
-    # step 115: kit draws replace only the class's own draw function in Blender's draw list (ui/own_draw.py) or
+    # kit draws replace only the class's own draw function in Blender's draw list (ui/own_draw.py) or
     # are prepended / appended, so compare the draw functions, not the class's draw attribute (Blender turns it
     # into its list wrapper on the first append / swap, and leaves it so; bpy_types._GenericUI).
     snap["ui_methods"] += [f"{c} draws: {_draw_funcs(c)}" for c in
                            ("TOPBAR_HT_upper_bar", "IMAGE_HT_header", "IMAGE_HT_tool_header", "STATUSBAR_HT_header",
                             "OUTLINER_HT_header")]
-    # step 37: Maya panel menus replace the 3D View header menus (a class attribute while enabled).
+    # Maya panel menus replace the 3D View header menus (a class attribute while enabled).
     snap["ui_methods"].append("VIEW3D_MT_editor_menus.draw_collapsible overridden: "
                               f"{'draw_collapsible' in bpy.types.VIEW3D_MT_editor_menus.__dict__}")
-    # step 49: Tool Box (toolbar draw filter), status bar row, dock-only sidebar polls.
+    # Tool Box (toolbar draw filter), status bar row, dock-only sidebar polls.
     from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active
     snap["ui_methods"] += [f"VIEW3D_PT_tools_active draws: {_draw_funcs(VIEW3D_PT_tools_active)}",
                            "VIEW3D_PT_tools_active.tools_from_context own: "
                            f"{VIEW3D_PT_tools_active.__dict__.get('tools_from_context')!r}"]
-    # step 129: Tool Box double-click watches tool sets through a wrapped activate_by_id
+    # Tool Box double-click watches tool sets through a wrapped activate_by_id
     from bl_ui import space_toolsystem_common
     snap["ui_methods"].append(f"space_toolsystem_common.activate_by_id: {space_toolsystem_common.activate_by_id!r}")
-    # step 59: Move/Rotate/Scale ToolDefs carry the Maya manipulator's gizmo group while enabled.
+    # Move/Rotate/Scale ToolDefs carry the Maya manipulator's gizmo group while enabled.
     from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
     for mode in ("OBJECT", "EDIT_MESH"):
         snap["ui_methods"] += sorted(
             f"tool {mode} {it.idname}: {it.widget}"
             for it, _i in ToolSelectPanelHelper._tools_flatten_with_tool_index(VIEW3D_PT_tools_active._tools[mode])
             if it is not None and not callable(it) and it.idname in ("builtin.move", "builtin.rotate", "builtin.scale"))
-    # step 104: Maya menu bars / icon rows in the Graph Editor and Dope Sheet headers
+    # Maya menu bars / icon rows in the Graph Editor and Dope Sheet headers
     snap["ui_methods"] += [f"{c} own draw: {getattr(getattr(bpy.types, c).draw, '_draw_funcs', [getattr(bpy.types, c).draw])[0]!r}"
                            for c in ("GRAPH_HT_header", "DOPESHEET_HT_header",
-                                     # step 105: Render Settings / Script Editor windows
+                                     # Render Settings / Script Editor windows
                                      "PROPERTIES_HT_header", "INFO_HT_header", "TEXT_HT_header",
-                                     # step 113: Maya panel bar / panel toolbar in the Maya Workflow Kit layout's 3D Views
+                                     # Maya panel bar / panel toolbar in the Maya Workflow Kit layout's 3D Views
                                      "VIEW3D_HT_header", "VIEW3D_HT_tool_header")]
-    # step 105: Hypershade menus in the Shader Editor header; Blender's Render panels re-registered with a wrapped poll
+    # Hypershade menus in the Shader Editor header; Blender's Render panels re-registered with a wrapped poll
     snap["ui_methods"].append("NODE_MT_editor_menus.draw_collapsible overridden: "
                               f"{'draw_collapsible' in bpy.types.NODE_MT_editor_menus.__dict__}")
     snap["render_panel_polls"] = sorted(
@@ -212,14 +212,14 @@ def snapshot():
     snap["sys_modules"] = sorted(m for m in sys.modules if m == "maya" or m.startswith("maya."))
 
     snap["addons"] = sorted(bpy.context.preferences.addons.keys())
-    # Blender preferences the add-on may change (navigation preset, step 4).
+    # Blender preferences the add-on may change (navigation preset).
     prefs = bpy.context.preferences
     snap["prefs_inputs"] = _rna_values(prefs.inputs)
     snap["prefs_view"] = _rna_values(prefs.view)
-    snap["prefs_edit"] = _rna_values(prefs.edit)   # step 30: undo steps
-    # step 44: aliased wires (use_overlay_smooth_wire / use_edit_mode_smooth_wire)
+    snap["prefs_edit"] = _rna_values(prefs.edit)   # undo steps
+    # aliased wires (use_overlay_smooth_wire / use_edit_mode_smooth_wire)
     snap["prefs_system_wire"] = [prefs.system.use_overlay_smooth_wire, prefs.system.use_edit_mode_smooth_wire]
-    # step 42: the Maya theme is restored on disable; fonts/styles must not leak either.
+    # the Maya theme is restored on disable; fonts/styles must not leak either.
     snap["theme"] = [_struct_hash(prefs.themes[0])]
     snap["ui_styles"] = {k: [v] for k, v in _walk(prefs.ui_styles[0]).items()}
     return snap

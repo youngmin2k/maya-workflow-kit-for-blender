@@ -1,4 +1,4 @@
-"""Step 206: UV Editor depth 2, like Maya.
+"""UV Editor depth 2, like Maya.
 Each case rebuilds Maya's mesh (corner k of face f = loop k, vertex ids
 kept), applies Maya's selection with UV sync off (the kit's UV mode), runs the kit operator and compares every
 face-corner UV with the expected result."""

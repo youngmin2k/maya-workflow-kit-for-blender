@@ -1,4 +1,4 @@
-"""Step 134 lane HUD in a real UI (Maya Workflow Kit layout): the Maya display / mode keys (1/2/3, 4-7, F8, F9-F11,
+"""In a real UI (Maya Workflow Kit layout): the Maya display / mode keys (1/2/3, 4-7, F8, F9-F11,
 Alt+A) leave no Adjust Last Operation panel (#58), and 3 draws the Maya cube smooth shaded while 1 draws it faceted
 (#61): the shading is read along a line across the cube in screenshots."""
 
@@ -72,12 +72,12 @@ def s_scene():
         o.select_set(o.name == "pCube1")
     bpy.context.view_layer.objects.active = cube()
     centre()
-    # step 258: the Maya layout views keep Blender's HUD region off (Maya has no redo panel); turn it on here so the
+    # the Maya layout views keep Blender's HUD region off (Maya has no redo panel); turn it on here so the
     # checks below still prove that display / mode keys don't ask for Adjust Last Operation
     with bpy.context.temp_override(window=win(), area=area, region=region):   # no window context = Blender crash
         area.spaces.active.show_region_hud = True
     # Positive control: Alt+W (Blender's object.location_clear: REGISTER + UNDO with a property) leaves its Adjust
-    # Last Operation panel (a Python call from a timer, or an operator without properties, shows none). Step 147
+    # Last Operation panel (a Python call from a timer, or an operator without properties, shows none).
     # took Shift+H (allset.visibility) off the panel.
     key('W', alt=True)
 

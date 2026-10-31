@@ -1,4 +1,4 @@
-"""Step 153: Blender 5.x pass — unified paint settings (#90), menus that stay open (5.0), radial submenus open only
+"""Blender 5.x pass — unified paint settings (#90), menus that stay open (5.0), radial submenus open only
 from their own sector."""
 
 import math
@@ -35,7 +35,7 @@ def _measure(text):
 
 
 def test_diagonal_gesture_through_a_wide_north_box():
-    # Move Options: N = Symmetry (a submenu) is a Maya-wide box that reaches into the NE sector (step 151 geometry)
+    # Move Options: N = Symmetry (a submenu) is a Maya-wide box that reaches into the NE sector (Maya ring geometry)
     p = engine.Params()
     origin = (500.0, 400.0)
     s = engine.Session(mm.OPT_MOVE, origin, 0.0, _measure, p)

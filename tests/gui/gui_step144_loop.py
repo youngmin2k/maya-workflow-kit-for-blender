@@ -1,4 +1,4 @@
-"""Step 144 LOOP lane in a real UI (GitHub #31): Mesh Tools > Insert Edge Loop = edit mode + the kit tool, one
+"""LOOP lane in a real UI (GitHub #31): Mesh Tools > Insert Edge Loop = edit mode + the kit tool, one
 click on a cube edge = a loop right at that height (no second click), Ctrl+Z takes it back, press-drag = the loop
 follows the mouse; Offset Edge Loop = a click on that loop = two loops (offset 0.5, relative to each side
 edge), a drag sets the offset; Slide Edge = middle-drag slides the selected loop along the cube's sides."""
@@ -35,7 +35,7 @@ def override():
 
 
 def menu(path):
-    # undo=True: a menu button calls its operator at undo depth 0 like this (step 147)
+    # undo=True: a menu button calls its operator at undo depth 0 like this
     with override():
         return bpy.ops.allset.menu_item('EXEC_DEFAULT', True, item=path)
 
@@ -110,7 +110,7 @@ def s_insert_click():
     check(f"Insert Edge Loop = edit mode + the kit tool ({bpy.context.mode}, {tool_id()})",
           bpy.context.mode == 'EDIT_MESH' and tool_id() == el().INSERT_TOOL)
     with override():
-        # the menu item is its own undo step (#88, step 147): Ctrl+Z below undoes only the loop
+        # the menu item is its own undo step (#88): Ctrl+Z below undoes only the loop
         bpy.ops.mesh.select_all('EXEC_DEFAULT', True, action='DESELECT')
     press((*EDGE, 0.4))
 

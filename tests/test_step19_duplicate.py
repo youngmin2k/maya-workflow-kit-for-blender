@@ -1,4 +1,4 @@
-"""Step 19: Maya Ctrl+D duplicate names copies pCube2 / pCubeShape2 (not pCube1.001),
+"""Maya Ctrl+D duplicate names copies pCube2 / pCubeShape2 (not pCube1.001),
 in place, with the subtree; Shift+D after it repeats the move."""
 
 from importlib import import_module

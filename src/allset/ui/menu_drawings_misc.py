@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Kit menu pictures for UV, Windows, Playback, Constrain, Key, Visualize, Edit, Texturing, Toon, Generate, Stereo and
-Render (step 142, #54) — see ``menu_drawings``."""
+Render (#54) — see ``menu_drawings``."""
 
 import math
 

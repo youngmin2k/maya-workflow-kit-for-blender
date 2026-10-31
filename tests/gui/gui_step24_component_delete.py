@@ -1,4 +1,4 @@
-"""Step 24 in a real UI: F11 (faces) -> select all -> Delete removes every face, no menu;
+"""In a real UI: F11 (faces) -> select all -> Delete removes every face, no menu;
 F10 (edges) + Backspace dissolves an edge; Delete in object mode still deletes the object."""
 
 import os

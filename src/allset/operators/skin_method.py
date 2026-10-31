@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya skinCluster Skinning Method (step 250, Issue #167): Classic Linear / Dual Quaternion / Weight Blended.
+"""Maya skinCluster Skinning Method (Issue #167): Classic Linear / Dual Quaternion / Weight Blended.
 
 Maya 2026 (numbers
 in tests/test_step250_skin_method.py): Dual Quaternion = DQ skinning with hemisphere alignment, scale blended linearly

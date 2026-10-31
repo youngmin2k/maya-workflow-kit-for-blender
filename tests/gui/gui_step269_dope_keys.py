@@ -1,4 +1,4 @@
-"""Step 269: Maya 2026's Dope Sheet keys (Maya 2026: g frames the playback range, t centres the current
+"""Maya 2026's Dope Sheet keys (Maya 2026: g frames the playback range, t centres the current
 time, h / j lock / unlock the selected channels, a / f stay Blender's frame all / selected). In the Timeline (Maya's
 Time Slider, not a Dope Sheet) the kit key passes, so g stays the window key there.
 Shots (ALLSET_GUI_SHOTS): gui_step269_dope_sheet.png."""

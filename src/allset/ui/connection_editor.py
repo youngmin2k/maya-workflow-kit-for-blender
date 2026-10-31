@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Connection Editor window (step 213, Issue #119).
+"""Maya's Connection Editor window (Issue #119).
 
 Maya 2022: Reload Left / Reload Right, the mode buttons
 Outputs / from -> to / Inputs, two attribute lists (the node, then its attributes; compounds such as translate open
@@ -8,7 +8,7 @@ Close. With Auto-connect on (factory) a click on a left attribute then on a righ
 follows the left (``connectAttr``); a click on a connected right attribute breaks it, the value stays.
 
 Blender has no dependency graph connections between properties: a connection is a driver on the right property with
-one variable ``cn`` reading the left property (the step 62 SDK uses ``sdk`` the same way). Maya copies the number
+one variable ``cn`` reading the left property (the Set Driven Key driver uses ``sdk`` the same way). Maya copies the number
 across attribute types through unit conversion (translateX 3 cm -> rotateX 3 degrees), so the driver expression scales
 by the same Maya-number factors (lengths / ``maya_unit()``, angles in degrees). Only attributes with a Blender
 counterpart are listed (transform channels, visibility, custom attributes): Maya's caching / nodeState / ... have none.
@@ -166,7 +166,7 @@ def connect(scene, src, src_attr, dst, dst_attr):
         var.targets[0].data_path = f"{sres[0]}[{sres[1]}]" if sres[1] >= 0 else sres[0]
         drv.expression = expression(sres[2], kind, unit)
         n += 1
-    # a Python ID-property write tags nothing (step 62): a custom attribute made after the last evaluation
+    # a Python ID-property write tags nothing: a custom attribute made after the last evaluation
     # isn't on the evaluated source yet, and the driver reads it as invalid until the source is tagged
     src.update_tag()
     dst.update_tag()

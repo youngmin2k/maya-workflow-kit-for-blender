@@ -1,4 +1,4 @@
-"""Step 238 (Issue #146): rig and animation hand polish.
+"""Issue #146: rig and animation hand polish.
 
 ③-6 Enable IK Solver is a Maya check item (the menu shows the state), ③-8 Paint Skin Weights starts on the first
 influence (Maya: joint1 hilited), ③-17 an animated FBX sets the

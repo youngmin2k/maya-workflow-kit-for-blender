@@ -4,7 +4,7 @@
 
 Maya keys (S keys every keyable attribute); Maya
 Time Slider menu (the time slider edits act on the Time Slider's highlighted range: the
-Shift-dragged range, else the current frame), step 56.
+Shift-dragged range, else the current frame).
 
 Nodes are the Channel Box's (``ui/channel_box.targets``): selected objects, or the selected pose bones
 in pose mode (a bone's curves are the armature action's ``pose.bones["n"]...`` curves).
@@ -19,7 +19,7 @@ from .. import results
 from .. import undo_steps
 
 # Maya tangent -> (interpolation, handle type or None); FLAT also levels the handles.
-# (reused by the Graph Editor tangent buttons, step 67)
+# (reused by the Graph Editor tangent buttons)
 TANGENTS = {
     "SPLINE": ("BEZIER", 'AUTO'),
     "LINEAR": ("LINEAR", None),
@@ -28,7 +28,7 @@ TANGENTS = {
     "FLAT": ("BEZIER", 'ALIGNED'),
     "PLATEAU": ("BEZIER", 'AUTO_CLAMPED'),
     "AUTO": ("BEZIER", 'AUTO_CLAMPED'),
-    # step 70: Fixed keeps the handles where they are; Blender has no
+    # Fixed keeps the handles where they are; Blender has no
     # Stepped Next: Stepped. BREAK / UNIFY only change the handle type (free / aligned).
     "FIXED": ("BEZIER", 'ALIGNED'),
     "STEPPED_NEXT": ("CONSTANT", None),
@@ -57,7 +57,7 @@ def apply_tangent(kp, kind, fc=None):
 
 
 def _maya_auto(fc):
-    """Maya tangent shapes after the curve changed (operators/maya_tangents.py, steps 257, 310)."""
+    """Maya tangent shapes after the curve changed (operators/maya_tangents.py)."""
     from . import maya_tangents
     maya_tangents.apply(fc)
 
@@ -139,7 +139,7 @@ def set_key(context, breakdown=False, channels=""):
     keytype = 'BREAKDOWN' if breakdown else 'KEYFRAME'
     if not channels and not breakdown and scene.keying_sets.active is not None:
         # Maya: with a current character set, S keys that character's attributes (and its subcharacters'),
-        # whatever is selected (step 187, rule 3)
+        # whatever is selected (rule 3)
         from . import character_sets
         return character_sets.key_current(context, keytype)
     if not channels:
@@ -151,7 +151,7 @@ def set_key(context, breakdown=False, channels=""):
     from ..ui import cb_channels
     count = 0
     for node in nodes(context):
-        # Channel Box Sync Selection in Graph Editor on: S keys the selected channels (step 158, as in Maya)
+        # Channel Box Sync Selection in Graph Editor on: S keys the selected channels (as in Maya)
         synced = None if only is not None else cb_channels.synced_keys(context, node)
         for key in synced if synced is not None else keyable_channels(node):
             if (only is None or key in only) and _cb().is_keyable(node, key):
@@ -263,7 +263,7 @@ def key_span(context):
     return (int(round(min(frames))), int(round(max(frames)))) if frames else None
 
 
-# --- Maya Key menu commands with their options (step 140, issue #35) ------------------------------
+# --- Maya Key menu commands with their options (issue #35) ------------------------------
 # Maya's Key > Delete / Cut / Copy / Paste / Scale / Snap Keys run cutKey / copyKey / pasteKey / scaleKey / snapKey with
 # the option window's values (Time range All = every key, Time
 # Slider = the playback range, Start/End = the fields). Results:
@@ -724,7 +724,7 @@ def global_key_applies(context):
     return context.mode in {'OBJECT', 'POSE'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_set_key(bpy.types.Operator):
     """Set a key on every keyable channel of the selection (Maya S); the active keying set if there is one"""
     bl_idname = "allset.set_key"

@@ -1,8 +1,8 @@
-"""Step 63 in a real UI (Maya modeling workflow): Status Line MTK icon -> the
+"""In a real UI (Maya modeling workflow): Status Line MTK icon -> the
 Modeling Toolkit in the dock -> Face mode icon -> a face selected -> Extrude button -> more faces; cube + sphere
 -> Combine button -> one pCube2 -> Separate button -> two pieces. Screenshots (vs shots/modeling_03.png)."""
 
-GUI_SKIP = "fails only inside the full GUI run (dock button lookup), passes alone 13/13 (step 140)"   # tests/gui/run.py leaves it out (--include-skipped runs it)
+GUI_SKIP = "fails only inside the full GUI run (dock button lookup), passes alone 13/13"   # tests/gui/run.py leaves it out (--include-skipped runs it)
 
 import os
 import sys
@@ -20,7 +20,7 @@ C = {"tries": 0}
 FACE_ICON, OBJECT_ICON = (188, 90), (310, 90)
 COMBINE, SEPARATE = (248, 457), (106, 457)          # object mode
 EXTRUDE_EDIT = (248, 582)                            # edit mode: the "N faces selected" row adds 31 px
-MTK_SCAN_PX = 10            # Status Line MTK icon: found by sweeping the 3D View tool header (step 75)
+MTK_SCAN_PX = 10            # Status Line MTK icon: found by sweeping the 3D View tool header
 
 
 def shot(name):
@@ -37,7 +37,7 @@ def redraw():
         a.tag_redraw()
 
 
-# step 116: the dock is its own area (no tab strip, another width): a spot's row (px below the content top) still
+# the dock is its own area (no tab strip, another width): a spot's row (px below the content top) still
 # holds, its x is found by sweeping that row for the button's command.
 COMMANDS = {FACE_ICON: "type='FACE'", OBJECT_ICON: "mode='OBJECT'", COMBINE: "Mesh/Combine",
             SEPARATE: "Mesh/Separate", EXTRUDE_EDIT: "allset.extrude"}
@@ -118,7 +118,7 @@ def meshes():
 def s_setup():
     setup()
     bpy.data.objects["Cube"].name = "pCube1"
-    redraw()      # no tab stack yet: the Status Line MTK icon opens it right of the viewport (step 116)
+    redraw()      # no tab stack yet: the Status Line MTK icon opens it right of the viewport
 
 
 def _button_command(r):
@@ -135,7 +135,7 @@ def _button_command(r):
 
 def s_find_mtk():
     """Sweep the tool header left to right until the MTK editor toggle is under the mouse (the Status Line
-    layout changes as groups are added, step 75)."""
+    layout changes as groups are added)."""
     r = region('TOOL_HEADER')
     if "mtk_x" not in C:
         C["mtk_x"] = r.x + 4
@@ -190,7 +190,7 @@ def s_check_extrude():
     check(f"MTK Extrude: one face extruded, 6 -> {n} faces", n == 10)
     ex = sys.modules["sim"].import_module(sys.modules["sim"].MODULE + ".operators.extrude")
     _o, rec = ex.active(bpy.context)
-    check(f"... as polyExtrudeFace1 with its manipulator (step 65; got {rec and rec.name})",
+    check(f"... as polyExtrudeFace1 with its manipulator (got {rec and rec.name})",
           rec is not None and rec.name == "polyExtrudeFace1")
 
 

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Kit-drawn Maya-style icons for the Tool Box, the Layer Editor toolbar and the Outliner rows the kit draws
-(step 131; issue #23).
+(issue #23).
 
 No Maya icon files. Each glyph is a few vector shapes in a Maya-style icon palette (light grey #bdbdbd line
 art, teal #48aab5 accents, a dark #3a3a3a rim) that follow the Maya
@@ -46,7 +46,7 @@ class Pen:
     """Draw on a ``Canvas`` of ``n`` pixels in design units (0..base, y down), hinting edges to whole pixels."""
 
     def __init__(self, n, base):
-        # the Pen does its own hinting: a Canvas that also snaps (status_icons since the step 131 STATUS lane) is
+        # the Pen does its own hinting: a Canvas that also snaps (status_icons) is
         # asked not to
         try:
             self.cv = Canvas(n, hint=False)
@@ -190,7 +190,7 @@ def _triangulate(pts):
 class Geo:
     """The same drawing calls as ``Pen``, recorded as coloured triangles in design units (y down) for Blender's
     vector icons (``bpy.app.icons.new_triangles``): Blender rasterises those at the toolbar's own icon size, which
-    is larger than a button icon (step 131: a preview icon in a toolbar button is drawn at 16 px x UI scale)."""
+    is larger than a button icon (a preview icon in a toolbar button is drawn at 16 px x UI scale)."""
 
     SEG = 40
 
@@ -640,7 +640,7 @@ _textures = {}
 
 def texture(name, n, greyed=False):
     """GPU texture of ``name`` at ``n`` px (call from a draw handler). Display (sRGB) values: the Outliner's region
-    draws the builtin 'IMAGE' shader's values as they are (step 131; unlike the shelf's image editor)."""
+    draws the builtin 'IMAGE' shader's values as they are (unlike the shelf's image editor)."""
     key = (name, n, greyed)
     tex = _textures.get(key)
     if tex is None:

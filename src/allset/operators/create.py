@@ -28,7 +28,7 @@ LEVEL = (HALF_PI, 0.0, 0.0)
 
 # kind: (label, Maya base name, operator, props, rotation)
 KINDS = {
-    # Primitives with a Maya creation node (#11, #12, step 129): built from operators/prim_shapes.py by
+    # Primitives with a Maya creation node (#11, #12): built from operators/prim_shapes.py by
     # operators/prim_history.py with Maya's topology, the node shown in Channel Box INPUTS. op = None.
     'CUBE': ("Cube", "pCube", None, {}, None),
     'SPHERE': ("Sphere", "pSphere", None, {}, None),
@@ -40,7 +40,7 @@ KINDS = {
     'PLATONIC': ("Platonic Solid", "pPlatonic", None, {}, None),
     'PYRAMID': ("Pyramid", "pPyramid", None, {}, None),
     'PRISM': ("Prism", "pPrism", None, {}, None),
-    'PIPE': ("Pipe", "pPipe", None, {}, None),                      # step 190
+    'PIPE': ("Pipe", "pPipe", None, {}, None),
     'HELIX': ("Helix", "pHelix", None, {}, None),
     'GEAR': ("Gear", "pGear", None, {}, None),
     'SOCCER_BALL': ("Soccer Ball", "pSolid", None, {}, None),
@@ -69,7 +69,7 @@ KINDS = {
                 {"type": 'PLAIN_AXES', "radius": 1.0}, None),
     'EMPTY_GROUP': ("Empty Group", "null", "object.empty_add",
                     {"type": 'PLAIN_AXES', "radius": 1.0}, None),
-    # Step 54: create paths that used Blender's operators with
+    # create paths that used Blender's operators with
     # metre defaults. A joint = a bone in one armature: bone length 1.
     'JOINT': ("Joint", "skeleton", "object.armature_add", {"radius": 1.0}, None),
     'TEXT': ("Type", "typeMesh", "object.text_add", {"radius": 1.0}, None),
@@ -79,10 +79,10 @@ KINDS = {
 # Kinds whose data keeps Blender's name (Maya has no "...Shape" node for them).
 NO_SHAPE_NAME = {'JOINT', 'TEXT'}
 # A Maya locator (Create > Locator, cmds.spaceLocator): an Empty with this flag; cmds_shim gives it a shape name
-# ``locatorShapeN`` (step 208)
+# ``locatorShapeN``
 LOCATOR_PROP = "allset_locator"
-# Lights (step 137, operators/lights.py): Maya intensity 1, Decay Rate No Decay. The power follows the Maya unit
-# (x maya_unit()^2, step 54) and is set so an intensity-1 light at 10 units lights a surface the Maya way;
+# Lights (operators/lights.py): Maya intensity 1, Decay Rate No Decay. The power follows the Maya unit
+# (x maya_unit()^2) and is set so an intensity-1 light at 10 units lights a surface the Maya way;
 # Cycles renders No Decay / Linear with a Light Falloff node, EEVEE and the viewport keep distance squared.
 FALLOFF_LIGHTS = {'POINT', 'SPOT', 'AREA'}
 LIGHT_NOTICE = ("Maya Decay Rate No Decay renders in Cycles; EEVEE and the viewport get darker with the square of "
@@ -108,7 +108,7 @@ def _scale_data(ob, k):
         data.shadow_soft_size *= k
         if data.type == 'AREA':
             data.size_y *= k
-        lights.maya_defaults(data, k)     # intensity 1, No Decay, spot cone 40, area 2 x 2 units (step 137)
+        lights.maya_defaults(data, k)     # intensity 1, No Decay, spot cone 40, area 2 x 2 units
 
 
 def _maya_naming(context):
@@ -122,7 +122,7 @@ def _maya_naming(context):
 def create(context, kind, maya_naming=True, overrides=None):
     """Create ``kind`` at the world origin; returns the new object. ``overrides``: for primitives Maya node
     attributes (``{"subdivisionsCaps": 2}``, lengths in Maya units, ``createUVs`` 0 = no UVs), else operator values
-    in Maya units (lengths are scaled like the defaults), e.g. from the primitive's option window (step 103)."""
+    in Maya units (lengths are scaled like the defaults), e.g. from the primitive's option window."""
     _label, base, op, props, rot = KINDS[kind]
     props = {**props, **(overrides or {})}
     if context.mode != 'OBJECT':
@@ -132,7 +132,7 @@ def create(context, kind, maya_naming=True, overrides=None):
         uvs = bool(vals.pop("createUVs", True))
         ob = prim_history.create_object(context, kind, vals, maya_naming, create_uvs=uvs)
         from . import material
-        for part in [ob, *ob.children]:   # nurbsCube: each patch joins lambert1 (step 100)
+        for part in [ob, *ob.children]:   # nurbsCube: each patch joins lambert1
             if part.type in {'MESH', 'SURFACE'}:
                 material.give_default(part)
         return ob
@@ -151,7 +151,7 @@ def create(context, kind, maya_naming=True, overrides=None):
         _first_joint(ob, maya_naming)
     if maya_naming:
         from . import material
-        material.give_default(ob)   # Maya: a new shape joins initialShadingGroup = lambert1 (step 100)
+        material.give_default(ob)   # Maya: a new shape joins initialShadingGroup = lambert1
     return ob
 
 

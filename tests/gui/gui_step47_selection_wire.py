@@ -1,4 +1,4 @@
-"""Step 47 in a real UI: Maya selection wire over shading — drawn for the selected objects in the Maya Workflow Kit
+"""In a real UI: Maya selection wire over shading — drawn for the selected objects in the Maya Workflow Kit
 layout, and the frame time with a 100k-poly selected mesh grows < 20 % (wm.redraw_timer)."""
 
 import os

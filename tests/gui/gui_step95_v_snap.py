@@ -1,11 +1,10 @@
-"""Step 95: V point snap with the Move manipulator, default and close zoom.
+"""V point snap with the Move manipulator, default and close zoom.
 
 Maya Workflow Kit cm template, pCube1 at the origin and pCube2 at x = 3 cm, Move tool. V held + drag of pCube1's X arrow to the
 screen position of a pCube2 vertex -> pCube1's pivot lands on that vertex projected onto the X axis (t x = 2.5 cm).
-Run with the template view (small cubes) and zoomed in close (the dragged cube fills much of the view,
-left open in step 81). Mouse moves go one per timer tick: Blender recomputes the snap target at most once
+Run with the template view (small cubes) and zoomed in close (the dragged cube fills much of the view). Mouse moves go one per timer tick: Blender recomputes the snap target at most once
 per 10 ms (transform_snap.cc transform_snap_mixed_apply), so a burst of moves queued in one tick keeps the target found
-for its first move — that, not the zoom, was step 81's failure."""
+for its first move — that, not the zoom, made the close-zoom snap fail."""
 
 import os
 import sys
@@ -94,7 +93,7 @@ def s_cubes():
 def pick(kind, verts, a, eye):
     if kind == "camera":
         return min(verts, key=lambda p: (p - eye).length)
-    if kind == "inner":  # the pCube2 corner nearest pCube1 (step 81's original target; may sit behind pCube1)
+    if kind == "inner":  # the pCube2 corner nearest pCube1 (the original target; may sit behind pCube1)
         return min(verts, key=lambda p: (p - a.matrix_world.translation).length)
     raise ValueError(kind)
 

@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Rig FBX import the way Maya 2026 reads it (step 223, Issue #133).
+"""Rig FBX import the way Maya 2026 reads it (Issue #133).
 
 What Blender's FBX reader does with a Maya rig:
 
 - it samples every bone at the union of its channels' key times and keys ``rotation_quaternion`` / ``location`` there
   with **linear** interpolation between the keys ($S/addons_core/io_scene_fbx/import_fbx.py:710-735, 851-890): Maya's
-  cubic tangents are lost, so poses between keys are off (also after a step 222 round trip);
+  cubic tangents are lost, so poses between keys are off (also after a kit export round trip);
 - the armature object carries the axis / unit conversion (Rotate X 90, Scale 0.01) and the skinned mesh is its child
   (Rotate X -90, Scale 100);
 - the Time Slider keeps Blender's range (Maya sets it to the file's range).
@@ -27,7 +27,7 @@ What Blender's FBX reader does with a Maya rig:
    rotations are Euler, like Maya's FBX import (Quaternion = resample).
 4. Translation: B's location is A . T(t) + b; copied 1:1 when A is a scaled signed permutation, else keyed every frame.
 5. The conversion goes into the bones (armature object = identity, like a Maya skeleton), the skinned meshes leave the
-   armature keeping their place (kit Bind Skin rule, step 58), the Time Slider = the file's time span.
+   armature keeping their place (kit Bind Skin rule), the Time Slider = the file's time span.
 
 A root joint under another node (a Maya group above the skeleton) is left to Blender's reader.
 """
@@ -167,7 +167,7 @@ def file_fps(tree, scene):
 
 def time_span(tree, fps):
     """The file's Time Slider range (frames): GlobalSettings TimeSpan (Maya writes the playback range). Blender's
-    FBX writer always writes 0 .. 1 s there (step 235: a kit file came back as 0-24), so that value defers to the
+    FBX writer always writes 0 .. 1 s there (a kit file came back as 0-24), so that value defers to the
     first take's LocalStart / LocalStop."""
     s = _settings(tree)
     a, b = s.get(b"TimeSpanStart"), s.get(b"TimeSpanStop")
@@ -396,9 +396,9 @@ def _rebuild(context, arm, joints, parents, scratch, f0, tree, fps):
         mw = ob.matrix_world.copy()
         fw = model_world(index, ob.name)
         if fw is not None:
-            # step 235: the mesh's place from the file (conversion @ its FBX world). Blender's reader parents a
+            # the mesh's place from the file (conversion @ its FBX world). Blender's reader parents a
             # skinned root mesh under the armature and, when the joints have no parent node (a file the kit wrote:
-            # Maya layout, step 222), keeps the conversion on both -> 1/100 size turned 90 deg (step 238)
+            # Maya layout), keeps the conversion on both -> 1/100 size turned 90 deg
             mw = g @ fw
         ob.parent = None
         ob.matrix_parent_inverse = Matrix.Identity(4)

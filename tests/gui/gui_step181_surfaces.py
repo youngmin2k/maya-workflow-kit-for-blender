@@ -1,4 +1,4 @@
-"""Step 181 in a real UI (Maya Workflow Kit layout): three EP curves at different heights -> Surfaces > Loft (the menu
+"""In a real UI (Maya Workflow Kit layout): three EP curves at different heights -> Surfaces > Loft (the menu
 item, as a Maya user runs it) -> loftedSurface1, a NURBS surface through the curves, drawn shaded in the persp view;
 then one profile -> Surfaces > Revolve -> revolvedSurface1. Screenshots: gui_step181_loft.png, gui_step181_revolve.png."""
 

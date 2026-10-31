@@ -1,4 +1,4 @@
-"""Step 70 in a real UI (Maya animation workflow): a cube with two keys -> Windows >
+"""In a real UI (Maya animation workflow): a cube with two keys -> Windows >
 Animation Editors > Graph Editor -> every key selected -> toolbar Linear -> LINEAR -> Shift+S hold + LMB drag east
 (Tangents) and on east (Flat) -> flat tangents -> G = playback range -> Playblast option box (dialog shot) -> Playblast
 -> a movie in the temp folder and Blender's player started (killed afterwards) (screenshots)."""

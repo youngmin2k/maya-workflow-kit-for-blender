@@ -1,4 +1,4 @@
-"""Step 134 lane HUD: Maya display / mode keys leave no Adjust Last Operation panel (#58), and Smooth Mesh
+"""Maya display / mode keys leave no Adjust Last Operation panel (#58), and Smooth Mesh
 Preview (3) is smooth shaded on Maya primitives whose hard edges are sharp_edge (#61)."""
 
 from importlib import import_module

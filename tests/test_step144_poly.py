@@ -1,4 +1,4 @@
-"""Step 144 POLY lane (GitHub #30): Quad Draw, Create Polygon, Append to Polygon as Maya tools.
+"""POLY lane (GitHub #30): Quad Draw, Create Polygon, Append to Polygon as Maya tools.
 GUI: tests/gui/gui_step144_poly.py. Maya Tool Settings defaults."""
 
 import math

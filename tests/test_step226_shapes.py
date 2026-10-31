@@ -1,4 +1,4 @@
-"""Step 226 L1 (Issue #136): NURBS curves as bone Custom Shapes — Maya ``parent -s [-r]``.
+"""L1 (Issue #136): NURBS curves as bone Custom Shapes — Maya ``parent -s [-r]``.
 
 Expected (parent shape relative / absolute):
 a circle (r 1, normal Maya Y) with cv0 at (0.7836, 0, -0.7836);

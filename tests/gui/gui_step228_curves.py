@@ -1,4 +1,4 @@
-"""Step 228 lane A (Issue #138) in a real UI: a CV curve and a cube in the Maya layout, Constrain > Motion Paths >
+"""Lane A (Issue #138) in a real UI: a CV curve and a cube in the Maya layout, Constrain > Motion Paths >
 Attach to Motion Path from the menu map (selection = cube + curve), scrub to frame 60: the cube sits on the curve
 facing along it (expected at frame 60: (9.894338, 0, 0.105634), ry 44.977 deg);
 Set Motion Path Key at frame 50 from the menu adds an edit point and a key. Shots in the shots folder."""
@@ -101,7 +101,7 @@ def s_frame60():
     rv = a.spaces.active.region_3d
     rv.view_perspective = 'ORTHO'
     rv.view_location = Vector((10.0, 0.0, 0.0)) * k()
-    rv.view_distance = 26.0 * k() * a.spaces.active.lens / 72.0      # ~26 units across (step 161)
+    rv.view_distance = 26.0 * k() * a.spaces.active.lens / 72.0      # ~26 units across
     for a_ in win().screen.areas:
         a_.tag_redraw()
 

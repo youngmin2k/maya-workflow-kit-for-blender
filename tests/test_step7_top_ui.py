@@ -1,4 +1,4 @@
-"""Step 7: Maya menu bar + menu sets, Status Line, command line, cmds_shim, Help Line."""
+"""Maya menu bar + menu sets, Status Line, command line, cmds_shim, Help Line."""
 
 import math
 import sys
@@ -45,7 +45,7 @@ class FakeLayout:
         self.log.append(("op", idname, text, props, kw))
         return props
 
-    def operator_menu_hold(self, idname, text=None, **kw):   # step 51: items with a Maya option box
+    def operator_menu_hold(self, idname, text=None, **kw):   # items with a Maya option box
         props = types.SimpleNamespace()
         self.log.append(("hold", idname, text, props, kw))
         return props
@@ -80,7 +80,7 @@ def _ctx(**extra):
 
 
 def _label(text):
-    """The item label of a drawn text (step 108: a filler, the Maya hotkey and the box mark follow it)."""
+    """The item label of a drawn text (a filler, the Maya hotkey and the box mark follow it)."""
     return text.replace(menu_sets.HAIR, "").split("  ")[0].replace(menu_sets.BOX_MARK.strip(), "").strip()
 
 
@@ -209,12 +209,12 @@ def test_menu_items_active_or_grey():
     create = _draw_menu(menu_sets.menu_idname("mainCreateMenu"))
     sub = next(e[1] for e in create if e[0] == "menu" and e[2] == "Polygon Primitives")
     items = _draw_menu(sub)
-    ops = {_label(e[2]): e for e in items if e[0] in ("op", "hold")}  # step 103 box mark, step 108 hotkey
-    # Step 10: Maya creation (origin, Maya size and names). Step 51: option-box items are one
+    ops = {_label(e[2]): e for e in items if e[0] in ("op", "hold")}  # box mark, hotkey text
+    # Maya creation (origin, Maya size and names). Option-box items are one
     # allset.menu_item button (press and hold = option box) running the item's mapped action.
     assert _action(ops["Cube"]) == ("op", "allset.create", {"kind": 'CUBE'}), ops["Cube"]
     assert _action(ops["Pyramid"]) == ("op", "allset.create", {"kind": 'PYRAMID'})
-    assert _action(ops["Pipe"]) == ("op", "allset.create", {"kind": 'PIPE'})          # step 190
+    assert _action(ops["Pipe"]) == ("op", "allset.create", {"kind": 'PIPE'})
     assert "Interactive Creation" not in ops, "a check item now (#225), not a greyed button"
     nurbs = _draw_menu(next(e[1] for e in create if e[0] == "menu" and e[2] == "NURBS Primitives"))
     grey = {_label(e[2]): e for e in nurbs if e[0] in ("op", "hold")}["Interactive Creation"]   # NURBS: still greyed
@@ -224,14 +224,14 @@ def test_menu_items_active_or_grey():
     # Blender's own menu at the end of File; v3d / tool / menu kinds.
     file_log = _draw_menu(menu_sets.menu_idname("mainFileMenu"))
     assert file_log[-1] == ("menu", "TOPBAR_MT_file", "Blender File"), file_log[-1]
-    imp = next(e for e in file_log if e[0] in ("op", "hold") and _label(e[2]) == "Import...")   # step 102: Maya dialog
+    imp = next(e for e in file_log if e[0] in ("op", "hold") and _label(e[2]) == "Import...")   # Maya dialog
     assert _action(imp) == ("op", "allset.file_import", {}), _action(imp)
     tools = _draw_menu(menu_sets.menu_idname("mainMeshToolsMenu"))
     cut = next(e for e in tools if e[0] in ("op", "hold") and _label(e[2]) == "Multi-Cut")
     assert _action(cut) == ("tool", "allset.multi_cut_tool", {"edit": True}), _action(cut)
     edit_mesh = _draw_menu(menu_sets.menu_idname("mainEditMeshMenu"))
     bevel = next(e for e in edit_mesh if e[0] in ("op", "hold") and _label(e[2]) == "Bevel")
-    assert _action(bevel)[:2] == ("v3d", "allset.bevel"), _action(bevel)   # polyBevel3 at once (step 139)
+    assert _action(bevel)[:2] == ("v3d", "allset.bevel"), _action(bevel)   # polyBevel3 at once
     # Section labels at Maya's dividers.
     assert ("label", "Pivot") not in file_log
     select = _draw_menu(menu_sets.menu_idname("mainSelectMenu"))
@@ -262,7 +262,7 @@ def test_menu_tool_enters_edit_mode():
 # --- top bar ----------------------------------------------------------------------
 
 def test_topbar_methods_swapped_and_restored():
-    # step 115: the kit swaps only the class's own draw in its draw list; draw_left / draw_right stay Blender's
+    # the kit swaps only the class's own draw in its draw list; draw_left / draw_right stay Blender's
     cls = bpy.types.TOPBAR_HT_upper_bar
     assert status_line.draw_upper_bar in cls.draw._draw_funcs
     assert cls.draw_left.__module__ == "bl_ui.space_topbar" and cls.draw_right.__module__ == "bl_ui.space_topbar"
@@ -283,7 +283,7 @@ def test_topbar_draw_maya_and_blender():
     assert menu_sets.menu_idname("mainMeshMenu") in menus, menus
     fake = types.SimpleNamespace(layout=FakeLayout())
     status_line.draw_right(fake, _ctx())
-    # Maya's "Workspace:" label + dropdown (step 113), not Blender's workspace ID field
+    # Maya's "Workspace:" label + dropdown, not Blender's workspace ID field
     assert any(e[0] == "prop" and e[1] == "allset_workspace" for e in fake.layout.log), fake.layout.log
     assert not any(e[0] == "template_ID" and e[2] == "workspace" for e in fake.layout.log)
     assert not any(e[0] == "template_ID" and e[2] == "scene" for e in fake.layout.log), "one scene"
@@ -378,7 +378,7 @@ def test_selection_mode_and_editor_buttons():
         bpy.ops.allset.render_settings()
         props = next(a for a in screen.areas if a.type == 'PROPERTIES')
         assert props.spaces.active.context == 'RENDER'
-        # step 116: the Maya panels are dock areas / floating windows (GUI: gui_step116_dock); a factory screen has
+        # the Maya panels are dock areas / floating windows (GUI: gui_step116_dock); a factory screen has
         # no tab stack, so they aren't shown and the user's Properties editor is left alone
         assert not status_line.editor_shown(screen, "CHANNEL_BOX")
         assert not status_line.editor_shown(screen, "ATTRIBUTE")
@@ -448,7 +448,7 @@ def test_command_field_runs_through_operator():
 
 
 def test_import_maya_cmds():
-    """Every import form works inside the Command Line namespace (step 114: without sys.modules entries)."""
+    """Every import form works inside the Command Line namespace (without sys.modules entries)."""
     assert "maya" not in sys.modules and "maya.cmds" not in sys.modules
     for src in ("import maya.cmds as mc; mc.ls is cmds.ls", "from maya import cmds as c2; c2.ls is cmds.ls",
                 "import maya.cmds; maya.cmds.ls is cmds.ls", "from maya.cmds import ls; ls is cmds.ls"):
@@ -462,7 +462,7 @@ def test_import_maya_cmds():
 
 
 def test_runner_uses_blenders_run_script():
-    """Step 130 (#40): entries run from a temporary Text through ``text.run_script`` — prepared source, no Text left."""
+    """#40: entries run from a temporary Text through ``text.run_script`` — prepared source, no Text left."""
     runner.reset()
     before = {t.name for t in bpy.data.texts}
     src = runner.prepare("import maya.cmds as cmds\nx = 1\nx + 1  # c")
@@ -476,7 +476,7 @@ def test_runner_uses_blenders_run_script():
     r = runner.run("for i in range(2):\n    print('line', i)")
     assert r.text == "line 1" and not r.error, r
     r = runner.run("def g():\n    return undefined_name\ng()")
-    assert r.error and r.text == "# Error: NameError: file <maya console> line 2: name 'undefined_name' is not "         "defined", r          # Maya History > Line numbers in errors, factory on (step 216)
+    assert r.error and r.text == "# Error: NameError: file <maya console> line 2: name 'undefined_name' is not "         "defined", r          # Maya History > Line numbers in errors, factory on
     assert {t.name for t in bpy.data.texts} == before, "the temporary Text is removed"
     r = runner.run("y * 2")
     assert r.text == "# Result: 12 #", "variables of earlier entries persist"
@@ -592,7 +592,7 @@ def test_cmds_select_ls_scene():
     cmds.select(cl=True)
     assert cmds.ls(sl=True) == []
     assert sorted(cmds.ls(type="mesh")) == ["pCubeShape1", "pCubeShape2"]
-    assert sorted(cmds.ls()) == [a, b, "pCubeShape1", "pCubeShape2"]   # Maya ls lists shapes too (step 208)
+    assert sorted(cmds.ls()) == [a, b, "pCubeShape1", "pCubeShape2"]   # Maya ls lists shapes too
     assert cmds.listRelatives(a) == ["pCubeShape1"], "Maya: the shape is a child"
     bpy.data.objects[b].parent = bpy.data.objects[a]
     assert cmds.listRelatives(a, c=True) == ["pCubeShape1", b] and cmds.listRelatives(b, p=True) == [a]

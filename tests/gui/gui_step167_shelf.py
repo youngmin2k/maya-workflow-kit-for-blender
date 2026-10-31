@@ -1,4 +1,4 @@
-"""Step 167 in the Maya Workflow Kit layout (1600 px window): the Poly Modeling shelf wraps into a second row at UI
+"""In the Maya Workflow Kit layout (1600 px window): the Poly Modeling shelf wraps into a second row at UI
 scale 1.25, the wheel over the icons / the scroll bar's arrow shows it (the last button is reachable and runs), and a
 double-click on Polygon Cube makes one cube and opens Polygon Cube Options. Shots with ``--shots``."""
 

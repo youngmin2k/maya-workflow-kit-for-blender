@@ -38,7 +38,7 @@ def main(argv=None):
 
     zip_path = build.main(["--blender", args.blender])
     env = rc.sandbox_env()
-    env["ALLSET_NO_WELCOME"] = "1"   # the first-start dialog would eat the simulated events (step 42)
+    env["ALLSET_NO_WELCOME"] = "1"   # the first-start dialog would eat the simulated events
     code, out = rc.run([args.blender, "--command", "extension", "install-file", "-r", rc.REPO_ID,
                         "--enable", str(zip_path)], env)
     if code != 0:

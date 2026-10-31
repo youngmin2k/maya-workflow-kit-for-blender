@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Pose Editor window (step 227 L16, Issue #137).
+"""Maya's Pose Editor window (Issue #137).
 
 Maya: Windows > Animation Editors > Pose Editor / Deform > Pose Space Deformation > Pose Editor — pose interpolators on
 the left, the current interpolator's poses on the right (Add Pose, Add Shape, Edit, Go to Pose, Delete, the pose
@@ -111,7 +111,7 @@ class ALLSET_PT_pose_editor(bpy.types.Panel):
     """Maya's Pose Editor (a marked Properties Tool tab in its own window)"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"            # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"            # = drawn by the Properties Tool tab (like Tool Settings)
     bl_label = "Pose Editor"
     bl_options = {'HIDE_HEADER'}
     bl_order = -300

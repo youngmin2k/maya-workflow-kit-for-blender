@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Graph Editor F / A framing the Maya way (step 281, #192).
+"""Graph Editor F / A framing the Maya way (#192).
 
 Maya's Graph Editor frames a rectangle Blender's ``graph.view_selected`` / ``graph.view_all`` don't make:
 

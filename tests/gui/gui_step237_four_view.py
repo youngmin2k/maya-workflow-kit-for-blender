@@ -1,4 +1,4 @@
-"""Step 237 (Issue #148): Maya Four View = four real 3D View panels (ui/four_view.py) in the Maya layout.
+"""Issue #148: Maya Four View = four real 3D View panels (ui/four_view.py) in the Maya layout.
 
 Space tap (``allset.toggle_quad_view``) splits the viewport into top / persp / front / side areas, each with its own
 header, shading and Show settings; Space tap over a panel keeps that panel alone; the next tap brings the four back with
@@ -50,7 +50,7 @@ def looks():
 
 
 def keys_work(tag):
-    """W hold + LMB in the main panel opens the Move tool marking menu: the panel takes keys (step 237: a joined area
+    """W hold + LMB in the main panel opens the Move tool marking menu: the panel takes keys (a joined area
     took none until the screen was refreshed)."""
     def move():
         # event simulation: the first key after a layout change, sent in the same tick as the move, is lost

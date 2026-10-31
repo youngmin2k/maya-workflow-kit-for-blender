@@ -1,4 +1,4 @@
-"""Step 169: Deform completion — the kit wire deformer like Maya's (translate / rotate / twist / scale / CV edit /
+"""Deform completion — the kit wire deformer like Maya's (translate / rotate / twist / scale / CV edit /
 envelope / dropoff / dropoff locators), Wire edit items, ShrinkWrap target edits, Lattice reset / remove tweaks,
 Prune Membership, Point On Curve, Paint Weights windows, Deform >= 60 %, no "Blender has no settings" box left.
 """
@@ -241,7 +241,7 @@ def test_point_on_curve():
 def test_paint_weights_windows_and_wire_paint():
     for label in ("Blend Shape", "Cluster", "Delta Mush", "Proximity Wrap", "Lattice", "ShrinkWrap", "Wire",
                   "Nonlinear", "Texture Deformer", "Set Membership"):
-        # Maya's menus have Paint Weights > Set Membership under Deform > Paint Membership (step 219 menus, step 229)
+        # Maya's menus have Paint Weights > Set Membership under Deform > Paint Membership
         path = "Deform/Paint Membership" if label == "Set Membership" else f"Deform/Paint Weights/{label}"
         w = option_windows.find_path(path)
         assert w is not None and w.title in ("Paint Attributes Tool", "Paint Blend Shape Weights Tool"), path
@@ -269,9 +269,9 @@ def test_deform_option_boxes_and_count():
     print(f"Deform: {working} / {len(paths)} working ({100 * working / len(paths):.0f} %); boxes "
           + ", ".join(f"{k} {len(v)}" for k, v in sorted(kinds.items())))
     print("dead:", kinds.get("dead"))
-    # Maya's menus (step 219) include the 70-item Maya Muscle plug-in submenu: a separate legacy muscle system the
+    # Maya's menus include the 70-item Maya Muscle plug-in submenu: a separate legacy muscle system the
     # kit explains with notices (rare Maya systems get a notice, not a re-implementation), so the
-    # working share is counted without it (step 229); every greyed Muscle item still needs a notice below.
+    # working share is counted without it; every greyed Muscle item still needs a notice below.
     core = [p for p in paths if not p.startswith("Deform/Muscle/")]
     working = sum(1 for p in core if p in menu_map.MAP)
     assert working / len(core) >= 0.60, (working, len(core))

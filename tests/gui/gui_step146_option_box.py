@@ -1,4 +1,4 @@
-"""Step 146 (#82): a Maya menu item's option box opens by holding the item, without a drag.
+"""#82: a Maya menu item's option box opens by holding the item, without a drag.
 
 Press and hold Display > Grid, Key > Set Key, Constrain > Parent: after Blender's hold time (0.2 s) its hold menu
 opens below the item and the kit puts the pointer on the menu's Option Box row (``menu_sets.LAST_WARP``), so letting
@@ -75,7 +75,7 @@ def first_row(menu):
     mouse (gui_step143_user grid_box); Key is taller than the window, so Blender pins it to the window top (Set Key
     87 px down); Constrain opens with its tear-off line at the mouse, Parent 23 px under it."""
     if menu == "mainDisplayMenu":
-        return C["x"], C["open"][1] + px(9)   # Maya 2026 Display menu (step 229 shot)
+        return C["x"], C["open"][1] + px(9)   # Maya 2026 Display menu
     if menu == "mainKeysMenu":
         return C["x"], win().height - px(87 if C["case"] == "Key/Set Key" else 444)
     return C["x"], C["open"][1] - px(23)

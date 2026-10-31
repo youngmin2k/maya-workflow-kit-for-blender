@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Rig FBX the way Maya 2026 writes it (step 222, Issue #132).
+"""Rig FBX the way Maya 2026 writes it (Issue #132).
 
 Blender's FBX writer puts the rest orientation (and the current frame's pose) of every joint into ``Lcl Rotation`` and
 writes the armature object as a ``Null`` (Lcl Rotation -90 X / Lcl Scaling 100 for the kit's Y-up cm preset), joint
@@ -15,14 +15,14 @@ first into the second with Blender's bundled ``io_scene_fbx.parse_fbx`` / ``enco
    (``rest_rotations``): the writer's own axis conventions, never the current frame.
    Lcl Rotation default and keys become Pre^-1 R(t), compat Euler (``rotation_display.euler_curve``'s rule).
 
-3. Step 232: joints whose Maya frame a bone can't take (``joints.MAYA_FRAME``: an oriented end joint lines up with
+3. Joints whose Maya frame a bone can't take (``joints.MAYA_FRAME``: an oriented end joint lines up with
    the world, a Behavior-mirrored joint points X back up the chain) turn their frame by Q_j (joint axes). The local
    matrix becomes Q_p^-1 L Q_j (Q_p = the parent joint's turn): PreRotation = Q_p^-1 R_rest Q_j, Lcl Rotation =
    Q_j^-1 R_rest^-1 R(t) Q_j, Lcl Translation = Q_p^-1 t; models under a turned joint get Q_p^-1 on rotation and
    translation; skin clusters / bind pose of a turned joint: TransformLink Q_j, Transform = Q_j^-1 Transform. The
    joints' world positions and the skinned mesh don't change.
 
-An animated armature object (curves on the Null) keeps its Null: only step 2 runs.
+An animated armature object (curves on the Null) keeps its Null: only item 2 runs.
 """
 
 import array
@@ -135,7 +135,7 @@ class Index:
         self.models = {m.props[0]: m for m in self.objects.find(b"Model")}
         self.parent = {}                      # child uid -> parent uid (OO)
         self.curve_nodes = {}                 # (model uid, b"Lcl Rotation") -> curve node
-        self.curve_nodes_all = {}             # every take's curve node (step 225: Game Exporter clips = takes)
+        self.curve_nodes_all = {}             # every take's curve node (Game Exporter clips = takes)
         self.curves = {}                      # curve node uid -> {b"d|X": curve elem}
         nodes = {e.props[0]: e for e in self.objects.find(b"AnimationCurveNode")}
         curves = {e.props[0]: e for e in self.objects.find(b"AnimationCurve")}
@@ -464,8 +464,7 @@ KTIME = 46186158000            # FBX ticks per second
 
 
 def set_time_span(path, start, end, fps):
-    """GlobalSettings TimeSpan = the Time Slider range like Maya writes it (Blender's writer puts 0 .. 1 s there,
-    step 235)."""
+    """GlobalSettings TimeSpan = the Time Slider range like Maya writes it (Blender's writer puts 0 .. 1 s there)."""
     tree, version = load(path)
     gs = tree.first(b"GlobalSettings")
     p70 = _p70(gs) if gs is not None else None
@@ -485,7 +484,7 @@ def set_time_span(path, start, end, fps):
 def rewrite(path, rest_path, turns=None, parents=None):
     """Rewrite the rig FBX at ``path`` the Maya way; ``rest_path`` = the same export at the rest pose; ``turns`` =
     {joint name: Q} (joints.maya_frames); ``parents`` = {joint name: parent name or None}: only those joints stay,
-    hung there (step 236, ``fbx_skeleton.reparent``). Returns (joints given a PreRotation, Nulls folded)."""
+    hung there (``fbx_skeleton.reparent``). Returns (joints given a PreRotation, Nulls folded)."""
     tree, version = load(path)
     rest_tree, _v = load(rest_path)
     index, rest_index = Index(tree), Index(rest_tree)

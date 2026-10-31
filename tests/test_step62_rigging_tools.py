@@ -1,4 +1,4 @@
-"""Step 62: Set Driven Key, pose-mode Constrain, Add / Edit / Delete Attribute, Blend Shape, Quick Rig (Rigify).
+"""Set Driven Key, pose-mode Constrain, Add / Edit / Delete Attribute, Blend Shape, Quick Rig (Rigify).
 GUI: tests/gui/gui_step62_sdk.py (rigging_06 hand order)."""
 
 import math
@@ -191,13 +191,13 @@ def test_constrain_in_pose_mode_goes_on_the_joint():
     arm.data.bones.active = arm.data.bones["joint2"]
     assert bpy.ops.allset.constrain(type='COPY_ROTATION') == {'FINISHED'}
     con = arm.pose.bones["joint2"].constraints[-1]
-    # step 233: a joint copies the control's Maya axes through a hidden helper that follows the control
+    # a joint copies the control's Maya axes through a hidden helper that follows the control
     helper = multi.helper_of(con)
     assert con.type == 'COPY_ROTATION' and helper is not None and not arm.constraints
     assert helper.constraints[0].target == ctrl
     assert bpy.ops.allset.constrain(type='CHILD_OF') == {'FINISHED'}
     assert multi.group_type(arm.pose.bones["joint2"].constraints[-1]) == "parentConstraint"
-    # no target selected -> nothing, with Maya's Error (step 258)
+    # no target selected -> nothing, with Maya's Error
     bpy.ops.object.mode_set(mode='OBJECT')
     _select(arm)
     bpy.ops.object.mode_set(mode='POSE')
@@ -291,7 +291,7 @@ def test_menus_shelf_and_notices():
     for path in ("Constrain/Parent", "Constrain/Orient", "Constrain/Point", "Constrain/Aim"):
         assert m[path][0] == "allset.constrain", path
     for label in ("Add Attribute...", "Edit Attribute...", "Delete Attribute..."):
-        # step 101: the Attributes section comes from menu_data (tools/gen_menu_data.py RUNTIME_LABELS)
+        # the Attributes section comes from menu_data (tools/gen_menu_data.py RUNTIME_LABELS)
         assert (label,) in menu_data.MENUS["mainModifyMenu"][3] and m["Modify/" + label].startswith("allset.")
     assert m["Skeleton/Quick Rig"] == "allset.quick_rig"
     assert "Skeleton/Quick Rig" in notices.NOTICES and "Skeleton/HumanIK" in notices.NOTICES

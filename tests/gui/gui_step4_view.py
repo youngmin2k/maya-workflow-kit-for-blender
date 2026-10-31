@@ -1,4 +1,4 @@
-"""Step 4 with simulated events: dolly direction, ortho tumble lock, view undo,
+"""With simulated events: dolly direction, ortho tumble lock, view undo,
 Space tap four views, Shift+A all views, 1/2/3, F9-F11, Ctrl+Space."""
 
 import os
@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sim import MODULE, check, ev, run, step, tap, setup, screenshot, view3d, win  # noqa: E402
 from importlib import import_module  # noqa: E402
 
-four_view = import_module(MODULE + ".ui.four_view")   # step 237: four real panels
+four_view = import_module(MODULE + ".ui.four_view")   # four real panels
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
 C = {}
@@ -117,7 +117,7 @@ def s_redo_view():
 
 @step
 def s_quad_wait():
-    pass                      # step 237: the top row splits one tick later
+    pass                      # the top row splits one tick later
 
 
 @step
@@ -152,14 +152,14 @@ def s_quad_off():
 
 @step
 def s_settle_layout():
-    # step 240 QA: alone 1 of 3 runs failed (non-deterministic) — after the layout change the window needs a tick of
+    # alone 1 of 3 runs failed (non-deterministic) — after the layout change the window needs a tick of
     # its own with the pointer in the view before a key reaches the new area under event simulation
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"])
 
 
 @step
 def s_shift_a():
-    # step 237: after a layout change the first key sent in the move's tick is lost under event simulation
+    # after a layout change the first key sent in the move's tick is lost under event simulation
     ev('A', 'PRESS', shift=True)
     ev('A', 'RELEASE', shift=True)
 

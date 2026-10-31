@@ -1,4 +1,4 @@
-"""Contact sheets of the kit-drawn icons (step 131, #23): docs/icons/*.png.
+"""Contact sheets of the kit-drawn icons (#23): docs/icons/*.png.
 
     python tools/icon_sheet.py [--out DIR]
 
@@ -119,7 +119,7 @@ def _inside():
         items = [(g.removeprefix("pt_"), [status_icons.image(g, s) for s in (48, 32, 24, 16)]) for g in glyphs]
         canvas, labels = _grid(items, f"{title} — kit-drawn glyphs (48, 32, 24, 16 px)")
         _save(canvas, labels, os.path.join(out, f"{name}.png"))
-    # step 142 (#54): menu-only drawings, one sheet per drawing module (menus drawn at 16 / 20 / 24 px)
+    # #54: menu-only drawings, one sheet per drawing module (menus drawn at 16 / 20 / 24 px)
     from allset.ui import menu_drawings
     by_module = {}
     for name, fn in menu_drawings.DRAWINGS.items():

@@ -7,7 +7,7 @@ action in ``ui/menu_map.py`` form (run by ``marking.modal.run_action``). Icons a
 Blender's own (no Maya artwork); the shelf row draws kit-made
 pictograms (``shelf_icons``).
 
-Step 109: every factory button keeps its slot. ``MENU`` names the Maya menu
+Every factory button keeps its slot. ``MENU`` names the Maya menu
 item that runs the same runTimeCommand: the button takes that item's
 action (``menu_map.MAP``) or, when the item is greyed, its notice (``ui/notices.py``). Buttons that are in no
 Maya menu carry their own notice in ``NOTICES``. Unmapped buttons are drawn greyed with the notice as tooltip.
@@ -39,7 +39,7 @@ _CONSTRAINTS = {
 BY_COMMAND = {
     # --- Curves, Surfaces ---
     "CreateNURBSCircle": (_create('NURBS_CIRCLE'), 'CURVE_NCIRCLE'),
-    "EPCurveTool": ("allset.ep_curve_tool", 'CURVE_NCURVE'),          # step 156
+    "EPCurveTool": ("allset.ep_curve_tool", 'CURVE_NCURVE'),
     "CreateBezierCurveTool": (_create('BEZIER_CURVE'), 'CURVE_BEZCURVE'),
     "InsertKnot": ("curve.subdivide", 'CURVE_PATH'),
     "CreateNURBSSphere": (_create('NURBS_SPHERE'), 'SURFACE_NSPHERE'),
@@ -66,19 +66,19 @@ BY_COMMAND = {
     "SmoothPolygon": (("item", "Mesh/Smooth"), 'MOD_SUBSURF'),     # the menu's polySmoothFace (#204)
     "ReducePolygon": (_mod('DECIMATE'), 'MOD_DECIM'),
     "PolyRemesh": (_mod('REMESH'), 'MOD_REMESH'),
-    "PolyExtrude": (("v3d", "allset.extrude", {}), 'FACESEL'),     # polyExtrudeFace (step 65)
+    "PolyExtrude": (("v3d", "allset.extrude", {}), 'FACESEL'),     # polyExtrudeFace
     "BridgeOrFill": ("mesh.bridge_edge_loops", 'MOD_LATTICE'),
-    "BevelPolygon": (("item", "Edit Mesh/Bevel"), 'MOD_BEVEL'),                 # step 139
-    "PolyMerge": (("item", "Edit Mesh/Merge"), 'AUTOMERGE_OFF'),               # step 139
+    "BevelPolygon": (("item", "Edit Mesh/Bevel"), 'MOD_BEVEL'),
+    "PolyMerge": (("item", "Edit Mesh/Merge"), 'AUTOMERGE_OFF'),
     "MergeToCenter": (("mesh.merge", {"type": 'CENTER'}), 'PIVOT_MEDIAN'),
     "FlipTriangleEdge": ("mesh.edge_rotate", 'MOD_TRIANGULATE'),
     "DuplicateFace": (("v3d", "mesh.duplicate_move", {}), 'DUPLICATE'),
     "PolygonCollapse": ("mesh.edge_collapse", 'FULLSCREEN_EXIT'),
     "MultiCutTool": (("tool", "allset.multi_cut_tool", True), 'SCULPTMODE_HLT'),
-    "MergeVertexTool": (("tool", "allset.target_weld_tool", True), 'AUTOMERGE_OFF'),   # Target Weld (step 64)
-    "QuadDrawTool": ("allset.quad_draw_start", 'MESH_DATA'),        # step 144 (#30)
+    "MergeVertexTool": (("tool", "allset.target_weld_tool", True), 'AUTOMERGE_OFF'),   # Target Weld
+    "QuadDrawTool": ("allset.quad_draw_start", 'MESH_DATA'),        # #30
     "TextureViewWindow": (("allset.hb_pane", {"ui_type": 'UV'}), 'UV'),
-    "SetCutSewUVTool": ("allset.cut_sew_tool_set", 'UV_EDGESEL'),   # step 79
+    "SetCutSewUVTool": ("allset.cut_sew_tool_set", 'UV_EDGESEL'),
     # --- Sculpting ---
     "SetMeshSculptTool": (("object.mode_set", {"mode": 'SCULPT'}), 'SCULPTMODE_HLT'),
     # --- Rigging ---
@@ -97,7 +97,7 @@ BY_COMMAND = {
     # --- Animation ---
     "PlayblastWindow": (("v3d", "allset.playblast", {}), 'RENDER_ANIMATION'),
     "CreateMotionTrail": ("object.paths_calculate", 'ANIM_DATA'),
-    "BakeSimulation": ("allset.bake_simulation", 'ACTION'),   # step 217 L18
+    "BakeSimulation": ("allset.bake_simulation", 'ACTION'),
     "SetKeyAnimated": (_key("Available"), 'KEYINGSET'),
     "SetKeyTranslate": (_key("Location"), 'CON_LOCLIKE'),
     "SetKeyRotate": (_key("Rotation"), 'CON_ROTLIKE'),
@@ -129,13 +129,13 @@ BY_LABEL = {
     "UVEditing/Planar Mapping": (("v3d", "uv.project_from_view", {}), 'UV_FACESEL'),
     "UVEditing/Cylindrical Mapping": (("v3d", "uv.cylinder_project", {}), 'MESH_CYLINDER'),
     "UVEditing/Spherical Mapping": (("v3d", "uv.sphere_project", {}), 'MESH_UVSPHERE'),
-    "UVEditing/Automatic Mapping": (("item", "UV/Automatic"), 'UV_DATA'),      # step 139
+    "UVEditing/Automatic Mapping": (("item", "UV/Automatic"), 'UV_DATA'),
     "Rendering/Standard Surface Material": (_shader('STANDARD_SURFACE'), 'MATERIAL'),
     "Rendering/Lambert Material": (_shader('LAMBERT'), 'SHADING_SOLID'),
     "Rendering/Blinn Material": (_shader('BLINN'), 'SHADING_RENDERED'),
     "Rendering/Phong Material": (_shader('PHONG'), 'SHADING_TEXTURE'),
     "Rendering/Surface Material": (_shader('SURFACE'), 'LIGHT'),
-    # step 105 kinds (operators/material.MATERIALS)
+    # Maya shader kinds (operators/material.MATERIALS)
     "Rendering/Anisotropic Material": (_shader('ANISOTROPIC'), 'MATERIAL'),
     "Rendering/Phong E Material": (_shader('PHONG_E'), 'MATERIAL'),
     "Rendering/Layered Material": (_shader('LAYERED'), 'MATERIAL'),
@@ -172,7 +172,7 @@ MENU = {
     "Curves/Offset Curve": "Curves/Offset/Offset Curve",
     "Curves/Rebuild Curve": "Curves/Rebuild",
     "Curves/Add Points Tool": "Curves/Add Points Tool",
-    "Surfaces/Revolve": "Surfaces/Revolve",          # step 181: a NURBS revolve (was the Screw modifier)
+    "Surfaces/Revolve": "Surfaces/Revolve",          # a NURBS revolve (was the Screw modifier)
     "Surfaces/Loft": "Surfaces/Loft",
     "Surfaces/Planar": "Surfaces/Planar",
     "Surfaces/Extrude": "Surfaces/Extrude",
@@ -196,8 +196,8 @@ MENU = {
     "Polygons/Content Browser": "Windows/Content Browser",
     "Polygons/Retopologize": "Mesh/Retopologize",
     "Polygons/Circularize": "Edit Mesh/Circularize",
-    "Polygons/Difference (A - B)": "Mesh/Booleans/Difference (A - B)",     # Maya 2026 shelf (step 269)
-    "Polygons/Smart Extrude": "Edit Mesh/Smart Extrude",                   # Maya 2026 shelf (step 269)
+    "Polygons/Difference (A - B)": "Mesh/Booleans/Difference (A - B)",     # Maya 2026 shelf
+    "Polygons/Smart Extrude": "Edit Mesh/Smart Extrude",                   # Maya 2026 shelf
     # UV Editing (Maya 2026: the UV buttons of the 2022 Poly Modeling shelf plus four more)
     "UVEditing/Contour Stretch": "UV/Contour Stretch",
     "UVEditing/3D Grab UV Tool": "UV/3D Grab UV Tool",
@@ -205,7 +205,7 @@ MENU = {
     "UVEditing/Cut UV Edges": "UV/Cut UV Edges",
     "UVEditing/Delete UVs": "UV/Delete UVs",
     "UVEditing/UV Set Editor": "UV/UV Set Editor",
-    # Sculpting (Mesh Tools > Sculpting Tools = the essentials brushes, step 101)
+    # Sculpting (Mesh Tools > Sculpting Tools = the essentials brushes)
     **{f"Sculpting/{t} Tool": f"Mesh Tools/Sculpting Tools/{t} Tool" for t in _SCULPT},
     "Sculpting/Base Meshes": "Windows/Content Browser",       # Maya opens the Content Browser on its meshes
     "Sculpting/Shape Editor": "Windows/Animation Editors/Shape Editor",
@@ -213,7 +213,7 @@ MENU = {
     # Rigging / Animation
     "Rigging/Human IK": "Windows/Animation Editors/HumanIK",
     "Rigging/Create Cluster": "Deform/Cluster",
-    "Animation/Motion Trail Editor": "Visualize/Motion Trail Editor",     # Maya 2026 shelf (step 269)
+    "Animation/Motion Trail Editor": "Visualize/Motion Trail Editor",     # Maya 2026 shelf
     "Animation/Ghost Selected": "Visualize/Ghost Selected",
     "Animation/Unghost Selected": "Visualize/Unghost Selected",
     "Animation/Open Ghosting Editor": "Visualize/Ghosting Editor",
@@ -251,7 +251,7 @@ NOTICES = {
     "Rendering/Render Diagnostics": (
         "Info editor", "Blender reports render problems in the Info editor and the status bar; there is no "
         "diagnostics window."),
-    # Maya 2026 shelf (step 269); the kit's Maya materials have no openPBRSurface kind
+    # Maya 2026 shelf; the kit's Maya materials have no openPBRSurface kind
     "Rendering/OpenPBR Surface Material": (
         "Standard Surface Material", "Maya Workflow Kit has no OpenPBR Surface material: use the Standard Surface "
         "Material button (a Principled BSDF material)."),

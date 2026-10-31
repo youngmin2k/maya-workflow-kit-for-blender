@@ -1,4 +1,4 @@
-"""Step 33: marking menus and the hotbox stay inside the visible region (engine, no bpy UI).
+"""Marking menus and the hotbox stay inside the visible region (engine, no bpy UI).
 GUI: tests/gui/gui_step33_menu_bounds.py."""
 
 from importlib import import_module
@@ -37,7 +37,7 @@ def _check(menu, origin, bounds=B):
     rows = [r for it, r in rects if it.kind == "list"]
     clash = [(a, b) for a in rows for b in radial if _overlap(a, b)]
     assert not clash, (menu.name, origin, clash[:2])
-    # the ring stays at the press point (step 193: only the list moves)
+    # the ring stays at the press point (only the list moves)
     assert s.center == origin, (s.center, origin)
     assert s.press == origin
     return s
@@ -72,11 +72,11 @@ def test_other_menus_near_edges():
 
 
 def test_radial_submenu_in_place_stays_inside():
-    # Ctrl+RMB "To Vertices" (W) opens a radial submenu at the pointer (step 9).
+    # Ctrl+RMB "To Vertices" (W) opens a radial submenu at the pointer.
     s = engine.Session(mm.MENUS["CTRL_CONVERT"], (150.0, 40.0), 0.0, measure, None, None, B)
     w = s.layout.radial["W"]
     p = s.params
-    cx, cy = s.center          # = the press point (step 193)
+    cx, cy = s.center          # = the press point
     s.move(cx - p.radius - 5, cy, 0.3)
     assert len(s.stack) == 2 and w.sub is not None
     for it in s.layout.items:

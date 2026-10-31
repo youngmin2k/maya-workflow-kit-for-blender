@@ -1,4 +1,4 @@
-"""Step 58: IK Handle Tool, Pole Vector, Bind / Unbind Skin, Paint Skin Weights (+ influence list), Copy / Mirror Skin
+"""IK Handle Tool, Pole Vector, Bind / Unbind Skin, Paint Skin Weights (+ influence list), Copy / Mirror Skin
 Weights, Copy / Paste Vertex Weights. GUI: tests/gui/gui_step58_skin.py."""
 
 import types
@@ -119,7 +119,7 @@ def test_pole_vector_keeps_the_pose():
     bpy.context.view_layer.objects.active = handle
     assert bpy.ops.allset.pole_vector() == {'FINISHED'}
     con = arm.pose.bones["joint2"].constraints["ikHandle1"]
-    # step 245: Maya's pole vector = target - start joint drives the handle's pole helper
+    # Maya's pole vector = target - start joint drives the handle's pole helper
     assert handle.get("allset_pole_object") == pole and con.pole_target == handle["allset_pole_helper"]
     bpy.context.view_layer.update()
     after = arm.pose.bones["joint2"].head

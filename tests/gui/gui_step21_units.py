@@ -1,4 +1,4 @@
-"""Step 21 in a real UI: in the Maya Workflow Kit layout (m + cm display) the shelf cube and
+"""In a real UI: in the Maya Workflow Kit layout (m + cm display) the shelf cube and
 ``cmds.polyCube()`` are the same 1 cm cube, seen by Maya's persp view; Channel Box
 and Attribute Editor show Maya's numbers (cm); screenshots."""
 
@@ -71,7 +71,7 @@ def s_loaded():
     C["cmds_cube"] = cmds.polyCube()[0]
     cmds.move(2, 0, 0, C["cmds_cube"])
     cmds.select("pCube1")
-    bpy.context.window_manager.allset_dock = 'CHANNEL_BOX'   # the layout's tab stack (step 116)
+    bpy.context.window_manager.allset_dock = 'CHANNEL_BOX'   # the layout's tab stack
     redraw()
 
 

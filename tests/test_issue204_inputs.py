@@ -135,7 +135,7 @@ def test_record_hides_when_the_mesh_changes_in_object_mode():
     ob = _cube()
     assert bpy.ops.allset.menu_item(item="Edit Mesh/Bevel") == {'FINISHED'}
     assert in_view.cb_record(bpy.context, ob) is not None
-    ob.data.vertices[0].co.x += 0.5               # another edit: no longer the node's result (step 65 rule)
+    ob.data.vertices[0].co.x += 0.5               # another edit: no longer the node's result (kit history rule)
     ob.data.update()
     assert in_view.cb_record(bpy.context, ob) is None
     assert "polyBevel1" not in _draw().nodes()

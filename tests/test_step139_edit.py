@@ -1,4 +1,4 @@
-"""Step 139 lane EDIT: Edit Mesh > Connect / Merge / Symmetrize and Mesh > Smooth against the expected numbers.
+"""Edit Mesh > Connect / Merge / Symmetrize and Mesh > Smooth against the expected numbers.
 Maya Y-up -> Blender Z-up: Maya (x, y, z) = Blender (x, -z, y).
 """
 

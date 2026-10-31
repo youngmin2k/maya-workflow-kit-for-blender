@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Kit menu pictures for Effects, Fields / Solvers, Fluids, nParticles, nConstraint, nHair, nCache and Cache (step 142,
+"""Kit menu pictures for Effects, Fields / Solvers, Fluids, nParticles, nConstraint, nHair, nCache and Cache (
 #54) — see ``menu_drawings``."""
 
 import math

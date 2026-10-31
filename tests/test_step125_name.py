@@ -1,5 +1,5 @@
-"""Step 125: the product is "Maya Workflow Kit" — manifest name, layout folder, zip name, no user-visible "Allset"
-left in the package. (The app template install / legacy-copy cleanup is gone since step 130.)"""
+"""The product is "Maya Workflow Kit" — manifest name, layout folder, zip name, no user-visible "Allset"
+left in the package. (There is no app template install / legacy-copy cleanup.)"""
 
 import os
 import re
@@ -12,7 +12,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src", "allset")
 # Hidden identifiers users never see (leading-dot data names, a PropertyGroup class name).
 HIDDEN = (".Allset Tension", ".Allset Solidify", ".Allset Sculpt", ".Allset Morph", ".Allset Jiggle", ".AllsetList", ".AllsetStrip", ".AllsetShelf", ".Allset Smooth Preview Shading", ".Allset Wire", ".Allset Sweep Mesh", ".Allset Weight Sum", '".Allset"', "AllsetNucleus", '"Allset"',
-          # step 226 / 227 helper collections, linked to no scene (never in a View Layer Outliner)
+          # helper collections, linked to no scene (never in a View Layer Outliner)
           ".AllsetConstraintHelpers", ".AllsetControlShapes", ".AllsetPoseHelpers")
 
 

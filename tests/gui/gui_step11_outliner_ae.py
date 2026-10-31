@@ -1,4 +1,4 @@
-"""Step 11 in a real UI: Ctrl+A switches the dock to the Attribute Editor (sidebar opens),
+"""In a real UI: Ctrl+A switches the dock to the Attribute Editor (sidebar opens),
 node tabs (transform / shape / history / material), the Maya Outliner tab; screenshots."""
 
 import os
@@ -26,7 +26,7 @@ def redraw():
 def shot(name):
     if SHOTS:
         wm = bpy.context.window_manager
-        window = wm.windows[-1]        # the floating Attribute Editor once it is open (step 116)
+        window = wm.windows[-1]        # the floating Attribute Editor once it is open
         with bpy.context.temp_override(window=window):
             bpy.ops.screen.screenshot(filepath=os.path.join(SHOTS, name))
 
@@ -81,7 +81,7 @@ def floating_dock():
 
 @step
 def s_sidebar_open():
-    # step 116: a factory layout has no Maya tab stack, so Ctrl+A opens the Attribute Editor as a floating window
+    # a factory layout has no Maya tab stack, so Ctrl+A opens the Attribute Editor as a floating window
     # (Maya opens panels that aren't in the workspace as floating windows); the viewport sidebar stays closed
     md = import_module(MODULE + ".ui.maya_dock")
     fl = floating_dock()
@@ -159,7 +159,7 @@ def _after_outliner_tab():
 
 @step
 def s_outliner_rows():
-    # the kit's Outliner rows (the sidebar Outliner tab went with the sidebar dock in step 116)
+    # the kit's Outliner rows (the sidebar Outliner tab went with the sidebar dock)
     _after_outliner_tab()
 
 

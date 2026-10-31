@@ -1,4 +1,4 @@
-"""Step 162: Ctrl+Shift+click on a Maya menu item adds it to the current shelf.
+"""Ctrl+Shift+click on a Maya menu item adds it to the current shelf.
 
 Ctrl and Shift are held (the add-on reads the OS key state, ``keystate.is_down``, which the simulation replaces) while
 Display > Grid is clicked: the item does not run and doesn't open its option box; a "Grid" button is appended to the
@@ -70,7 +70,7 @@ def s_open():
 @step
 def s_hover():
     # Display opens mid-viewport with Grid 34 px above the mouse (gui_step146_option_box.first_row)
-    C["row"] = (C["x"], C["y"] + px(9))   # Maya 2026 Display menu (step 229 shot)
+    C["row"] = (C["x"], C["y"] + px(9))   # Maya 2026 Display menu
     ev('MOUSEMOVE', 'NOTHING', x=C["row"][0] - 4, y=C["row"][1])
 
 
@@ -86,7 +86,7 @@ def s_settle():
 
 @step
 def s_click():
-    # Ctrl + Shift physically held: only the OS key state (simulated modifier clicks run nothing, step 51)
+    # Ctrl + Shift physically held: only the OS key state (simulated modifier clicks run nothing)
     sim._down.update({'LEFT_CTRL', 'LEFT_SHIFT'})
     del C["calls"][:]
     ev('LEFTMOUSE', 'PRESS', x=C["row"][0], y=C["row"][1])

@@ -1,9 +1,9 @@
-"""Step 130 (GitHub #46, #40): the Maya keymap never changes the active keyconfig or a keymap preference.
+"""GitHub #46, #40: the Maya keymap never changes the active keyconfig or a keymap preference.
 
 Maya items live in the add-on keyconfig; the active keyconfig's own items of the same keymaps are switched off in
 memory while Maya mode is on and switched on again on Maya mode off / disable.
 Background Blender leaves the default keyconfig empty, so it is filled from Blender's keymap data first
-(rt60_dump.populate, like the step 60 round trip).
+(rt60_dump.populate, like the switch round trip test).
 """
 
 from importlib import import_module
@@ -70,7 +70,7 @@ def test_lifecycle_active_keyconfig_untouched():
         obj = _kcs().active.keymaps["Object Mode"]
         assert not [k for k in obj.keymap_items if k.active], "preset Object Mode items still on"
         assert bpy.app.timers.is_registered(km_mod._watch)
-        # merged order = Maya order: the PASS_THROUGH-first item precedes Blender's click select (step 76)
+        # merged order = Maya order: the PASS_THROUGH-first item precedes Blender's click select
         user = [k.idname for k in _kcs().user.keymaps["3D View"].keymap_items
                 if k.active and k.type == 'LEFTMOUSE' and k.value == 'CLICK' and not (k.shift or k.ctrl or k.alt)]
         data = next(km for km in km_mod.generate_data() if km[0] == "3D View")[2]["items"]
@@ -125,7 +125,7 @@ def test_disable_in_maya_mode_restores_everything():
 def test_no_runtime_exec_of_keymap_data():
     """The IC data is static (tools/gen_ic_data.py); one file per Blender minor whose data changed."""
     ic = import_module(kit.MODULE + ".keymap.ic_data")
-    assert ic.VERSIONS[0] == (5, 0), "no 4.5 data since step 279"
+    assert ic.VERSIONS[0] == (5, 0), "no 4.5 data (the kit needs 5.0+)"
     assert ic.data_version((5, 0)) == (5, 0) and ic.data_version((5, 3)) == ic.VERSIONS[-1]
     assert ic.data_version((5, 1)) == (5, 1)
     data = ic.generate()

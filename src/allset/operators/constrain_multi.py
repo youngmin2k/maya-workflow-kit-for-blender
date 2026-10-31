@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 226 L4: Maya multi-target constraints (weighted average).
+"""L4: Maya multi-target constraints (weighted average).
 
 Maya: a point / orient / parent / scale constraint with several targets is
 one node ``<owner>_<type><n>`` with one weight attribute ``<target>W<i>`` per target (default 1.0), the result is the
@@ -9,7 +9,7 @@ The kit (one Blender constraint reads one target):
 - One Blender constraint per target, stacked in Maya's target order, named ``<group>:<i>:<target>`` (parent: one
   Copy Location + one Copy Rotation ``... R`` per target). The owner (Object / PoseBone) keeps the group in the ID
   property ``allset_cgroups`` ({group: Maya type}) and Maya's weight per target in ``allset_w_<first member name>``
-  (float 1.0 — keyable and drivable, Set Driven Key drives exactly these, step 226 L5).
+  (float 1.0 — keyable and drivable, Set Driven Key drives exactly these).
 - Point / Orient / Parent: influence of member i = driver ``w_i / S_i if S_i > 0 else 1 / (i + 1)`` with
   S_i = w_0 + ... + w_i (Blender mixes the stack in order, so these influences give exactly the weighted average of
   the positions; all 0 = the equal average and W0 0.5 · W1 0 = target A, both Maya). Simple expressions only:
@@ -21,7 +21,7 @@ The kit (one Blender constraint reads one target):
   constraint goes (``cleanup``, from a depsgraph handler through a timer).
 - Scale: Maya's multi-target scale is the weighted geometric mean: member i = Copy Scale with
   ``power = w_i / Σw`` (equal split when Σw = 0), the first replaces, the others multiply (``use_offset``) — exact.
-- Rotation: Maya's interpType (orient / parent) — step 252 (#168), operators/constrain_interp.py: Shortest is the
+- Rotation: Maya's interpType (orient / parent) — #168, operators/constrain_interp.py: Shortest is the
   rotation members' influence w_i / W_total, the other types (default Average) a kit-computed blend.
 """
 
@@ -132,7 +132,7 @@ def is_head(con, owner=None):
 
 
 def head_of(con, owner=None):
-    """The constraint that stands for ``con``'s Maya node: a group's first member; a step 252 Interp Type blend's
+    """The constraint that stands for ``con``'s Maya node: a group's first member; an Interp Type blend's
     group head; an aim's Object up turn (``rig_tools.UP_SUFFIX``) = that aim."""
     mb = member(con, owner)
     if mb is None:
@@ -273,7 +273,7 @@ def _joint_from_object():
     return (MAYA_WORLD @ JOINT_AXES.transposed()).to_4x4()
 
 
-# Step 233: an object's Maya axes are its Blender X / Z / -Y (joints.MAYA_WORLD), a joint's are its bone's Y / Z / X
+# an object's Maya axes are its Blender X / Z / -Y (joints.MAYA_WORLD), a joint's are its bone's Y / Z / X
 # (joints.JOINT_AXES), so a bone copying an object's rotation has to copy the object's frame turned by
 # MAYA_WORLD JOINT_AXES^-1 (Maya orientConstraint / parentConstraint without offset: the joint's axes = the target's;
 # 90 deg off before). A bone target needs nothing.
@@ -314,7 +314,7 @@ def build(context, owner, targets, ctype, maintain_offset=None, weight=1.0):
             src = _helper(owner, f"{owner_name}_{group}_{labels[i]}Offset", t, sub, ow, ctype == 'COPY_LOCATION')
             src_sub = ""
         elif needs_joint_axes(owner, t, sub, ctype):
-            # step 233: a joint takes the target's Maya axes, not its Blender ones (joints.JOINT_AXES)
+            # a joint takes the target's Maya axes, not its Blender ones (joints.JOINT_AXES)
             src = _helper(owner, f"{owner_name}_{group}_{labels[i]}Axes", t, sub,
                           _target_world(t, sub) @ _joint_from_object(), False)
             src_sub = ""
@@ -337,7 +337,7 @@ def build(context, owner, targets, ctype, maintain_offset=None, weight=1.0):
                 first = c
     _state["armed"] = True
     if ctype in ('COPY_ROTATION', 'CHILD_OF') and len(targets) > 1:
-        # step 252 (#168): Maya interpType, default Average (operators/constrain_interp.py); one target = its own
+        # #168: Maya interpType, default Average (operators/constrain_interp.py); one target = its own
         # rotation whatever the type (Maya: fewer than 2 targets blend as Average = that target)
         from . import constrain_interp
         constrain_interp.set_mode(context, owner, group, constrain_interp.AVERAGE)
@@ -404,7 +404,7 @@ def cleanup():
             node = owner.pose.bones.get(bone) if bone and owner.pose is not None else (None if bone else owner)
             if node is not None:
                 alive = any(helper_of(c) == h for c in node.constraints if c.name.startswith(con_name))
-                partner = h.get("allset_aim_up")       # step 252: an aim's up helper goes with its aim
+                partner = h.get("allset_aim_up")       # an aim's up helper goes with its aim
                 if alive and partner and node.constraints.get(partner) is None:
                     alive = False
                     for c in [c for c in node.constraints if helper_of(c) == h]:

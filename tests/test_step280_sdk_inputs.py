@@ -1,4 +1,4 @@
-"""Step 280 (#186): Set Driven Key blendWeighted inputs live on their own data-block (operators/driven_key.py).
+"""#186: Set Driven Key blendWeighted inputs live on their own data-block (operators/driven_key.py).
 
 Two drivers summed on one transform channel read a stale input now and then while the inputs sat on the driven ID
 itself; on the hidden helper Texture the sum is right every time. Older files move over on load (once, no undo step

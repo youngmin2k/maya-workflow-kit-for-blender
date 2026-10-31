@@ -1,4 +1,4 @@
-"""Step 42 (reworked in step 130): Make Blender Maya and New Scene in Maya Layout change none of Blender's
+"""Make Blender Maya and New Scene in Maya Layout change none of Blender's
 preferences and write nothing outside the extension.
 
 The welcome dialog and the start-in-Maya-layout switch need a GUI; here: what make and the
@@ -46,7 +46,7 @@ def test_make_maya_changes_no_preferences():
     prefs = preferences.get()
     assert prefs.start_in_maya_layout and prefs.welcome_done
     assert kit.diff(before, _prefs()) == [], kit.diff(before, _prefs())
-    assert bpy.context.preferences.app_template == template, "no app template switch (step 130)"
+    assert bpy.context.preferences.app_template == template, "no app template switch"
     assert not os.path.isdir(os.path.join(_templates_dir(), app_template.TEMPLATE_ID)), "nothing copied out"
     assert _addons() == before_addons, (_addons() ^ before_addons)   # nothing switched off or on
     # the new Maya scene: the bundled layout as an untitled file

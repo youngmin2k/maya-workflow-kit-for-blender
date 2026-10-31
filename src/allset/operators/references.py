@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya references on Blender links + library overrides (step 209, Issue #116).
+"""Maya references on Blender links + library overrides (Issue #116).
 
-A kit reference (step 69, ``project.reference``) is a collection named after its namespace, marked ``REF`` (the
+A kit reference (``project.reference``) is a collection named after its namespace, marked ``REF`` (the
 source path) and ``NODE`` (Maya's reference node name, propRN / propRN1), holding library overrides of the source
 file's first scene. Maya's rules:
 
@@ -26,7 +26,7 @@ from bpy.props import EnumProperty, StringProperty
 
 from .. import results
 
-REF = "allset_reference"            # on the namespace collection: the source path (step 69)
+REF = "allset_reference"            # on the namespace collection: the source path
 NODE = "allset_reference_node"      # Maya's reference node name: propRN, propRN1
 ORDER = "allset_reference_order"    # creation order (the Reference Editor lists references like Maya)
 REPLACED = "allset_reference_replaced"   # Recently Replaced Files (newest first)

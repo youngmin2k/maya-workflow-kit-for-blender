@@ -10,7 +10,7 @@
    "user" setup in its own sandbox tmp/release_env_user (tools/release_probe.py seed: an enabled add-on of their own, changed input
    preferences, undo steps and theme). After the install the user's add-ons, theme and interface
    preferences are unchanged and only the kit's declared, backed-up changes appear (Maya keymap active,
-   prefs_preset navigation / undo values); after disabling the kit everything is as seeded (step 53).
+   prefs_preset navigation / undo values); after disabling the kit everything is as seeded.
 4. A GUI Blender on that sandbox (no --factory-startup, so the saved sandbox
    preferences with the enabled extension load like a real first start) runs
    tools/release_shots.py: checks the extension and the Maya keymap are active,
@@ -67,7 +67,7 @@ def run(cmd, env, timeout=TIMEOUT):
     return r.returncode, r.stdout + r.stderr
 
 
-# What enabling the kit may change on purpose (step 53): the Maya keymap becomes active
+# What enabling the kit may change on purpose: the Maya keymap becomes active
 # (keymap/__init__.py register) and the navigation / undo presets (prefs_preset.PRESET, UNDO_PRESET), all
 # backed up and put back on disable.
 DECLARED_INPUTS = {"view_rotate_method", "use_rotate_around_active", "use_mouse_depth_navigate", "use_zoom_to_mouse",
@@ -94,7 +94,7 @@ def user_setup_check(blender, zip_path):
     run(probe + ["check", str(snaps["after"])], env)
     run(probe + ["disable", str(snaps["disabled"])], env)
     checks = user_setup_checks(snaps["before"], snaps["after"], snaps["disabled"])
-    # step 60: enable again, Make Blender Maya, then Remove the extension in Maya mode
+    # enable again, Make Blender Maya, then Remove the extension in Maya mode
     removed = USER_SANDBOX / "removed.json"
     run([blender, "--command", "extension", "install-file", "-r", REPO_ID, "--enable", str(zip_path)], env)
     run(probe + ["make", str(USER_SANDBOX / "made.json")], env)
@@ -122,7 +122,7 @@ def _files(root):
 
 
 def leftover_check(blender, zip_path):
-    """Step 117: clean config -> install -> enable -> opt in -> disable -> Remove leaves no kit file behind."""
+    """Clean config -> install -> enable -> opt in -> disable -> Remove leaves no kit file behind."""
     env = sandbox_env(CLEAN_SANDBOX)
     probe = [blender, "-b", "--python", str(ROOT / "tools" / "release_probe.py"), "--"]
     run(probe + ["check", str(CLEAN_SANDBOX / "start.json")], env)
@@ -139,13 +139,13 @@ def leftover_check(blender, zip_path):
                   and not f.startswith(("extensions/.cache/", f"extensions/{REPO_ID}/.blender_ext/")))
     for f in left:
         print("  left behind:", f)
-    return [(f"opt-in writes no layout template outside the extension (step 130; template there: {made})", not made),
+    return [(f"opt-in writes no layout template outside the extension (template there: {made})", not made),
              ("Remove from inside Blender", rc == 0),
              (f"clean config: install -> enable -> opt in -> disable -> Remove leaves {len(left)} kit files", not left)]
 
 
 def user_setup_checks(before_path, after_path, disabled_path):
-    """(name, ok) pairs: installing the kit kept the user's add-ons and settings (step 53)."""
+    """(name, ok) pairs: installing the kit kept the user's add-ons and settings."""
     if not after_path.exists() or not disabled_path.exists():
         return [("snapshots after the install / disable (tools/release_probe.py)", False)]
     before, after, off = (json.loads(p.read_text(encoding="utf-8")) for p in (before_path, after_path, disabled_path))
@@ -162,7 +162,7 @@ def user_setup_checks(before_path, after_path, disabled_path):
         (f"install changes only the declared navigation preferences ({sorted(changed)})",
          changed <= DECLARED_INPUTS),
         (f"active keymap: {before['active_keyconfig']} -> {after['active_keyconfig']} (declared)",
-         after["active_keyconfig"] == before["active_keyconfig"]),   # step 130: never changed
+         after["active_keyconfig"] == before["active_keyconfig"]),   # never changed
         (f"disabling the kit restores everything ({[k for k, v in restored.items() if not v] or 'all'})",
          all(restored.values()) and kit not in off["addons"] and set(before["addons"]) <= set(off["addons"])),
     ]

@@ -1,4 +1,4 @@
-"""Step 26: Smart Extrude (Shift+manipulator on faces/edges), taking back a copy or
+"""Smart Extrude (Shift+manipulator on faces/edges), taking back a copy or
 extrusion that didn't move, only the transform manipulator, hold-menu check boxes.
 The drag itself: tests/gui/gui_step26_smart_extrude.py.
 """

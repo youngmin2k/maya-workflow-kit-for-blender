@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Create > Curve Tools drawing tools: CV Curve Tool, EP Curve Tool, Three / Two Point Circular Arc (step 156 lane T).
+"""Maya Create > Curve Tools drawing tools: CV Curve Tool, EP Curve Tool, Three / Two Point Circular Arc.
 
-Window-level modals like the Joint Tool (operators/joints.py, step 57): menus / shelf invoke them from any context and
+Window-level modals like the Joint Tool (operators/joints.py): menus / shelf invoke them from any context and
 each click finds the 3D View WINDOW region under the mouse itself (not the Tool Box column). Maya places curve points on
 the ground grid in a perspective view (Blender z = 0) and on the view plane through the origin in orthographic views
 (same rule as the Joint Tool, ``joints.click_point``).
@@ -14,8 +14,8 @@ divisions), hold C = the nearest curve / polygon edge under the cursor (dragging
 CV / vertex / pivot; the Status Line snap buttons (Blender's scene snapping) snap too and Ctrl inverts them while
 clicking, like Blender. The arcs finish
 on the release of their last click (3 / 2 points). The curve itself comes from ``curves_maya`` (``make_cv_curve`` /
-``make_ep_curve`` / ``make_arc3`` / ``make_arc2``) and is named ``curveN`` / ``curveShapeN``. UNDO only (no redo panel,
-step 147): one undo step per finished curve.
+``make_ep_curve`` / ``make_arc3`` / ``make_arc2``) and is named ``curveN`` / ``curveShapeN``. UNDO only (no redo panel):
+one undo step per finished curve.
 """
 
 import json
@@ -399,7 +399,7 @@ class _CurveDrawTool:
         if ob is None:
             return {'CANCELLED'}
         LAST.update(kind=self.kind, points=[p.copy() for p in pts])
-        from ..command_line import show_result      # Maya prints the result in the Command Line (step 151)
+        from ..command_line import show_result      # Maya prints the result in the Command Line
         show_result(f"Result: {ob.name}")
         return {'FINISHED'}
 

@@ -1,4 +1,4 @@
-"""Step 196 lane B (issue #103): Maya option windows for Create Character Set / Subcharacter Set, Curves Cut / Detach /
+"""Lane B (issue #103): Maya option windows for Create Character Set / Subcharacter Set, Curves Cut / Detach /
 Reverse Direction / Smooth (both) / Straighten, the circular arc tools, Merge UVs, Contour Stretch, Set / Assume
 Preferred Angle and Add Influence (operators/option_windows_misc196.py).
 

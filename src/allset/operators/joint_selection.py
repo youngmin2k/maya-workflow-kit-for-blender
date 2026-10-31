@@ -49,7 +49,7 @@ def select_roots_if_empty(ob):
     if ob is None or ob.type != 'ARMATURE' or ob.pose is None:
         return False
     if ob.mode == 'EDIT':
-        # step 241: an unskinned skeleton is shown in Edit mode; its root joints are picked with their subtrees
+        # an unskinned skeleton is shown in Edit mode; its root joints are picked with their subtrees
         ebs = ob.data.edit_bones
         if any(eb.select or eb.select_head or eb.select_tail for eb in ebs):
             return False
@@ -98,7 +98,7 @@ def pick(context, ob, mouse, radius):
     return min(candidates)[2] if candidates else None
 
 
-# --- Edit or Pose (step 241, Issue #156) ------------------------------------
+# --- Edit or Pose (Issue #156) ------------------------------------
 # Maya moves a placed joint with W at any time (translate; the children follow). Blender can't translate a connected
 # bone in Pose mode, so while the **Move tool** is on, a skeleton that drives no mesh is shown in Edit mode (the rest
 # = where Maya's joints are); with any other tool joints are picked in Pose mode as before (Channel Box
@@ -137,7 +137,7 @@ def sync_tool_mode(context):
         picked = [pb.name for pb in ob.pose.bones if bone_selected(pb)]
         active = ob.data.bones.active.name if ob.data.bones.active else None
         if not picked or any(ob.pose.bones[n].custom_shape is not None for n in picked):
-            return None     # controls (custom shapes) are animated in Pose, never repositioned (#171, step 255)
+            return None     # controls (custom shapes) are animated in Pose, never repositioned (#171)
         bpy.ops.object.mode_set(mode='EDIT')
         ob[AUTO_EDIT] = True
         ebs = ob.data.edit_bones
@@ -248,7 +248,7 @@ def _edit_picked(ob):
 
 
 def _pick_shape(eb, state, preserve):
-    """Select joint ``eb`` for W: its bone and subtree, or (Maya Preserve Children, step 243) only its head, so the
+    """Select joint ``eb`` for W: its bone and subtree, or (Maya Preserve Children) only its head, so the
     children stay — a connected head is the parent's tail point."""
     if not preserve:
         for b in _subtree(eb):
@@ -320,7 +320,7 @@ def select_edit(context, ob, name, shift=False, ctrl=False):
 def select(context, ob, name, shift=False, ctrl=False):
     """Maya replace / toggle / subtract / add on individual joints."""
     # a bone with a custom shape is a control (control = bone Custom Shape), not a Maya joint: picking it
-    # keeps Pose mode with the Move tool too (#171, step 255: an unkeyed Rigify rig went to Edit mode on a W click)
+    # keeps Pose mode with the Move tool too (#171: an unkeyed Rigify rig went to Edit mode on a W click)
     control = name in ob.pose.bones and ob.pose.bones[name].custom_shape is not None
     if ob.get(MOVE_SKINNED) or (joint_mode(ob) == 'EDIT' and not control and not ob.get(POSE_PIN)
                                 and move_tool_active(context)):

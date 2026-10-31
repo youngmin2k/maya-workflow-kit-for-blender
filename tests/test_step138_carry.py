@@ -1,4 +1,4 @@
-"""Step 138 lane CARRY (#64, #63): Maya tool settings are global across File > Open / New Scene / Revert
+"""Lane CARRY (#64, #63): Maya tool settings are global across File > Open / New Scene / Revert
 (ui/scene_carry.py), and the "Keep Maya Layout When Opening Files" rule."""
 
 import math

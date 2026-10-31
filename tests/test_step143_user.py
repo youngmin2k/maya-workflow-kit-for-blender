@@ -1,4 +1,4 @@
-"""Step 143: GitHub user reports before 0.3.0 (GUI: tests/gui/gui_step143_user.py).
+"""GitHub user reports before 0.3.0 (GUI: tests/gui/gui_step143_user.py).
 
 - #84: the Maya double-click loop pick passed ``ring=False`` to ``mesh.loop_select``, which Blender 5.1+ no longer has
   (ring pick is ``mesh.edgering_select`` there): "keyword "ring" unrecognized" on 5.2.

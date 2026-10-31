@@ -1,4 +1,4 @@
-"""Step 216 in a real UI: the Script Editor's History menu. Show Stack Trace is turned on through its Maya menu item
+"""In a real UI: the Script Editor's History menu. Show Stack Trace is turned on through its Maya menu item
 (``allset.menu_item``), a failing script runs with Ctrl+Enter -> the history pane (Blender's Info editor) lists
 Maya's "# Error: ... file <maya console> line n: ..." line and the "# Traceback" lines; Echo All Commands on + a Maya
 menu command -> its Python call is listed (an OPERATOR-type report, no status-bar banner). The History menu is drawn

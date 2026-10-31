@@ -1,5 +1,5 @@
 {
-  "_doc": "Maya Workflow Kit marketing visual tokens (steps 122, 124, 125). Primitive -> semantic -> component. Colours: the kit's Maya-like theme greys (src/allset/theme) + Maya logo teal (colour value only) + Autodesk brand Hello Yellow / Black (brand.autodesk.com/brand-system/color). 'palettes' holds the semantic accent sets; 'palette' picks one (env ALLSET_MARKETING_PALETTE overrides).",
+  "_doc": "Maya Workflow Kit marketing visual tokens. Primitive -> semantic -> component. Colours: the kit's Maya-like theme greys (src/allset/theme) + Maya logo teal (colour value only) + Autodesk brand Hello Yellow / Black (brand.autodesk.com/brand-system/color). 'palettes' holds the semantic accent sets; 'palette' picks one (env ALLSET_MARKETING_PALETTE overrides).",
   "primitive": {
     "grey-950": "#1e1e1e",
     "grey-900": "#252525",
@@ -96,7 +96,7 @@
         1080
       ],
       "name_size": 76,
-      "_name_doc": "step 125: 'Maya Workflow Kit' is ~3x the width of 'Allset' -> N 120 -> 76 so the lockup stays left of the screens; screens moved right",
+      "_name_doc": "'Maya Workflow Kit' is ~3x the width of 'Allset' -> N 120 -> 76 so the lockup stays left of the screens; screens moved right",
       "text_xy": [128, 330],
       "screens_xy": [[1060, 150], [900, 390]],
       "name_font": "font-bold",
@@ -127,7 +127,7 @@
       "radius": 52
     },
     "lockup": {
-      "_doc": "name over line (same left edge, two-line form) or name then line on one baseline (one-line form, gap one_line_gap x N); line = for_ratio x the name size, same family, so its ink is the same share of the name's. Step 125: name 'Maya Workflow Kit' (no separate colour for 'Maya'), line = the 'for Maya users, in Blender' context right after the name",
+      "_doc": "name over line (same left edge, two-line form) or name then line on one baseline (one-line form, gap one_line_gap x N); line = for_ratio x the name size, same family, so its ink is the same share of the name's. Name 'Maya Workflow Kit' (no separate colour for 'Maya'), line = the 'for Maya users, in Blender' context right after the name",
       "name": "Maya Workflow Kit",
       "line": "for Maya users, in Blender",
       "name_font": "font-bold",
@@ -142,7 +142,7 @@
   "palette": "maya-autodesk",
   "palettes": {
     "maya-autodesk": {
-      "_doc": "default (step 124): Maya logo teal leads, Autodesk Hello Yellow only for action moments (CTA, click pulse), Autodesk Black ink on the accents",
+      "_doc": "default: Maya logo teal leads, Autodesk Hello Yellow only for action moments (CTA, click pulse), Autodesk Black ink on the accents",
       "accent": "teal-500",
       "accent-strong": "teal-600",
       "accent-deep": "teal-800",

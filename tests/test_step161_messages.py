@@ -1,4 +1,4 @@
-"""Step 161 G1: a kit command's result goes to Maya's Command Line result field, not Blender's
+"""G1: a kit command's result goes to Maya's Command Line result field, not Blender's
 status-bar report banner. Warnings / errors stay reports; tool usage hints stay Help Line reports."""
 
 import os
@@ -18,7 +18,7 @@ PKG = os.path.dirname(import_module(kit.MODULE).__file__)
 # the kit layout) and the Script Editor's echo (its history is Blender's Info editor, which lists reports).
 HINT_REPORTS = {
     "operators/cut_sew.py": 1,
-    "operators/graph_menu_198.py": 1,     # Add Key Tool usage hint (step 198)
+    "operators/graph_menu_198.py": 1,     # Add Key Tool usage hint
     "operators/quad_draw.py": 3,
     "ui/script_editor.py": 1,
 }

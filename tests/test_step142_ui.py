@@ -1,4 +1,4 @@
-"""Step 142 lane UI: Maya's vertical dock tab strip and the dock width per raised tab (#78), the menu bar's » overflow
+"""Maya's vertical dock tab strip and the dock width per raised tab (#78), the menu bar's » overflow
 and the Set Driven Key lists that give up rows (#77), Maya manipulator axis colours and the dormant wireframe colour
 (#76). Rules only; real windows: tests/gui/gui_step142_ui.py."""
 
@@ -23,7 +23,7 @@ manipulator = import_module(kit.MODULE + ".ui.manipulator")
 selection_wire = import_module(kit.MODULE + ".ui.selection_wire")
 
 SCALES = (1.0, 1.25, 1.5)
-OLD_DOCK = {1.0: 466, 1.25: 574, 1.5: 672}      # step 135: one horizontal tab row
+OLD_DOCK = {1.0: 466, 1.25: 574, 1.5: 672}      # one horizontal tab row
 
 
 # --- #78 dock ------------------------------------------------------------------------------------------------------

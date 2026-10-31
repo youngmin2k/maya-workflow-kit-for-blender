@@ -1,4 +1,4 @@
-"""Step 57: Joint Tool (click -> joints, Enter), Orient Joint, Mirror Joints, pose-mode pick-walk, P / Shift+P on
+"""Joint Tool (click -> joints, Enter), Orient Joint, Mirror Joints, pose-mode pick-walk, P / Shift+P on
 joints. GUI: tests/gui/gui_step57_joints.py."""
 
 import math

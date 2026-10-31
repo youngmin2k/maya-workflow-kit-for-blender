@@ -1,4 +1,4 @@
-"""Step 140 lane RIG: Maya option windows / tool settings for Skeleton, Skin, Blend Shape and Aim / Pole Vector /
+"""Maya option windows / tool settings for Skeleton, Skin, Blend Shape and Aim / Pole Vector /
 Scale constraints (operators/option_windows_rig.py). Labels and defaults follow Maya's
 option windows."""
 
@@ -120,7 +120,7 @@ def test_titles_buttons_fields_defaults_are_maya():
             _w("paint_skin_weights").title) == ("Joint Tool", "IK Handle Tool", "IK Spline Handle Tool",
                                                 "Paint Skin Weights Tool")
     # Joint Tool: secondary Y, world orientation +Y, Create IK handle off
-    # step 244: the Orientation section adds Orient Joint to World (off) and Auto orient secondary axis (on)
+    # the Orientation section adds Orient Joint to World (off) and Auto orient secondary axis (on)
     assert _fields("joint_tool")[:6] == [
         ("orient_world", "", False),
         ("secondary_axis", "Secondary Axis:", "Y"), ("secondary_world", "Secondary Axis World Orientation:", "Y"),
@@ -130,8 +130,8 @@ def test_titles_buttons_fields_defaults_are_maya():
                                          ("solver_enable", "", True), ("weight", "Weight:", 1.0)]
     assert _fields("ik_spline_tool") == [("root_on_curve", "", True), ("parent_curve", "", True),
                                          ("snap_curve", "", False), ("create_curve", "", True),
-                                         ("spans", "Number of spans:", "1"),       # step 218
-                                         ("twist_type", "Twist type:", "Linear")]  # step 249
+                                         ("spans", "Number of spans:", "1"),
+                                         ("twist_type", "Twist type:", "Linear")]
     # Bind Skin, button "Apply and Close"
     w = _w("bind_skin_maya")
     assert (w.title, w.action) == ("Bind Skin Options", "Apply and Close")
@@ -139,7 +139,7 @@ def test_titles_buttons_fields_defaults_are_maya():
         ("bind_to", "Bind to:", "Joint hierarchy"), ("bind_method", "Bind method:", "Closest distance"),
         ("skinning", "Skinning method:", "Classic linear"),
         ("normalize", "Normalize weights:", "Interactive"), ("max_influences", "Max influences:", 5),
-        # step 247: Maintain max influences on, Dropoff rate 4.0
+        # Maintain max influences on, Dropoff rate 4.0
         ("maintain_max", "", True), ("dropoff", "Dropoff rate:", 4.0),
         ("remove_unused", "", True), ("colorize", "", True)]
     # Detach Skin
@@ -163,7 +163,7 @@ def test_titles_buttons_fields_defaults_are_maya():
     assert _fields("aim_constraint") == [
         ("aim_vector", "Aim vector:", (1.0, 0.0, 0.0)), ("up_vector", "Up vector:", (0.0, 1.0, 0.0)),
         ("world_up_type", "World up type:", "Vector"), ("world_up_vector", "World up vector:", (0.0, 1.0, 0.0)),
-        ("world_up_object", "World up object:", ""), ("weight", "Weight:", 1.0)]   # step 252: + World up object
+        ("world_up_object", "World up object:", ""), ("weight", "Weight:", 1.0)]   # + World up object
     # Pole Vector: only Weight 1 (:187-188); Scale: Maintain offset off, Offset 1 1 1, All, Weight 1 (:190-192)
     assert _fields("pole_vector") == [("weight", "Weight:", 1.0)]
     assert [(n, d) for n, _l, d in _fields("scale_constraint")] == [
@@ -211,7 +211,7 @@ def test_aim_options():
     con = cube.constraints[-1]
     assert (con.track_axis, con.up_axis) == ('TRACK_NEGATIVE_Y', 'UP_X'), (con.track_axis, con.up_axis)  # Maya Z = -Y
     target, cube = _aim_scene()
-    # step 252 (#168): any world up vector (a hidden empty's Z axis = the vector, Track To uses its Z)
+    # #168: any world up vector (a hidden empty's Z axis = the vector, Track To uses its Z)
     res = ow.run(_w("aim_constraint"), bpy.context, {"world_up_vector": (1.0, 0.0, 0.0)})
     con = cube.constraints[-1]
     assert res == {'FINISHED'} and con.type == 'TRACK_TO' and con.use_target_z and con.target is not target, res
@@ -291,7 +291,7 @@ def test_joint_tool_options_reach_the_bones():
     _clear()
     assert bpy.ops.allset.joint_tool(points=pts, secondary_axis="NONE", secondary_world="Z") == {'FINISHED'}
     arm = bpy.context.active_object
-    # step 244: Secondary Axis None = Maya's orient without a secondary world axis (traditional: Z = child x parent
+    # Secondary Axis None = Maya's orient without a secondary world axis (traditional: Z = child x parent
     # direction): joint2 bends in the Maya XY plane... here the chain is in Blender's XZ plane
     j2 = arm.data.bones[1]
     a = (j2.tail_local - j2.head_local).normalized()
@@ -301,7 +301,7 @@ def test_joint_tool_options_reach_the_bones():
     _clear()
     assert bpy.ops.allset.joint_tool(points=pts) == {'FINISHED'}
     arm = bpy.context.active_object
-    # Maya 2025+ default = auto orient secondary axis (step 244): Maya Y (bone Z) = the bend normal of this chain
+    # Maya 2025+ default = auto orient secondary axis: Maya Y (bone Z) = the bend normal of this chain
     # (it lies in Blender's XZ plane, so the normal is +-Blender Y; n . up = 0 is Maya's tie, the kit keeps n)
     zy = arm.data.bones[1].matrix_local.to_3x3().col[2]
     assert abs(zy.y) > 1 - 1e-5, tuple(zy)

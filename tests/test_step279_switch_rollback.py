@@ -1,4 +1,4 @@
-"""Step 279 (#198 #199): a Maya mode module that fails to register (or unregister) can't leave the kit half there.
+"""#198 #199: a Maya mode module that fails to register (or unregister) can't leave the kit half there.
 
 - A register failure in one ``ui`` module or one MODE package rolls back: Maya mode stays off, only CORE is left,
   the top bar draws are Blender's again; switching on again later works.
@@ -26,7 +26,7 @@ def _allset_types():
 
 
 def _boom(*_a, **_k):
-    raise RuntimeError("step 279 injected failure")
+    raise RuntimeError("injected failure")
 
 
 class _Patch:
@@ -157,7 +157,7 @@ def test_foreign_panel_reregister_failure_is_skipped():
     def register_class(cls):
         if cls in panels and cls not in refused:   # refuse the first re-register of each foreign panel
             refused.add(cls)
-            raise ValueError(f"step 279: {cls.__name__} refused")
+            raise ValueError(f"test: {cls.__name__} refused")
         return real_register(cls)
 
     kit.enable(maya=False)
@@ -180,7 +180,7 @@ def test_foreign_panel_reregister_failure_is_skipped():
         # a foreign panel Blender won't unregister: left alone too
         def unregister_class(cls):
             if cls in panels:
-                raise RuntimeError(f"step 279: {cls.__name__} can't be unregistered")
+                raise RuntimeError(f"test: {cls.__name__} can't be unregistered")
             return real_unregister(cls)
         with _Patch(bpy.utils, "unregister_class", unregister_class):
             assert sw.set_mode(True, layout=False) is True, sw.last_error[0]

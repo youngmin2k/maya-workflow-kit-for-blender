@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Engine-ready skeletons in kit FBX files (step 236, Issue #145).
+"""Engine-ready skeletons in kit FBX files (Issue #145).
 
 Maya's FBX holds joints only (control curves don't go out). A Blender
 rig made with Rigify keeps its deforming bones (DEF-*) under helper bones (ORG-, MCH-, controls), and Blender's

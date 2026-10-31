@@ -1,4 +1,4 @@
-"""Step 226 lane C: Match Transformations to a joint, Maya multi-target constraints (weighted average), like Maya.
+"""Match Transformations to a joint, Maya multi-target constraints (weighted average), like Maya.
 
 Expected results (the
 values are in EXPECTED below). Scene: locators ctrl (1, 4.5, 0), ctrlB (-3, 4, 0),
@@ -233,7 +233,7 @@ def test_orient_two_targets():
 def test_parent_two_targets_maintain_offset():
     a, b, o = two_ctrls()
     g = _constrain('CHILD_OF', a, b, o)
-    # step 252: + the hidden Interp Type blend (Copy Rotation, not a Maya node)
+    # + the hidden Interp Type blend (Copy Rotation, not a Maya node)
     from bl_ext.user_default.allset.operators import constrain_interp as ci
     assert [c.type for c in o.constraints if not ci.is_blend(c)] == ['COPY_LOCATION', 'COPY_ROTATION'] * 2
     assert cb.constraint_node_name(o, o.constraints[3]) == "obj_parentConstraint1"
@@ -367,7 +367,7 @@ def test_pose_bone_owner_two_targets():
     assert bpy.ops.allset.constrain(type='CHILD_OF') == {'FINISHED'}
     bpy.context.view_layer.update()
     from bl_ext.user_default.allset.operators import constrain_interp as ci
-    hs = [h for h in multi.helpers() if ci.H_GROUP not in h.keys()]      # step 252: + the Interp Type blend helper
+    hs = [h for h in multi.helpers() if ci.H_GROUP not in h.keys()]      # + the Interp Type blend helper
     assert len(hs) == 2 and all(h.get(multi.H_BONE) == "joint1" for h in multi.helpers())
     bpy.ops.object.mode_set(mode='OBJECT')
 

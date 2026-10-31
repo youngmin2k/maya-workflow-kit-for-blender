@@ -1,4 +1,4 @@
-"""Step 160 (#81) in a real UI: every Maya workspace of the template through Windows > Workspaces (one shot each,
+"""#81: in a real UI: every Maya workspace of the template through Windows > Workspaces (one shot each,
 read by eye), then Reset Current Workspace puts a changed layout back."""
 
 import os

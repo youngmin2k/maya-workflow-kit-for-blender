@@ -3,8 +3,8 @@
 Mirror Skin Weights, Copy / Paste Vertex Weights.
 
 Maya rigging: skin = Armature modifier + vertex
-groups named after the joints), step 58. A Maya joint is a bone's head (or the
-tail of a chain end, step 57); Blender's IK pulls a bone's tail, so a Maya IK handle on end joint J is an IK
+groups named after the joints). A Maya joint is a bone's head (or the
+tail of a chain end); Blender's IK pulls a bone's tail, so a Maya IK handle on end joint J is an IK
 constraint on the bone whose tail is J.
 """
 
@@ -121,9 +121,9 @@ def create_ik(context, arm, start, end, solver="RP", solver_enable=True, weight=
     con.weight = max(0.01, weight)               # Blender's IK weight range starts at 0.01
     con.mute = not solver_enable
     from . import ik_fk
-    ik_fk.ensure_blend(arm, ik_bone, con)           # Maya Ik Blend on the handle (step 223)
+    ik_fk.ensure_blend(arm, ik_bone, con)           # Maya Ik Blend on the handle
     if solver == "RP":
-        # Maya ikRPsolver: default pole vector + Twist channels, the pole helper, Blender's pole angle (step 245)
+        # Maya ikRPsolver: default pole vector + Twist channels, the pole helper, Blender's pole angle
         from . import ik_rp
         ik_rp.setup(context, arm, ik_bone, con, handle)
     if context.active_object is not None and context.active_object.mode != 'OBJECT':
@@ -256,7 +256,7 @@ def _chain_heads(arm, con_bone, count):
 def set_pole(context, arm, pb, con, pole):
     """Maya poleVectorConstraint: the handle's pole vector = target − start joint, so the
     chain plane turns to face the target like Maya's. A kit RP handle keeps its pole helper (twist still applies);
-    another IK constraint gets the target as its pole with Blender's pole angle for Maya's plane (step 245; the old
+    another IK constraint gets the target as its pole with Blender's pole angle for Maya's plane (the old
     "move the chain least" search kept the chain where it was, which Maya doesn't). Returns the chain's movement."""
     from . import ik_rp
     from .ik_fk import chain
@@ -317,7 +317,7 @@ class ALLSET_OT_pole_vector(bpy.types.Operator):
 # --- Bind / Unbind Skin -------------------------------------------------------------------------
 
 def _skin_part(m):
-    from .skin_method import is_part     # Weight Blended's DQ half (step 250) is part of the skin, not a second one
+    from .skin_method import is_part     # Weight Blended's DQ half is part of the skin, not a second one
     return is_part(m)
 
 
@@ -334,7 +334,7 @@ def armature_modifiers(mesh):
 
 
 # Maya Bind Skin options the kit honours: Normalize weights is kept on the
-# mesh (Interactive = Blender's Auto Normalize while painting, step 129), Colorize skeleton = a bone colour per joint
+# mesh (Interactive = Blender's Auto Normalize while painting), Colorize skeleton = a bone colour per joint
 # (Unbind Skin's "Remove joint colors" takes them away), Remove unused influences = drop joints that weigh nothing.
 NORMALIZE_PROP = "allset_normalize"
 NORMALIZE = (("NONE", "None", "Weights are left as painted"),
@@ -365,7 +365,7 @@ BIND_METHODS = (("CLOSEST_DISTANCE", "Closest distance", "Default bind (like May
                 ("HEAT_MAP", "Heat Map", "Blender's automatic weights (bone heat)"))
 DROPOFF = 4.0
 # Maya treats a vertex within 1e-4 of joints as on them: those share it equally
-# (the kit used 1e-9 before step 247)
+# (the kit used 1e-9 before)
 ON_JOINT = 1e-4
 SKINNING = (("CLASSIC_LINEAR", "Classic linear", "Weights blend the joint matrices (the default, like Maya)"),
             ("DUAL_QUATERNION", "Dual quaternion", "Volume-preserving blend (Blender Preserve Volume)"),
@@ -476,7 +476,7 @@ def _bind_closest(arm, mesh, bones, max_influences, dropoff=DROPOFF, hierarchy=F
 
 def name_skin_cluster(mesh):
     """Maya names each bind's deformer skinCluster1, skinCluster2 ... scene-wide (two binds give skinCluster1 /
-    skinCluster2, step 158 #97): a skin modifier with Blender's automatic name gets the next free number."""
+    skinCluster2, #97): a skin modifier with Blender's automatic name gets the next free number."""
     md = armature_modifier(mesh)
     if md is None or md.name.startswith("skinCluster"):
         return md
@@ -494,7 +494,7 @@ def bind_skin(context, arm, meshes, max_influences=5, only_bones=None, normalize
               remove_unused=True, colorize_skeleton=True, method="CLOSEST_DISTANCE", dropoff=DROPOFF,
               skinning="CLASSIC_LINEAR", maintain_max=True):
     """Smooth bind (Maya skinCluster): the meshes stay where they are in the hierarchy. Also stores Maya's bind pose
-    (Go to Bind Pose), maxInfluences / maintainMaxInfluences / dropoffRate on the mesh (step 247)."""
+    (Go to Bind Pose), maxInfluences / maintainMaxInfluences / dropoffRate on the mesh."""
     for mesh in meshes:
         mesh.pop(PAINT_SEEN, None)          # a new skin: Paint Skin Weights starts on its first influence (238)
     if context.active_object is not None and context.active_object.mode != 'OBJECT':
@@ -535,7 +535,7 @@ def bind_skin(context, arm, meshes, max_influences=5, only_bones=None, normalize
         if float(dropoff) != DROPOFF:
             mesh[rig_maya.DROPOFF_PROP] = {vg.name: float(dropoff) for vg in influences(mesh)}
         from . import skin_method
-        skin_method.set_method(mesh, skinning)       # step 250: Classic linear / Dual quaternion / Weight blended
+        skin_method.set_method(mesh, skinning)       # Classic linear / Dual quaternion / Weight blended
     context.view_layer.update()
     for mesh in meshes:
         unpose_mesh(arm, mesh)
@@ -673,11 +673,11 @@ class ALLSET_OT_bind_skin(bpy.types.Operator):
         if arm is None:
             arm = next((o for o in sel if o.type == 'ARMATURE'), None)
             if arm is not None and arm.mode == 'EDIT':
-                # step 241: an unskinned skeleton's joints are picked in Edit mode
+                # an unskinned skeleton's joints are picked in Edit mode
                 picked = [eb.name for eb in arm.data.edit_bones if eb.select]
         meshes = [o for o in sel if o.type == 'MESH']
         if not sel and not picked:
-            from .maya_errors import SELECT_TO_BIND        # Maya 2026 (step 266 independent check)
+            from .maya_errors import SELECT_TO_BIND        # Maya 2026
             self.report({'ERROR'}, SELECT_TO_BIND)
             return {'CANCELLED'}
         if arm is None:
@@ -686,13 +686,13 @@ class ALLSET_OT_bind_skin(bpy.types.Operator):
             self.report({'ERROR'}, MUST_SELECT_JOINT)
             return {'CANCELLED'}
         if not meshes:
-            from .maya_errors import BINDABLE_IN_SELECTION   # Maya: an Error, joints only (step 266)
+            from .maya_errors import BINDABLE_IN_SELECTION   # Maya: an Error, joints only
             self.report({'ERROR'}, BINDABLE_IN_SELECTION)
             return {'CANCELLED'}
         skinned = [m for m in meshes if armature_modifier(m) is not None]
         if skinned:
             # Maya 2024+ asks before a second skinCluster; the kit
-            # keeps one skin per mesh — the question with Yes greyed and the Blender way (step 224)
+            # keeps one skin per mesh — the question with Yes greyed and the Blender way
             QUESTION["mesh"] = skinned[0].name
             if context.window is not None:
                 bpy.ops.allset.skin_cluster_question('INVOKE_DEFAULT', mesh=skinned[0].name)
@@ -726,7 +726,7 @@ def unbind(context, mesh, history="DELETE"):
             mesh.modifiers.remove(mod)
         if history != "KEEP" and arm is not None:
             bones = {b.name for b in arm.data.bones}
-            from .skin_method import BLEND_GROUP      # the skinCluster's blendWeights go with it (step 250)
+            from .skin_method import BLEND_GROUP      # the skinCluster's blendWeights go with it
             for vg in [g for g in mesh.vertex_groups if g.name in bones or g.name == BLEND_GROUP]:
                 mesh.vertex_groups.remove(vg)
     if NORMALIZE_PROP in mesh:
@@ -910,7 +910,7 @@ def apply_paint_settings(context, mesh, arm, v):
     else:
         ups.use_locked_size = 'SCENE'            # Maya's radius is a world size (cm) unless Screen projection is on
         compat.set_unprojected_radius(ups, max(1e-4, v["radius"] * units.maya_unit(context.scene)))
-    if v["normalize"] is not None:              # None: deformer weights (step 169), never normalized
+    if v["normalize"] is not None:              # None: deformer weights, never normalized
         mesh[NORMALIZE_PROP] = v["normalize"]
         ts.use_auto_normalize = v["normalize"] == "INTERACTIVE"
     else:
@@ -993,7 +993,7 @@ class ALLSET_OT_paint_skin_weights(bpy.types.Operator):
             set_view_tool(context, 'builtin.brush')
         # Maya hilites the first influence (joint1, the skeleton's root) the first time the tool opens on a skin and
         # keeps the picked one afterwards. Bind Skin leaves
-        # Blender's last made group (the last joint) active: the first entry picks by hierarchy (step 238, #146).
+        # Blender's last made group (the last joint) active: the first entry picks by hierarchy (#146).
         first = first_influence(mesh)
         if first is not None and (mesh.vertex_groups.active is None or not mesh.get(PAINT_SEEN)):
             mesh.vertex_groups.active_index = first.index
@@ -1005,9 +1005,9 @@ class ALLSET_OT_paint_skin_weights(bpy.types.Operator):
         if any(shown) and not all(shown) and not mesh.data.use_paint_mask:
             mesh.data.use_paint_mask_vertex = True
         # Maya Bind Skin makes the skinCluster with Normalize Weights = Interactive (normalizeWeights 1): painting a
-        # joint takes weight from the others so every vertex keeps a total of 1 (#20, step 129). Blender's factory
+        # joint takes weight from the others so every vertex keeps a total of 1 (#20). Blender's factory
         # Auto Normalize is off; Skin > Normalize Weights > Disable still turns it off while painting. The skin's own
-        # mode comes from Bind Skin's Normalize weights (step 140).
+        # mode comes from Bind Skin's Normalize weights.
         context.tool_settings.use_auto_normalize = normalize_mode(mesh) == "INTERACTIVE"
         self._settings(context, mesh)
         return {'FINISHED'}

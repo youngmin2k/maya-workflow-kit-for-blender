@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""RMB list DG Traversal / Inputs / Outputs (step 165).
+"""RMB list DG Traversal / Inputs / Outputs.
 
 Maya fills these submenus from the dependency graph when they open (Maya 2022
 RMB marking menu). The kit's graph is what the Channel Box INPUTS and the Attribute Editor tabs already
@@ -285,7 +285,7 @@ class ALLSET_OT_mm_node_table(bpy.types.Operator):
         for name, mtype, owner, key, _cbkey, struct in found:
             row = col.row(align=True)
             if order:
-                # Maya: drag a node with MMB in this list = reorderDeformers (step 218 L17). The rows are in stack
+                # Maya: drag a node with MMB in this list = reorderDeformers. The rows are in stack
                 # order (first evaluated on top): up = one step earlier, down = one step later; shape keys,
                 # extrusions and constraints don't move.
                 mod_name = struct.name if isinstance(struct, bpy.types.Modifier) and struct.name in order else None

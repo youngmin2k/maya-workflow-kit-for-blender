@@ -1,4 +1,4 @@
-"""Step 204 in a real UI (Issue #111): Layer Editor multi-selection -> the
+"""In a real UI (Issue #111): Layer Editor multi-selection -> the
 Graph Editor shows every selected layer's curves.
 
 Maya Workflow Kit layout, pCube1 keyed on BaseAnimation (tx 0@1 5@12 0@24, ry 0 -> 90), AnimLayer1 (additive, tx
@@ -220,7 +220,7 @@ def s_ctrl_up():
     sel = selected_names()
     C["via_click"] = sel == ["AnimLayer1", "AnimLayer2"]
     if not C["via_click"]:
-        # fallback (step 170: a simulated modifier may not reach the button): the Ctrl+click operator call
+        # fallback (a simulated modifier may not reach the button): the Ctrl+click operator call
         print("GUI NOTE Ctrl+click did not reach the row button; calling allset.anim_layer_select(toggle=True)",
               flush=True)
         area, reg = dock()
@@ -327,7 +327,7 @@ def s_graph_check():
 
 @step
 def s_graph_pixels():
-    # screen.screenshot shows the previous frame: take it again one tick later (step 9)
+    # screen.screenshot shows the previous frame: take it again one tick later
     if "shot" not in C:
         return
     path, w, rect = C["shot"]
@@ -349,7 +349,7 @@ def s_zero_weight():
     sc = bpy.context.scene
     C["before"] = {n: (sc.allset_anim_layers[n].weight, weight_keys(n)) for n in ("AnimLayer1", "AnimLayer2")}
     with bpy.context.temp_override(window=win()):
-        bpy.ops.ed.undo_push(message="step 204 GUI before")
+        bpy.ops.ed.undo_push(message="layers GUI before")
         # like the Layer Editor toolbar button (undo depth 0): Zero Weight and Key Layer on both selected layers
         C["zero"] = bpy.ops.allset.anim_layer_key_weight('EXEC_DEFAULT', True, weight=0.0)
     after = {n: (sc.allset_anim_layers[n].weight, weight_keys(n)) for n in ("AnimLayer1", "AnimLayer2")}

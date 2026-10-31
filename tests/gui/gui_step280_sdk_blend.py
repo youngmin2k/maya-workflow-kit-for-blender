@@ -1,4 +1,4 @@
-"""Step 280 (#186) in a real UI: two Set Driven Key drivers summed on pCube1 Rotate Z (Maya blendWeighted).
+"""#186: in a real UI: two Set Driven Key drivers summed on pCube1 Rotate Z (Maya blendWeighted).
 ctrl.curl (0, 0) (10, 90) + ctrl.spread (0, 0) (10, -30) through the Set Driven Key window -> 10 / 10 = 60,
 Ctrl+Z / Ctrl+Shift+Z over the last Key, then Save As + Open: the hidden inputs stay on their own data-block."""
 

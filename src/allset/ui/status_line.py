@@ -108,8 +108,8 @@ class ALLSET_OT_select_mask(bpy.types.Operator):
 
 
 
-# Maya keeps its selection masks across File > New / Open (they are session state,
-# step 93). Blender keeps the object select filters in each file's screens and the mesh
+# Maya keeps its selection masks across File > New / Open (they are session state).
+# Blender keeps the object select filters in each file's screens and the mesh
 # select mode in its scene, so a load would replace them: remember them before the load and put them back after.
 MASK_FLAGS = tuple(sorted({t for m in OBJECT_MASKS if m[3] for t in m[3]}))
 _carried = {}
@@ -207,8 +207,8 @@ def toggle_snap(ts, name):
     if new:
         ts.snap_elements = new
         ts.use_snap = True
-        # Maya snaps the Move tool whenever a snap button is on: an Affect flag left off (Step Snap Off before
-        # step 220, or a file saved that way) would make the button look on while nothing snaps (#139)
+        # Maya snaps the Move tool whenever a snap button is on: an Affect flag left off (Step Snap Off in
+        # older kit files, or a file saved that way) would make the button look on while nothing snaps (#139)
         from ..operators import snap_align
         snap_align.settle_affect(ts)
     else:
@@ -235,7 +235,7 @@ class ALLSET_OT_snap_toggle(bpy.types.Operator):
 
 
 # Blender's memfile undo restores the scene's tool settings with everything else, so an undo after a snap toggle
-# would switch the snap back (step 258, Issue #155). The state from before the undo / redo is put back from a 0 s
+# would switch the snap back (Issue #155). The state from before the undo / redo is put back from a 0 s
 # timer like the current frame (ui/time_slider.py ``restore_frame``).
 _KEEP_SNAP = {}
 
@@ -323,7 +323,7 @@ def draw_tool_symmetry(self, context):
 # --- render -----------------------------------------------------------
 
 def _properties_area(screen):
-    """A Properties editor of ``screen`` that is not the Tool Settings dock (step 106)."""
+    """A Properties editor of ``screen`` that is not the Tool Settings dock."""
     from . import maya_dock, tool_dock
     return next((a for a in (screen.areas if screen else ())
                  if a.type == 'PROPERTIES' and not tool_dock.is_dock(a) and maya_dock.role(a) is None), None)
@@ -417,18 +417,18 @@ def ipr_toggle(space):
 # --- editor toggles -----------------------------------------------
 
 EDITORS = (
-    # Maya order: Modeling Toolkit first (step 63)
+    # Maya order: Modeling Toolkit first
     ("MODELING_TOOLKIT", "Show or hide the Modeling Toolkit", 'EDITMODE_HLT'),
     ("ATTRIBUTE", "Show or hide the Attribute Editor", 'PROPERTIES'),
     ("TOOL_SETTINGS", "Show or hide the Tool Settings of the active tool (dock left of the viewport)", 'TOOL_SETTINGS'),
     ("CHANNEL_BOX", "Show or hide the Channel Box / Layer Editor", 'MENU_PANEL'),
 )
-# Status Line toggle -> Maya panel of the tab stack (ui/maya_dock.py, step 116)
+# Status Line toggle -> Maya panel of the tab stack (ui/maya_dock.py)
 DOCK_KINDS = {"MODELING_TOOLKIT": 'MODELING_TOOLKIT', "ATTRIBUTE": 'ATTRIBUTE_EDITOR', "CHANNEL_BOX": 'CHANNEL_BOX'}
 
 
 def editor_shown(screen, editor):
-    if editor == "TOOL_SETTINGS":    # the dock left of the viewport (ui/tool_dock.py, step 106)
+    if editor == "TOOL_SETTINGS":    # the dock left of the viewport (ui/tool_dock.py)
         from . import tool_dock
         return tool_dock.shown(screen)
     from . import maya_dock
@@ -451,12 +451,12 @@ class ALLSET_OT_editor_toggle(bpy.types.Operator):
 
     def execute(self, context):
         if self.editor == "TOOL_SETTINGS":
-            # Maya ToggleToolSettings: the dock left of the viewport (ui/tool_dock.py, step 106)
+            # Maya ToggleToolSettings: the dock left of the viewport (ui/tool_dock.py)
             from . import tool_dock
             tool_dock.toggle(context, show_only=self.show)
             return {'FINISHED'}
         # Maya Windows > UI Elements toggles: a panel tabbed behind another is raised,
-        # a shown one hidden (ui/maya_dock.py, step 116)
+        # a shown one hidden (ui/maya_dock.py)
         from . import maya_dock
         maya_dock.toggle(context, DOCK_KINDS[self.editor], show_only=self.show)
         return {'FINISHED'}
@@ -479,7 +479,7 @@ GROUPS = (
     ("EDITORS", "Editor toggles"),
 )
 # Groups Maya 2022 shows collapsed on a factory Status Line (only the bar
-# and arrow between selection modes and snaps, after symmetry and after render; step 113).
+# and arrow between selection modes and snaps, after symmetry and after render).
 DEFAULT_COLLAPSED = ("MASKS", "HISTORY", "INPUT")
 _collapsed = set(DEFAULT_COLLAPSED)
 
@@ -556,7 +556,7 @@ def draw_status_line(layout, context, compact=False):
     """The Maya Status Line, left to right (Maya 2022:
     menu set combo, then groups of bar + buttons + collapse arrow, sidebar toggles at the right end). ``compact``
     (the 3D View tool header of other layouts, which overflows): the input line goes after the editor toggles
-    (step 75)."""
+   ."""
     from .. import preferences
     screen = context.screen
     ts = context.scene.tool_settings
@@ -569,8 +569,8 @@ def draw_status_line(layout, context, compact=False):
 
     if _group(layout, "FILE"):
         row = layout.row(align=True)
-        _flat(row, "allset.new_maya_scene", "new")       # new scene in the Maya layout (step 130)
-        _flat(row, "allset.open_scene", "open_scene")      # project scenes folder (step 69)
+        _flat(row, "allset.new_maya_scene", "new")       # new scene in the Maya layout
+        _flat(row, "allset.open_scene", "open_scene")      # project scenes folder
         _flat(row, "allset.save_scene", "save")
         _flat(row, "ed.undo", "undo")
         _flat(row, "ed.redo", "redo")
@@ -611,7 +611,7 @@ def draw_status_line(layout, context, compact=False):
                 _grey(row, "snap_" + name, f"Status Line/{desc}")
             else:
                 _flat(row, ALLSET_OT_snap_toggle.bl_idname, "snap_" + name, depress=snap_on(ts, name)).snap = name
-        # Maya's live surface field (step 59): arrow + text field
+        # Maya's live surface field: arrow + text field
         row = layout.row(align=True)
         sub = row.row(align=True)
         sub.emboss = 'NONE'
@@ -628,13 +628,13 @@ def draw_status_line(layout, context, compact=False):
         sub.emboss = 'NONE'
         sub.menu(ALLSET_MT_symmetry.bl_idname, text="", icon='DOWNARROW_HLT')
         # Maya's symmetry box is a drop-down (Maya 2022 Status Line): a click on the text opens the list, it is
-        # never a text field (step 258, Issue #155: the read-only text property took a text cursor)
+        # never a text field (Issue #155: the read-only text property took a text cursor)
         box = row.row(align=True)
         box.ui_units_x = 5
         box.menu(ALLSET_MT_symmetry.bl_idname, text=_symmetry_text(None))
         _group_end(layout, "SYMMETRY")
 
-    if _group(layout, "HISTORY"):   # Maya Status Line; toggle since step 189 (input_line.draw_history)
+    if _group(layout, "HISTORY"):   # Maya Status Line; a toggle (input_line.draw_history)
         _flat(layout, input_line.ALLSET_OT_construction_history.bl_idname, "history",
               depress=context.window_manager.allset_construction_history)
         _group_end(layout, "HISTORY")
@@ -645,13 +645,13 @@ def draw_status_line(layout, context, compact=False):
         _flat(row, "render.render", "render")
         _flat(row, ALLSET_OT_ipr_toggle.bl_idname, "ipr", depress=bool(space) and space.shading.type == 'RENDERED')
         _flat(row, ALLSET_OT_render_settings.bl_idname, "render_settings")
-        _flat(row, "allset.hypershade", "hypershade")       # ui/hypershade.py (step 67)
+        _flat(row, "allset.hypershade", "hypershade")       # ui/hypershade.py
         _grey(row, "render_setup", "Status Line/Render Setup")
         _flat(row, ALLSET_OT_light_editor.bl_idname, "light_editor")
         _grey(row, "pause", "Status Line/Pause Viewport 2.0")
         _group_end(layout, "RENDER")
 
-    if not compact and _group(layout, "INPUT"):     # Maya Status Line input field (step 75)
+    if not compact and _group(layout, "INPUT"):     # Maya Status Line input field
         input_line.draw(layout, context)
         _group_end(layout, "INPUT")
 
@@ -711,11 +711,11 @@ def redraw_top_bars():
             del _top_bars[key]
 
 
-# --- menu bar overflow (step 142, #77) -------------------------------------------------------------------------
+# --- menu bar overflow (#77) -------------------------------------------------------------------------
 # Maya hides the menus that don't fit behind a » button at the menu bar's right end; the
 # kit's bar ran under the Workspace field instead ("Deform U", GUI shot at UI scale 1.5). Same pattern as the panel
-# toolbar's » (step 132 #52, ui/panel_toolbar.py): Blender's header layout can't report where it put an item, so the
-# widths follow its layout rules (toolbar_fit.unit; a ``ui_units_x = k`` sub-row is floor(k U) wide, step 132).
+# toolbar's » (#52, ui/panel_toolbar.py): Blender's header layout can't report where it put an item, so the
+# widths follow its layout rules (toolbar_fit.unit; a ``ui_units_x = k`` sub-row is floor(k U) wide).
 MENU_LEAD_UNITS = 0.4    # the header region's left padding
 LOGO_UNITS = 1.6         # the Blender logo pulldown (icon only)
 MENU_SET_UNITS = 5.5     # the menu set dropdown (= menu_sets.draw_menu_bar)
@@ -833,7 +833,7 @@ def draw_right(self, context):
         layout.template_running_jobs()
     # Maya: "Workspace:" and a dropdown at the far right of the menu bar
     # (label 60 px, combo 194 px), not Blender's ID field
-    # (screen icon, name, unlink button; step 113).
+    # (screen icon, name, unlink button).
     row = layout.row(align=True)
     row.label(text="Workspace:")
     sub = row.row(align=True)
@@ -864,7 +864,7 @@ def status_line_shown(context):
 
 
 # The workspace dropdown (Maya's "Workspace:" combo) lists Maya's workspaces, then the file's others (ui/workspaces.py,
-# step 160, #81).
+# #81).
 
 
 def _workspaces(self, context):
@@ -894,7 +894,7 @@ def draw_tool_header(self, context):
     if area is None or context.area != area:  # one Status Line, not one per 3D View
         return
     from .shelf import strip_area
-    if strip_area(context.screen) is not None:  # drawn in the Maya strip (step 12)
+    if strip_area(context.screen) is not None:  # drawn in the Maya strip
         return
     draw_status_line(self.layout, context, compact=True)
     self.layout.separator(type='LINE')
@@ -902,7 +902,7 @@ def draw_tool_header(self, context):
 
 def draw_upper_bar(self, context):
     """The top bar's own draw while the kit is on (as space_topbar.py TOPBAR_HT_upper_bar.draw, with the kit's
-    left / right): Blender's ``draw_left`` / ``draw_right`` methods stay untouched (step 115)."""
+    left / right): Blender's ``draw_left`` / ``draw_right`` methods stay untouched."""
     if context.region.alignment == 'RIGHT':
         draw_right(self, context)
     else:

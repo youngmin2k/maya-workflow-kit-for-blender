@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Modal operators: the marking menu engine and the hotbox (step 9).
+"""Modal operators: the marking menu engine and the hotbox.
 
 ``allset.mm_engine``: one marking menu (``marking/menus.py``) drawn with the
 GPU, driven by ``engine.Session``. ``allset.hotbox``: Space hold (menu rows,
@@ -44,7 +44,7 @@ def poll_action(action):
     if isinstance(action, mm.Sub):
         return not mm.is_unavailable(action)
     if _is_item(action):
-        # a main-menu item (step 136): enabled like in the menu; a failing poll gives Maya's warning, not grey
+        # a main-menu item: enabled like in the menu; a failing poll gives Maya's warning, not grey
         return action[1] in menu_map.MAP
     kind, target, _props = menu_map.normalize(action)
     if kind not in ("op", "v3d"):
@@ -62,7 +62,7 @@ def _is_item(action):
 
 
 def hover_notice(session):
-    """(key, Help Line text) for the hovered greyed item: its ``notices.MARKING`` notice (step 136), or None."""
+    """(key, Help Line text) for the hovered greyed item: its ``notices.MARKING`` notice, or None."""
     from ..ui import notices
     menu = session.stack[0][0].sub        # the root layout's menu (a MarkingMenu)
     item, _opt = session.hover
@@ -81,16 +81,16 @@ def run_action(context, action, option=False, path=None):
     """Run a menu action like the Maya menu item (or its option box). An action with an option window
     (``operators/option_windows``) opens it as the option box, and a plain run uses its saved values (a Maya
     menu item runs with its option values); ``path`` = the Maya menu path, for windows tied to a path. A finished
-    command is one undo step named after the item (``undo_steps.command``, step 147)."""
+    command is one undo step named after the item (``undo_steps.command``)."""
     from .. import undo_steps
     outer = undo_steps.depth() == 0
     label = _label(action, path)
     res = undo_steps.command(label, lambda: _run_action(context, action, option, path))
     if outer and isinstance(res, set) and 'FINISHED' in res:
-        from ..command_line import runner         # Script Editor History > Echo All Commands (step 216)
+        from ..command_line import runner         # Script Editor History > Echo All Commands
         runner.echo_action(action)
     if outer and not option and isinstance(res, set) and 'FINISHED' in res:
-        from ..operators import repeat_maya       # Maya G / Recent Commands (step 175)
+        from ..operators import repeat_maya       # Maya G / Recent Commands
         repeat_maya.record(label, action, path, context)
     return res
 
@@ -109,7 +109,7 @@ def _label(action, path):
 def _run_action(context, action, option, path):
     if _is_item(action):
         # The main-menu item itself (allset.menu_item: component / object mode rules, Maya warnings); its option box
-        # is the menu's (option window / dialog for that path), step 136.
+        # is the menu's (option window / dialog for that path).
         if option and action[1] in menu_map.MAP:
             return run_action(context, menu_map.MAP[action[1]], option=True, path=action[1])
         return bpy.ops.allset.menu_item(item=action[1])
@@ -125,7 +125,7 @@ def _run_action(context, action, option, path):
                 raise RuntimeError(res)
             return res
     kind, target, props = menu_map.normalize(action)
-    if kind == "prop":     # a Maya check / radio item (step 104)
+    if kind == "prop":     # a Maya check / radio item
         return menu_sets.set_prop(context, target, props)
     if kind == "menu":
         return bpy.ops.wm.call_menu(name=target)
@@ -141,7 +141,7 @@ def _run_action(context, action, option, path):
     mod, name = target.split(".")
     op = getattr(getattr(bpy.ops, mod), name)
     if target == "object.modifier_add":
-        # Maya commands run as a modifier: Maya's Error for a selection they don't take (step 258, #152), and no
+        # Maya commands run as a modifier: Maya's Error for a selection they don't take (#152), and no
         # Python TypeError when Blender has no such modifier for the active object type
         from ..operators import maya_errors
         maya_errors.check_modifier(context, props.get("type"))
@@ -154,11 +154,11 @@ def _run_action(context, action, option, path):
 
 def _call(op, option, props):
     if option and "option_box" in op.get_rna_type().properties:
-        # the operator has its own Maya options window (invoke_props_dialog, step 63)
+        # the operator has its own Maya options window (invoke_props_dialog)
         return op('INVOKE_DEFAULT', option_box=True, **props)
     if option:
         # Maya's option box opens the command's settings: Blender's Adjust Last Operation, which needs the operator
-        # registered, so it is called with undo=True (its own undo step; before step 147 nothing was registered)
+        # registered, so it is called with undo=True (its own undo step)
         from .. import undo_steps
         res = op('INVOKE_DEFAULT', True, **props)
         undo_steps.mark_pushed()
@@ -172,7 +172,7 @@ def _call(op, option, props):
     return res
 
 
-# Ctrl+RMB convert menu: also opened on a mesh in object mode (marking/__init__.resolve, step 136).
+# Ctrl+RMB convert menu: also opened on a mesh in object mode (marking/__init__.resolve).
 CONVERT_FROM_OBJECT = "CTRL_CONVERT"
 
 
@@ -202,13 +202,13 @@ class ALLSET_OT_mm_engine(bpy.types.Operator):
         target = getattr(context.window_manager, "allset_mm_target", "") or             (context.active_object.name if context.active_object else "")
         menu = mm.with_object_name(menu, target)
         if any(e != mm.DIVIDER and isinstance(e[1], mm.NodeList) for e in menu.items):
-            from . import rmb_nodes      # DG Traversal / Inputs / Outputs of that object (step 165)
+            from . import rmb_nodes      # DG Traversal / Inputs / Outputs of that object
             menu = mm.with_nodes(menu, rmb_nodes.nodes(bpy.data.objects.get(target)) if target else None)
-        # Drawn over the whole window like Maya's menus (step 52): bounds = the window's editors.
-        # Rows / boxes stay off the area borders Blender draws over every region (step 136).
+        # Drawn over the whole window like Maya's menus: bounds = the window's editors.
+        # Rows / boxes stay off the area borders Blender draws over every region.
         bounds = draw.window_bounds(context.window, region)
         edges = draw.window_edges(context.window, region)
-        # Ctrl+RMB on a mesh in object mode (step 136): Maya converts the whole object, so the items are live and
+        # Ctrl+RMB on a mesh in object mode: Maya converts the whole object, so the items are live and
         # run after entering component mode with everything selected (_finish).
         self._from_object = self.menu == CONVERT_FROM_OBJECT and context.mode == 'OBJECT'
         enabled = (lambda a: a is not None and not mm.is_unavailable(a)) if self._from_object else poll_action
@@ -225,7 +225,7 @@ class ALLSET_OT_mm_engine(bpy.types.Operator):
 
     def _show_notice(self):
         """A greyed item under the mouse puts its notice in the Help Line, like a greyed main-menu item's tooltip
-        (step 54 / 136)."""
+       ."""
         found = hover_notice(self._session)
         key = found[0] if found else None
         if key is not None and key != getattr(self, "_notice", None):
@@ -255,7 +255,7 @@ class ALLSET_OT_mm_engine(bpy.types.Operator):
             run_action(context, item.action, option)
         except RuntimeError as ex:
             from ..operators import maya_errors
-            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error (step 258, #152)
+            maya_errors.report_nested(self, ex)       # a Maya Error stays an Error (#152)
         return {'FINISHED'}
 
     def modal(self, context, event):
@@ -267,7 +267,7 @@ class ALLSET_OT_mm_engine(bpy.types.Operator):
             if pending is not None:
                 # Click mode picked on a press: run on that button's release, so a popup the
                 # item opens (Assign Existing Material) doesn't get the release and pick its
-                # first row (GUI step 29). Maya menu items also run on release.
+                # first row. Maya menu items also run on release.
                 button, picked = pending
                 released = event.type == button and event.value == 'RELEASE'
                 if released or (event.type == 'TIMER' and keystate.is_down(button) is False):
@@ -308,7 +308,7 @@ class ALLSET_OT_mm_engine(bpy.types.Operator):
 
 
 def open_menu(menu_name, button, origin=None):
-    """Engine or pie, per the "Marking Menu Style" preference (step 8 pies as fallback)."""
+    """Engine or pie, per the "Marking Menu Style" preference (pies as fallback)."""
     from . import pie_idname
     if _prefs(bpy.context).marking_menu_style == 'PIE':
         return bpy.ops.wm.call_menu_pie(name=pie_idname(menu_name))   # a user-edited menu has its own
@@ -371,7 +371,7 @@ class ALLSET_OT_hotbox(bpy.types.Operator):
             return {'CANCELLED'}
         now = time.monotonic()
         if engine.restart_too_soon(_LAST_HOLD_END[0], now):
-            return {'CANCELLED'}      # the PRESS half of a release + press repeat pair (step 260, #174)
+            return {'CANCELLED'}      # the PRESS half of a release + press repeat pair (#174)
         prefs = _prefs(context)
         self._key = event.type
         self._t0 = now
@@ -423,7 +423,7 @@ class ALLSET_OT_hotbox(bpy.types.Operator):
                     self._hold.press(now)
                 return {'RUNNING_MODAL'}
             if self._pressed is not None:
-                # Step 260 (#174): a click on a menu name opens the menu on the RELEASE, so the popup never gets that
+                # #174: a click on a menu name opens the menu on the RELEASE, so the popup never gets that
                 # release (Blender opens a menu with a row under the pointer and a release runs that row); a press that
                 # drags away opens it at once, for a press-drag-release onto a row (the kit's earlier behaviour).
                 if event.type in {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE'}:
@@ -466,7 +466,7 @@ class ALLSET_OT_hotbox(bpy.types.Operator):
 
     @staticmethod
     def _open_label(key):
-        if key == "RECENT":   # Maya HotboxRecentMenu: the repeatLast history (step 175)
+        if key == "RECENT":   # Maya HotboxRecentMenu: the repeatLast history
             bpy.ops.wm.call_menu(name="ALLSET_MT_recent_commands")
         elif key == "CONTROLS":
             bpy.ops.wm.call_menu(name=ALLSET_MT_hotbox_controls.bl_idname)
@@ -561,7 +561,7 @@ class ALLSET_OT_hb_single(bpy.types.Operator):
         area, region = _view3d(context)
         if area is None:
             return {'CANCELLED'}
-        from ..ui import four_view                 # step 237: the persp panel stays, the others close
+        from ..ui import four_view                 # the persp panel stays, the others close
         if four_view.is_four(context.window.screen):
             four_view.set_layout(context, context.window, False)
         return {'FINISHED'}

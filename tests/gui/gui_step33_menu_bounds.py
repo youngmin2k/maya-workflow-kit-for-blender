@@ -1,4 +1,4 @@
-"""Step 33 in a real UI: RMB on an object low in the view shows the whole marking menu list
+"""In a real UI: RMB on an object low in the view shows the whole marking menu list
 (and its last row works), the hotbox opened near the top edge keeps its rows on screen;
 screenshots."""
 
@@ -26,7 +26,7 @@ def draw():
 
 
 def bounds():
-    # step 52: menus draw over the whole window (its editors), like Maya's
+    # menus draw over the whole window (its editors), like Maya's
     from sim import win
     area, region = view3d()
     return draw().window_bounds(win(), region)

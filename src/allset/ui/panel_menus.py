@@ -28,7 +28,7 @@ from ..operators import view as view_ops
 GREY_OP = "allset.menu_unavailable"
 
 
-# Row tables live in panel_menu_data (bpy-free: menu_count / menu_consistency / notice rules walk them, step 177).
+# Row tables live in panel_menu_data (bpy-free: menu_count / menu_consistency / notice rules walk them).
 from .panel_menu_data import (_view, VIEW, VIEW_AXIS, CAMERA_TOOLS, SHADING, LIGHTING, ALL_TYPES,
                               _show_row, SHOW, ISOLATE, RENDERER, PANELS, PANEL_TYPES, LAYOUTS, BAR, item_path)  # noqa: F401
 
@@ -87,7 +87,7 @@ def panel_camera(context):
 
 def camera_locked(ob):
     """Maya Lock Camera (camera -lockTransform): the kit locks the camera's location and rotation channels;
-    Blender's camera-view navigation keeps locked channels (step 129)."""
+    Blender's camera-view navigation keeps locked channels."""
     return all(ob.lock_location) and all(ob.lock_rotation)
 
 
@@ -152,7 +152,7 @@ SHOW_HIDDEN = "allset_hidden_by_show"   # IK handles the Show menu hid (view-lay
 
 
 def show_ik_handles(context, on):
-    """Maya Show > IK Handles (step 189): Blender has no view filter for these empties, so the kit hides them in
+    """Maya Show > IK Handles: Blender has no view filter for these empties, so the kit hides them in
     the view layer (every view) and marks them; showing again un-hides only marked ones."""
     from ..operators import by_type
     for ob in by_type.ik_handles(context.scene):
@@ -223,7 +223,7 @@ def state(context, key):
         from ..operators import by_type
         return not any(o.get(SHOW_HIDDEN) for o in by_type.ik_handles(context.scene))
     if key in ("LAYOUT_SINGLE", "LAYOUT_FOUR"):
-        from . import four_view                 # step 237: four real panels
+        from . import four_view                 # four real panels
         four = four_view.is_four(context.screen) if context.screen is not None else False
         return four == (key == "LAYOUT_FOUR")
     return None
@@ -298,7 +298,7 @@ def apply(context, key):
     elif key == "RENDER_ENGINE":
         enter_rendered(space)
     elif key in ("TUMBLE_SELECTION", "TUMBLE_COI"):
-        # Blender's Orbit Around Selection is a user preference, which the kit never writes (step 130):
+        # Blender's Orbit Around Selection is a user preference, which the kit never writes:
         # the items show it and open Preferences > Navigation to change it.
         try:
             bpy.ops.screen.userpref_show('INVOKE_DEFAULT', section='NAVIGATION')
@@ -316,7 +316,7 @@ def apply(context, key):
         from . import selection_wire
         selection_wire.set_highlighting(context, not selection_wire.highlighting(context))
     elif key == "SHOW_NURBS_CURVES":
-        # step 262 (#173): the view's curve filter + the curve-shaped bone controls (ui/curve_controls.py)
+        # #173: the view's curve filter + the curve-shaped bone controls (ui/curve_controls.py)
         from . import curve_controls
         space.show_object_viewport_curve = not space.show_object_viewport_curve
         curve_controls.sync(space, context.scene)
@@ -365,11 +365,11 @@ def apply(context, key):
         if space.local_view is None and not any(ob.select_get() for ob in context.view_layer.objects if ob):
             return False
         with context.temp_override(area=area, region=main_region(area)):
-            bpy.ops.allset.isolate()        # step 164: isolating a group shows its children
+            bpy.ops.allset.isolate()        # isolating a group shows its children
     elif key in ("EXPOSURE", "GAMMA", "CM_ENABLE"):
         _toggle_colour(context.scene, key)
     elif key in ("LAYOUT_SINGLE", "LAYOUT_FOUR"):
-        # step 237 (Issue #148): Maya's layouts = four real panels (ui/four_view.py); Single Perspective View keeps
+        # Issue #148: Maya's layouts = four real panels (ui/four_view.py); Single Perspective View keeps
         # the persp panel, Four View puts every panel back with its own settings
         from . import four_view
         from ..operators import view
@@ -568,7 +568,7 @@ class ALLSET_OT_panel_new_persp(bpy.types.Operator):
     """Make a new perspective camera and look through it in this view"""
     bl_idname = "allset.panel_new_persp"
     bl_label = "New"
-    # an undo step, no Adjust Last Operation (Maya has no redo panel, step 147)
+    # an undo step, no Adjust Last Operation (Maya has no redo panel)
     bl_options = {'UNDO'}
 
     @classmethod

@@ -1,4 +1,4 @@
-"""Step 278 (#187): commands that switch a hidden active object into Edit / Pose mode warn the kit's way
+"""#187: commands that switch a hidden active object into Edit / Pose mode warn the kit's way
 ("<name> is hidden: show it (Display > Show) first") instead of Blender's "Cannot edit hidden object" or a Python
 error, and leave the scene as it was. Component modes (F9 / F10 / F11 / F7): tests/test_issue187_hidden_components.py.
 """

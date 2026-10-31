@@ -1,4 +1,4 @@
-"""Step 218 L17 / L15b: Maya reorderDeformers on the modifier stack, Key > Set Blend Shape Target Weight Keys.
+"""L17 / L15b: Maya reorderDeformers on the modifier stack, Key > Set Blend Shape Target Weight Keys.
 Maya 2026 deformer order."""
 
 from importlib import import_module

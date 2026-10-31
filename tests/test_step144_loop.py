@@ -1,4 +1,4 @@
-"""Step 144 LOOP lane (GitHub #31): Insert Edge Loop, Offset Edge Loop and Slide Edge as Maya tools.
+"""LOOP lane (GitHub #31): Insert Edge Loop, Offset Edge Loop and Slide Edge as Maya tools.
 GUI: tests/gui/gui_step144_loop.py. Every expected number below is what
 Maya gives on the same meshes (polySplitRing / polyDuplicateEdge /
 polySlideEdge), plus the Tool Settings / window defaults."""

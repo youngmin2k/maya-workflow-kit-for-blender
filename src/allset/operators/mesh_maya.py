@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Mesh menu commands with Maya's meaning (step 63).
+"""Mesh menu commands with Maya's meaning.
 
 Maya:
 - Mesh > Combine = ``cmds.polyUnite(centerPivot=True, name=first)``: a new ``pCube2`` (pCube1 / pSphere1 stay behind as
@@ -19,7 +19,7 @@ from mathutils import Matrix, Vector
 from .. import results
 from . import freeze, naming, parenting, units
 
-# Maya Y-up axis -> Blender (axis index, sign): X -> X, Y -> Z, Z -> -Y (step 57)
+# Maya Y-up axis -> Blender (axis index, sign): X -> X, Y -> Z, Z -> -Y
 MAYA_AXES = {'X': (0, 1.0), 'Y': (2, 1.0), 'Z': (1, -1.0)}
 
 
@@ -112,7 +112,7 @@ def separate(context, ob):
         setattr(grp, attr, getattr(ob, attr))
     context.view_layer.update()
     # Maya: the pieces have translate 0 and their pivot at the group's own origin, not at its pivot
-    # (polySurface1/2 rotatePivot (0, 0, 0) under pCube2, step 63). The group carries the pivot
+    # (polySurface1/2 rotatePivot (0, 0, 0) under pCube2). The group carries the pivot
     # offset in delta_location, so each piece's pivot moves back by it (freeze.shift_pivot keeps the data).
     lin = Matrix.LocRotScale(None, grp.matrix_basis.to_quaternion(), grp.matrix_basis.to_scale()).to_3x3()
     back = lin.inverted_safe() @ -Vector(grp.delta_location)

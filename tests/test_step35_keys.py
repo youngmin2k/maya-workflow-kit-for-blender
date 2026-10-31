@@ -1,4 +1,4 @@
-"""Step 35: Maya key batch — Ctrl+Alt+LMB box zoom, Ctrl+T, Y, Ctrl+Shift+X/Q, Return, F2–F6.
+"""Maya key batch — Ctrl+Alt+LMB box zoom, Ctrl+T, Y, Ctrl+Shift+X/Q, Return, F2–F6.
 GUI: tests/gui/gui_step35_keys.py."""
 
 from importlib import import_module
@@ -27,7 +27,7 @@ def test_bindings():
         knife = _items(km, 'X', shift=True, ctrl=True)
         quad = _items(km, 'Q', shift=True, ctrl=True)
         assert knife == [("allset.menu_tool", {"tool": "allset.multi_cut_tool", "edit": True})], (km, knife)
-        assert quad == [("allset.quad_draw_start", {})], (km, quad)      # step 144: the kit Quad Draw
+        assert quad == [("allset.quad_draw_start", {})], (km, quad)      # the kit Quad Draw
 
 
 def test_f_keys_are_menu_sets_and_view_keys_kept():
@@ -39,7 +39,7 @@ def test_f_keys_are_menu_sets_and_view_keys_kept():
         assert not [i for i, _p in _items("3D View", key)], (key, _items("3D View", key))
     assert sets == {'F2': 'modelingMenuSet', 'F3': 'riggingMenuSet', 'F4': 'animationMenuSet',
                     'F5': 'dynamicsMenuSet', 'F6': 'renderingMenuSet'}, sets
-    # F1 = Maya Help since step 107 (Window keymap); ortho views still on Ctrl+F1-F3.
+    # F1 = Maya Help (Window keymap); ortho views still on Ctrl+F1-F3.
     assert not _items("3D View", 'F1'), _items("3D View", 'F1')
     for key in ('F1', 'F2', 'F3'):
         assert _items("3D View", key, ctrl=True)[0][0] == "view3d.view_axis", key

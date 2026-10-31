@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Kit-drawn Maya-style icons for the Status Line, the menu bar and the viewport panel toolbar (step 113,
-redrawn in step 131 for #23).
+"""Kit-drawn Maya-style icons for the Status Line, the menu bar and the viewport panel toolbar
+(#23).
 
 No Maya icons. The Status Line (20 px) and panel toolbar (16 px) glyphs are flat light-grey #bcbcbc line art
 with teal #48a9b4 accents, a dark outline around every shape and no button frame.

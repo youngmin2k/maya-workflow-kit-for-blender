@@ -1,4 +1,4 @@
-"""Windows installer helper round trip (step 61): install -> Make Blender Maya -> uninstall restores all.
+"""Windows installer helper round trip: install -> Make Blender Maya -> uninstall restores all.
 
     python tools/installer_check.py [--blender PATH] [--no-build]
 
@@ -66,7 +66,7 @@ def main(argv=None):
     results.append((f"setup -Install -MakeMaya exits 0 (got {rc})", rc == 0))
     results.append(("installed into user_default and enabled", s and s["kit_version"] and
                     "bl_ext.user_default.allset" in s["addons"]))
-    results.append((f"active keymap unchanged (got {s and s['active_keyconfig']}, step 130)",
+    results.append((f"active keymap unchanged (got {s and s['active_keyconfig']})",
                     s and s["active_keyconfig"] == before["active_keyconfig"]))
     results.append(("Make Blender Maya applied (theme kept, splash off)", s and s["theme"] == before["theme"]
                     and s["view"]["show_splash"] == "False"))

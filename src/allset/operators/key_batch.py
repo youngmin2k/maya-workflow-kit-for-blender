@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 78 keys: Shift+G repeat last at the mouse position, Ctrl+Shift+C camera from
+"""Keys: Shift+G repeat last at the mouse position, Ctrl+Shift+C camera from
 the view.
 
 - Shift+G = Maya's Repeat Last at the mouse position:
@@ -16,7 +16,7 @@ from .. import results
 from . import create
 
 # Blender's viewport lens is defined on a 72 mm sensor (BKE_camera_params_from_view3d: lens on the 36 mm default
-# sensor with CAMERA_PARAM_ZOOM_INIT_PERSP 2; step 41): a camera on 36 mm needs half the lens.
+# sensor with CAMERA_PARAM_ZOOM_INIT_PERSP 2): a camera on 36 mm needs half the lens.
 VIEW_SENSOR = 72.0
 
 
@@ -42,7 +42,7 @@ def mouse_point(region, rv3d, mouse):
 
 
 def move_to(objects, point):
-    """Maya ``move x y z`` (absolute): each object's pivot (the origin, step 10) goes to ``point``. Children of
+    """Maya ``move x y z`` (absolute): each object's pivot (the origin) goes to ``point``. Children of
     another moved object follow their parent."""
     moved = set(objects)
     for ob in objects:
@@ -58,7 +58,7 @@ class ALLSET_OT_repeat_at_mouse(bpy.types.Operator):
     bl_idname = "allset.repeat_at_mouse"
     bl_label = "Repeat Last at Mouse Position"
     # Not REGISTER: it must not become the "last operator" itself, or the next Shift+G repeats the
-    # move instead of the create (Maya repeats the command every time; step 97).
+    # move instead of the create (Maya repeats the command every time).
     bl_options = {'UNDO'}
 
     @classmethod
@@ -72,7 +72,7 @@ class ALLSET_OT_repeat_at_mouse(bpy.types.Operator):
         point = mouse_point(region, rv3d, (event.mouse_region_x, event.mouse_region_y))
         from . import repeat_maya
         try:
-            res = repeat_maya.repeat(context, inside_undo_op=True)   # Maya repeatLast, menu commands too (step 175)
+            res = repeat_maya.repeat(context, inside_undo_op=True)   # Maya repeatLast, menu commands too
         except RuntimeError as ex:
             self.report({'WARNING'}, f"Nothing to repeat ({ex})")
             return {'CANCELLED'}

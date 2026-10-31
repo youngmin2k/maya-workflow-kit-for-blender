@@ -1,4 +1,4 @@
-"""Step 103: real Maya option windows (Maya 2022 fields and defaults),
+"""Real Maya option windows (Maya 2022 fields and defaults),
 option boxes as Maya's right-side square, every mapped option box opens something.
 GUI: tests/gui/gui_step103_option_windows.py."""
 
@@ -71,14 +71,14 @@ def test_every_mapped_option_box_opens_something():
 
 def test_windows_registered_with_maya_titles_and_buttons():
     assert len(ow.WINDOWS) >= 24
-    panels = ("ghosting_editor",)     # step 171: Maya's Ghosting Editor is a panel (menu item, no option box)
+    panels = ("ghosting_editor",)     # Maya's Ghosting Editor is a panel (menu item, no option box)
     for w in ow.WINDOWS:
         if w.key in panels:
             assert getattr(bpy.ops.allset, "opt_" + w.key) and w.action, w.key
             continue
-        # Maya option windows end in "Options"; boxes that open Maya Tool Settings carry the tool name (step 140);
-        # two Render windows carry Maya's own titles (step 152); the arc tools'
-        # boxes open Maya's Tool Settings "Three / Two Point Arc Settings" (step 196)
+        # Maya option windows end in "Options"; boxes that open Maya Tool Settings carry the tool name;
+        # two Render windows carry Maya's own titles; the arc tools'
+        # boxes open Maya's Tool Settings "Three / Two Point Arc Settings"
         assert (w.title.endswith(("Options", "Tool", "Arc Settings"))
                 or w.title in ("Render Sequence (Current Frame)", "Batch Render Frame")) and w.action, w.key
         rna = getattr(bpy.ops.allset, "opt_" + w.key).get_rna_type()
@@ -88,7 +88,7 @@ def test_windows_registered_with_maya_titles_and_buttons():
             assert name in rna.properties
         assert w.paths or w.match, w.key
         for p in w.paths:
-            # editor menu bars (Graph Editor / Dope Sheet Edit key windows, step 157) have their own boxes
+            # editor menu bars (Graph Editor / Dope Sheet Edit key windows) have their own boxes
             assert (p in menu_data.OPTION_BOXES or p in editor_menu_data.OPTION_BOXES) and p in menu_map.MAP, (w.key, p)
     # default values, as in Maya
     d = ow._BY_KEY
@@ -113,7 +113,7 @@ def test_box_mark_not_a_left_window_icon():
             return lambda *a, **k: None
 
     rec = Rec()
-    menu_sets._draw_boxed(rec, "Create/Polygon Primitives/Cube", "Cube" + menu_sets.BOX_MARK)   # step 108: full text
+    menu_sets._draw_boxed(rec, "Create/Polygon Primitives/Cube", "Cube" + menu_sets.BOX_MARK)   # full text
     idname, text, icon, menu, props = rec.log[0]
     assert text == "Cube" + menu_sets.BOX_MARK and icon == 'NONE' and props.item == "Create/Polygon Primitives/Cube"
     assert menu == "ALLSET_MT_option_box"
@@ -139,7 +139,7 @@ def test_primitives():
     _run("poly_cylinder", height=5.0, height_div=4, axis="X")
     ob = bpy.context.active_object
     assert abs(_size(ob).x - 5.0) < 1e-3, _size(ob)                    # Maya axis X: lies along X
-    assert len(ob.data.polygons) == 20 * 4 + 2 * 20     # cap divisions 1: two centre fans (step 129)
+    assert len(ob.data.polygons) == 20 * 4 + 2 * 20     # cap divisions 1: two centre fans
     _run("poly_plane", width=3.0, height=2.0, width_div=3, height_div=2)
     ob = bpy.context.active_object
     assert (_size(ob) - Vector((3, 2, 0))).length < 1e-4 and len(ob.data.polygons) == 6
@@ -172,7 +172,7 @@ def test_edit_commands_and_transforms():
     # every face of a closed cube, faces kept together: the shell moves out by the thickness (no side faces)
     assert abs(_size(ob).x - 5.0) < 1e-3 and bpy.context.mode == 'OBJECT', _size(ob)
     n0 = len(ob.data.polygons)
-    _run("smooth", levels=2)        # real polySmoothFace geometry since step 139: every quad -> 4 x 4 quads
+    _run("smooth", levels=2)        # real polySmoothFace geometry: every quad -> 4 x 4 quads
     assert len(ob.data.polygons) == 16 * n0 and not any(m.type == 'SUBSURF' for m in ob.modifiers),         (n0, len(ob.data.polygons), [m.type for m in ob.modifiers])
     _run("duplicate_special_maya", copies=3, translate=(2.0, 0.0, 0.0))
     assert len([o for o in bpy.context.scene.objects if o.type == 'MESH']) == 4

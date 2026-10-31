@@ -1,4 +1,4 @@
-"""Step 11: Maya Outliner (UIList rows) and Attribute Editor (node tabs, template sections).
+"""Maya Outliner (UIList rows) and Attribute Editor (node tabs, template sections).
 
 """
 
@@ -211,9 +211,9 @@ def _textured_cube():
 def test_ae_tabs_in_maya_order():
     ob, mat = _textured_cube()
     assert ae.tabs(ob) == [("T", "pCube1", "transform"), ("S", "pCube1Shape", "mesh"),
-                           ("M:polySmooth1", "polySmooth1", "polySmoothFace"),   # Maya node types (step 106)
+                           ("M:polySmooth1", "polySmooth1", "polySmoothFace"),   # Maya node types
                            ("M:polyBevel1", "polyBevel1", "polyBevel3"),
-                           ("SG:0", "standardSurface1SG", "shadingEngine"),   # Maya's shading group (step 100)
+                           ("SG:0", "standardSurface1SG", "shadingEngine"),   # Maya's shading group
                            ("MAT:0", "standardSurface1", "standardSurface")]
     assert ae.current_tab(bpy.context, ob) == "S"      # default: shape (preferred node)
 
@@ -245,7 +245,7 @@ def _maya_sections(nodes, out, prefix=""):
 
 
 def _rna_owner(owner_name, kind):
-    if kind == "joint":   # step 55: a joint is a pose bone
+    if kind == "joint":   # a joint is a pose bone
         return {"ob": bpy.types.PoseBone, "bone": bpy.types.Bone, "arm": bpy.types.Armature,
                 "armob": bpy.types.Object}[owner_name]
     if owner_name == "ob":
@@ -302,7 +302,7 @@ def test_ae_draws_every_tab():
             panels = [e for e in lay.log if e[0] == "panel"]
             assert panels, (target.name, key)
             if key == "T":
-                # the lead and only selected node: Maya number fields (Channel Box text proxies, step 148 #85)
+                # the lead and only selected node: Maya number fields (Channel Box text proxies, #85)
                 assert (("prop", target, "location", "") in lay.log or
                         ("prop", bpy.context.scene.allset_cb, "tx_text", "") in lay.log), lay.log[:12]
                 assert ("label", "Translate") in lay.log
@@ -323,7 +323,7 @@ def test_ae_draws_every_tab():
     lay = FakeLayout()
     ae.draw(lay, bpy.context, ob)
     if plain.node_tree is not None and any(n.type == 'BSDF_PRINCIPLED' for n in plain.node_tree.nodes):
-        # Blender 5.x: every new material has a Principled tree, shown as standardSurface (step 53)
+        # Blender 5.x: every new material has a Principled tree, shown as standardSurface
         assert "Color" in [e[3] for e in lay.log if e[0] == "prop" and e[2] == "default_value"]
     else:
         assert ("prop", plain, "diffuse_color", "Color") in lay.log
@@ -354,7 +354,7 @@ def test_ae_add_limit_and_select():
 def test_dock_mode_switches_panels():
     wm = bpy.context.window_manager
     wm.allset_dock = 'CHANNEL_BOX'
-    # step 116: no 3D View sidebar tabs any more; one panel draws the Maya panels in their own dock areas (a
+    # no 3D View sidebar tabs any more; one panel draws the Maya panels in their own dock areas (a
     # Properties Tool tab draws "Tool"-category panels)
     for gone in ("ALLSET_PT_channel_box", "ALLSET_PT_layer_editor", "ALLSET_PT_dock_attribute_editor",
                  "ALLSET_PT_dock_modeling_toolkit"):

@@ -5,7 +5,7 @@ Maya runtime commands:
 InsertKeyTranslate / Rotate / Scale = ``cmds.setKeyframe(insert=True, attribute="translate" / ...)``, InsertKey =
 Insert Key (curves with selected Graph Editor keys, else the Graph Editor's curves, else the selection's),
 Nudge = ``cmds.keyframe(animation="keys", relative=True, option="over", timeChange=±1)``, SelectNext/PreviousKey
-(from the last selected key: find the next / previous key, select only it, go there) (step 83).
+(from the last selected key: find the next / previous key, select only it, go there).
 
 An insert keeps the curve's shape. Blender 4.5's ``keyframe_points.insert`` already subdivides a segment between two
 auto-handle keys and keeps the handles auto (= Maya Auto tangents, which follow later edits); with
@@ -265,7 +265,7 @@ INSERT_ITEMS = (("ALL", "Insert Key", "Insert a key on the selected curves witho
                 ("SCALE", "Insert Key on Scale", "Insert a key on the scale curves, keeping their shape (Maya Ctrl+Shift+R)"))
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_insert_key(bpy.types.Operator):
     """Insert a key at the current time on existing curves without changing their shape (Maya Insert Key)"""
     bl_idname = "allset.insert_key"
@@ -288,7 +288,7 @@ class ALLSET_OT_insert_key(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_nudge_keys(bpy.types.Operator):
     """Move the selected keys one frame (Graph Editor / Dope Sheet), else the selection's keys at the current time
     or in the Time Slider range (Maya Shift+( / Shift+))"""
@@ -306,7 +306,7 @@ class ALLSET_OT_nudge_keys(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_select_key(bpy.types.Operator):
     """Go to the next / previous key and select it (Maya Ctrl+Alt+. / Ctrl+Alt+,)"""
     bl_idname = "allset.select_key"

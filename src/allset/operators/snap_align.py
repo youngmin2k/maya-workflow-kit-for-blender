@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya Modify > Align: Snap Align Objects, Snap Together Tool, Make Live, Match
-Transformations (step 59).
+Transformations.
 
 Maya:
 
@@ -152,8 +152,8 @@ def align_objects(context, axes=(True, False, False), mode='MID'):
 
 # --- Match Transformations ------------------------------------------------------------------------
 
-# A joint's Maya X / Y / Z = the bone's Y / Z / X, an object's Maya X / Y / Z = Blender X / Z / -Y (step 57),
-# so an object lined up with a joint's Maya axes has world = bone world @ Rz(+90) (step 226 uses the same turn).
+# A joint's Maya X / Y / Z = the bone's Y / Z / X, an object's Maya X / Y / Z = Blender X / Z / -Y,
+# so an object lined up with a joint's Maya axes has world = bone world @ Rz(+90) (control shapes use the same turn).
 _BONE_TO_OBJECT = Matrix.Rotation(math.pi / 2, 4, 'Z')
 
 
@@ -174,7 +174,7 @@ def _set_maya_frame(node, m):
 def match_lead(context):
     """(lead, others) of Maya Match Transformations: the last selected node is the lead. A joint lead = the active pose
     bone in pose mode (picking a joint enters Pose mode, the objects picked before stay selected), or the
-    active bone of an active armature in object mode (step 226)."""
+    active bone of an active armature in object mode."""
     lead = context.view_layer.objects.active
     if lead is None:
         return None, []
@@ -431,7 +431,7 @@ STEP_FLAGS = {'TRANSLATE': "use_snap_translate", 'ROTATE': "use_snap_rotate", 'R
 MAYA_ROTATE_STEP = 0.2617993877991494      # 15 degrees (Rotate tool snapValue, S3)
 
 
-# Issue #139 (step 220): Blender's use_snap_translate / rotate / scale ("Affect") switch *all* snapping off for that
+# Issue #139: Blender's use_snap_translate / rotate / scale ("Affect") switch *all* snapping off for that
 # transform, not only the increment. Step Snap Off used to clear use_snap_translate, so Snap to Grid / Points on the
 # Status Line looked on but Move never snapped. The kit now keeps its per-tool Step Snap state in a scene ID property
 # and leaves a transform's Affect flag on while any other snap mode (grid / curve / point / live) is on.
@@ -460,7 +460,7 @@ def step_snap_mode(ts, kind):
     return 'ABSOLUTE' if ts.use_snap_grid_absolute else 'RELATIVE'
 
 
-# Step 263 (Issue #153): Maya keeps Relative / Absolute per tool (Move / Rotate /
+# Issue #153: Maya keeps Relative / Absolute per tool (Move / Rotate /
 # Scale tool snapRelative), Blender has one Absolute Grid Snap flag
 # for every transform. The kit keeps each tool's mode in STEP_PROP and puts it into Blender's flag when a transform
 # of that tool can start: the tool becomes active (tool_keys._watch), an LMB press on the manipulator
@@ -529,7 +529,7 @@ def heal_affect(ts):
 def settle_affect(ts):
     """After the Status Line snap set changed: with a grid / point / curve snap on, every Affect flag is on (#139);
     with none left, a tool whose Step Snap the user turned Off gets its Affect flag back off — otherwise it kept
-    stepping by another tool's increment while showing Off (step 240 QA C-240-1)."""
+    stepping by another tool's increment while showing Off."""
     if other_snaps_on(ts):
         return heal_affect(ts)
     n = 0
@@ -561,7 +561,7 @@ def set_step_snap(ts, kind, mode):
         else:
             ts.use_snap = False
         return 'OFF'
-    # step 263 (#153): the other tools keep their own Step Snap — one never set stays Off instead of following
+    # #153: the other tools keep their own Step Snap — one never set stays Off instead of following
     # Blender's shared increment snap (Maya: a tool context's -snap is its own)
     was_snapping = ts.use_snap and 'INCREMENT' in ts.snap_elements
     for other, flag in STEP_FLAGS.items():
@@ -577,7 +577,7 @@ def set_step_snap(ts, kind, mode):
     ts.snap_elements = set(ts.snap_elements if ts.use_snap else ()) | {'INCREMENT'}
     ts.use_snap = True
     setattr(ts, STEP_FLAGS[kind], True)
-    # this tool's own mode (step 263); Blender's shared flag follows it until another tool's transform starts
+    # this tool's own mode; Blender's shared flag follows it until another tool's transform starts
     ts.use_snap_grid_absolute = mode == 'ABSOLUTE'
     if kind == 'ROTATE' and abs(ts.snap_angle_increment_3d - 0.0872664600610733) < 1e-6:
         ts.snap_angle_increment_3d = MAYA_ROTATE_STEP     # Blender's 5 degrees -> the kit's 15

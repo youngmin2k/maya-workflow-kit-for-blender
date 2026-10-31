@@ -1,4 +1,4 @@
-"""Step 141 lane SELECT in a real UI: Ctrl+RMB (CTRL_CONVERT) on a cube in component mode runs the new conversions
+"""In a real UI: Ctrl+RMB (CTRL_CONVERT) on a cube in component mode runs the new conversions
 through marking-menu gestures — vertex mode: Grow Selection > Grow Along Loop (an isolated vertex grows to its three
 neighbours); face mode: To Vertices > To Vertex Perimeter (the face's 4 vertices); then the list row To Face Path
 (the rings of the touched edges = all 6 faces). Screenshot: gui_step141_convert_menu.png."""

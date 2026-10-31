@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya buffer curves (step 198): Curves > Buffer Curve Snapshot /
+"""Maya buffer curves: Curves > Buffer Curve Snapshot /
 Swap Buffer Curve and View > Show Buffer Curves.
 
 Maya: Snapshot stores the selected curves; Swap exchanges a curve and its buffer —

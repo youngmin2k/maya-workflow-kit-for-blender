@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Kit menu pictures for Create, Curves, Surfaces, Skeleton and Skin (step 142, #54) — see ``menu_drawings``."""
+"""Kit menu pictures for Create, Curves, Surfaces, Skeleton and Skin (#54) — see ``menu_drawings``."""
 
 import math
 

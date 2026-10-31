@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Graph Editor toolbar: tangent buttons and buffer curves in the Graph Editor header (step 70).
+"""Maya Graph Editor toolbar: tangent buttons and buffer curves in the Graph Editor header.
 
 Maya's Graph Editor has a toolbar of tangent buttons (Auto, Spline, Clamped, Linear, Flat, Stepped, Plateau, then
 Break / Unify) and buffer curve buttons.
@@ -23,7 +23,7 @@ def draw_toolbar(self, context):
     if space is None or space.type != 'GRAPH_EDITOR' or space.mode != 'FCURVES':
         return
     from . import editor_chrome
-    if editor_chrome.enabled(context):     # the Maya icon row has these buttons (step 104)
+    if editor_chrome.enabled(context):     # the Maya icon row has these buttons
         return
     layout = self.layout
     layout.separator()

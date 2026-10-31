@@ -9,7 +9,7 @@ Maya keyconfig puts ``allset.manip_duplicate`` in front of it
 (keymap/maya_patches.py 21). This operator duplicates/extrudes and always passes the
 event on, so the gizmo then transforms the selection, which is the new part. A timer
 waits for the transform to end and takes the copy / extrusion back when nothing moved
-(a Shift+click, a cancelled drag). Steps 22 and 26.
+(a Shift+click, a cancelled drag).
 """
 
 import bmesh
@@ -20,9 +20,9 @@ from .. import live_refs
 from . import duplicate, keystate
 
 # Gizmo groups of the transform manipulator (tool gizmo and the viewport's object gizmos);
-# light/camera/spot gizmos share the keymap but are left alone (step 26).
+# light/camera/spot gizmos share the keymap but are left alone.
 XFORM_GROUPS = {"VIEW3D_GGT_xform_gizmo", "VIEW3D_GGT_xform_gizmo_context",
-                "ALLSET_GGT_xform"}   # ui/manipulator.py, the Maya-shaped manipulator (step 59)
+                "ALLSET_GGT_xform"}   # ui/manipulator.py, the Maya-shaped manipulator
 POLL = 0.05
 EPS = 1e-6
 
@@ -180,7 +180,7 @@ def _transform_running(window):
     return any(op.bl_idname.startswith(TRANSFORM_MODALS) for op in window.modal_operators)
 
 
-# --- the active handle (Maya MMB drag anywhere), step 28 -------------------------------
+# --- the active handle (Maya MMB drag anywhere) -------------------------------------
 
 # Last handle per transform kind (Maya manipsRememberActiveHandle,
 # ...AfterToolSwitch true). Session only; a re-tap of the tool key resets.
@@ -348,7 +348,7 @@ class ALLSET_OT_manip_press(bpy.types.Operator):
 
     def invoke(self, context, _event):
         from . import snap_align
-        snap_align.apply_active(context)       # step 263: this tool's Step Snap Relative / Absolute
+        snap_align.apply_active(context)       # this tool's Step Snap Relative / Absolute
         if from_xform_gizmo(context) and context.window is not None:
             watch({"kind": 'PRESS'}, context.window, context.area, context.region)
         return {'PASS_THROUGH'}
@@ -372,7 +372,7 @@ class ALLSET_OT_manip_mmb(bpy.types.Operator):
 
     def invoke(self, context, _event):
         from . import snap_align
-        snap_align.apply_tool(context.scene.tool_settings, self.mode)   # step 263: per-tool Step Snap
+        snap_align.apply_tool(context.scene.tool_settings, self.mode)   # per-tool Step Snap
         kwargs = {"release_confirm": True}
         handle = HANDLES.get(self.mode)
         if self.mode == 'TRANSLATE':
@@ -402,7 +402,7 @@ class ALLSET_OT_manip_mmb(bpy.types.Operator):
 
     @staticmethod
     def _maya_scale(handle):
-        """Step 275 (#200): the active Scale handle drags Maya's way (operators/manip_scale.py); an axis or plane
+        """#200: the active Scale handle drags Maya's way (operators/manip_scale.py); an axis or plane
         handle at half speed there."""
         axes = tuple(bool(a) for a in handle.get("constraint_axis", ())) if handle else ()
         kwargs = {"button": 'MIDDLEMOUSE'}
@@ -421,7 +421,7 @@ class ALLSET_OT_manip_mmb(bpy.types.Operator):
         return {'FINISHED'} if res & {'RUNNING_MODAL', 'FINISHED'} else {'CANCELLED'}
 
 
-# --- Ctrl+LMB on a handle, Shift+MMB = automatic axis (step 85) -------------------------
+# --- Ctrl+LMB on a handle, Shift+MMB = automatic axis -------------------------
 # Move tool: a drag started with Ctrl held on an axis arrow / plane / the centre moves that handle's way with
 # grid snapping (the same as pressing Ctrl after the drag started), Ctrl+click on the centre frees the active
 # handle; Scale tool: Ctrl+LMB on an axis scales the other two axes; Shift+MMB drag moves along the axis closest
@@ -579,7 +579,7 @@ class ALLSET_OT_manip_mmb_auto(bpy.types.Operator):
             op = getattr(bpy.ops.transform, TRANSFORM_OPS[self.mode])
             try:
                 # launched from this MOUSEMOVE: release_confirm can't see the MMB, so the transform is
-                # confirmed by the MMB release below it (step 85)
+                # confirmed by the MMB release below it
                 kwargs = dict(constraint_axis=tuple(k == i for k in range(3)), orient_type=self._otype,
                               release_confirm=True)
                 if self.mode == 'RESIZE':
@@ -629,7 +629,7 @@ class ALLSET_OT_manip_size(bpy.types.Operator):
     bl_options = {'INTERNAL'}
 
     # Maya's = / - keys grow / shrink the manipulator; here 1.25x steps within
-    # Blender's gizmo size range 10-200 px (step 27). Since step 130 this scales the kit's
+    # Blender's gizmo size range 10-200 px. This scales the kit's
     # Move / Scale manipulator only (ui/manipulator.SIZE): Blender's gizmo_size preference is never written, so
     # Blender's own gizmos (Rotate) keep their size.
     factor: bpy.props.FloatProperty(name="Factor", default=1.25, min=0.1, max=10.0,

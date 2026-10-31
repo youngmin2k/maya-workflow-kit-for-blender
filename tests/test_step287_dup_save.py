@@ -1,4 +1,4 @@
-"""Step 287 (#217): a file saved while a duplicate still shares its original's Outliner number (as an earlier version
+"""#217: a file saved while a duplicate still shares its original's Outliner number (as an earlier version
 left it) opens with the tie in it and settles on the first order sync, the original keeping its place; undoing a
 duplicate leaves a settled order."""
 

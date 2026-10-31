@@ -1,4 +1,4 @@
-"""Step 263 (Issue #154) in a real UI: File > Game Exporter opens a kit window that stays open while you work in the
+"""Issue #154: in a real UI: File > Game Exporter opens a kit window that stays open while you work in the
 main window (a click there no longer drops the File Name edit), shows the "Up Axis" label, and closes by its window."""
 
 import os

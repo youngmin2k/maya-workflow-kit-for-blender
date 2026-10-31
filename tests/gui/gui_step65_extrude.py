@@ -1,4 +1,4 @@
-"""Step 65 in a real UI (Maya modeling workflow): top face -> Ctrl+E -> extrude
+"""In a real UI (Maya modeling workflow): top face -> Ctrl+E -> extrude
 manipulator + In-View Editor (polyExtrudeFace1) -> drag the Thickness row -> 0.5 -> Channel Box INPUTS
 polyExtrudeFace1 Divisions 2 -> 16 vertices -> Ctrl+Z -> Divisions 1 again -> drag the blue arrow -> Local
 Translate Z changes. Screenshots vs shots/modeling_03.png / modeling_04.png."""
@@ -84,7 +84,7 @@ def arrow_point():
 def s_setup():
     C["x"], C["y"] = setup()
     area, _region = view3d()
-    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport (step 116; was the 3D View sidebar)
+    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport (was the 3D View sidebar)
     bpy.context.view_layer.objects.active = cube()
     cube().select_set(True)
     with v3d_ctx():
@@ -170,7 +170,7 @@ def s_shot_thickness():
 
 @step
 def s_open_extrude_node():
-    open_inputs("polyExtrudeFace1")   # step 135: INPUTS nodes start collapsed (Maya)
+    open_inputs("polyExtrudeFace1")   # INPUTS nodes start collapsed (Maya)
     scroll_channel_box()              # ... and a long Channel Box scrolls inside its part
     redraw()
 
@@ -180,7 +180,7 @@ def s_wait_open_extrude():
     redraw()
 
 
-# The field is looked up by its data path (step 135: the Channel Box part scrolls, rows have no fixed y).
+# The field is looked up by its data path (the Channel Box part scrolls, rows have no fixed y).
 step(find_button(dock, lambda path, _cmd: path.endswith("divisions_text"), C, "divisions", x_frac=0.8, step_px=8))
 
 

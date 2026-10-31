@@ -1,4 +1,4 @@
-"""Step 151 lane B in a real UI: top face -> Ctrl+E -> Maya's polyExtrudeFace manipulator (three local arrows, scale
+"""In a real UI: top face -> Ctrl+E -> Maya's polyExtrudeFace manipulator (three local arrows, scale
 cubes, plane handles, centre square) from Maya's persp angle; drag the
 red X arrow (Local Translate X, one Ctrl+Z step), the red X scale cube (Local Scale X) and the centre square (uniform
 Local Scale). Screenshots: gui_step151_manip.png / _hover.png / _scaled.png (compare with modeling_03.png)."""

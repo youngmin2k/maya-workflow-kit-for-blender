@@ -1,4 +1,4 @@
-"""Step 211 (audit 16 fix batch, #117): Light Linking submenu, Maya max + 1 names for sets / layers / anim layers /
+"""Fix batch #117: Light Linking submenu, Maya max + 1 names for sets / layers / anim layers /
 characters / bookmarks, Ctrl+V pasted__ names under a group, startup cameras first in the Outliner, AE tab row, nHair
 option boxes = the Curves windows. Maya values."""
 
@@ -41,7 +41,7 @@ def _select(obs):
 
 def test_light_linking_submenu_opens_the_light_linking_panel():
     mm, ms = m("ui.menu_map"), m("ui.menu_sets")
-    # since the step 219 menus the submenu is in the menu data itself, no run-time CHILDREN entry
+    # the submenu is in the menu data itself, no run-time CHILDREN entry
     md = m("ui.menu_data")
     win = next(it for it in md.MENUS["mainWindowMenu"][3] if it[0] == "Relationship Editors")
     assert ("Light Linking", [("Light-Centric",), ("Object-Centric",)]) in win[1]

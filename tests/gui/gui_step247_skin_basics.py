@@ -1,4 +1,4 @@
-"""Step 247 (Issue #164) in a real UI, the skinning chain a Maya rigger walks:
+"""Issue #164: in a real UI, the skinning chain a Maya rigger walks:
 Joint Tool 3 clicks -> Enter -> a mesh over the chain -> Skin > Bind Skin -> pose joint2 in the Channel Box ->
 Skin > Go to Bind Pose puts the mesh back (error 0) -> Skin > Prune Small Weights (0.01, renormalised) ->
 Skin > Edit Influences > Set Max Influences... -> Skin > Mirror Skin Weights -> Ctrl+Z -> save + open keeps the bind pose."""

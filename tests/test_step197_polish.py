@@ -1,4 +1,4 @@
-"""Step 197 (#104): small Maya polish batch — result field after Undo, overlays under the hotbox, character-set and
+"""#104: small Maya polish batch — result field after Undo, overlays under the hotbox, character-set and
 NURBS display menus wired up, Mesh > Cleanup... a leaf."""
 
 from importlib import import_module
@@ -27,7 +27,7 @@ def _start():
 
 
 def test_a_new_command_replaces_undo_text():
-    """step 182 / 192 G4: "Undo: Group" stayed through P / Delete / Ctrl+E; Maya replaces it."""
+    """G4: "Undo: Group" stayed through P / Delete / Ctrl+E; Maya replaces it."""
     _start()
     assert bpy.ops.allset.group('EXEC_DEFAULT', True) == {'FINISHED'}
     bpy.ops.ed.undo()
@@ -181,7 +181,7 @@ def test_no_stale_character_set_notices():
     assert "Windows/Relationship Editors/Character Sets" not in notices.NOTICES
     assert menu_map.MAP["Windows/Relationship Editors/Character Sets"][1] == "allset.character_editor"
     assert "Graph Editor/Show/Objects/Characters" not in notices.NOTICES
-    assert "Dope Sheet/Show/Objects/Characters" not in notices.NOTICES   # step 203: members in the Dope Sheet
+    assert "Dope Sheet/Show/Objects/Characters" not in notices.NOTICES   # members in the Dope Sheet
 
 
 def test_graph_outliner_lists_character_nodes():

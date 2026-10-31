@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya ⇄ Blender switch (steps 60, 130).
+"""Maya ⇄ Blender switch.
 
 The extension stays enabled; "Maya mode" is the set of sub-packages ``__init__.MODE``
 (keymap, UI, operators, ...). Switching off unregisters them, which puts
@@ -10,7 +10,7 @@ add-on preferences, Edit (Blender) / Windows > Settings/Preferences (Maya) menu 
 the menu search finds, and Ctrl+Alt+Shift+M (free in Blender, Industry Compatible and
 Maya's standard hotkeys).
 
-Nothing persistent (step 130): Maya mode writes none of Blender's preferences and
+Nothing persistent: Maya mode writes none of Blender's preferences and
 nothing outside the extension's folders, so switching off / disabling / removing needs no snapshot or restore —
 unregistering the Maya mode modules takes back everything they registered.
 
@@ -61,7 +61,7 @@ def is_maya_workspace(ws):
     """A workspace that already is the Maya layout (appended by the switch or a Maya Workflow Kit file)."""
     if ws is None:
         return False
-    if PREV_KEY in ws or TEMPLATE_KEY in ws:     # TEMPLATE_KEY: any Maya workspace of the template (step 160)
+    if PREV_KEY in ws or TEMPLATE_KEY in ws:     # TEMPLATE_KEY: any Maya workspace of the template
         return True
     for screen in ws.screens:
         for area in screen.areas:
@@ -81,9 +81,9 @@ def _fit_views(ws, scene):
             for space in area.spaces:
                 if space.type != 'VIEW_3D':
                     continue
-                # The tool header is Maya's panel toolbar in views with a header (step 113); the Tool Box column has
-                # neither. Set it explicitly: an appended screen came back with it shown (step 60). Only a
-                # change is written (Modeling - Expert keeps a header without the toolbar row, step 160; writing a
+                # The tool header is Maya's panel toolbar in views with a header; the Tool Box column has
+                # neither. Set it explicitly: an appended screen came back with it shown. Only a
+                # change is written (Modeling - Expert keeps a header without the toolbar row; writing a
                 # region flag of a screen no window shows crashes Blender in ED_area_init in -b).
                 if space.show_region_tool_header and not space.show_region_header:
                     space.show_region_tool_header = False
@@ -101,11 +101,11 @@ def enter_layout(window):
     if window is None or is_maya_workspace(window.workspace):
         return None
     own = [ws for ws in bpy.data.workspaces if PREV_KEY not in ws and is_maya_workspace(ws)]
-    own.sort(key=lambda ws: template_of(ws) != TEMPLATE_WORKSPACE)     # Maya Classic first (step 160)
+    own.sort(key=lambda ws: template_of(ws) != TEMPLATE_WORKSPACE)     # Maya Classic first
     own = own[0] if own else None
     if own is not None:
         # the file's own Maya layout (a Maya Workflow Kit template file left by a switch to Blender): back to it,
-        # nothing appended twice (#19, step 129); the user's workspace is remembered for the way back (#185)
+        # nothing appended twice (#19); the user's workspace is remembered for the way back (#185)
         if window.workspace is not None:
             own[BLENDER_PREV_KEY] = window.workspace.name
         window.workspace = own
@@ -119,12 +119,12 @@ def enter_layout(window):
     return ws
 
 
-TEMPLATE_KEY = "allset_template"      # the template workspace a Maya workspace was made from (step 160)
+TEMPLATE_KEY = "allset_template"      # the template workspace a Maya workspace was made from
 
 
 def append_workspace(window, template_name):
     """Append the template workspace ``template_name`` (General, Animation, ... tools/make_startup.MAYA_WORKSPACES) into
-    the open file and show it in ``window``: its Status Line / Shelf masks and cm views are set up (step 160, #81)."""
+    the open file and show it in ``window``: its Status Line / Shelf masks and cm views are set up (#81)."""
     before = set(bpy.data.workspaces)
     with bpy.context.temp_override(**_window_override(window)):
         bpy.ops.workspace.append_activate(idname=template_name, filepath=_template_blend())
@@ -218,7 +218,7 @@ def leave_layout(window):
     name = ws.name
     if window.workspace == ws:
         # The window changes workspace on its next event loop: delete the old one after that. Deleting the
-        # screen the window still draws crashed Blender 5.1 (screen_draw_move_highlight, GUI sweep, step 118).
+        # screen the window still draws crashed Blender 5.1 (screen_draw_move_highlight, GUI sweep).
         _delete_later(window, name, added)
     else:
         _delete_workspace(window, name, added)
@@ -228,7 +228,7 @@ def leave_layout(window):
 BLENDER_LAYOUT_KEY = "allset_blender_layout"
 BLENDER_PREV_KEY = "allset_blender_prev"     # on a template Maya workspace: the user's workspace before it (#185)
 # Blender's embedded factory startup file: what Add Workspace > General appends from (workspace_edit.cc
-# workspace_append_button, BLO_EMBEDDED_STARTUP_BLEND; step 129)
+# workspace_append_button, BLO_EMBEDDED_STARTUP_BLEND)
 EMBEDDED_STARTUP = "<startup.blend>"
 # The workspace the user's own file showed when a new Maya scene replaced it (first_start.new_maya_scene).
 START_WORKSPACE = {"name": None}
@@ -302,7 +302,7 @@ def _users_startup_workspaces(window):
 def blender_target(window):
     """The workspace a switch to Blender shows in ``window`` when its Maya layout came with the file (no workspace
     to go back to): the user's workspace if the file has one, else the user's own startup workspaces appended,
-    else Blender's factory Layout (#19 step 129, #185)."""
+    else Blender's factory Layout (#19, #185)."""
     target = _users_workspace(window) or _users_startup_workspaces(window)
     if target is not None:
         return target
@@ -334,7 +334,7 @@ def _leave_template_layout(window):
 def _delete_workspace(window, name, added):
     ws = bpy.data.workspaces.get(name)
     # workspace.delete removes the window's active workspace whatever the override says: remove the
-    # left one as data once no window shows it (4.5 and 5.1 GUI, step 118)
+    # left one as data once no window shows it (4.5 and 5.1 GUI)
     if ws is not None and all(w.workspace != ws for w in _windows()):
         bpy.data.batch_remove(ids=[ws])
     for mask_name in added:                  # masks the switch loaded go too: the file is as before
@@ -382,7 +382,7 @@ def _mode_modules():
     return MODE
 
 
-# The Maya mode modules registered right now, in order (step 279, #198 #199). ``unregister_mode`` takes back exactly
+# The Maya mode modules registered right now, in order (#198 #199). ``unregister_mode`` takes back exactly
 # these, so a half-done register or a module that raises on unregister can't leave Maya menus behind.
 _mode_done = []
 
@@ -457,7 +457,7 @@ def stop_playback():
 
 def set_mode(on, layout=True):
     """Switch Maya mode on / off now (no restart). The open file's scenes are not touched; Blender's preferences
-    are never written (step 130): switching off unregisters the Maya mode modules, which takes back everything
+    are never written: switching off unregisters the Maya mode modules, which takes back everything
     they registered."""
     prefs = _prefs_addon()
     stop_playback()
@@ -478,7 +478,7 @@ def set_mode(on, layout=True):
         if not _registered[0]:
             try:
                 register_mode()
-            except Exception as ex:      # rolled back already: plain Blender, Maya mode stays off (step 279)
+            except Exception as ex:      # rolled back already: plain Blender, Maya mode stays off
                 preferences_off()
                 _report_failure(ex)
                 _redraw()
@@ -493,12 +493,12 @@ def set_mode(on, layout=True):
     else:
         try:
             from .ui import maya_dock
-            maya_dock.close_floating()     # floating Maya panels would show Blender's Tool tab (step 116)
+            maya_dock.close_floating()     # floating Maya panels would show Blender's Tool tab
         except Exception:
             pass
         try:
             from .ui import four_view
-            four_view.collapse_all(bpy.context)   # step 237: the four panels back to one, the screen as it was
+            four_view.collapse_all(bpy.context)   # the four panels back to one, the screen as it was
         except Exception:
             pass
         if layout:
@@ -578,7 +578,7 @@ def draw_topbar_switch(self, context):
     if region is None or region.alignment != 'RIGHT':
         return
     on = is_on()
-    # Maya's menu bar has nothing here: flat text, the current mode bright and the other dim (step 113)
+    # Maya's menu bar has nothing here: flat text, the current mode bright and the other dim
     row = self.layout.row(align=True)
     row.scale_x = 0.85
     sub = row.row(align=True)

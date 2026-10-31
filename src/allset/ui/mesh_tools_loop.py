@@ -13,7 +13,7 @@ from . import notices
 from ..operators import edge_loops
 
 # Maya rows the kit can't honour -> (substitute, one line); keys are "Tool Settings/<tool>/<row>" (Insert Edge Loop's
-# greyed rows are in ui/tool_settings.TS_NOTICES since step 129)
+# greyed rows are in ui/tool_settings.TS_NOTICES)
 TS = "Tool Settings"
 GREY = {
     f"{TS}/Offset Edge Loop/Start/End vertex offset": ("0", "The loop ends stay at their vertices"),

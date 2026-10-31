@@ -1,4 +1,4 @@
-"""Step 241 (Issue #156, report @cnzim) in a real UI, chain ③ start:
+"""Issue #156 (report @cnzim) in a real UI, chain ③ start:
 Joint Tool 3 clicks -> W finishes (Edit mode, Move tool) -> click joint2 -> drag = joint2 + joint3 move, joint1 stays ->
 Ctrl+Z / Shift+Z -> Bind Skin -> click joint2 = Pose -> Skin > Move Skinned Joints -> drag: the mesh stays ->
 Move Skinned Joints again = Pose, posing bends about the new place -> save + open keeps the joints."""

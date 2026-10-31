@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya click / marquee modifiers in the Graph Editor, Dope Sheet and UV Editor (step 170).
+"""Maya click / marquee modifiers in the Graph Editor, Dope Sheet and UV Editor.
 
 Maya (Graph Editor / Dope Sheet / Outliner clicks): marquee Shift = toggle (XOR), Ctrl =
 deselect, Ctrl+Shift = add, in all three; a click: Shift = toggle, Ctrl+Shift = add (never removes); Ctrl =

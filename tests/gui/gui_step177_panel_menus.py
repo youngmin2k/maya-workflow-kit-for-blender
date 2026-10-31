@@ -1,4 +1,4 @@
-"""Step 177 in a real UI: View > Center View of Selection (Maya viewFit -c), the Tumble / Dolly camera tools picked
+"""In a real UI: View > Center View of Selection (Maya viewFit -c), the Tumble / Dolly camera tools picked
 from View > Camera Tools (LMB drag), Camera Attribute Editor in Blender's persp view (popover), and shots of the
 View / Shading panel menus with their greyed rows."""
 

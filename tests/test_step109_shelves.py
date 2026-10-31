@@ -1,4 +1,4 @@
-"""Step 109: every Maya shelf button in its slot (greyed with a notice when unmapped), Sculpting brushes,
+"""Every Maya shelf button in its slot (greyed with a notice when unmapped), Sculpting brushes,
 Curves / Surfaces and FX buttons, Maya-style icons.
 
 """
@@ -21,7 +21,7 @@ notices = import_module(kit.MODULE + ".ui.notices")
 curve_tools = import_module(kit.MODULE + ".operators.curve_tools")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# factory shelf button counts (step 269)
+# factory shelf button counts
 EXPECTED_COUNTS = {"Curves": 14, "Surfaces": 24, "Polygons": 37, "Sculpting": 26, "UVEditing": 12, "Rigging": 18,
                "Animation": 15, "Rendering": 26, "FX": 29, "FXCaching": 10}
 
@@ -167,7 +167,7 @@ def test_loft_two_circles():
     _select(a, b)
     assert bpy.ops.allset.loft() == {'FINISHED'}
     ob = bpy.data.objects["loftedSurface1"]
-    assert ob.type == 'SURFACE', ob.type                 # a NURBS surface since step 181
+    assert ob.type == 'SURFACE', ob.type                 # a NURBS surface
     sp = ob.data.splines[0]
     assert sp.use_cyclic_u and sp.point_count_v == 4, (sp.use_cyclic_u, sp.point_count_v)   # 2 curves: 1 cubic span
     ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get())
@@ -177,7 +177,7 @@ def test_loft_two_circles():
         assert abs(min(p.z for p in zs)) < 1e-4 and abs(max(p.z for p in zs) - 5.0) < 1e-4
     finally:
         ev.to_mesh_clear()
-    assert ob.active_material is not None          # lambert1, like a Maya shape (step 100)
+    assert ob.active_material is not None          # lambert1, like a Maya shape
 
 
 def test_extrude_sweeps_profile_along_path():
@@ -246,7 +246,7 @@ def test_nurbs_square_cube_cone():
     assert bpy.ops.allset.create(kind='NURBS_CUBE') == {'FINISHED'}
     cube = bpy.data.objects["nurbsCube1"]
     assert len(cube.children) == 6
-    def cvs(name):   # step 129: Maya builds the patches in place (CVs), the part transforms stay at the origin
+    def cvs(name):   # Maya builds the patches in place (CVs), the part transforms stay at the origin
         return [p.co for p in bpy.data.objects[name].data.splines[0].points]
     assert {round(p.z, 4) for p in cvs("topnurbsCube1")} == {0.5}
     assert {round(p.y, 4) for p in cvs("leftnurbsCube1")} == {-0.5}      # Maya left = +Z side
@@ -298,7 +298,7 @@ def test_fluid_collide_and_ncloth_display():
 # --- icons ------------------------------------------------------------------------------------
 
 def test_icons_use_maya_hues_and_fade_when_greyed():
-    # step 131: hues of Maya 2022's icons
+    # hues of Maya 2022's icons
     assert shelf_icons.SHELF_COLOURS["Polygons"] == shelf_icons.SHELF_COLOURS["Sculpting"]
     assert shelf_icons.SHELF_COLOURS["Curves"] == shelf_icons.SHELF_COLOURS["Surfaces"]
     r, g, b = shelf_icons.SHELF_COLOURS["Curves"]
@@ -315,8 +315,8 @@ def test_icons_use_maya_hues_and_fade_when_greyed():
     assert (np.abs(tools[tools[..., 3] > 0.99][:, :3] - light).max(axis=1) < 0.02).any(), "tool parts in grey"
     tools = [lab for lab, _c in next(b for n, _l, b in shelf_data.SHELVES if n == "Sculpting") if lab.endswith(" Tool")]
     sculpt = {shelf_icons.draw(lab, "Sculpting").round(2).tobytes() for lab in tools}
-    assert len(sculpt) == len(tools), (len(sculpt), len(tools))     # step 131: every brush its own picture
-    # step 131: Maya's dark outline round the shapes, UV tools green
+    assert len(sculpt) == len(tools), (len(sculpt), len(tools))     # every brush its own picture
+    # Maya's dark outline round the shapes, UV tools green
     outline = np.array(shelf_icons.DARK)
     assert (np.abs(px[px[..., 3] > 0.5][:, :3] - outline).max(axis=1) < 0.03).any(), "dark outline"
     uv = shelf_icons.draw("Planar Mapping", "UVEditing")

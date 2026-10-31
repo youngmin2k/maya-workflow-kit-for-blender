@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's ``// Error:`` messages for commands run on a selection they don't take (step 258, #152).
+"""Maya's ``// Error:`` messages for commands run on a selection they don't take (#152).
 
 Maya prints these as Errors in the Command Line / Help Line (Maya 2026,
 with the step-258 additions there). A kit operator reports one with ``op.report({'ERROR'}, text)``;
@@ -11,12 +11,12 @@ WRONG_SELECTION = "Current selection doesn't match required selection type."    
 NO_LIVE_SURFACE = "A live surface is required for conform."                         # Maya Mesh Tools > Conform
 NO_CONFORM_SELECTION = "No components or objects selected for conform."
 MUST_SELECT_JOINT = "You must select at least one joint."                           # Maya Bind Skin, no joint selected
-SELECT_TO_BIND = "Select objects to bind."                     # Bind Skin, nothing selected (step 258 / 266)
-BINDABLE_IN_SELECTION = "Bindable objects must be part of the selection."   # Bind Skin, joints only (step 266)
+SELECT_TO_BIND = "Select objects to bind."                     # Bind Skin, nothing selected
+BINDABLE_IN_SELECTION = "Bindable objects must be part of the selection."   # Bind Skin, joints only
 NO_TARGETS = "Target list was empty or contained no valid targets."                 # parent / point / orient /
-#                                                    scale / aim / geometry constraint (step 258)
+#                                                    scale / aim / geometry constraint
 MOVE_IK_TO_FK = "Must select an ik handle, joint or object that connected to IK/FK."   # Maya Move IK to FK
-# step 258: nothing selected / a plain skeleton
+# nothing selected / a plain skeleton
 REMESH_NOTHING = "This command requires at least 1 argument(s) to be specified or selected;  found 0."
 REDUCE_NOTHING = "Reduce requires that at least 1 object or group of faces be selected."
 NO_SHAPE = "No shape was selected."                     # KeyBlendShapeTargetsWeight on a plain skeleton / nothing
@@ -53,7 +53,7 @@ def refuse_hidden(op, ob):
 
 def report_nested(op, ex):
     """Report a RuntimeError of a nested call on ``op``: an Error (an operator's ERROR report, a ``MayaError``) stays
-    an Error with its text, anything else becomes a Warning with its last line (as before step 258). Blender's
+    an Error with its text, anything else becomes a Warning with its last line. Blender's
     "Cannot edit hidden object" becomes the kit's warning naming the object."""
     text = str(ex).strip()
     if BLENDER_HIDDEN in text:

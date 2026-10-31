@@ -1,4 +1,4 @@
-"""Step 148 (#87 #85 #83 #95): Channel Box finish.
+"""#87 #85 #83 #95: Channel Box finish.
 GUI: tests/gui/gui_step148_cb.py (RMB menu, pane, AE, lattice, light at UI 1.0 / 1.25 / 1.5)."""
 
 from importlib import import_module
@@ -61,13 +61,13 @@ def test_light_shapes_rows_are_maya_color_and_intensity():
     assert abs(ob.data.color[1] - 0.25) < 1e-6
     assert abs(cbm._row_read(owner, "SHAPE", "maya:colorG") - 0.25) < 1e-6
     assert cbm._row_kind(owner, "SHAPE", "maya:colorG") == "NONE"
-    # Intensity is Maya's value over Blender's Power (step 137)
+    # Intensity is Maya's value over Blender's Power
     cbm._row_write(owner, "SHAPE", "allset_intensity", 2.0)
     assert abs(ob.data.allset_intensity - 2.0) < 1e-4
 
 
 def test_83_pane_room_model():
-    # step 148 shots: 4.8-4.9 U of fixed rows at UI 1.0 / 1.25 / 1.5 (menu bar + name line + margins + splitter)
+    # screenshots: 4.8-4.9 U of fixed rows at UI 1.0 / 1.25 / 1.5 (menu bar + name line + margins + splitter)
     assert abs((cbm.PANE_TOP + 3.0 + 0.3) - 4.9) < 1e-6
 
 

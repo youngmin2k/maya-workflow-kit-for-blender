@@ -1,4 +1,4 @@
-"""Step 44: Maya widget feel. Step 130 removed the theme, density, font and wire presets (they wrote Blender's
+"""Maya widget feel. The kit has no theme, density, font and wire presets (they wrote Blender's
 preferences); what is left: the marking menu text font and the Channel Box row height."""
 
 import os

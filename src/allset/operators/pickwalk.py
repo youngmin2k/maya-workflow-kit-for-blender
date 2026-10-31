@@ -6,7 +6,7 @@ Left/Right = sibling (Maya-style hotkeys). Siblings are in Maya's
 creation order (a re-parented node last; the kit's ``outliner_order.ORDER`` numbers) and wrap around —
 locators made b, a, c walk b -> a -> c -> b, Down = the first made.
 Edit mode:
-component pick-walk at the end of this file (step 39).
+component pick-walk at the end of this file.
 """
 
 import bpy
@@ -49,7 +49,7 @@ def walk(view_layer, ob, direction):
     return sibs[(i + (1 if direction == "RIGHT" else -1)) % len(sibs)]
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_pick_walk(bpy.types.Operator):
     """Walk the selection through the hierarchy (Maya arrow keys)"""
     bl_idname = "allset.pick_walk"
@@ -81,7 +81,7 @@ class ALLSET_OT_pick_walk(bpy.types.Operator):
 
 
 
-# --- component pick-walk (step 39) ----------------------------------------------------
+# --- component pick-walk ----------------------------------------------------
 # Maya pick-walk: edges walk the edge ring (Up/Down)
 # and the edge loop (Left/Right); faces/vertices (Maya: face loop / index order) walk to the
 # neighbour whose screen direction is closest to the arrow.
@@ -209,7 +209,7 @@ def view_projector(context, ob):
     return project
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_pick_walk_component(bpy.types.Operator):
     """Walk the component selection to the next vertex / edge / face (Maya arrow keys)"""
     bl_idname = "allset.pick_walk_component"

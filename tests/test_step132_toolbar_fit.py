@@ -1,4 +1,4 @@
-"""Step 132 (#52): the Maya panel toolbar fits the 3D View tool header — groups that don't fit go into Maya's »
+"""#52: the Maya panel toolbar fits the 3D View tool header — groups that don't fit go into Maya's »
 overflow popover. Widths from 1 px mouse sweeps at UI scale 1.0 / 1.25 / 1.5; GUI side:
 tests/gui/gui_step129_panel_toolbar.py."""
 

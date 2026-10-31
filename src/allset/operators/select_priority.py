@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya selection priority for object-mode clicks (step 76).
+"""Maya selection priority for object-mode clicks.
 
 Maya picks the overlapping candidate of the highest type priority (``selectPrefPriorityMode
 "animation"``; ikHandle 10, joint 9, nurbsCurve 4, everything else 2),
@@ -66,7 +66,7 @@ def shape_hit(mouse, xa, xb, front):
 
 def pick_joint(context, ob, mouse, radius):
     """``joint_selection.pick`` for pose / object mode with Custom Shapes: a bone that has one is hit on its drawn
-    wire (projected evaluated shape segments), not on the octahedron Blender doesn't draw for it (step 226)."""
+    wire (projected evaluated shape segments), not on the octahedron Blender doesn't draw for it."""
     from . import joint_selection
     from ..ui import maya_joints
     if maya_joints.is_maya_view(context.space_data, getattr(getattr(context, "window", None), "workspace", None)):
@@ -109,7 +109,7 @@ def pick_joint(context, ob, mouse, radius):
 # --- scene -------------------------------------------------------------------------------------------------
 
 def ik_targets(scene):
-    """Objects that are an IK constraint's target (Maya ikHandle; kit ``ikHandleN``, step 58)."""
+    """Objects that are an IK constraint's target (Maya ikHandle; kit ``ikHandleN``)."""
     out = set()
     for ob in scene.objects:
         if ob.type != 'ARMATURE' or ob.pose is None:
@@ -141,7 +141,7 @@ def _segments(ob, kind, depsgraph):
     per unit of length (bones)."""
     mw = ob.matrix_world
     if kind == 'ARMATURE':
-        # a bone with a Custom Shape is drawn as that shape's wire, not the octahedron (step 226)
+        # a bone with a Custom Shape is drawn as that shape's wire, not the octahedron
         a, b, reach = [], [], []
         shapes = control_shapes.shows_custom_shapes(ob)
         for pb in ob.pose.bones:
@@ -194,7 +194,7 @@ def hits(context, region, rv3d, mouse):
     from ..ui import maya_joints
     maya_view = maya_joints.is_maya_view(space, getattr(getattr(context, "window", None), "workspace", None))
     out = []
-    for ob in context.scene.objects:   # view_layer.objects can yield None after removals (step 67)
+    for ob in context.scene.objects:   # view_layer.objects can yield None after removals
         kind = kind_of(ob, targets)
         pri = priority(kind)
         if pri <= DEFAULT or not _selectable(ob, space, view_layer):
@@ -263,7 +263,7 @@ class ALLSET_OT_select_priority(bpy.types.Operator):
             name = pick_joint(context, ob, mouse, radius)
             if name is not None:
                 if joint_selection.joint_mode(ob) == 'EDIT':
-                    # step 241 (#156): a joint of a skeleton shown in Edit mode is picked like a Maya joint (its
+                    # #156: a joint of a skeleton shown in Edit mode is picked like a Maya joint (its
                     # subtree moves with it), not as Blender's head / tail point
                     selected = joint_selection.select(context, ob, name, event.shift, event.ctrl)
                     return self._finish_pick(context, event, selected)
@@ -310,7 +310,7 @@ class ALLSET_OT_select_priority(bpy.types.Operator):
         return self._finish_pick(context, event, selected)
 
     def _pose_miss(self, context, event, ob, mouse):
-        """A Pose-mode click that hit no control (#171, step 255). Maya has no selection mode to leave: a click whose
+        """A Pose-mode click that hit no control (#171). Maya has no selection mode to leave: a click whose
         click box holds no curve / joint picks the object under it, else clears the selection
         (a click on empty space selects nothing). So: another object under the click ->
         leave Pose and select it (Blender can't pick another object from Pose); nothing -> stay in Pose, bones
@@ -331,7 +331,7 @@ class ALLSET_OT_select_priority(bpy.types.Operator):
     def _finish_pick(self, context, event, selected):
         if event.value == 'PRESS' and selected:
             # Tweak tool: this press is consumed, so Blender makes no CLICK_DRAG from it — start the
-            # tweak's move ourselves once the mouse leaves the drag threshold (step 97)
+            # tweak's move ourselves once the mouse leaves the drag threshold
             self._start = (event.mouse_x, event.mouse_y)
             self._threshold = context.preferences.inputs.drag_threshold_mouse * (context.preferences.system.ui_scale or 1.0)
             context.window_manager.modal_handler_add(self)

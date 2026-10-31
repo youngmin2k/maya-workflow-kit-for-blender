@@ -1,4 +1,4 @@
-"""Step 281 (#192) in a real UI, an animator's first minutes: Maya Workflow Kit layout, a fresh pCube1 selected,
+"""#192: in a real UI, an animator's first minutes: Maya Workflow Kit layout, a fresh pCube1 selected,
 a ~750 px Graph Editor. Maya: the unkeyed cube is listed at once (bare node row); the toolbar is its own row under the
 menus with every tangent button in reach; S over the editor keys 10 channels; handles show on selected keys only;
 F frames the selected key; Ctrl+Z; Save As + Open keeps the layout."""

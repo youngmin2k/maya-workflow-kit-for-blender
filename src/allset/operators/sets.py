@@ -6,7 +6,7 @@ Maya behaviour (names set1, set2 …, selection kept,
 Blender has no set node, so a kit set is a collection that is not linked to any scene
 (fake user, so it is saved) carrying the ID property ``allset_set`` = its creation number
 (Outliner order); its objects are the members — an object can be in several collections, so
-the scene tree is untouched (step 96).
+the scene tree is untouched.
 """
 
 

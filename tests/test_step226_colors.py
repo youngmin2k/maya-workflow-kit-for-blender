@@ -1,4 +1,4 @@
-"""Step 226 lane B (Issue #136): Maya control colours — Display > Wireframe Color... and the Attribute
+"""Lane B (Issue #136): Maya control colours — Display > Wireframe Color... and the Attribute
 Editor's Drawing Overrides (operators/wire_color.py).
 
 Maya: the colorIndex palette 1-31

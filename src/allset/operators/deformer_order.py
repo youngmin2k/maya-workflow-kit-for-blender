@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Deformer order (Maya ``reorderDeformers``) and Key > Set Blend Shape Target Weight Keys (step 218, L17 / L15b).
+"""Deformer order (Maya ``reorderDeformers``) and Key > Set Blend Shape Target Weight Keys (L17 / L15b).
 
 Maya 2026:
 ``reorderDeformers A B`` moves **B** to directly before A in evaluation order, so A then runs right after B; when B
@@ -97,7 +97,7 @@ def blend_shape_keys(ob):
     key = getattr(getattr(ob, "data", None), "shape_keys", None)
     if key is None:
         return []
-    from . import blend_shapes_227   # in-between helper keys are driven, not Maya targets (step 227)
+    from . import blend_shapes_227   # in-between helper keys are driven, not Maya targets
     return blend_shapes_227.target_blocks(key)
 
 
@@ -129,7 +129,7 @@ class ALLSET_OT_key_blend_shape_weights(bpy.types.Operator):
     def execute(self, context):
         objects = list(context.selected_objects)
         if not any(ob.type in SHAPE_TYPES for ob in objects):
-            # Maya 2026's message for nothing / a plain skeleton (step 258)
+            # Maya 2026's message for nothing / a plain skeleton
             self.report({'ERROR'}, "No shape was selected.")
             return {'CANCELLED'}
         n = key_target_weights(context, objects)

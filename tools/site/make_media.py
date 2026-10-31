@@ -1,4 +1,4 @@
-"""Web copies of marketing media for site/media (step 127)."""
+"""Web copies of marketing media for site/media."""
 import json, os, shutil, subprocess, sys
 from pathlib import Path
 from PIL import Image
@@ -8,7 +8,7 @@ BIN = Path(os.environ.get("LOCALAPPDATA", "")) / "hermes" / "tools" / "ffmpeg-9.
 FF, FP = str(BIN / "ffmpeg.exe"), str(BIN / "ffprobe.exe")
 MK = ROOT / "docs/distribution/marketing"
 OUT = ROOT / "site/media"
-# what site/index.html and app.js use (step 142, #41: the full lists left 32 unused files in site/media)
+# what site/index.html and app.js use (#41: the full lists left 32 unused files in site/media)
 CLIPS = ["01_hotbox", "03_channel_box_keys", "04_navigation", "05_pivot_snap", "06_rigging"]
 RAW = ["hero", "menus_shelves", "switch_before"]
 VF = "scale=1280:-2:flags=lanczos"

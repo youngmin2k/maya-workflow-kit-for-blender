@@ -1,4 +1,4 @@
-"""Step 289: the add-on preferences come back after Preferences > Add-ons off / on.
+"""The add-on preferences come back after Preferences > Add-ons off / on.
 
 Blender deletes an add-on's preferences entry on ``addon_utils.disable(default_set=True)``; the kit copies the
 settings the user changed into its extension user folder on unregister and puts them back when register finds a

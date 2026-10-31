@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Character Sets on Blender Keying Sets (step 187).
+"""Maya Character Sets on Blender Keying Sets.
 
 A Maya character set is a node that owns a list of attributes; one of them can be *current* (Time Slider field), and
 then Set Key (S) keys the current character's attributes whatever is selected. Blender's absolute Keying Set is that
@@ -156,7 +156,7 @@ def node_paths(node, keys):
 
 def create_keys(node, excluded=EXCLUDED_KINDS):
     """Maya Create Character Set attributes of one node: keyable, not the ``excluded`` kinds (default: Scale /
-    Visibility; the option window's All keyable except: LOC / ROT / SCALE / VIS / CUSTOM = Dynamic, step 196)."""
+    Visibility; the option window's All keyable except: LOC / ROT / SCALE / VIS / CUSTOM = Dynamic)."""
     cb = _cb()
     keys = []
     for key in cb._visible_channels(node):
@@ -276,7 +276,7 @@ class ALLSET_OT_character_create(bpy.types.Operator):
     bl_options = {'UNDO'}
 
     sub: BoolProperty(name="Subcharacter", default=False, options={'SKIP_SAVE'})
-    # Create (Sub)character Set Options (step 196): default values
+    # Create (Sub)character Set Options: default values
     character_name: StringProperty(name="Name", default="", options={'SKIP_SAVE'},
                          description="Empty: character1 / subCharacter1, counting up")
     attributes: EnumProperty(name="Include", items=[('ALL', "All keyable", ""),

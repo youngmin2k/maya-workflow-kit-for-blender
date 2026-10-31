@@ -1,4 +1,4 @@
-"""Step 55 in a real UI, in a Maya user's hand order: a skeleton (kit Create Joints + two joints) ->
+"""In a real UI, in a Maya user's hand order: a skeleton (kit Create Joints + two joints) ->
 Ctrl+Tab pose mode -> click joint2 in the view -> the Channel Box shows joint2 with Translate / Rotate /
 Scale (XYZ) -> type "+=10" in Rotate Z -> S keys it -> Lock Selected on Rotate -> rotating in the view
 does nothing; a Copy Location constraint to locator1 -> CB INPUTS weight row locator1W0 -> 0.5 ->
@@ -18,7 +18,7 @@ from sim import MODULE, check, dock_area, dock_region, ev, find_button, open_inp
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
 C = {"tries": 0}
 # Channel Box rows: Translate X value field 136 px left of the UI region's right edge and 114 px
-# below its top at scale 1.25 (gui_step38); rows are 16 px at 1.0 (ROW_SCALE 0.8, step 44) = 20 at 1.25.
+# below its top at scale 1.25 (gui_step38); rows are 16 px at 1.0 (ROW_SCALE 0.8) = 20 at 1.25.
 ROW = 20
 
 
@@ -32,7 +32,7 @@ def shot(name):
 
 
 def ui_region():
-    return dock_region()       # the Maya tab stack (step 116; was the 3D View sidebar)
+    return dock_region()       # the Maya tab stack (was the 3D View sidebar)
 
 
 def dock():
@@ -50,7 +50,7 @@ def redraw():
 
 def field(row, from_right=136):
     """Window position of Channel Box value row ``row`` (0 = Translate X): the value / name column x found by
-    ``find_button`` (step 116: the dock's width is not the old sidebar's), rows ROW px apart below Translate X."""
+    ``find_button`` (the dock's width is not the old sidebar's), rows ROW px apart below Translate X."""
     x = C["value_x"] if from_right == 136 else C["name_x"]
     return x, C["tx_y"] - px(ROW * row)
 
@@ -94,14 +94,14 @@ def s_setup():
         bpy.data.objects.remove(ob)
     us = bpy.context.scene.unit_settings
     us.system, us.length_unit, us.system_rotation = 'METRIC', 'CENTIMETERS', 'DEGREES'
-    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport (step 116), before framing the view
+    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport, before framing the view
     area, region = view3d()
     with bpy.context.temp_override(window=win(), area=area, region=main_region()):
         bpy.ops.allset.create(kind='JOINT')
         a = bpy.context.active_object
         bpy.ops.object.mode_set(mode='EDIT')
         prev = a.data.edit_bones["joint1"]
-        for name in ("joint2", "joint3"):     # what the Joint Tool (step 57) will place
+        for name in ("joint2", "joint3"):     # what the Joint Tool will place
             eb = a.data.edit_bones.new(name)
             eb.head, eb.tail = prev.tail, prev.tail + (prev.tail - prev.head)
             eb.parent, eb.use_connect = prev, True
@@ -163,7 +163,7 @@ def s_bone_picked():
     redraw()
 
 
-# the joint's rows (pose mode: no object-mode note row above them), looked up by data path (step 116)
+# the joint's rows (pose mode: no object-mode note row above them), looked up by data path
 step(find_button(dock, lambda path, _cmd: path.endswith("tx_text"), C, "tx", x_frac=0.7, step_px=6))   # inside the value column of the step-142 narrow dock
 step(find_button(dock, lambda path, cmd: "cb_select_channel" in cmd or path.endswith("tx_sel"), C, "name", y_from="tx"))
 
@@ -255,7 +255,7 @@ def s_lock():
     sel = cb().selected_channels()
     check(f"clicking channel names of a joint selects them ({C['sel_rx']}, then {sel})",
           C["sel_rx"] == ["rx"] and sel == ["rz"])
-    # Shift+click adds (step 6); simulated Shift doesn't reach UI buttons, so set Rotate X..Z here
+    # Shift+click adds; simulated Shift doesn't reach UI buttons, so set Rotate X..Z here
     cb().set_selected_channels(["rx", "ry", "rz"])
     bpy.ops.allset.cb_lock(lock=True)      # Channels > Lock Selected (menu clicks: gui_step6)
     redraw()
@@ -284,7 +284,7 @@ def s_not_rotated():
     con = pb.constraints.new('COPY_LOCATION')
     con.target = loc
     cb().rebuild_rows()
-    open_inputs()    # step 135: the constraint node starts collapsed (Maya)
+    open_inputs()    # the constraint node starts collapsed (Maya)
     scroll_channel_box()    # ... and a long Channel Box scrolls inside its part
     redraw()
 
@@ -303,7 +303,7 @@ def s_constraint_shot():
 
 
 def _is_w0(path, _cmd):
-    """The weight row's text field (step 135: looked up by data path, the Channel Box part scrolls)."""
+    """The weight row's text field (looked up by data path, the Channel Box part scrolls)."""
     rows = bpy.context.scene.allset_cb.rows
     return any(r.kind == "CONSTRAINT" and path.endswith(f"rows[{i}].text") for i, r in enumerate(rows))
 

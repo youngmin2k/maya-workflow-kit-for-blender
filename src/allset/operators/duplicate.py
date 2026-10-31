@@ -41,7 +41,7 @@ def copy_subtree(root, instance=False):
         new = ob.copy()
         if ob.data is not None and not instance:
             new.data = ob.data.copy()
-        if not instance:   # Maya duplicates without the input graph: no polyCube1 on pCube2 (step 129)
+        if not instance:   # Maya duplicates without the input graph: no polyCube1 on pCube2
             for idb in (new, new.data):
                 for key in (prim_history.KEY, prim_history.PART):
                     if idb is not None and key in idb:
@@ -112,7 +112,7 @@ class ALLSET_OT_duplicate(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_duplicate_special(bpy.types.Operator):
     """Duplicate with options: copies or instances, number of copies, offsets per
     copy, where to put them (Maya Edit > Duplicate Special)"""

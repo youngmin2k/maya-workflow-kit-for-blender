@@ -1,4 +1,4 @@
-"""Step 144 POLY lane in a real UI (GitHub #30): Mesh Tools > Create Polygon = click points on the ground, Backspace,
+"""POLY lane in a real UI (GitHub #30): Mesh Tools > Create Polygon = click points on the ground, Backspace,
 Enter -> polySurface1 (and Limit points completes by itself); Append to Polygon = click a border edge + 2 points,
 Enter -> a face added to that mesh; Quad Draw (Ctrl+Shift+Q, the Cube made live) = clicks drop dots on the cube's top,
 Shift hover previews and Shift+click fills a quad, Ctrl+click = edge loop, drag a vertex = it stays on the surface,

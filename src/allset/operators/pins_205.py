@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 205 (issue #112): Constrain > UV Pin / Proximity Pin, Deform > Display / Hide Intermediate Objects,
+"""Issue #112: Constrain > UV Pin / Proximity Pin, Deform > Display / Hide Intermediate Objects,
 Deform > Wrap > Add / Remove Influence.
 
 Maya 2022 behaviour (Maya's option windows):
@@ -144,7 +144,7 @@ class Geo:
         me = ob.data
         if ob.mode == 'EDIT':
             # the original mesh's loop data is empty while the edit BMesh owns it (foreach_get raised on every
-            # update, step 240 QA D-240-2): the pin waits where it is and follows again when edit mode ends
+            # update): the pin waits where it is and follows again when edit mode ends
             self.ok = False
             return
         tris = me.loop_triangles

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Editor Select / Edit commands of step 178.
+"""Maya UV Editor Select / Edit commands.
 
 Maya's commands work on every component of the hilited meshes of the current component mask
 (UV Editor Select menu).
@@ -49,7 +49,7 @@ def shown_faces(bm, synced):
 def mask(ts):
     """Maya component mask of the kit state: 'VERT' / 'EDGE' / 'FACE' / 'UV' / 'SHELL'."""
     from . import uv_shell_select
-    if uv_shell_select.flag(bpy.context) and ts.use_uv_select_sync:      # step 256: Maya's UV Shell mask
+    if uv_shell_select.flag(bpy.context) and ts.use_uv_select_sync:      # Maya's UV Shell mask
         return 'SHELL'
     if ts.use_uv_select_sync:
         sv, se, sf = ts.mesh_select_mode

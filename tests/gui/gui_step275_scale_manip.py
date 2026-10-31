@@ -1,10 +1,10 @@
-"""Step 275 (#200) in a real UI: Maya Workflow Kit layout, a cube, Scale tool (R).
+"""#200: in a real UI: Maya Workflow Kit layout, a cube, Scale tool (R).
 
 - Centre handle: press on it, drag left (with some vertical wobble, which Maya ignores) until the factor is 0.1:
   the cube's scale is 1 + dx * wpp / R (horizontal px since the press, world length of a px at the pivot, pivot to
   the farthest corner of the cube's world box); one Ctrl+Z gives 1.0 back.
 - X axis handle: +45 px along it = 1 + 45 / (90 px x UI scale), only X changes; it becomes the active handle.
-- MMB drag anywhere then scales X the same way at half speed (active handle, step 28).
+- MMB drag anywhere then scales X the same way at half speed (active handle).
 - XY plane handle: both X and Y by the drag along its diagonal; Ctrl+drag on the X handle scales Y and Z.
 Screenshot: gui_step275_scale.png (mid-drag, header "Scale: ...")."""
 
@@ -383,7 +383,7 @@ def s_shift_hover():
 @step
 def s_shift_press():
     p = screen(C["c"])
-    ev('LEFT_SHIFT', 'PRESS', shift=True)       # a keyboard Shift reaches the window state (step 261)
+    ev('LEFT_SHIFT', 'PRESS', shift=True)       # a keyboard Shift reaches the window state
     ev('LEFTMOUSE', 'PRESS', x=int(p.x), y=int(p.y), shift=True)
 
 

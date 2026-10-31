@@ -1,4 +1,4 @@
-"""Step 164: Maya DAG rules for a parent: hiding a parent hides its descendants without
+"""Maya DAG rules for a parent: hiding a parent hides its descendants without
 touching their own Visibility, Delete / Export Selection / Isolate take the hierarchy."""
 
 import os

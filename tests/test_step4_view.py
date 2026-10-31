@@ -1,4 +1,4 @@
-"""Step 4: view history, smooth preview, component modes, keys."""
+"""View history, smooth preview, component modes, keys."""
 
 from importlib import import_module
 
@@ -20,10 +20,10 @@ def _kmis(km_name, idname, type, shift=False, ctrl=False, alt=False):
             and k.value == 'PRESS' and k.shift == shift and k.ctrl == ctrl and k.alt == alt]
 
 
-# --- preferences: left alone (step 130) ---------------------------------------------
+# --- preferences: left alone ---------------------------------------------
 
 def test_navigation_preferences_left_alone():
-    """The Maya navigation preset (turntable, dolly, no zoom to mouse, ...) is gone since step 130:
+    """The Maya navigation preset (turntable, dolly, no zoom to mouse, ...) is gone:
     Maya mode leaves Blender's navigation preferences at the user's values."""
     defaults = {p.identifier: p.default for p in INPUTS.bl_rna.properties
                 if p.identifier in ("view_zoom_axis", "view_zoom_method", "use_zoom_to_mouse", "view_rotate_method")}
@@ -132,7 +132,7 @@ def test_smooth_preview_levels():
 
 
 def test_smooth_preview_leaves_user_subsurf_and_user_wire():
-    # Step 15 reversed step 4's "re-use the first Subsurf": 1/2/3 only touch the kit's
+    # 1/2/3 don't re-use the first Subsurf: they only touch the kit's
     # preview modifier (a user Subsurf is history in Maya terms).
     ob = _mesh("sp_b")
     user = ob.modifiers.new("Mine", 'SUBSURF')
@@ -168,7 +168,7 @@ def test_camera_keys():
     assert not _kmis("3D View", "view3d.rotate", "LEFTMOUSE", alt=True)
     assert _kmis("3D View", "allset.frame_all_views", "F", shift=True)[0].properties.selected
     assert not _kmis("3D View", "allset.frame_all_views", "A", shift=True)[0].properties.selected
-    # Step 17: plain F = the kit's Maya-fit framing instead of IC view_selected.
+    # plain F = the kit's Maya-fit framing instead of IC view_selected.
     assert _kmis("3D View", "allset.frame", "F") and not _kmis("3D View", "view3d.view_selected", "F")
 
 
@@ -181,7 +181,7 @@ def test_view_history_keys():
 
 
 def test_space_ctrl_space_keys():
-    # Step 9: the Space tap (four views) now lives in the hotbox operator.
+    # the Space tap (four views) now lives in the hotbox operator.
     assert len(_kmis("3D View", "allset.hotbox", "SPACE")) == 1
     assert _kmis("Screen", "screen.screen_full_area", "SPACE", ctrl=True)[0].properties.use_hide_panels
 

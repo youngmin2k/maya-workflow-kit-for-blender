@@ -1,4 +1,4 @@
-"""Step 249 (Issue #166) in a real UI: a six-joint spine -> Skeleton > Create IK Spline Handle (click the root, then
+"""Issue #166: in a real UI: a six-joint spine -> Skeleton > Create IK Spline Handle (click the root, then
 the end joint) -> the curve is bent -> the handle's Channel Box shows Twist / Roll / Twist Type; Twist 100 turns the
 in-between joints 25 deg each (Maya Linear), Twist Type 1 (Ease In) piles it toward the end, Roll 30 turns the root
 -> Ctrl+Z -> save + open keeps the twist."""

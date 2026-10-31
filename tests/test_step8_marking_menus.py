@@ -1,4 +1,4 @@
-"""Step 8: Maya marking menus as pies (definitions, classes, dispatch, keymap, Q/W/E/R)."""
+"""Maya marking menus as pies (definitions, classes, dispatch, keymap, Q/W/E/R)."""
 
 import types
 from importlib import import_module
@@ -72,8 +72,8 @@ def _fresh():
 # --- definitions ------------------------------------------------------------------
 
 def test_definitions_well_formed():
-    assert len(mm.MENUS) == 28, sorted(mm.MENUS)  # 13 + 5 hotbox zones (step 9) + A (step 10) + 3 UV Editor (step 66) + pivot edit (step 94) + lattice (step 294) + Quad Draw options
-    # + Shift+S keyframe / tangent (step 70) + Shift+Q / Alt+Q (step 78)
+    assert len(mm.MENUS) == 28, sorted(mm.MENUS)  # 13 + 5 hotbox zones + A + 3 UV Editor + pivot edit + lattice + Quad Draw options
+    # + Shift+S keyframe / tangent + Shift+Q / Alt+Q
     for name, menu in mm.MENUS.items():
         for path, label, action in mm.walk(menu, name):
             assert label and isinstance(label, str), path
@@ -116,8 +116,8 @@ def test_pie_classes_and_slot_order():
     fake = types.SimpleNamespace(layout=FakeLayout())
     getattr(bpy.types, marking.idname("RMB_MESH")).draw(fake, bpy.context)
     texts = [e[2] for e in fake.layout.log if e[0] in ("op", "menu")]
-    assert texts[:2] == ["Vertex", "UV ▸"], texts  # W, E (UV = submenu, step 151)
-    # S, then the list under S: the object's name row (step 52), then Select
+    assert texts[:2] == ["Vertex", "UV ▸"], texts  # W, E (UV = submenu)
+    # S, then the list under S: the object's name row, then Select
     assert texts[2] == "Face" and texts[3].endswith("...") and texts[4] == "Select", texts
     assert "Edge" in texts and "Object Mode" in texts and texts.index("Edge") > texts.index("Face")
     # Radial submenu = another pie; empty slots = separators.
@@ -130,7 +130,7 @@ def test_pie_classes_and_slot_order():
     getattr(bpy.types, marking.idname("OPT_ROTATE")).draw(fake, bpy.context)
     seps = [e for e in fake.layout.log if e[0] == "sep"]
     assert seps, "N is empty in Maya's rotate options: a separator keeps the slot"
-    # step 59: Discrete Rotate (greyed before) is the rotate step snap now
+    # Discrete Rotate (greyed before) is the rotate step snap now
     ops = [e for e in fake.layout.log if e[0] == "op"]
     assert any(e[1] == "allset.step_snap" and e[2] == "Discrete Rotate" for e in ops), ops
 
@@ -144,7 +144,7 @@ def test_dispatch_by_context():
         bpy.ops.mesh.primitive_cube_add()
         assert R("RMB", bpy.context) == ("pie", marking.idname("RMB_MESH"))
         assert R("SHIFT_RMB", bpy.context) == ("pie", marking.idname("SHIFT_OBJECT"))
-        # Maya's Ctrl+RMB convert marking menu picks by the lead's shape type: a mesh object gets the convert menu (step 136)
+        # Maya's Ctrl+RMB convert marking menu picks by the lead's shape type: a mesh object gets the convert menu
         assert R("CTRL_RMB", bpy.context) == ("pie", marking.idname("CTRL_CONVERT")), "mesh object: convert menu"
         bpy.ops.object.mode_set(mode='EDIT')
         ts = bpy.context.scene.tool_settings
@@ -163,7 +163,7 @@ def test_dispatch_by_context():
 
 
 def test_lattice_dispatch_and_component():
-    # step 294 (#227): a lattice gets the Maya RMB menu in object and edit mode, and
+    # #227: a lattice gets the Maya RMB menu in object and edit mode, and
     # Lattice Point enters lattice edit mode
     _fresh()
     R = marking.resolve

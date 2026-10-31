@@ -1,4 +1,4 @@
-"""Step 168: Modify menu — Smooth Mesh Preview to Polygons applies only the kit preview (skinCluster1 stays),
+"""Modify menu — Smooth Mesh Preview to Polygons applies only the kit preview (skinCluster1 stays),
 Default Object Manipulator / Show Manipulator Tool, Align Tool, Position Along Curve, Geometry to Bounding Box (+ its
 Maya option window), Evaluate Nodes check items, Modify menu >= 60 % working, following Maya's rules.
 """
@@ -375,7 +375,7 @@ def test_evaluate_nodes_switches():
 
 def test_evaluate_nodes_menu_items():
     for label in ("IK Solvers", "Constraints", "Expressions", "Fluids", "nCloths", "nParticles", "nRigids",
-                  "Particles", "Rigid Bodies", "Snapshots"):       # Snapshots: step 171
+                  "Particles", "Rigid Bodies", "Snapshots"):       # Snapshots too
         kind, target, _props = menu_map.normalize(menu_map.MAP[f"Modify/Evaluate Nodes/{label}"])
         assert kind == "prop" and target.startswith("scene.allset_eval."), (label, target)
     assert menu_map.MAP["Modify/Evaluate Nodes/Ignore All"] == ("allset.evaluate_all", {"on": False})

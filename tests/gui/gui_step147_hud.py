@@ -1,4 +1,4 @@
-"""Step 147 (#92 #86) in the Maya Workflow Kit layout: Ctrl+E, Ctrl+B, the Joint Tool started from the Rigging shelf
+"""#92 #86: in the Maya Workflow Kit layout: Ctrl+E, Ctrl+B, the Joint Tool started from the Rigging shelf
 and the IK Handle Tool leave no Adjust Last Operation panel anywhere, and the shelf click after Create Joints reaches
 the shelf (#86: the Joint Tool panel covered the shelf and ate it)."""
 
@@ -94,7 +94,7 @@ def s_scene():
         o.select_set(o.name == "pCube1")
     bpy.context.view_layer.objects.active = cube()
     centre()
-    # step 258: the Maya layout views keep Blender's HUD region off (Maya has no redo panel); turn it on here so the
+    # the Maya layout views keep Blender's HUD region off (Maya has no redo panel); turn it on here so the
     # check below still proves that kit commands don't ask for Adjust Last Operation
     area, _r = main_view()
     with override():

@@ -1,4 +1,4 @@
-"""Step 174 in the Maya Workflow Kit layout: one tool across object / component modes.
+"""In the Maya Workflow Kit layout: one tool across object / component modes.
 
 Maya 2022 keeps currentCtx when the selection mode changes: W then F9 stays
 moveSuperContext, F8 back too; E + F10 = rotate, R + F11 = scale, Q + F9 = select, and W picked in component mode

@@ -1,4 +1,4 @@
-"""Step 170 in a real UI: Maya selection modifiers in the Graph Editor (Maya: a click on a selected key keeps the
+"""In a real UI: Maya selection modifiers in the Graph Editor (Maya: a click on a selected key keeps the
 selection, Ctrl+Shift+click only adds, Shift+marquee toggles, Ctrl+marquee deselects) and the Outliner (Shift+click =
 range, Ctrl+click = toggle); screenshots (ALLSET_GUI_SHOTS)."""
 
@@ -78,7 +78,7 @@ def click(xy, *mods):
             ev(KEYS[m], 'RELEASE', x=xy()[0], y=xy()[1])
 
     def s2():
-        # modifiers ride on the mouse events (separate simulated key presses stop CLICK / CLICK_DRAG, step 96)
+        # modifiers ride on the mouse events (separate simulated key presses stop CLICK / CLICK_DRAG)
         x, y = xy()
         kw = {m: True for m in mods}
         ev('LEFTMOUSE', 'PRESS', x=x, y=y, **kw)
@@ -337,7 +337,7 @@ def s_toggle_on():
     check(f"Ctrl+click toggles pA4 on ({selected()})", selected() == ["pA1", "pA3", "pA4"])
 
 def real_ctrl_click(xy):
-    """A real Ctrl+click: the Ctrl key event carries the modifier into the window state (step 261), then the click."""
+    """A real Ctrl+click: the Ctrl key event carries the modifier into the window state, then the click."""
     wait()
 
     def s1():

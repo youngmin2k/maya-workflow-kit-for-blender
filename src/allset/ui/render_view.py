@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Render View = Blender's Image Editor showing Render Result (step 67).
+"""Maya Render View = Blender's Image Editor showing Render Result.
 
 Maya's Render View toolbar has Render, IPR,
 Keep Image and Remove Image: kept images stay in a strip to compare with the next render. Blender's Render

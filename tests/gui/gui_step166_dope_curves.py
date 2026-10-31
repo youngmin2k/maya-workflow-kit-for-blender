@@ -1,4 +1,4 @@
-"""Step 166: Maya Dope Sheet > Curves runs the Graph Editor's curve commands (Euler Filter, Resample Curve) on the
+"""Maya Dope Sheet > Curves runs the Graph Editor's curve commands (Euler Filter, Resample Curve) on the
 curves of the selected keys — the Dope Sheet area turns into a Graph Editor for the call and back — and Dope Sheet
 View > Auto Frame frames the Dope Sheet."""
 

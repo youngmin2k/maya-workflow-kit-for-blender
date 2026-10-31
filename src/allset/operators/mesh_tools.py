@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Target Weld, Crease Tool and Multi-Cut feel (step 64).
+"""Maya Target Weld, Crease Tool and Multi-Cut feel.
 
 - Target Weld (Maya polyMergeVertexContext):
   drag a vertex (an edge in edge mode) onto another one; a dragged vertex that is selected takes every selected
   vertex with it (Maya's tool description). Merge To Target / Center.
 - Crease Tool (Maya polyCreaseCtx): MMB drag left / right = less / more crease on the selected
   edges (vertices in vertex mode), shown as Maya's value. Blender stores 0-1 with OpenSubdiv sharpness = 10 * b^2
-  (step 64), so Maya value c is stored as sqrt(c / 10).
-- Multi-Cut: since step 129 a kit tool (operators/multi_cut.py); its Tool Settings live here
+ , so Maya value c is stored as sqrt(c / 10).
+- Multi-Cut: a kit tool (operators/multi_cut.py); its Tool Settings live here
   and it reuses ``edge_ring`` / ``insert_loop`` / ``snap_factor``.
 """
 
@@ -30,7 +30,7 @@ MAYA_SNAP_STEP = 10       # Multi-Cut Snap Step %
 
 TARGET_WELD_TOOL = "allset.target_weld_tool"
 CREASE_TOOL = "allset.crease_tool"
-MULTI_CUT_TOOL = "allset.multi_cut_tool"     # step 129 (operators/multi_cut.py)
+MULTI_CUT_TOOL = "allset.multi_cut_tool"     # operators/multi_cut.py
 
 _handles = []   # (space type, handle) of draw handlers of running modals (removed on unregister)
 
@@ -616,7 +616,7 @@ class ALLSET_OT_multicut_loop(bpy.types.Operator):
         edges = insert_loop(bm, bm.edges[self.edge], self.factor)
         if not edges:
             return {'CANCELLED'}
-        limit = math.radians(settings(context).smoothing_angle)   # Multi-Cut Smoothing Angle (step 129)
+        limit = math.radians(settings(context).smoothing_angle)   # Multi-Cut Smoothing Angle
         for e in edges:
             if len(e.link_faces) == 2:
                 e.smooth = e.calc_face_angle(0.0) <= limit + 1e-6

@@ -1,4 +1,4 @@
-"""Step 227 lane B (Issue #137): Pose Space Deformation — Create Pose Interpolator, poses,
+"""Lane B (Issue #137): Pose Space Deformation — Create Pose Interpolator, poses,
 corrective shapes (operators/pose_space_227.py) and the Pose Editor window (ui/pose_editor.py).
 
 Expected (``pose_one`` / ``pose_two`` / ``pose_one_gaussian``):
@@ -23,7 +23,7 @@ menu_map = import_module(kit.MODULE + ".ui.menu_map")
 compat = import_module(kit.MODULE + ".compat")
 
 
-# Maya joint coordinates (a, b, c) on X / Y / Z -> bone coordinates: joint X / Y / Z = bone Y / Z / X (step 57)
+# Maya joint coordinates (a, b, c) on X / Y / Z -> bone coordinates: joint X / Y / Z = bone Y / Z / X
 P = Matrix(((0, 0, 1), (1, 0, 0), (0, 1, 0)))
 
 

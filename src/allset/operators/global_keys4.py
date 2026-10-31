@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Global key batch 4 (step 90): Ctrl+X cut / Ctrl+V paste, Alt+\\ playback range = animation range,
+"""Global key batch 4: Ctrl+X cut / Ctrl+V paste, Alt+\\ playback range = animation range,
 Alt+1 / 2 / 4 show toggles, Ctrl+` / Shift+~ / Ctrl+Shift+~ smooth proxy. Alt+X walk is Blender's view3d.walk.
 
 Maya 2022 behaviour:
@@ -154,7 +154,7 @@ class ALLSET_OT_paste(bpy.types.Operator):
 # --- Alt+\ ----------------------------------------------------------------------------------------------
 
 def playback_to_animation_range(scene):
-    """Kit rule (step 20): playback range = preview range, animation range = frame_start / end. Turning the preview
+    """Kit rule: playback range = preview range, animation range = frame_start / end. Turning the preview
     range off makes playback = animation; its values stay, so the Range Slider double-click can bring them back."""
     scene.use_preview_range = False
 
@@ -196,7 +196,7 @@ def toggle_show(space, scene, kind):
         attr = SPACE_FILTER[kind]
         new = not getattr(space, attr)
         setattr(space, attr, new)
-        if kind == 'CURVES':        # step 262: curve-shaped bone controls follow (ui/curve_controls.py)
+        if kind == 'CURVES':        # curve-shaped bone controls follow (ui/curve_controls.py)
             from ..ui import curve_controls
             curve_controls.sync(space, scene)
         return new
@@ -263,7 +263,7 @@ def proxy_action(ob, action):
         if mod is None:
             mod = ob.modifiers.new("Subdivision", 'SUBSURF')
             first_preview = next((i for i, m in enumerate(ob.modifiers) if display.is_preview(m)), None)
-            if first_preview is not None:   # the kit's smooth preview stays last in the stack (step 15)
+            if first_preview is not None:   # the kit's smooth preview stays last in the stack
                 with bpy.context.temp_override(object=ob):
                     bpy.ops.object.modifier_move_to_index(modifier=mod.name, index=first_preview)
         mod.show_viewport = True
@@ -281,7 +281,7 @@ def proxy_action(ob, action):
     return True
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_smooth_proxy(bpy.types.Operator):
     """Maya smooth proxy keys: Ctrl+` toggle cage / smooth, Shift+~ show both, Ctrl+Shift+~ create"""
     bl_idname = "allset.smooth_proxy"

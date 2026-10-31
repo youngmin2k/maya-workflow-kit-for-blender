@@ -1,4 +1,4 @@
-"""Step 225 (Issue #135) in a real UI: File > Game Exporter opens the kit window (Animation Clips tab with two clips),
+"""Issue #135: in a real UI: File > Game Exporter opens the kit window (Animation Clips tab with two clips),
 Visualize > Motion Trail Editor opens Maya's editor and Create Motion Trail draws a Blender motion path on an animated
 cube. Shots in the shots folder."""
 
@@ -88,7 +88,7 @@ def s_wait1():
 def s_game_shot():
     path = shot("game_exporter.png")
     check(f"Game Exporter window shot: {path}", os.path.exists(path))
-    mw = import_module(MODULE + ".ui.marked_window")          # step 263: a kit window, not a popup
+    mw = import_module(MODULE + ".ui.marked_window")          # a kit window, not a popup
     w = mw.find_window(bpy.context, "GAME_EXPORTER")
     check("Game Exporter is a window that stays open", w is not None)
     if w is not None:

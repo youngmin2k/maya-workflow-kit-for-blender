@@ -1,4 +1,4 @@
-"""Step 199 (#106) main line: Skin / Constrain items wired, option windows, normal / tangent constraints named like
+"""#106: main line: Skin / Constrain items wired, option windows, normal / tangent constraints named like
 Maya nodes in Channel Box INPUTS, the skin weight-sum helper hidden from INPUTS."""
 
 from importlib import import_module

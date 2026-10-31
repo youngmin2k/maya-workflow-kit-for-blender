@@ -1,4 +1,4 @@
-"""Step 166: no Maya command greyed in one menu while it works in another (tools/menu_consistency.py on the live kit),
+"""No Maya command greyed in one menu while it works in another (tools/menu_consistency.py on the live kit),
 Select / Delete All by Type for the kit's IK handles and clusters, Dope Sheet curve commands and Auto Frame."""
 
 import importlib.util
@@ -41,7 +41,7 @@ def _menu_paths(menu_count):
 def test_twins_mapped_to_the_same_action():
     for twin, source in menu_map.TWINS.items():
         assert menu_map.MAP.get(twin) == menu_map.MAP.get(source) is not None, twin
-    # Maya 2026's Dope Sheet has no Curves menu (step 269): its curve commands are gone with it
+    # Maya 2026's Dope Sheet has no Curves menu: its curve commands are gone with it
     for label in ("Euler Filter", "Smooth Filter (Butterworth)", "Smooth Filter (Gaussian)", "Resample Curve",
                   "Isolate Curve"):
         assert f"Dope Sheet/Curves/{label}" not in menu_map.MAP, label
@@ -57,9 +57,9 @@ def test_menu_counts():
     r = menu_count.count(md, menu_map, notices)
     eds = r["editors"]
     print({k: eds[k]["working"] for k in ("Dope Sheet", "UV Editor")})
-    # 124 at step 163, 158 at step 268; the Maya 2026 Dope Sheet (step 269) has 94 leaves, 68 working
+    # the Maya 2026 Dope Sheet has 94 leaves, 68 working
     assert eds["Dope Sheet"]["working"] >= 68, eds["Dope Sheet"]
-    assert eds["UV Editor"]["working"] >= 114, eds["UV Editor"]       # 110 at step 163, >= +4
+    assert eds["UV Editor"]["working"] >= 114, eds["UV Editor"]       # at least 114
     assert not r["greyed"], r["greyed"][:5]
 
 

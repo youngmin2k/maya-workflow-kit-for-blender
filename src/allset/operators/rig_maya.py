@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Skeleton / Skin / Deform commands with Maya's results (step 110).
+"""Maya Skeleton / Skin / Deform commands with Maya's results.
 
 Reroot, Preferred Angle, IK Spline Handle; Hammer, Add / Remove
 Influence, Remove Unused Influences; Cluster, Soft Mod (Nonlinear lives in ``menu_items``). A Maya joint is a
@@ -302,8 +302,8 @@ def create_spline_ik(context, arm, start, end, curve=None, root_on_curve=True, s
                      parent_curve=True, spans=1):
     """Spline IK constraint ``ikHandleN`` on the bone ending at the end joint (Maya ikSplineSolver).
 
-    ``curve`` None = Auto create curve: ``curveN`` fitted through the chain (degree 3, ``spans`` spans; step 110).
-    An existing curve (step 218): Root on curve moves the root onto
+    ``curve`` None = Auto create curve: ``curveN`` fitted through the chain (degree 3, ``spans`` spans).
+    An existing curve: Root on curve moves the root onto
     the curve start and the joints keep their lengths along the curve (Blender Spline IK, Y scale None, no chain
     offset); off keeps the root where it is and the chain takes the curve's shape from there (Chain Offset; Maya
     instead puts the joints after the root on the curve itself, roc0_snc0: up to 1.35
@@ -341,7 +341,7 @@ def create_spline_ik(context, arm, start, end, curve=None, root_on_curve=True, s
     con.xz_scale_mode = 'NONE'
     con.use_curve_radius = False
     con.use_chain_offset = not root_on_curve
-    # step 249 (#166): Maya's handle with Twist / Roll / Twist Type (drivers on the chain's roll)
+    # #166: Maya's handle with Twist / Roll / Twist Type (drivers on the chain's roll)
     from . import spline_twist
     spline_twist.setup(context, arm, ik_bone, con, mw @ ik_bone.tail)
     return con, curve
@@ -355,7 +355,7 @@ class ALLSET_OT_ik_spline_handle(bpy.types.Operator):
     curve off) the selected / clicked curve (Maya Skeleton > Create IK Spline Handle)"""
     bl_idname = "allset.ik_spline_handle"
     bl_label = "Create IK Spline Handle"
-    bl_options = {'UNDO'}       # a click tool: Maya has no redo panel (step 147)
+    bl_options = {'UNDO'}       # a click tool: Maya has no redo panel
 
     # Maya 2026 IK Spline Handle Tool factory settings (ikSplineHandleCtx)
     root_on_curve: BoolProperty(name="Root on curve", default=True, options={'SKIP_SAVE'})
@@ -363,7 +363,7 @@ class ALLSET_OT_ik_spline_handle(bpy.types.Operator):
     snap_curve: BoolProperty(name="Snap curve to root", default=False, options={'SKIP_SAVE'})
     create_curve: BoolProperty(name="Auto create curve", default=True, options={'SKIP_SAVE'})
     spans: bpy.props.IntProperty(name="Number of spans", default=1, min=1, max=4, options={'SKIP_SAVE'})
-    # step 249: Maya Twist type of the tool (factory Linear) = the new handle's Twist Type
+    # Maya Twist type of the tool (factory Linear) = the new handle's Twist Type
     twist_type: bpy.props.IntProperty(name="Twist type", default=0, min=0, max=3, options={'SKIP_SAVE'})
     curve: bpy.props.StringProperty(name="Curve", default="", options={'SKIP_SAVE', 'HIDDEN'},
                                     description="Existing curve object (Auto create curve off); empty = the "
@@ -501,7 +501,7 @@ def normalize(mesh, groups=None):
                 g.weight /= total
 
 
-# Maya Add Influence without Lock weights (step 202): the skin's
+# Maya Add Influence without Lock weights: the skin's
 # weights are recomputed by the closest-distance rule of Bind Skin (skin.closest_distance_weights) over the old and
 # the new influences, each with its own dropoff (old = the bind's, new = the option's Dropoff, factory 4).
 MAX_INFLUENCES_PROP = "allset_max_influences"   # Maya skinCluster maxInfluences (Bind Skin factory 5)
@@ -618,7 +618,7 @@ def _add_by_distance(mesh, names, dropoff):
 
 def add_influence(mesh, bone_names, lock=False, weight=0.0, dropoff=4.0):
     """Maya Add Influence. Factory (Lock weights off): the skin weights are recomputed by distance with the new
-    joints (``maya_add_weights``, step 202). Option window Lock weights (step 196):
+    joints (``maya_add_weights``). Option window Lock weights:
     the new influence weighs ``weight`` on every vertex, the other influences are scaled
     by 1 - weight, and it is locked (Blender's vertex group lock)."""
     names = [n for n in dict.fromkeys(bone_names) if n not in mesh.vertex_groups]
@@ -674,7 +674,7 @@ def _selected_bone_names(context):
         arm = context.active_object
     if arm is None:
         return []
-    from ..ui import channel_box      # Bone.select is gone in 5.x: the shim (step 200)
+    from ..ui import channel_box      # Bone.select is gone in 5.x: the shim
     return [pb.name for pb in arm.pose.bones if channel_box.bone_selected(pb)]
 
 
@@ -785,9 +785,9 @@ class ALLSET_OT_hammer_weights(bpy.types.Operator):
 def _hook(context, ob, base, centre_world, vertex_indices=None):
     """Hook modifier ``<base>N`` driven by the empty ``<base>NHandle`` at ``centre_world`` (rest = no change).
 
-    Step 144 (#34): a mesh's points are the vertex group ``<base>N`` (weight 1, the default deformer weight),
+    #34: a mesh's points are the vertex group ``<base>N`` (weight 1, the default deformer weight),
     which Deform > Paint Weights paints; ``vertex_indices`` None = every point (a Hook with neither a group nor
-    indices moves nothing, step 110)."""
+    indices moves nothing)."""
     from . import deformers
     name = deformers.new_name(base)
     handle = bpy.data.objects.new(f"{name}Handle", None)
@@ -853,7 +853,7 @@ def control_points(ob):
 
 
 def _point_selection(ob, selected_only):
-    """Maya cluster on CVs (step 218): the handle pivot is the centre
+    """Maya cluster on CVs: the handle pivot is the centre
     of the selected CVs, the Hook acts on exactly those indices; object mode = every CV (pivot = their box centre,
     like a mesh). Returns (world centre, indices) or (None, None)."""
     pts = [p for p in control_points(ob) if p[2] or not selected_only]

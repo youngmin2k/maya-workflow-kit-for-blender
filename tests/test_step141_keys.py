@@ -1,4 +1,4 @@
-"""Step 141 lane KEYS: Ctrl+A = Attribute Editor / Channel Box in every mode (#65), UV / Image Editor Alt+RMB dolly
+"""Ctrl+A = Attribute Editor / Channel Box in every mode (#65), UV / Image Editor Alt+RMB dolly
 without Blender's Zoom Axis preference (B4), undo-depth hint (B6), joint names restart at joint1 (#73).
 GUI: tests/gui/gui_step141_keys.py."""
 
@@ -66,7 +66,7 @@ def test_ctrl_a_same_in_every_ic_version():
 
 def test_mapping_row_notes_every_mode():
     e = mapping.ENTRIES["ShowAttributeEditorOrChannelBox"]
-    assert e["status"] == "KIT" and "step 141" in e["note"]
+    assert e["status"] == "KIT" and "#65" in e["note"]
     path = ROOT / "docs" / "keymap_mapping.md"
     if not path.exists():
         raise kit.Skip("generated mapping table not in this clone")
@@ -127,7 +127,7 @@ def test_undo_hint_readme_and_app():
 
 
 def test_undo_hint_in_preferences_panel():
-    """The add-on preferences draw the hint (factory Undo Steps 32 < 256)."""
+    """The add-on preferences draw the hint (Blender's undo depth 32 < 256)."""
     if bpy.context.preferences.edit.undo_steps >= 256:
         return
     labels = []
@@ -198,4 +198,4 @@ def test_joint_names_skip_existing_after_partial_delete():
     bpy.context.view_layer.objects.active = a
     bpy.ops.object.delete()
     _c, names = _skeleton(3)
-    assert names == ["joint4", "joint5", "joint6"], names   # Maya (step 208): one past the highest, no gap filling
+    assert names == ["joint4", "joint5", "joint6"], names   # Maya: one past the highest, no gap filling

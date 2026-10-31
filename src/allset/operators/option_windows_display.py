@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 152 (#101) Maya option windows of the Display menu: Display > Grid ❒ = Maya's Grid Options.
+"""#101: Maya option windows of the Display menu: Display > Grid ❒ = Maya's Grid Options.
 
 Same spec as operators/option_windows.py (``F`` fields, ``Window`` = one ``allset.opt_<key>`` operator;
 option_windows._extend appends ``WINDOWS``). Labels, kinds and buttons follow Maya's Grid Options;
@@ -9,7 +9,7 @@ grid / axis / highlight colour = index 2 = 0.25 grey.
 Maya keeps grid options per user, so the kit
 keeps them where every option window keeps its values: the add-on preference ``option_settings`` (key
 "grid_options"). ui/maya_grid.py draws from ``grid_settings()`` = the applied values over the defaults.
-Colours: Maya picks them on its 31-entry colour index slider; Blender has a colour picker (step 152), with
+Colours: Maya picks them on its 31-entry colour index slider; Blender has a colour picker, with
 index 2 grey (#404040) as the default. Grid numbers are not drawn by the kit (hidden by default).
 """
 
@@ -64,7 +64,7 @@ def _run_grid(context, v):
     return {'FINISHED'}
 
 
-# --- Display > Toggle Show/Hide ❒ (step 162) ----------------------------------------------------------------------
+# --- Display > Toggle Show/Hide ❒ ----------------------------------------------------------------------
 # Maya "Toggle Visibility Options": First Selection: Independent (default, stored 1) / Dependent (2); buttons
 # Apply and Close / Apply / Close. The plain
 # click and h run with the saved value (operators/visibility.toggle_dependent).

@@ -1,4 +1,4 @@
-"""Step 2: the generated "Maya" keyconfig."""
+"""The generated "Maya" keyconfig."""
 
 
 import bpy
@@ -68,7 +68,7 @@ def test_uv_click_select():
 def test_box_select_modes():
     exact = {(False, False): "SET", (True, False): "XOR", (False, True): "SUB", (True, True): "ADD"}
     # outliner select_box has no XOR mode: Shift adds (workaround). uv / graph run the Shift box as SET and
-    # allset.select_2d_box (first) toggles it the Maya way (step 170, tests/test_step170_select_mods.py).
+    # allset.select_2d_box (first) toggles it the Maya way (tests/test_step170_select_mods.py).
     no_xor = {**exact, (True, False): "ADD"}
     set_xor = {**exact, (True, False): "SET"}
     cases = (("3D View Tool: Select Box", "view3d.select_box", exact),
@@ -84,7 +84,7 @@ def test_box_select_modes():
 
 
 def test_outliner_and_graph_click_select():
-    # Step 170 (Maya): Outliner Shift = range, Ctrl = toggle, Ctrl+Shift = add range; Graph Editor
+    # Maya: Outliner Shift = range, Ctrl = toggle, Ctrl+Shift = add range; Graph Editor
     # Shift / Ctrl+Shift toggle in Blender's item (Ctrl+Shift "add only" by allset.select_2d_click), Ctrl = plain
     for (shift, ctrl), (extend, rng) in (((True, False), (False, True)), ((False, True), (True, False)),
                                          ((True, True), (True, True))):
@@ -119,7 +119,7 @@ def test_space_is_free_for_hotbox():
     for km in ("Window", "Screen", "Frames", "3D View Generic", "Object Mode",
                "Object Non-modal", "Mesh"):
         assert _any_event(km, "SPACE") == [], (km, _any_event(km, "SPACE"))
-    # Step 9: Space = hotbox (tap = four views / maximize) in 3D View and the panel editors.
+    # Space = hotbox (tap = four views / maximize) in 3D View and the panel editors.
     for km in ("3D View", "Outliner", "Graph Editor", "Dopesheet", "Node Editor", "Image"):
         assert _any_event(km, "SPACE") == ["allset.hotbox"], (km, _any_event(km, "SPACE"))
     assert _one("Frames", "screen.animation_play", "V", alt=True)
@@ -155,49 +155,49 @@ _OBJECT_MODE_STACK = ("Window", "Screen", "Frames", "3D View", "3D View Generic"
                       "Object Mode", "Object Non-modal")
 _STACKS = {"3D View": _VIEW3D_STACK, "Object Mode": _OBJECT_MODE_STACK,
            "Object Non-modal": _VIEW3D_STACK,
-           # Step 129: the Maya dock is a Properties editor (Channel Box row hover / drag)
+           # the Maya dock is a Properties editor (Channel Box row hover / drag)
            "Property Editor": ("Window", "Screen", "Property Editor", "View2D Buttons List"),
-           # Step 135: Channel Box wheel scroll (the region's View2D Buttons List handler runs first)
+           # Channel Box wheel scroll (the region's View2D Buttons List handler runs first)
            "View2D Buttons List": ("Window", "Screen", "View2D Buttons List", "Property Editor"),
-           # 3D View edit/pose modes: the mode keymap on top of the 3D View ones (step 8 adds
+           # 3D View edit/pose modes: the mode keymap on top of the 3D View ones (the kit adds
            # RMB marking menus and Q/W/E/R to them).
            **{km: ("Window", "Screen", "Frames", "3D View", "3D View Generic", km, "Object Non-modal")
               for km in ("Mesh", "Curve", "Curves", "Armature", "Pose", "Metaball", "Lattice")},
            "Screen": None,
            **{km: (km,) for km in maya_patches.SLIDER_TOOL_KEYMAPS},
            "Outliner": ("Window", "Screen", "Outliner", "View2D", "View2D Buttons List"),
-           # Step 9 hotbox editors (Space): the editor keymap plus the global ones.
+           # Hotbox editors (Space): the editor keymap plus the global ones.
            **{km: ("Window", "Screen", "Frames", km, "View2D")
               for km in ("Graph Editor", "Dopesheet", "Node Editor", "Image")},
-           # Step 22: gizmo keymaps run from the gizmo map handler, ahead of the region keymaps.
+           # gizmo keymaps run from the gizmo map handler, ahead of the region keymaps.
            **{km: (km,) for km in maya_patches.GIZMO_KEYMAPS},
-           # Step 30: select tool keymaps (only active with that tool, ahead of the editor keymaps).
+           # select tool keymaps (only active with that tool, ahead of the editor keymaps).
            **{km: (km,) for km in maya_patches.SELECT_DRAG_KEYMAPS},
-           # Step 76: the Tweak tool keymap (only active with that tool, ahead of the editor keymaps).
+           # the Tweak tool keymap (only active with that tool, ahead of the editor keymaps).
            "3D View Tool: Tweak": ("3D View Tool: Tweak",),
            "3D View Tool: Cursor": ("3D View Tool: Cursor",),
-           # Step 66: the UV Editor (an Image Editor in UV mode).
+           # the UV Editor (an Image Editor in UV mode).
            maya_patches.UV_KM: ("Window", "Screen", "Frames", maya_patches.UV_KM, "Image", "Image Generic", "View2D"),
-           # Step 84: the scrub strip of the Dope Sheet / Graph Editor / Time Slider (its own keymap, kit-made).
+           # the scrub strip of the Dope Sheet / Graph Editor / Time Slider (its own keymap, kit-made).
            "Time Scrub": ("Window", "Screen", "Frames", "Time Scrub", "Dopesheet", "View2D"),
-           # Step 69: Window items (file keys) run after every editor keymap.
+           # Window items (file keys) run after every editor keymap.
            "Window": None,
-           # Step 104: the Graph Editor's channel region (the kit's Maya outliner rows over it).
+           # the Graph Editor's channel region (the kit's Maya outliner rows over it).
            "Animation Channels": ("Window", "Screen", "Frames", "Animation Channels", "View2D", "View2D Buttons List"),
-           # Step 105: the Text Editor (the kit Script Editor's input pane).
+           # the Text Editor (the kit Script Editor's input pane).
            "Text": ("Window", "Screen", "Screen Editing", "Text Generic", "Text"),
-           # Step 107: paint / sculpt mode keymaps (the mode keymap on top of the 3D View ones).
+           # paint / sculpt mode keymaps (the mode keymap on top of the 3D View ones).
            **{km: ("Window", "Screen", "Frames", "3D View", "3D View Generic", km, "Object Non-modal")
               for km in ("Weight Paint", "Sculpt")},
-           # Step 141: the other modes where Ctrl+A was IC select-all (Ctrl+A = AE / CB swap there now).
+           # the other modes where Ctrl+A was IC select-all (Ctrl+A = AE / CB swap there now).
            **{km: ("Window", "Screen", "Frames", "3D View", "3D View Generic", km, "Object Non-modal")
               for km in ("Particle", "Point Cloud", "Sculpt Curves", "Paint Face Mask (Weight, Vertex, Texture)",
                          "Paint Vertex Selection (Weight, Vertex)")},
-           # Step 150: the outliner wheel sits first in View2D (checked before Animation Channels in that region).
+           # the outliner wheel sits first in View2D (checked before Animation Channels in that region).
            "View2D": ("Window", "Screen", "Frames", "View2D", "View2D Buttons List", "Animation Channels"),
-           # Step 150: Ctrl+A = AE / CB swap in the NLA Editor too (the other 2D animation editors are above).
+           # Ctrl+A = AE / CB swap in the NLA Editor too (the other 2D animation editors are above).
            "NLA Editor": ("Window", "Screen", "Frames", "NLA Editor", "NLA Generic", "View2D"),
-           # Step 214: IC's window-level render keys (checked before every editor keymap)
+           # IC's window-level render keys (checked before every editor keymap)
            "Screen Editing": None,
            "Frames": None}  # None = every non-modal keymap (Frames is in most editors)
 
@@ -206,7 +206,7 @@ def test_added_bindings_not_shadowed():
     data = maya_patches.apply(ic_data.generate())
     assert maya_patches.ADDED, "no added bindings recorded"
     problems = []
-    # step 170: select tool keymaps that got a Maya marquee item are only active with that tool (own stack)
+    # select tool keymaps that got a Maya marquee item are only active with that tool (own stack)
     stacks = {**_STACKS, **{km: (km,) for km in maya_patches.SELECT_2D_KEYMAPS if km not in _STACKS},
               **{km: (km,) for km in maya_patches.UV_SHELL_DRAG_KEYMAPS if km not in _STACKS}}
     for km, idname, ev, _props, shadows in maya_patches.ADDED:
@@ -227,7 +227,7 @@ def test_added_bindings_not_shadowed():
 
 
 def test_disable_leaves_keyconfigs_alone():
-    """Step 130: no keyconfig of the kit's own, the active one never changes; disable removes every Maya item."""
+    """No keyconfig of the kit's own, the active one never changes; disable removes every Maya item."""
     kcs = bpy.context.window_manager.keyconfigs
     active = kcs.active.name
     kit.disable()

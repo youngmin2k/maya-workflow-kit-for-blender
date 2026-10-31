@@ -1,4 +1,4 @@
-"""Step 259 (Issue #176): "name '__annotations__' is not defined" right after install on CachyOS (Blender 5.2.3 built
+"""Issue #176: "name '__annotations__' is not defined" right after install on CachyOS (Blender 5.2.3 built
 against the system Python 3.14).
 
 Python 3.14 evaluates annotations lazily (PEP 649 / 749): a class body has no ``__annotations__`` name any more, so

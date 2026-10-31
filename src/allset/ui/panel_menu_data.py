@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Rows of the Maya viewport panel menus (``ui/panel_menus.py``), the panel toolbar (``ui/panel_toolbar.py``) and the
 greyed Status Line widgets (``ui/status_line.py``) as plain data — no ``bpy`` — so ``tools/menu_count.py``,
-``tools/menu_consistency.py`` and the step-101 notice rules can walk them like the main menus (step 177; until then
+``tools/menu_consistency.py`` and the step-101 notice rules can walk them like the main menus (until then
 these 36 + 9 greyed items were outside every count).
 
 Item paths (``allset.menu_unavailable`` ``item``, ``notices.PANEL_MENU`` keys): ``Panel menu/<menu>/<sub>/<label>``,
@@ -40,13 +40,13 @@ VIEW = [
     ("set", "TUMBLE_COI", "Around Center of Interest"),
     _sep("Change View"),
     _run("Align Camera To Polygon", "view3d.view_axis", type='TOP', align_active=True),
-    _run("Center View of Selection", "allset.center_view_selection"),   # step 177: Maya viewFit -c
+    _run("Center View of Selection", "allset.center_view_selection"),   # Maya viewFit -c
     _run("Default View", "allset.view_home"),
     _run("Frame All", "allset.frame", selected=False),
     _run("Frame Selection", "allset.frame", selected=True),
     ("menu", "View Along Axis", "ALLSET_MT_panel_view_axis"),
     _sep(),
-    _run("Camera Attribute Editor...", "allset.camera_attribute_editor"),   # step 177: showPanelCameraEditor
+    _run("Camera Attribute Editor...", "allset.camera_attribute_editor"),   # showPanelCameraEditor
     ("menu", "Camera Tools", "ALLSET_MT_panel_camera_tools"),
     _sep(),
     _grey("View Sequence Time"),
@@ -58,7 +58,7 @@ VIEW_AXIS = [_view("X", 'RIGHT'), _view("Y", 'BACK'), _view("Z", 'TOP'),
              _view("-X", 'LEFT'), _view("-Y", 'FRONT'), _view("-Z", 'BOTTOM')]
 
 CAMERA_TOOLS = [
-    # step 177: Maya's camera tools (ui/camera_tools.py: LMB drag tumbles / tracks / dollies until another tool)
+    # Maya's camera tools (ui/camera_tools.py: LMB drag tumbles / tracks / dollies until another tool)
     _tool("Tumble Tool", "allset.tumble_tool"), _tool("Track Tool", "allset.track_tool"),
     _tool("Dolly Tool", "allset.dolly_tool"),
     _run("Zoom Tool", "view3d.zoom_border"),
@@ -112,7 +112,7 @@ LIGHTING = [
 ]
 
 # Maya object type -> SpaceView3D.show_object_viewport_<type> (None = no Blender filter, "@" = an overlay flag,
-# "!" = a kit ``set`` key: ui/panel_menus.state / apply, step 189).
+# "!" = a kit ``set`` key: ui/panel_menus.state / apply).
 SHOW_TYPES = (
     ("Controllers", None), ("NURBS Curves", "!SHOW_NURBS_CURVES"), ("NURBS Surfaces", "surf"),
     ("NURBS CVs", None), ("NURBS Hulls", None), ("Polygons", "mesh"), ("Subdiv Surfaces", None),
@@ -148,14 +148,14 @@ SHOW = [
     *[_show_row(label, t) for label, t in SHOW_TYPES],
     _sep(),
     ("prop", "space", "show_gizmo", "Manipulators"),
-    ("set", "GRID", "Grid"),               # Maya grid (ui/maya_grid.py, step 45)
+    ("set", "GRID", "Grid"),               # Maya grid (ui/maya_grid.py)
     ("prop", "overlay", "show_text", "HUD"),
     _grey("Hold-Outs"),
-    ("set", "SELECTION_HILITE", "Selection Highlighting"),   # kit wire + Blender outline (step 262)
+    ("set", "SELECTION_HILITE", "Selection Highlighting"),   # kit wire + Blender outline
 ]
 
 ISOLATE = [
-    _run("View Selected", "allset.isolate"),          # step 164: with the children
+    _run("View Selected", "allset.isolate"),          # with the children
 ]
 
 RENDERER = [
@@ -202,14 +202,14 @@ BAR = (("View", "ALLSET_MT_panel_view"), ("Shading", "ALLSET_MT_panel_shading"),
 # (glyph, kind, data, label): kind "set" = panel_menus.ALLSET_OT_panel_set key, "prop" = (owner, prop) on the view,
 # "run" = (operator, props) run in the view, "grey" = no Blender equivalent (the label explains it).
 #
-# Step 129 (#10): every Maya toggle (a check button on Maya's panel toolbar) is a
+# #10: every Maya toggle (a check button on Maya's panel toolbar) is a
 # toggle here too — "set" keys are drawn with ``toggle=True`` so Wireframe / Smooth Shade All / Use All Lights turn
 # off to Maya's off state (panel_menus.TOGGLE_OFF); camera buttons act on the camera the view looks through and are
 # disabled in Blender's persp / ortho views (Maya disables Lock Camera there too).
 TOOLBAR = (
     (("cam_select", "set", "SELECT_CAMERA", "Select Camera"),
      ("cam_lock", "set", "CAMERA_LOCK", "Lock Camera"),
-     ("cam_attr", "run", ("allset.camera_attribute_editor", {}), "Camera Attributes"),   # step 177
+     ("cam_attr", "run", ("allset.camera_attribute_editor", {}), "Camera Attributes"),
      ("bookmark", "grey", None, "Bookmarks"),
      ("image_plane", "run", ("allset.create", {"kind": 'IMAGE_PLANE'}), "Image Plane"),
      ("pan_zoom", "grey", None, "2D Pan/Zoom"),

@@ -1,4 +1,4 @@
-"""Step 144 lane DEFORM (#34) in a real UI: Deform > Lattice on a cube makes
+"""Lane DEFORM (#34) in a real UI: Deform > Lattice on a cube makes
 ffd1Lattice around it (2 5 2 divisions), selected, and its Channel Box INPUTS show ffd1 with Envelope; the
 Lattice option box opens "Lattice Options". Screenshots to ALLSET_GUI_SHOTS (default tmp/gui144_deform)."""
 

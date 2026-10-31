@@ -1,4 +1,4 @@
-"""Step 216: Maya Script Editor > History menu options (Echo All Commands, Line numbers in errors, Show Stack Trace,
+"""Maya Script Editor > History menu options (Echo All Commands, Line numbers in errors, Show Stack Trace,
 Suppress ..., History Output) as add-on preferences that change what the kit runner writes into the Script Editor
 history. Factory states = Maya 2022's check marks."""
 

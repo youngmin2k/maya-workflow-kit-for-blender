@@ -1,4 +1,4 @@
-"""Generate the Maya Workflow Kit app template splash images (step 42).
+"""Generate the Maya Workflow Kit app template splash images.
 
     python tools/make_splash.py [--media]   # re-runs itself in `blender -b --factory-startup`
 
@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "src" / "allset" / "app_template" / "Maya_Workflow_Kit"
-MEDIA = ROOT / "docs" / "distribution" / "media"   # extensions.blender.org icon + featured image (step 117)
+MEDIA = ROOT / "docs" / "distribution" / "media"   # extensions.blender.org icon + featured image
 
 
 def srgb(h):
@@ -120,7 +120,7 @@ def main():
         colour(ob, hex_colour)
     # Text (Blender's bundled font)
     title = len(bpy.data.objects)
-    # Step 125: the product name + the lockup line "for Maya users, in Blender" (step 111: Maya only
+    # the product name + the lockup line "for Maya users, in Blender" (Maya only
     # as the audience)
     text("Maya Workflow Kit", 0.6, 1.0, 0.95, TEXT)
     text("for Maya users, in Blender", 0.65, -0.3, 0.55, TEXT_DIM)
@@ -151,7 +151,7 @@ def main():
     scene.render.resolution_percentage = 100
     welcome = OUT.parent.parent / "welcome.png"
     MEDIA.mkdir(parents=True, exist_ok=True)
-    # step 117: the same square picture is the extensions.blender.org icon (256 x 256)
+    # the same square picture is the extensions.blender.org icon (256 x 256)
     for path in (MEDIA / "icon.png",) if media_only else (welcome, MEDIA / "icon.png"):
         scene.render.filepath = str(path)
         bpy.ops.render.render(write_still=True)

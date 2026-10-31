@@ -1,4 +1,4 @@
-"""Step 103 in a real UI: option boxes are Maya's right-side square (Create > Polygon Primitives, Edit Mesh), and
+"""In a real UI: option boxes are Maya's right-side square (Create > Polygon Primitives, Edit Mesh), and
 three option windows (Polygon Cube, Bevel, Parent Constraint) open as dialogs with the command / Cancel buttons and
 Apply / Save Settings / Reset Settings; screenshots (ALLSET_GUI_SHOTS)."""
 

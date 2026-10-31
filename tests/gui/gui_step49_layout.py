@@ -1,4 +1,4 @@
-"""Step 49 in a real UI: Maya Workflow Kit layout = Maya General — Tool Box column (clicks set tools, a click under
+"""In a real UI: Maya Workflow Kit layout = Maya General — Tool Box column (clicks set tools, a click under
 the tools keeps the selection), the tab stack opens on the Channel Box, Help + Command row, Range Slider
 under the Time Slider, quick layout buttons; screenshot."""
 
@@ -9,7 +9,7 @@ from importlib import import_module
 import bpy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-os.environ["ALLSET_FIT_WARP"] = "1"   # step 258: the fit only runs right after load (toolbox.FIT_WINDOW)
+os.environ["ALLSET_FIT_WARP"] = "1"   # the fit only runs right after load (toolbox.FIT_WINDOW)
 from sim import MODULE, check, ev, run, scale, step, setup, screenshot, win, load_maya_layout  # noqa: E402
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
@@ -41,7 +41,7 @@ def tools_region():
 
 def tool_y(i):
     """Centre of the i-th Tool Box button: 23 px below the top, 35 px apart at effective scale 1.0
-    (read from a step 49 screenshot)."""
+    (read from a screenshot)."""
     r = tools_region()
     return round(r.y + r.height - scale() * (23 + 35 * i))
 
@@ -73,7 +73,7 @@ def s_layout():
     tb = toolbox_area()
     want = toolbox.column_width()
     fits = abs(tb.width - want) <= 1
-    # step 112: the template column has room up to scale 1.6, so unfitted it still draws its toolbar (spare width
+    # the template column has room up to scale 1.6, so unfitted it still draws its toolbar (spare width
     # in the toolbar colour); narrower than the toolbar, the main view shows its toolbar meanwhile
     room = tb.width >= want - 1 and any(r.type == 'TOOLS' and r.width > 1 for r in tb.regions)         and not main_view().spaces.active.show_region_toolbar
     check(f"Tool Box column = one toolbar column at this scale ({tb.width} px, want {want}), or wider with its "
@@ -83,7 +83,7 @@ def s_layout():
     outl = next(a for a in win().screen.areas if a.type == 'OUTLINER')
     view = main_view()
     check("Tool Box | Outliner | view, left to right", tb.x < outl.x < view.x)
-    # step 116: the Maya tab stack is its own area right of the view (not the view's sidebar), on the Channel Box
+    # the Maya tab stack is its own area right of the view (not the view's sidebar), on the Channel Box
     md = import_module(MODULE + ".ui.maya_dock")
     props = [a for a in win().screen.areas if a.type == 'PROPERTIES']
     check("the only Properties area is the Maya tab stack, right of the view",
@@ -147,7 +147,7 @@ def s_empty_click():
     redraw()
 
 
-step(redraw)                  # step 237: the top row splits one tick later
+step(redraw)                  # the top row splits one tick later
 
 
 @step
@@ -170,7 +170,7 @@ def s_single():
 @step
 def s_rows():
     shelf = import_module(MODULE + ".ui.shelf")
-    # the Status Line header and the shelf row (no header since step 113: its WINDOW draws tab strip + icons)
+    # the Status Line header and the shelf row (no header: its WINDOW draws tab strip + icons)
     rows = [shelf.strip_area(win().screen), shelf.shelf_row_area(win().screen)]
     hs = [next(r.height for r in a.regions if r.type == ('HEADER' if i == 0 else 'WINDOW')) if a else 0
           for i, a in enumerate(rows)]

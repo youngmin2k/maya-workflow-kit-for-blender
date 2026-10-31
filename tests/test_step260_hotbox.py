@@ -1,4 +1,4 @@
-"""Step 260 (Issues #174, #177): a held Space keeps the hotbox up whatever the input path sends while the key is down
+"""Issues #174, #177: a held Space keeps the hotbox up whatever the input path sends while the key is down
 (release + press repeat pairs, a moment of "up" from the OS key state); a quick tap still toggles the pane; a click on a
 hotbox menu name opens the menu without running a row; the Emulate 3 Button Mouse hint (Alt+LMB tumble can't work)."""
 

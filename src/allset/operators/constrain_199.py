@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 199 lane C: Constrain > Normal / Tangent / Remove Target / Set Rest Position / Modify Constrained Axis.
+"""Constrain > Normal / Tangent / Remove Target / Set Rest Position / Modify Constrained Axis.
 
 - Normal / Tangent (Maya Normal / Tangent Constraint Options, default: weight 1, aim (1, 0, 0),
   up (0, 1, 0), world up type Vector (0, 1, 0)): Maya only turns the object — its aim vector = the target's normal at
@@ -450,7 +450,7 @@ def helpers_owned_by(objects):
 def remove_helpers(objs):
     """Delete helper empties (each once; objects already gone are skipped). Maya's normal / tangent constraint is a
     DAG child of the constrained object, so it goes with the object and with Delete by Type > Constraints
-    (step 202, #109; Remove Target already did this, ``remove_targets``)."""
+    (#109; Remove Target already did this, ``remove_targets``)."""
     seen = set()
     for h in objs:
         try:

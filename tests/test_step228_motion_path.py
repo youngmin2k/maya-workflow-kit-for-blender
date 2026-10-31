@@ -1,4 +1,4 @@
-"""Step 228 lane A (Issue #138): Constrain > Motion Paths > Attach to Motion Path / Set Motion Path Key
+"""Lane A (Issue #138): Constrain > Motion Paths > Attach to Motion Path / Set Motion Path Key
 (operators/motion_path_228.py).
 
 Expected (rows =
@@ -285,7 +285,7 @@ def test_axes_and_inverse_up():
     _scene()
     try:
         bpy.ops.allset.motion_path_attach('EXEC_DEFAULT', front_axis="Y", up_axis="Y")
-    except RuntimeError as ex:      # an operator that reports ERROR raises in Python (step 69)
+    except RuntimeError as ex:      # an operator that reports ERROR raises in Python
         assert "must differ" in str(ex), ex
     else:
         raise AssertionError("same front and up axis attached")

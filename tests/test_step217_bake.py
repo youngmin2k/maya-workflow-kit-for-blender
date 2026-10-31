@@ -1,4 +1,4 @@
-"""Step 217 lane L18: Key > Bake Simulation like Maya's ``bakeResults`` (menu default flags).
+"""Key > Bake Simulation like Maya's ``bakeResults`` (menu default flags).
 
 Expected results: a constrained box (cases default / dic_off / pok_off / step2)
 and an IK chain (Disable implicit control on / off).

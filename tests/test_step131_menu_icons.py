@@ -1,4 +1,4 @@
-"""Step 131 lane MENU (#23): Maya menu items that Maya draws with an icon show the kit's own drawing of the same
+"""Lane MENU (#23): Maya menu items that Maya draws with an icon show the kit's own drawing of the same
 command (ui/menu_icons.py, table ui/menu_icon_data.py from tools/gen_menu_icons.py).
 GUI: tests/gui/gui_step131_menu_icons.py."""
 
@@ -52,7 +52,7 @@ def test_every_picture_is_a_kit_drawing():
             assert pic[1] in status_icons.GLYPHS, (path, pic)
         elif kind == "kit":
             assert pic[1] in kit_icons.GLYPHS, (path, pic)
-        elif kind == "menu":            # step 142 (#54): menu-only drawings
+        elif kind == "menu":            # #54: menu-only drawings
             assert pic[1] in menu_drawings.DRAWINGS, (path, pic)
         else:
             raise AssertionError((path, pic))
@@ -76,7 +76,7 @@ def test_icons_are_distinct_within_a_menu():
         seen = {}
         for path, pic in rows:
             key = mi.picture(pic, 16).tobytes()
-            # step 142: one menu drawing on several items = Maya shows one icon file there (the generator links them)
+            # one menu drawing on several items = Maya shows one icon file there (the generator links them)
             # a repeated label ("#2", Maya's legacy row of the same command) shows the same icon, like Maya
             twin = path.split("#", 1)[0] == seen.get(key, ("",))[0].split("#", 1)[0]
             if key in seen and menu not in MAYA_SHARED and not twin and not (pic[0] == "menu" and seen[key][1] == pic):

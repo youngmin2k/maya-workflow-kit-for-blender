@@ -3,14 +3,14 @@
 
     python tools/menu_count.py            # summary
     python tools/menu_count.py --greyed   # list the greyed items without a notice
-    python tools/menu_count.py --options  # + what every option box opens (headless Blender, step 140)
+    python tools/menu_count.py --options  # + what every option box opens (headless Blender)
 
-Shared menus are counted per set (the audit's per-set table, 1417 leaves at step 98) and once per path
+Shared menus are counted per set (the audit's per-set table, 1417 leaves at the time) and once per path
 (the headline 1251). Runs without Blender: ``bpy`` is stubbed, ``ui/menu_data``, ``menu_map`` and ``notices`` are imported from
 src/. A leaf = a drawn item that is not a submenu (a mapped submenu entry counts once). Shared menus
-(Deform, Constrain) count once per set that shows them, like the audit. Step 101 target: working >= 40 %,
-greyed without a notice = 0. The Graph Editor / Dope Sheet / UV Editor menu bars (step 104) are listed after the totals,
-then the viewport panel menus, panel toolbar and greyed Status Line widgets (ui/panel_menu_data.py, step 177).
+(Deform, Constrain) count once per set that shows them, like the audit. Target: working >= 40 %,
+greyed without a notice = 0. The Graph Editor / Dope Sheet / UV Editor menu bars are listed after the totals,
+then the viewport panel menus, panel toolbar and greyed Status Line widgets (ui/panel_menu_data.py).
 """
 
 import collections
@@ -50,8 +50,8 @@ def _load():
     sys.modules["mk.ui"] = ui
     try:
         mods = tuple(importlib.import_module(f"mk.ui.{m}") for m in ("menu_data", "menu_map", "notices"))
-        mods[0].EDITORS = importlib.import_module("mk.ui.editor_menu_data").EDITORS   # step 104 editor menu bars
-        mods[0].PANEL = importlib.import_module("mk.ui.panel_menu_data")   # step 177 panel menus / toolbar / Status Line
+        mods[0].EDITORS = importlib.import_module("mk.ui.editor_menu_data").EDITORS   # editor menu bars
+        mods[0].PANEL = importlib.import_module("mk.ui.panel_menu_data")   # panel menus / toolbar / Status Line
         return mods
     finally:
         for name, mod in saved.items():
@@ -120,7 +120,7 @@ def count(md=None, mm=None, nt=None):
                     c["greyed"] += 1
                     greyed.append(path)
         editors[editor] = c
-    panels = collections.OrderedDict()      # viewport panel menus, panel toolbar, Status Line widgets (step 177)
+    panels = collections.OrderedDict()      # viewport panel menus, panel toolbar, Status Line widgets
     if getattr(md, "PANEL", None) is not None:
         for family, path, working in md.PANEL.leaves():
             c = panels.setdefault(family, collections.Counter())
@@ -137,7 +137,7 @@ def count(md=None, mm=None, nt=None):
 
 
 def options():
-    """What every Maya option box opens (window / dialog / tool / redo / generic / dead, step 133): runs
+    """What every Maya option box opens (window / dialog / tool / redo / generic / dead): runs
     tests/test_step140_option_count.py in its own sandbox (needs Blender) and prints its table."""
     import json
     import os

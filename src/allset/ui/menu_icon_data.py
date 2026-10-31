@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya menu item -> kit drawing of the same command (generated file — do not edit;
-step 131 lane MENU, issue #23).
+issue #23).
 
 ICONS = {Maya menu path: picture}; picture = ("shelf", shelf file, button label, button index) = that
 button's kit drawing (``shelf_icons.draw``), like Maya shows the shelf picture of the same command in its
 menus; ("status", glyph) = a ``status_icons`` glyph, ("kit", glyph) = a ``kit_icons`` glyph (the same
-Maya picture on the Status Line / Tool Box); ("menu", name) = a ``menu_drawings`` drawing (step 142,
+Maya picture on the Status Line / Tool Box); ("menu", name) = a ``menu_drawings`` drawing (
 #54: items on no shelf). Only items Maya 2022 draws with an icon are listed.
 """
 

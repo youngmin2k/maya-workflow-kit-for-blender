@@ -1,4 +1,4 @@
-"""Step 134 lane SEL: Maya selection colours without a theme — the object wire uses kit-fixed colours
+"""Maya selection colours without a theme — the object wire uses kit-fixed colours
 (lead #43ffa3, other selected #ffffff) and mesh edit mode gets Maya-style component colours (ui/component_colors.py)."""
 
 from importlib import import_module
@@ -44,7 +44,7 @@ def test_maya_wire_colors_fixed():
 
 
 def test_wire_colors_ignore_the_theme():
-    """The kit ships no theme (step 130): Blender's factory theme is orange, the wire must still be Maya's."""
+    """The kit ships no theme: Blender's factory theme is orange, the wire must still be Maya's."""
     theme = bpy.context.preferences.themes[0].view_3d
     before = sw.wire_colors()
     old = tuple(theme.object_active), tuple(theme.object_selected)

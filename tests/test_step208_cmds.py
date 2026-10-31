@@ -1,4 +1,4 @@
-"""Step 208: maya.cmds look-alike 2 (Issue #115) — Maya-style scripts run
+"""Maya.cmds look-alike 2 (Issue #115) — Maya-style scripts run
 through the kit's Command Line runner (command_line/runner.py -> cmds_shim / cmds_dag / cmds_anim / cmds_file):
 returned values, names, channels, world positions, keys, time and playback range are compared. Each case starts with
 ``cmds.file(new=True, force=True)`` like a fresh Maya scene. Kit differences that can't follow Maya are listed in

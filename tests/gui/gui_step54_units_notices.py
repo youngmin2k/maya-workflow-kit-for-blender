@@ -1,4 +1,4 @@
-"""Step 54 in a real UI (Maya Workflow Kit template = cm scene, maya_unit 0.01), Maya hand order:
+"""In a real UI (Maya Workflow Kit template = cm scene, maya_unit 0.01), Maya hand order:
 Create > Lights > Point Light -> intensity 1, No Decay (power = 4 pi^2 x 10^2 x maya_unit^2); Fields/Solvers > Gravity -> Blender's Wind field blowing down (not rescaled);
 Windows > Animation Editors > Trax Editor under the mouse -> tooltip + Help Line "NLA" notice.
 Menus are the kit's Maya menus, opened as menus and picked with the keyboard (accelerator / arrows).
@@ -61,8 +61,8 @@ def s_point():
 @step
 def s_point_check():
     ob = bpy.context.view_layer.objects.active
-    # Maya intensity 1, Decay Rate No Decay (step 137): matches Maya at
-    # 10 units, power = 4 pi^2 k^2 x 10^2 (operators/lights.power_factor); still scales with maya_unit^2 (step 54)
+    # Maya intensity 1, Decay Rate No Decay: matches Maya at
+    # 10 units, power = 4 pi^2 k^2 x 10^2 (operators/lights.power_factor); still scales with maya_unit^2
     want = 4.0 * math.pi ** 2 * C["k"] ** 2 * 100.0
     check(f"Create > Lights > Point Light: {ob and ob.name}, power {ob and ob.data.energy:.6f} W "
           f"(4 pi^2 x 100 x maya_unit^2 = {want:.6f})",
@@ -90,8 +90,8 @@ TRAX_ROW = 6      # rows below the tear-off line in Windows > Animation Editors 
 
 @step
 def s_trax_walk():
-    # The menu opens with its first row under the mouse — Maya's tear-off line since step 116 — rows are 20 px at
-    # scale 1: Graph Editor is one row down; Maya 2026 (step 219) puts Dope Sheet, Time Editor, MotionMaker Editor and
+    # The menu opens with its first row under the mouse — Maya's tear-off line — rows are 20 px at
+    # scale 1: Graph Editor is one row down; Maya 2026 puts Dope Sheet, Time Editor, MotionMaker Editor and
     # Camera Sequencer before Trax Editor, six rows down.
     area, region = view3d()
     x, y = region.x + region.width // 2, region.y + region.height // 2

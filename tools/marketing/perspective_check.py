@@ -1,4 +1,4 @@
-"""Step 126 check: the turned screens of the key visual / kit cards keep the capture's aspect.
+"""Check: the turned screens of the key visual / kit cards keep the capture's aspect.
 
     python tools/marketing/perspective_check.py [OUT_DIR]   (default tmp/marketing)
 

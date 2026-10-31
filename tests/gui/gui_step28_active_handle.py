@@ -1,4 +1,4 @@
-"""Step 28 in a real UI: drag the Move gizmo's X arrow, then MMB drag anywhere moves along X
+"""In a real UI: drag the Move gizmo's X arrow, then MMB drag anywhere moves along X
 only (Maya active handle); tap W again (centre handle) and MMB drag moves freely."""
 
 import os

@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Kit-drawn icons on Maya menu items (step 131, issue #23).
+"""Kit-drawn icons on Maya menu items (issue #23).
 
 Maya 2022 draws the shelf picture of a command beside its menu item (Create > Polygon Primitives, Mesh, Edit Mesh,
 Deform ...). ``menu_icon_data.ICONS`` (tools/gen_menu_icons.py)
 links such an item to the kit's own drawing of the same command: a shelf button (``shelf_icons``), a Status Line
 glyph (``status_icons``), a Tool Box glyph (``kit_icons``) or, for items on no shelf, a menu-only drawing
-(``menu_drawings``, step 142, #54). Items Maya shows without an icon, and items the kit has no drawing for, get none
+(``menu_drawings``, #54). Items Maya shows without an icon, and items the kit has no drawing for, get none
 (nothing of Maya's artwork).
 
 Blender draws a menu item's icon at 16 px x UI scale; each picture is rasterised at exactly that size (the drawings

@@ -4,31 +4,31 @@
 Maya's result is an animCurveUU from the driver attribute to the driven one.
 Blender equivalent: a driver on the driven
 channel (one variable ``sdk`` reading the driver channel, type AVERAGE = the variable) whose
-F-curve has keys (driver value, driven value) — the same curve shape (step 62).
+F-curve has keys (driver value, driven value) — the same curve shape.
 Values are raw RNA values (radians, metres), so the mapping is the one the user posed.
 
-Blender writes a driver's result back over a typed value at the next update (step 62),
+Blender writes a driver's result back over a typed value at the next update,
 so while the Set Driven Key window is open, a Channel Box edit of a channel driven by a kit SDK
 driver mutes that driver until Key (which records the pose) or Close (which drops it).
 The window state lives on the WindowManager like a Maya window (not undoable, not saved).
 
-Step 226 (Maya 2026):
+Maya 2026 behaviour:
 1. Curve shape = Maya 2026 ``auto`` tangents written by the kit (``maya_auto``): end keys flat, a key between two
    neighbours gets the slope (y[i+1] - y[i-1]) / (x[i+1] - x[i-1]), a local extreme is flat (sdk_three_keys: the
    middle key's slope is 9 = 90 / 10; sdk_four_keys_overshoot: both inner keys flat). Blender's own handle modes
    (Auto / Auto Clamped, with or without Continuous Acceleration) give other shapes,
    so the handles are ALIGNED at a third of each segment with that slope. Pre / post infinity Constant.
 2. A second driver on the same driven channel = Maya ``blendWeighted`` (the inputs are **added**, sdk_two_drivers):
-   every driver's curve sits on a hidden float ID property ``allset_sdk_<n>`` of the file's input helper (step 280;
+   every driver's curve sits on a hidden float ID property ``allset_sdk_<n>`` of the file's input helper (
    its own kit SDK driver, variable ``sdk``), and the channel's driver becomes a SUM over variables ``sdk``, ``sdk1`` ...
    reading those properties (``is_blend``). Key on a summed channel keys that driver's input so the sum equals the
    posed value (posed - the other inputs' current values; Maya keys one blendWeighted input).
 3. Driven nodes besides objects / joints (Maya: any keyable attribute): a mesh's blendShape (its shape Key ID, one
    attribute per target = key block ``value``) and constraint nodes (Maya ``<target>W0`` = ``influence``, or the
-   owner's ``allset_w_<constraint>`` weight property when a multi-target constraint group keeps one, step 226 L4).
+   owner's ``allset_w_<constraint>`` weight property when a multi-target constraint group keeps one).
    Their values are not Channel Box channels, so posing them is held through msgbus (``_watch``), not WRITE_HOOKS.
 
-Step 280 (#186): Blender doesn't order a driver that writes an ID property against another driver of the same ID
+#186: Blender doesn't order a driver that writes an ID property against another driver of the same ID
 that reads it, so a SUM over inputs kept on the driven ID itself read a stale input now and then. The hidden inputs
 live on their own data-block instead (like Maya's blendWeighted node): one hidden Texture per file (``helper``,
 type NONE, fake user, marked ``HELPER``). Older files are moved over on load (``sync``), inputs a copied object
@@ -45,8 +45,8 @@ VAR = "sdk"          # the kit's driver variable name: marks a Set Driven Key dr
 INPUT_PROP = "allset_sdk_"     # hidden blendWeighted input properties (channel_box.custom_keys hides allset_*)
 SHAPE = "bs:"        # a blendShape target weight: key block ``value`` of a shape Key
 WEIGHT = "cw"        # a constraint node's weight (<target>W0)
-WEIGHT_PROP = "allset_w_"      # step 226 L4: the Maya weight of a multi-target constraint group, on the owner
-HELPER = "allset_blend_inputs" # step 280: marks the hidden Texture that holds the blendWeighted inputs
+WEIGHT_PROP = "allset_w_"      # the Maya weight of a multi-target constraint group, on the owner
+HELPER = "allset_blend_inputs" # marks the hidden Texture that holds the blendWeighted inputs
 HELPER_NAME = ".allset_sdk"
 
 
@@ -130,7 +130,7 @@ def extra_nodes(node):
 
 def channels(node):
     """The node's keyable attributes (Maya SDK lists the Channel Box ones)."""
-    if is_key(node):     # Maya targets only: the hidden in-between helper keys are driven (step 227)
+    if is_key(node):     # Maya targets only: the hidden in-between helper keys are driven
         from . import blend_shapes_227
         return [SHAPE + b.name for b in blend_shapes_227.target_blocks(node)]
     if is_constraint(node):
@@ -301,7 +301,7 @@ LENGTH_KEYS = ("tx", "ty", "tz")
 
 
 def curve_scale(driver_key):
-    """Curve x per raw driver value. Blender merges F-curve keys less than 0.01 apart in x (step 97),
+    """Curve x per raw driver value. Blender merges F-curve keys less than 0.01 apart in x,
     and a length driver in the cm template moves 0.01 BU per cm: those curves keep x in display units."""
     from . import units
     k = units.maya_unit()
@@ -389,7 +389,7 @@ def _new_curve(c):
         c.id.animation_data.drivers.remove(old)
     fc = c.id.driver_add(c.path, c.index) if c.index >= 0 else c.id.driver_add(c.path)
     # A new driver curve maps 1:1 — a Generator modifier in 4.5, two keys (0, 0) (1, 1) in 5.x
-    # (step 118): SDK curves start empty either way.
+    #: SDK curves start empty either way.
     for mod in list(fc.modifiers):
         fc.modifiers.remove(mod)
     while len(fc.keyframe_points):
@@ -570,7 +570,7 @@ def all_sdk_curves():
                 yield fc
 
 
-# --- input helper upkeep (step 280) ----------------------------------------------------------------
+# --- input helper upkeep ----------------------------------------------------------------
 
 def _split_prop(path):
     """'pose.bones["j"]["allset_sdk_0"]' -> ('pose.bones["j"]', 'allset_sdk_0'); None when not an input path."""
@@ -814,7 +814,7 @@ def _on_posed(id_name, id_kind, path, index):
         fc.mute = True
 
 
-# Step 238 (#146): msgbus notifies on the next event-loop pass, so a value typed into a blend
+# #146: msgbus notifies on the next event-loop pass, so a value typed into a blend
 # shape / constraint weight and keyed before that pass met a depsgraph update first, and the unmuted driver wrote its
 # result over it (the key became (90, 0)). The driven values seen after each update are kept; an update that finds a
 # value changed since (= typed, not driven) mutes that SDK driver first — depsgraph_update_pre runs before drivers.
@@ -1062,7 +1062,7 @@ class ALLSET_OT_sdk_close(bpy.types.Operator):
 @bpy.app.handlers.persistent
 def _on_load(_dummy):
     _COUNTS[0] = None
-    sync_if_changed()        # step 280: an older file's inputs move to the helper (no undo step of its own)
+    sync_if_changed()        # an older file's inputs move to the helper (no undo step of its own)
     release_all()
     try:
         _watch(state())      # a file load clears msgbus

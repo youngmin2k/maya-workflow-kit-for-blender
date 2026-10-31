@@ -1,4 +1,4 @@
-"""Step 66 in a real UI (Maya UV workflow): cube -> UV > UV Editor -> a UV Editor window, edit mode,
+"""In a real UI (Maya UV workflow): cube -> UV > UV Editor -> a UV Editor window, edit mode,
 UV Sync Selection, the UVs drawn -> the top face's edges selected -> Shift+X (Cut) -> two shells -> Ctrl+U (Unfold) ->
 Ctrl+L (Layout) -> inside 0-1, no overlap -> RMB marking menu NW = UV Shell -> island mode; UV Toolkit tab (screenshots)."""
 
@@ -205,7 +205,7 @@ def s_rmb_release():
 @step
 def s_shell_mode():
     ts = bpy.context.scene.tool_settings
-    # step 256: UV Shell = Maya's UV Shell mask (one selection with the 3D View: sync on, face mode)
+    # UV Shell = Maya's UV Shell mask (one selection with the 3D View: sync on, face mode)
     check(f"UV Editor RMB NW = UV Shell mask (sync {ts.use_uv_select_sync}, {tuple(ts.mesh_select_mode)})",
           bpy.context.window_manager.allset_uv_shell_mask and ts.use_uv_select_sync
           and tuple(ts.mesh_select_mode) == (False, False, True))

@@ -1,5 +1,4 @@
-"""Step 104: Maya editor chrome — Graph Editor / Dope Sheet / UV Editor menu bars like Maya's (Maya 2026
-since step 269), every
+"""Maya editor chrome — Graph Editor / Dope Sheet / UV Editor menu bars like Maya's (Maya 2026), every
 leaf mapped or greyed with a notice, check items, icon rows, header draws swapped and restored, Curves > Infinity,
 in / out tangents, Stats fields, the Graph Editor outliner rows."""
 
@@ -83,7 +82,7 @@ def test_check_items_are_blender_properties():
     menu_sets.set_prop(bpy.context, "preferences.edit.keyframe_new_interpolation_type",
                        {"value": 'LINEAR' if old != 'LINEAR' else 'BEZIER'})
     assert edit.keyframe_new_interpolation_type == old
-    # step 157: Default In / Out Tangent are kit add-on prefs (the kit's own keys use them), not Blender's preference
+    # Default In / Out Tangent are kit add-on prefs (the kit's own keys use them), not Blender's preference
     assert menu_map.spec("Graph Editor/Tangents/Default In Tangent/Linear") ==         ("prop", "addon_prefs.default_in_tangent", {"value": 'LINEAR'})
     assert menu_map.spec("Graph Editor/View/Infinity") == ("prop", "space_data.show_extrapolation", {})
 

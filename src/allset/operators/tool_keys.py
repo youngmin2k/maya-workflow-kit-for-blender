@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya keys without a Blender operator of their own (step 35).
+"""Maya keys without a Blender operator of their own.
 
 - ``allset.box_zoom`` (Ctrl+Alt+LMB drag): draw a box; left→right zooms in on it,
   right→left zooms out.
@@ -88,7 +88,7 @@ SACRED_PREFIXES = ("builtin.select", "builtin.move", "builtin.rotate", "builtin.
                    "builtin.transform")
 _TICK = 0.25
 LAST = {}   # mode -> tool idname
-_active = [None]   # the active tool idname the watch saw last (step 263)
+_active = [None]   # the active tool idname the watch saw last
 
 
 def is_sacred(idname):
@@ -111,7 +111,7 @@ def _watch():
             if idname != _active[0]:
                 _active[0] = idname
                 from . import snap_align
-                snap_align.apply_active(context)   # step 263: the new tool's Step Snap Relative / Absolute
+                snap_align.apply_active(context)   # the new tool's Step Snap Relative / Absolute
             if context.mode == _mode[0]:
                 for m in CARRY_MODES:
                     _seen[m] = _tool_of(workspace, m)
@@ -123,9 +123,9 @@ def _watch():
             from . import joint_selection
             if context.mode == 'EDIT_ARMATURE':
                 from . import joint_edit
-                joint_edit.process(context)                    # step 243 (#160): a move keeps the Maya frames
+                joint_edit.process(context)                    # #160: a move keeps the Maya frames
                 joint_edit.watch()
-            # step 241 (#156): Move tool = Edit mode for an unskinned skeleton's joints, other tools = Pose
+            # #156: Move tool = Edit mode for an unskinned skeleton's joints, other tools = Pose
             joint_selection.sync_tool_mode(context)
             if context.mode == 'EDIT_ARMATURE':
                 joint_selection.sync_joint_pivot(context)      # E / R about the lead joint
@@ -137,7 +137,7 @@ def _watch():
     return _TICK
 
 
-# --- one tool across object / component modes (step 174) -------------------------------------------
+# --- one tool across object / component modes -------------------------------------------
 # Maya's tool is one global context: W then F9 / F10 / F11 / F8 / RMB Vertex keeps the Move tool (and E / R / Q / T
 # their own) in either selection mode. Blender keeps a tool per mode and a
 # mesh's edit mode starts on Select Box, so after a mode change the new mode takes the previous mode's sacred tool.
@@ -260,7 +260,7 @@ class ALLSET_OT_menu_set(bpy.types.Operator):
             for area in window.screen.areas:
                 area.tag_redraw()
         from ..ui import status_line
-        status_line.redraw_top_bars()   # the Maya menu bar is in the top bar, a global area (step 72)
+        status_line.redraw_top_bars()   # the Maya menu bar is in the top bar, a global area
         return {'FINISHED'}
 
 
@@ -291,7 +291,7 @@ class ALLSET_OT_toggle_sel_mode(bpy.types.Operator):
         # Edit mode exposes the rest skeleton as components.
         if ob is not None and ob.type == 'ARMATURE':
             if ob.mode == 'EDIT':
-                # step 241: F8 also ends Skin > Move Skinned Joints, and Pose stays while the Move tool is on
+                # F8 also ends Skin > Move Skinned Joints, and Pose stays while the Move tool is on
                 ob.pop("allset_move_skinned", None)
                 if ob.pop("allset_joint_move_edit", None):
                     ob["allset_joint_pose_pin"] = True
@@ -308,7 +308,7 @@ class ALLSET_OT_toggle_sel_mode(bpy.types.Operator):
             text = "Component selection <hl>on</hl>.\nF8 goes back to objects."
         view_message.show(context, text, 'TOP_CENTER')
         # UNDO-only (no redo panel): Blender never registers it, so name its undo step here — that also clears a
-        # stale "Undo: ..." in the result field (step 197, #104)
+        # stale "Undo: ..." in the result field (#104)
         from ..command_line import undo_text
         undo_text.operator_step(self)
         return {'FINISHED'}

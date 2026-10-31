@@ -5,7 +5,7 @@ Maya's Command Line (language toggle, input/result field, Script Editor button) 
 Python only: MEL is not supported. ``maya.cmds`` is a
 small look-alike (``cmds_shim``), importable as ``import maya.cmds as cmds`` in code run from the Command Line,
 shelf buttons and the Script Editor only: those imports are rewritten to the kit's module before Blender's Run Script
-runs the entry (``runner.prepare``, step 130).
+runs the entry (``runner.prepare``).
 """
 
 
@@ -184,7 +184,7 @@ def help_text(context):
 HELP_UNITS = 33.75
 COMMAND_UNITS = 45.75
 # Inside the Command Line (1600 px window): language button ~35 px, input
-# ~335 px, result field ~485 px, Script Editor button. Step 161: the row is shared out as a fraction of the status bar
+# ~335 px, result field ~485 px, Script Editor button. The row is shared out as a fraction of the status bar
 # (the fixed UI units ran 1988 px wide at UI scale 1.25 in a 1600 px window, so the result field was drawn
 # off the right edge and a command's result never showed).
 INPUT_SHARE = 335 / 915
@@ -214,7 +214,7 @@ def draw_help_line(layout, context):
     shows progress too)."""
     from ..ui import notices
     notices.remember_status_area(context.area, context.window)
-    note = notices.current()   # a "Not in Blender" notice of the menu item under the mouse (step 54)
+    note = notices.current()   # a "Not in Blender" notice of the menu item under the mouse
     from ..ui import weight_numbers
     text = note or weight_numbers.help_note() or help_text(context)
     if text:
@@ -281,7 +281,7 @@ def register():
     bpy.types.WindowManager.allset_cmd = StringProperty(
         name="Command Line", description="Python command (Enter to run). MEL is not supported",
         options={'SKIP_SAVE'}, update=_on_command)
-    # Only Blender's own status bar draw is swapped: other add-ons' appended items keep drawing (step 115).
+    # Only Blender's own status bar draw is swapped: other add-ons' appended items keep drawing.
     own_draw.swap("STATUSBAR_HT_header", draw_status_bar)
     undo_text.register()
 

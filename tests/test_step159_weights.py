@@ -1,4 +1,4 @@
-"""Step 159 (lane W): Deform > Export / Import Weights = Maya deformerWeights XML. Format and import rules follow
+"""Deform > Export / Import Weights = Maya deformerWeights XML. Format and import rules follow
 Maya."""
 
 import os

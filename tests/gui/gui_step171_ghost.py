@@ -1,4 +1,4 @@
-"""Step 171 in the Maya Workflow Kit layout: Visualize > Ghost Selected draws Maya's ghosts.
+"""In the Maya Workflow Kit layout: Visualize > Ghost Selected draws Maya's ghosts.
 
 Scene (flat #5c5c5c viewport):
 a 1-unit cube keyed translateX 0 -> 18 over frames 1 -> 10 (linear), current frame 5, Ghost Selected, nothing

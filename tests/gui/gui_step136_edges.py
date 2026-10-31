@@ -1,4 +1,4 @@
-"""Step 136 (#56): marking menus opened near every edge of the main viewport stay inside the window and off the area
+"""#56: marking menus opened near every edge of the main viewport stay inside the window and off the area
 borders Blender draws after every region. Maya Workflow Kit layout; RMB / Shift+RMB / Ctrl+RMB on pCube1 in object
 mode and in vertex / edge / face mode (everything selected), pressed near the top, bottom, left and right edge of the
 main 3D View. Each opened menu: every drawn rect (radial boxes, list rows) inside the window, no rect on a horizontal

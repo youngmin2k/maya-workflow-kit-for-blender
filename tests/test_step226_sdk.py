@@ -1,4 +1,4 @@
-"""Step 226 lane D (Issue #136): Set Driven Key like Maya (operators/driven_key.py).
+"""Lane D (Issue #136): Set Driven Key like Maya (operators/driven_key.py).
 
 Expected: curve shapes
 of 2 / 3 / 4 keys (29 samples each, auto tangents, infinity Constant), two drivers on one channel = blendWeighted sum
@@ -155,7 +155,7 @@ def test_blend_shape_weight_is_a_driven_node():
     head = bpy.data.objects.new("pSphere1", me)
     bpy.context.scene.collection.objects.link(head)
     head.shape_key_add(name="Basis")
-    head.shape_key_add(name="smile").value = 0.0   # Blender 5.x starts a new key at 1.0 (step 229)
+    head.shape_key_add(name="smile").value = 0.0   # Blender 5.x starts a new key at 1.0
     key = me.shape_keys
     key.name = "blendShape1"
     drv = _empty("ctrl", curl=0, spread=0)
@@ -230,7 +230,7 @@ def test_constraint_weight_is_a_driven_node():
 
 
 def test_ik_blend_and_hidden_inputs_on_a_joint():
-    """ikBlend is the handle's custom attribute (step 223): it lists like any custom channel. Two drivers on a joint
+    """ikBlend is the handle's custom attribute: it lists like any custom channel. Two drivers on a joint
     channel put the hidden inputs on the pose bone."""
     _clear()
     handle = _empty("ikHandle1", ikBlend=1)

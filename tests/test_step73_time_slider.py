@@ -1,4 +1,4 @@
-"""Step 73: Time Slider key ticks and the draggable Range Slider bar.
+"""Time Slider key ticks and the draggable Range Slider bar.
 GUI: tests/gui/gui_step73_time_slider.py."""
 
 from importlib import import_module

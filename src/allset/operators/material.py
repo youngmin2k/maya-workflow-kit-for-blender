@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya material assignment (step 29).
+"""Maya material assignment.
 
 Lighting/Shading > Material Attributes / Assign New / Favorite / Existing Material
  and the same items at the end of the RMB object
@@ -26,10 +26,10 @@ from .. import compat, depsgraph_filter
 SUPPORTED = {'MESH', 'CURVE', 'SURFACE', 'FONT', 'META'}
 
 # Maya shader kinds (shelf shader buttons) on Principled BSDF.
-# Default values (lambert: step 100).
+# Default values (lambert family).
 # Every lambert-family shader: color 0.5 grey, incandescence black (Principled's default Emission Color is white at
 # strength 0: the AE showed white), specularColor 0.5. diffuse 0.8 has no Principled input (its "Weight" socket is
-# disabled), so since step 214 a "Maya Diffuse" Mix node (``ensure_diffuse``) puts color x diffuse into Base Color.
+# disabled), so a "Maya Diffuse" Mix node (``ensure_diffuse``) puts color x diffuse into Base Color.
 _GREY = (0.5, 0.5, 0.5, 1.0)
 _BLACK = (0.0, 0.0, 0.0, 1.0)
 _COMMON = {"Base Color": _GREY, "Emission Color": _BLACK}
@@ -53,7 +53,7 @@ def cosine_power_roughness(n):
 MATERIALS = {
     # standardSurface: baseColor 0.8 (= Principled's), specularRoughness 0.4, emissionColor white
     'STANDARD_SURFACE': ("standardSurface", "Standard Surface", {"Roughness": 0.4}),
-    # Arnold's default material (Maya with mtoa); same Principled stand-in (step 67)
+    # Arnold's default material (Maya with mtoa); same Principled stand-in
     'AI_STANDARD_SURFACE': ("aiStandardSurface", "aiStandardSurface", {}),
     'LAMBERT': ("lambert", "Lambert", {**_COMMON, "Roughness": 1.0, "Specular IOR Level": 0.0}),
     # blinn: eccentricity 0.3, specularRollOff 0.7 (AE row = Specular IOR Level), specularColor 0.5 (#71)
@@ -62,7 +62,7 @@ MATERIALS = {
     # phong: cosinePower 20, specularColor 0.5 (#71)
     'PHONG': ("phong", "Phong", {**_SPECULAR, "Roughness": cosine_power_roughness(MAYA_COSINE_POWER)}),
     'SURFACE': ("surfaceShader", "Surface Shader", {"Emission Strength": 1.0}),
-    # Step 105: the rest of Maya's Hypershade Create > Maya > Surface list that Blender can build (Principled stand-ins
+    # the rest of Maya's Hypershade Create > Maya > Surface list that Blender can build (Principled stand-ins
     # plus a node or two)
     # phongE: roughness 0.5, highlightSize 0.5 (Specular IOR Level), whiteness 0.5 (Specular Tint)
     'PHONG_E': ("phongE", "Phong E", {**_SPECULAR, "Roughness": 0.5, "Specular IOR Level": 0.5}),
@@ -78,7 +78,7 @@ BUILT = {'RAMP', 'LAYERED', 'USE_BACKGROUND'}
 KIND_ITEMS = [(k, v[1], f"Maya {v[0]} (Principled BSDF)") for k, v in MATERIALS.items()]
 # The Assign Favorite Material submenu (Maya's surface-shader favourites).
 FAVORITES = ('LAMBERT', 'BLINN', 'PHONG', 'STANDARD_SURFACE')
-# ID property naming the Maya node type of a kit-made material (AE tab label/sections, step 38).
+# ID property naming the Maya node type of a kit-made material (AE tab label/sections).
 TYPE_PROP = "allset_type"
 # The default material, like Maya: every new shape joins initialShadingGroup, whose surface
 # shader is lambert1 (a lambert); Delete Unused Nodes keeps it, a new Lambert is lambert2.
@@ -95,7 +95,7 @@ def new_material(kind):
     from . import naming
     base, _label, values = MATERIALS[kind]
     if _maya_scene():
-        default_material()   # Maya's scene always has lambert1, so a new Lambert is lambert2 (step 100)
+        default_material()   # Maya's scene always has lambert1, so a new Lambert is lambert2
     n = naming.next_number(base, {m.name for m in bpy.data.materials})
     mat = bpy.data.materials.new(f"{base}{n}")
     mat[TYPE_PROP] = base
@@ -113,7 +113,7 @@ def new_material(kind):
     return mat
 
 
-# --- Maya diffuse (step 214, #120) ---------------------------------------------------------------------------------
+# --- Maya diffuse (#120) ---------------------------------------------------------------------------------
 # Maya's lambert family renders color x diffuse x light (diffuse 0.8 for
 # lambert / blinn / phong / phongE / anisotropic / rampShader, "rendered value = color x diffuse x intensity");
 # a texture connected to color is multiplied by diffuse as well. Principled has no diffuse weight, so a Mix node
@@ -323,7 +323,7 @@ def default_material(create=True):
         return mat
     old = bpy.data.materials.get(DEFAULT_NAME)
     if old is not None and old.get(TYPE_PROP) == "lambert" and old.library is None:
-        # a kit "lambert1" from before step 100 (Assign New Material > Lambert): it becomes the default
+        # a kit "lambert1" from an older version (Assign New Material > Lambert): it becomes the default
         old[DEFAULT_PROP] = True
         old.use_fake_user = True
         return old
@@ -335,7 +335,7 @@ def default_material(create=True):
     node = next(nd for nd in mat.node_tree.nodes if nd.type == 'BSDF_PRINCIPLED')
     for socket, value in MATERIALS['LAMBERT'][2].items():
         node.inputs[socket].default_value = value
-    ensure_diffuse(mat)                      # Maya lambert1 diffuse 0.8 (step 214)
+    ensure_diffuse(mat)                      # Maya lambert1 diffuse 0.8
     sync_display(mat)
     return mat
 
@@ -411,7 +411,7 @@ def _on_depsgraph(scene, depsgraph):
         return
     key = scene.as_pointer()
     known = _known.get(key)
-    # step 286 (#191): objects are only added with a Scene / Collection update, and an addition raises the count —
+    # #191: objects are only added with a Scene / Collection update, and an addition raises the count —
     # a move or a selection change skips the walk over every object (0.45 ms per update at 620 objects)
     if known is not None and (not depsgraph_filter.structure_changed(depsgraph)
                               or len(scene.objects) == len(known)):
@@ -574,7 +574,7 @@ def assign_faces(ob, mat):
     slots = ob.material_slots
     index = next((i for i, s in enumerate(slots) if s.material == mat), None)
     if index is None:
-        if not slots:   # the rest of the mesh keeps the default: Maya's lambert1 (step 100), else no material
+        if not slots:   # the rest of the mesh keeps the default: Maya's lambert1, else no material
             ob.data.materials.append(default_material() if _maya_scene() else None)
         ob.data.materials.append(mat)
         index = len(ob.material_slots) - 1
@@ -640,7 +640,7 @@ class ALLSET_OT_shelf_material(bpy.types.Operator):
         return create_and_assign(self, context, self.kind)
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_assign_new_material(bpy.types.Operator):
     """Pick a material type, create it and assign it to the selected objects or faces
     (Maya Assign New Material, Shift+T)"""

@@ -1,4 +1,4 @@
-"""Step 108: Maya hotkeys right-aligned in the kit's Maya menus (from the item's Maya command and the kit keymap),
+"""Maya hotkeys right-aligned in the kit's Maya menus (from the item's Maya command and the kit keymap),
 never a Blender shortcut."""
 
 from importlib import import_module
@@ -15,7 +15,7 @@ ROOT = Path(kit.__file__).resolve().parent.parent
 
 KIT_OPS = {"allset.menu_item", "allset.menu_unavailable", "allset.menu_run", "allset.menu_tool",
            "allset.menu_set_value", "wm.call_menu_pie",
-           "allset.menu_tear_off"}   # Maya's tear-off line (step 116): no keymap item runs it
+           "allset.menu_tear_off"}   # Maya's tear-off line: no keymap item runs it
 
 
 class Recorder:

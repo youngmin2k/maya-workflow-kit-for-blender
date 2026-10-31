@@ -9,7 +9,7 @@ face layouts and UVs follow Maya's for the default and varied attributes
 
 A polygon shape = ``Mesh(verts, faces, uvs, hard, edges)``: ``uvs`` one (u, v) per face corner (or None), ``hard`` the
 edges Maya marks hard (frozenset vertex pairs) or ``ALL``, ``edges`` Maya's edge ids as vertex pairs in Maya's order
-(polyCube / polyCylinder, step 257) or None. A NURBS shape = list of ``Patch`` (one per Maya shape:
+(polyCube / polyCylinder) or None. A NURBS shape = list of ``Patch`` (one per Maya shape:
 nurbsSquare / nurbsCube are a group of four / six).
 """
 
@@ -246,7 +246,7 @@ def poly_cube(a):
         ((-w / 2, -h / 2, -d / 2), (0, 0, d), (0, h, 0), sz, sy, (c_, 0.0, c0, 0.25)),      # left -X
     )
     for side, (o, du, dv, nu, nv, (u0, v0, u1, v1)) in enumerate(sides):
-        # Maya walks the right side (+X) from the back (step 257, 15 / 15 polyCube sizes): its interior vertices
+        # Maya walks the right side (+X) from the back (15 / 15 polyCube sizes): its interior vertices
         # and faces come back to front
         cols = list(range(nu + 1))[::-1] if side == 4 else list(range(nu + 1))
         grid = [{} for _ in range(nv + 1)]
@@ -394,7 +394,7 @@ def poly_cylinder(a):
     if sc == 0:
         return _cylinder_ngon_caps(a, r, h, sx, sy, dy)
     # Maya stacks every ring from the bottom cap's innermost up the side to the top cap's innermost, then the two
-    # centres (step 257: 24 / 24 polyCylinder sizes with Subdivisions Caps >= 1, round caps 4 / 4)
+    # centres (24 / 24 polyCylinder sizes with Subdivisions Caps >= 1, round caps 4 / 4)
     rings = []          # (radius, y, part): part -1 bottom cap, 0 side, 1 top cap
     for c in range(1, sc):
         rings.append(_cap_ring(r, -h / 2, sc, c, -1, dome) + (-1,))
@@ -1185,7 +1185,7 @@ def build(node_type, attrs):
     return NURBS_BUILD[node_type](a)
 
 
-# Step 190: Pipe / Helix / Gear / Soccer Ball (prim_shapes_more) and Super Ellipse / Spherical Harmonics / Ultra Shape
+# Pipe / Helix / Gear / Soccer Ball (prim_shapes_more) and Super Ellipse / Spherical Harmonics / Ultra Shape
 # (prim_supershape, one polySuperShape node) join the tables; both modules import this one, so they come last.
 from . import prim_shapes_more, prim_supershape  # noqa: E402
 

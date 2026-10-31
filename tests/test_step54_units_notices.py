@@ -1,4 +1,4 @@
-"""Step 54: create paths in Maya units, light power x maya_unit^2, and the shared "not in Blender"
+"""Create paths in Maya units, light power x maya_unit^2, and the shared "not in Blender"
 notices. GUI: tests/gui/gui_step54_units_notices.py."""
 
 import math
@@ -67,7 +67,7 @@ def test_light_power_scaled_by_maya_unit_squared():
     for setup in SETUPS:
         _fresh()
         k = _units(setup)
-        # step 137: Maya intensity 1 / No Decay, power matched to Maya renders (operators/lights.py):
+        # Maya intensity 1 / No Decay, power matched to Maya renders (operators/lights.py):
         # still x maya_unit^2, now 4 pi^2 x 100 (point / spot, matched at 10 units) and pi^2 x 9.87 (area)
         pi2 = math.pi ** 2
         for kind, base in (('POINT_LIGHT', 4 * pi2 * 100), ('SPOT_LIGHT', 4 * pi2 * 100), ('AREA_LIGHT', pi2 * 9.87)):
@@ -103,7 +103,7 @@ def test_notices_are_real_menu_paths_with_a_line():
     for path, (substitute, line) in notices.NOTICES.items():
         assert substitute and line.startswith("Blender") or "Blender" in line, (path, line)
     want = {"Windows/Animation Editors/Trax Editor": "NLA",
-            # step 197: Relationship Editors > Character Sets is real (operators/character_sets.py)
+            # Relationship Editors > Character Sets is real (operators/character_sets.py)
             "Windows/General Editors/Hypergraph: Connections": "Drivers", "Skeleton/HumanIK": "Rigify",
             "Windows/General Editors/Namespace Editor": "ns:", "File/Create Reference...": "Library Override",
             "File/Set Project...": "projects", "Modify/Evaluate Nodes/nucleuses": "nucleus",
@@ -136,13 +136,13 @@ def test_notice_in_tooltip_and_help_line():
     assert "NLA" in notices.current(), "the Help Line shows the notice while the tooltip is up"
     # a greyed item keeps allset.menu_unavailable, tooltip with the notice
     rec = _Rec()
-    # (Batch Render until step 152, which maps it)
+    # (Batch Render is mapped)
     path = "Windows/General Editors/Namespace Editor"
     menu_sets.draw_item(rec, path, "Namespace Editor")
     assert rec.log[0][0] == "allset.menu_unavailable", rec.log
     tip = menu_sets.ALLSET_OT_menu_unavailable.description(bpy.context, types.SimpleNamespace(item=path))
     assert "Namespace Editor" in tip and "namespaces" in tip, tip
-    # items without a notice run the same action through allset.menu_item (step 108: Blender prints no shortcut
+    # items without a notice run the same action through allset.menu_item (Blender prints no shortcut
     # of its own beside it)
     rec = _Rec()
     menu_sets.draw_item(rec, "Create/Polygon Primitives/Cube", "Cube")

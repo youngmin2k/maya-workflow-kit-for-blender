@@ -1,4 +1,4 @@
-"""Step 152 (#101) lane A in a real UI: Display > Grid ❒ opens Maya's Grid Options window, and applying other values
+"""#101: lane A in a real UI: Display > Grid ❒ opens Maya's Grid Options window, and applying other values
 (length, lines every, subdivisions, colours) changes the grid the Maya layout view draws. Screenshots
 (ALLSET_GUI_SHOTS) for the step doc, next to Maya's Grid Options window."""
 

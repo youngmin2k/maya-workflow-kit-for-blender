@@ -1,4 +1,4 @@
-"""Step 155 lane D in a real UI: cube -> UV > UV Editor -> top face cut out (two shells) + Layout -> Maya 9 texture
+"""In a real UI: cube -> UV > UV Editor -> top face cut out (two shells) + Layout -> Maya 9 texture
 borders (on by default, thick), 8 shell borders (colour), Ctrl+1 isolate, 4 wireframe; screenshots per state
 (src/allset/ui/uv_display.py)."""
 

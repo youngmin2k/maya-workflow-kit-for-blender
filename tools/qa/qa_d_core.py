@@ -1,4 +1,4 @@
-"""QA step 240, activity D: seeded monkey in Maya mode, headless (engine; runners qa_monkey*.py).
+"""QA activity D: seeded monkey in Maya mode, headless (engine; runners qa_monkey*.py).
 
 Action dictionary (built at run time):
   key   - Maya keymap items (``kit.maya_kc()``, non-modal) whose operator is ``allset.*`` or a common Blender op,
@@ -59,7 +59,7 @@ EXCLUDE = (
     # wm.call_menu exec (seen at seed 1 #295 "Windows/UI Elements") - headless-only, a GUI opens the menu
     r"^\('menu'", r"^\('pie'", r"allset\.mm_", r"hotbox", r"popup", r"option_box", r"call_menu", r"call_panel",
     # Blender 4.5 / 5.2 -b crash in initTimeSlide on a scripted transform.transform(mode='TIME_SLIDE') with no
-    # Dope Sheet (factory Blender, no kit: tools/qa/repro_c_time_slide.py, step 271) - a GUI has the editor
+    # Dope Sheet (factory Blender, no kit: tools/qa/repro_c_time_slide.py) - a GUI has the editor
     # 5.2 -b crash in stitch_exit on a scripted UV Stitch (factory Blender; 4.5 survives, the GUI menu path is checked
     # by tests/gui/gui_step271_uv_stitch.py); -b has no tool keymaps, so tool activation raises inside Blender
     r"Stitch Together", r"uv\.stitch", r"Pencil Curve Tool",

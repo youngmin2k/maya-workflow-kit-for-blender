@@ -1,16 +1,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Editor display keys and Move UV Shell (step 155).
+"""Maya UV Editor display keys and Move UV Shell.
 
 Maya 2022 UV Editor hotkeys (context polyTexturePlacementPanel) and View menu:
 
 - 4 Wireframe / 5 Shaded (Display Mode radio) -> ``SpaceUVEditor.show_faces`` off / on (Shaded also sets
-  ``uv_face_opacity`` 1). ``uv_face_opacity`` 0 alone still draws grey face fills (GUI shot, step 155): no wireframe.
+  ``uv_face_opacity`` 1). ``uv_face_opacity`` 0 alone still draws grey face fills (GUI shot): no wireframe.
 - 6 UVEditor_ToggleUVTextureImage -> ``SpaceImageEditor.image`` = None / back (Blender has no "hide the image"
   flag; the image is remembered per editor, else the active material's image texture is shown).
 - 8 UVEditor_ToggleUVShellBorder = Maya's shell border display toggle: shell
   borders drawn in colour, 3 px wide.
 - 9 UVEditor_ToggleTextureBorder = ``ToggleTextureBorderDisplay``: Maya's "texture
-  borders" are the UV shell border edges drawn thick (Select > Texture Borders selects the same edges; step 79
+  borders" are the UV shell border edges drawn thick (Select > Texture Borders selects the same edges;
   cut_sew.py calls them that too), on by default in the Maya View menu (checked). Drawn 3 px in the
   theme's UV wire colour, i.e. the same edge, thicker.
 - Ctrl+1 UVEditor_ToggleUVIsolateViewSelected -> ``allset.uv_isolate``.
@@ -21,7 +21,7 @@ Maya 2022 UV Editor hotkeys (context polyTexturePlacementPanel) and View menu:
 Shell borders follow the step-66 island rule (operators/uv_tools.islands: faces join where their UVs match at both
 ends of an edge): an edge is a border on a face's side when no other shown face shares the same UVs across it.
 They are drawn by an Image Editor WINDOW POST_PIXEL handler in UV space mapped through ``View2D.view_to_region``;
-segments are cached per object and dropped on any depsgraph update of a mesh / object (like step 79).
+segments are cached per object and dropped on any depsgraph update of a mesh / object (like cut_sew.py).
 """
 
 import bmesh
@@ -113,7 +113,7 @@ def segments_of(ob, synced):
         uv = bm.loops.layers.uv.active
         if uv is None:
             pts = np.zeros((0, 2), np.float32)
-        else:     # numpy (operators/uv_arrays.py): the Python border_segments took ~1.8 s on 48 k faces (step 254)
+        else:     # numpy (operators/uv_arrays.py): the Python border_segments took ~1.8 s on 48 k faces
             arrays = uv_arrays.read(ob, bm, uv, bpy.context.view_layer.depsgraph, cached=True)
             pts = uv_arrays.border_points(arrays, uv_arrays.shown_faces(arrays, synced))
         _cache[key] = pts

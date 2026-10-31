@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya lengths in Blender units, and the optional "Maya Units": 1 BU = 1 cm.
 
-Rule (step 21): a Maya length of 1 is one scene
+Rule: a Maya length of 1 is one scene
 display length unit, like Maya's current linear unit.
 ``maya_unit()`` gives it in BU; every creation path scales by it, so a Create cube,
 ``cmds.polyCube()`` and a cube imported from a Maya FBX are the same size.
@@ -15,7 +15,7 @@ light falloff and importers assume 1 BU = 1 m).
 The values before are kept per scene in the custom property
 ``allset_units_backup`` and come back when the option is turned off. New
 files (no file path: the home file) get the units on load; saved files are
-never changed behind the user's back (step 10).
+never changed behind the user's back.
 """
 
 import json
@@ -48,7 +48,7 @@ def grid_scale(scene=None):
     """Viewport grid scale that puts the finest perspective grid step on one Maya unit.
 
     Blender skips grid steps below the base unit (1 m) in user perspective views and
-    divides the steps by ``scale_length`` (step 25), so with cm
+    divides the steps by ``scale_length``, so with cm
     shown the grid (and X-hold grid snap) was 1 m. The step is ``grid_scale /
     scale_length`` BU = ``grid_scale`` m, so grid_scale = metres per display unit.
     """

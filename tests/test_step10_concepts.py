@@ -1,4 +1,4 @@
-"""Step 10: Maya concept operators, checked numerically (matrices, vertices, names).
+"""Maya concept operators, checked numerically (matrices, vertices, names).
 
 Freeze / Reset / Center Pivot, Maya parenting, Duplicate Special / with Transform,
 Maya creation and naming, Maya units, Delete History / by Type, keys and menus.
@@ -413,7 +413,7 @@ def test_naming_helpers():
     assert naming.base_name("pCube12") == "pCube"
     assert naming.base_name("Cube.001") == "Cube"
     assert naming.base_name("foo") == "foo"
-    assert naming.next_number("pCube", {"pCube1", "pCube3"}) == 4   # Maya: one past the highest (step 208)
+    assert naming.next_number("pCube", {"pCube1", "pCube3"}) == 4   # Maya: one past the highest
     assert naming.next_number("pCube", {"pCube1"}, {"pCubeShape2"}) == 3
 
 
@@ -421,7 +421,7 @@ CREATE_CASES = (
     # kind, object name, data name, dimensions, polygon count
     ('CUBE', "pCube1", "pCubeShape1", (1, 1, 1), 6),
     ('SPHERE', "pSphere1", "pSphereShape1", (2, 2, 2), 400),
-    ('CYLINDER', "pCylinder1", "pCylinderShape1", (2, 2, 2), 60),   # Maya menu: caps = centre fans (step 129)
+    ('CYLINDER', "pCylinder1", "pCylinderShape1", (2, 2, 2), 60),   # Maya menu: caps = centre fans
     ('CONE', "pCone1", "pConeShape1", (2, 2, 2), 21),
     ('TORUS', "pTorus1", "pTorusShape1", (3, 3, 1), 400),
     ('PLANE', "pPlane1", "pPlaneShape1", (1, 1, 0), 100),
@@ -447,7 +447,7 @@ def test_create_numbers_and_other_kinds():
     bpy.data.objects.remove(bpy.data.objects["pCube1"])
     bpy.data.meshes.remove(bpy.data.meshes["pCubeShape1"])
     bpy.ops.allset.create(kind='CUBE')
-    assert bpy.context.view_layer.objects.active.name == "pCube3"   # Maya: one past the highest (step 208)
+    assert bpy.context.view_layer.objects.active.name == "pCube3"   # Maya: one past the highest
     for kind, name in (('POINT_LIGHT', "pointLight1"), ('DIRECTIONAL_LIGHT', "directionalLight1"),
                        ('CAMERA', "camera1"), ('LOCATOR', "locator1"), ('EMPTY_GROUP', "null1"),
                        ('NURBS_SPHERE', "nurbsSphere1"), ('NURBS_CIRCLE', "nurbsCircle1")):
@@ -625,7 +625,7 @@ def test_menus_use_concept_operators():
             "Create/Polygon Primitives/Cube": "allset.create"}
     for path, idname in want.items():
         assert menu_map.spec(path)[1] == idname, (path, menu_map.spec(path))
-    # Center Pivot sits in a "Pivot" section after Match Transformations (EXTRA, Maya order, step 59).
+    # Center Pivot sits in a "Pivot" section after Match Transformations (EXTRA, Maya order).
     modify = next(m for m in menu_sets.menu_data.MENUS.values() if m[0] == "Modify")
     entries = list(menu_sets.children(modify[3], "Modify"))
     i = [p for p, _it in entries].index("Modify/Center Pivot")

@@ -1,4 +1,4 @@
-"""Step 162: Maya Hypershade swatch MMB drag onto an object = assign (ui/hs_drag.py). Headless: the window / view-ray /
+"""Maya Hypershade swatch MMB drag onto an object = assign (ui/hs_drag.py). Headless: the window / view-ray /
 ray-cast target lookup, the assignment path (operators/material.assign: whole object, or the selected faces of a
 mesh edited in face mode), the swatch button property and the keymap item. Real drag across windows:
 tests/gui/gui_step162_hs_drag.py."""

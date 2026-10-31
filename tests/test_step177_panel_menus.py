@@ -1,5 +1,5 @@
-"""Step 177: the viewport panel menus, panel toolbar and greyed Status Line widgets are counted (tools/menu_count.py),
-every greyed one has a notice (step 101 rule), none has a working twin (tools/menu_consistency.py), and the rows with
+"""The viewport panel menus, panel toolbar and greyed Status Line widgets are counted (tools/menu_count.py),
+every greyed one has a notice (menu rule), none has a working twin (tools/menu_consistency.py), and the rows with
 a kit counterpart run it: Center View of Selection (Maya viewFit -c), Camera Attribute Editor, the camera
 tools."""
 
@@ -59,7 +59,7 @@ def test_drawn_rows_are_the_counted_rows():
     # Status Line: the greyed widgets it draws are the listed ones
     drawn = {f"Status Line/{desc}" for _g, desc, _i, types_ in status_line.OBJECT_MASKS if types_ is None}
     drawn |= {f"Status Line/{desc}" for _n, desc, _i, el in status_line.SNAPS if el is None}
-    assert input_line.HISTORY_PATH not in pmd.STATUS_LINE      # a real toggle since step 189 (BS5)
+    assert input_line.HISTORY_PATH not in pmd.STATUS_LINE      # a real toggle
     src = inspect.getsource(status_line)
     drawn |= {p for p in pmd.STATUS_LINE if f'"{p}"' in src}
     assert drawn == set(pmd.STATUS_LINE), drawn ^ set(pmd.STATUS_LINE)

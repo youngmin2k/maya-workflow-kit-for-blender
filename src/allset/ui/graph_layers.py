@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Graph Editor with several selected animation layers (step 204).
+"""Graph Editor with several selected animation layers.
 
 Maya: the Graph Editor lists each selected layer under
 the object and draws every selected layer's curves in their own values. Blender's Graph Editor draws and edits one

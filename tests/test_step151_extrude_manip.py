@@ -1,4 +1,4 @@
-"""Step 151 lane B: Maya's polyExtrudeFace manipulator - three local
+"""Maya's polyExtrudeFace manipulator - three local
 translate arrows, a scale cube per axis, three plane handles and the centre square (uniform scale) - and the
 polyExtrudeFace values they drive (Local Translate X / Y, Local Scale X / Y / Z, operators/extrude.py).
 

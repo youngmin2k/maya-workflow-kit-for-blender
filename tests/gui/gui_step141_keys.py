@@ -1,4 +1,4 @@
-"""Step 141 (lane KEYS, B4) with simulated events: Alt+RMB drag in the UV Editor zooms like Maya's dolly — right =
+"""With simulated events: Alt+RMB drag in the UV Editor zooms like Maya's dolly — right =
 in, left = out — with Blender's Zoom Axis preference left at its factory Vertical."""
 
 import os

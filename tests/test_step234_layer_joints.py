@@ -1,4 +1,4 @@
-"""Step 234 (Issue #143): animation layers on joints — key, bake, membership.
+"""Issue #143: animation layers on joints — key, bake, membership.
 
 Expected (chain and bake results):
 Create Layer from Selected on a joint, Rotate X +20 at frame 12, S -> Rotate X 20 on every frame (one

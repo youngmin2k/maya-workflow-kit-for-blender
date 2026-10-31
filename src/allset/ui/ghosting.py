@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya ghosting (Visualize > Ghost Selected / Unghost Selected / Unghost All / Open Ghosting Editor), step 171.
+"""Maya ghosting (Visualize > Ghost Selected / Unghost Selected / Unghost All / Open Ghosting Editor).
 
 Maya 2022 rules:
 - Ghost Selected turns ``ghosting`` on for the selection and, with Include Hierarchy (factory on), everything under
   it; Unghost Selected / Unghost All turn it off. Each ghosted node carries its own settings, copied from the
   Ghosting Editor's values when it was ghosted (an editor change applies to every current ghost).
-- Factory settings: mode Pre And Post Frames, Pre Frames 3, Post Frames 3, Step 1 (presets 1s / 2s / 4s / 5s / 10s
-  = step 1 / 2 / 4 / 5 / 10, Custom = own pre / post / step), Pre Frame Color (0.447, 1, 1), Post Frame Color
+- Factory settings: mode Pre And Post Frames, Pre Frames 3, Post Frames 3, Step: 1 (presets 1s / 2s / 4s / 5s / 10s
+  = Step: 1 / 2 / 4 / 5 / 10, Custom = own pre / post / step), Pre Frame Color (0.447, 1, 1), Post Frame Color
   (0.878, 0.678, 0.663), Near Opacity 0.5, Far Opacity 0.15.
 - Frames (``cmds.ghosting(query=True, frames=True)``): t − k·step / t + k·step for k = 1 .. pre / post, not clipped to
   the playback range; Pre And Post Keyframes = the pre / post nearest keys before / after t (any key, also outside the
@@ -319,7 +319,7 @@ def drop(uids=None):
         _batches.pop(key, None)
 
 
-# step 286 (#191): "does any object of this scene ghost?" per scene pointer, so a frame change doesn't walk every
+# #191: "does any object of this scene ghost?" per scene pointer, so a frame change doesn't walk every
 # object; dropped when a ghost setting changes, on undo / redo / load and when objects are added or removed
 _any_ghost = {}
 
@@ -430,7 +430,7 @@ def _draw():
     if rv3d is None or space.shading.type == 'RENDERED' or not space.overlay.show_overlays:
         return
     scene = context.scene
-    if not _ghosting_in(scene):          # step 286 (#191): no walk over every object on each redraw
+    if not _ghosting_in(scene):          # #191: no walk over every object on each redraw
         return
     obs = [ob for ob in ghosted(scene) if ob.type in GEOMETRY and ob.visible_get()]
     if not obs:

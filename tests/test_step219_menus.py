@@ -1,4 +1,4 @@
-"""Step 219 (Issue #130): the kit's main menus follow Maya 2026: every kit menu, item order, dividers and submenus
+"""Issue #130: the kit's main menus follow Maya 2026: every kit menu, item order, dividers and submenus
 equal Maya's except the submenus
 the kit fills at run time from the scene."""
 

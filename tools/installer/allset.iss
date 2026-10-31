@@ -1,4 +1,4 @@
-; Maya Workflow Kit Windows installer — DRAFT (step 61).
+; Maya Workflow Kit Windows installer — DRAFT.
 ; Not built, not signed, not published: compiling needs Inno Setup 6 (https://jrsoftware.org/isinfo.php),
 ; and a public .exe needs an Authenticode signature (SmartScreen) — neither is done yet.
 ; The work is done by allset_setup.ps1 (tested by tools/installer_check.py);
@@ -11,7 +11,7 @@
 ; folder (%APPDATA%\Blender Foundation\Blender\<x.y>\extensions\user_default) through Blender itself.
 ; The setup folder ({app}) only keeps the zip, the helper scripts and the list of Blender versions it
 ; installed for, which the uninstaller uses to remove the kit the way Preferences > Remove does
-; (the user's keymap, theme and preferences come back, step 60).
+; (the user's keymap, theme and preferences come back).
 
 #ifndef AppVersion
   #define AppVersion "0.1.0"

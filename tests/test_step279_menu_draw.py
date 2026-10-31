@@ -1,4 +1,4 @@
-"""Step 279 (#199): no kit Maya menu draw raises a Python error — also while an operator it draws is missing.
+"""#199: no kit Maya menu draw raises a Python error — also while an operator it draws is missing.
 
 Every kit menu class (the Maya menu bar menus with all their submenus, the editor menu bars, the Status Line /
 workspace / symmetry / UI Elements menus ...) and the top bar / Status Line draw functions are drawn into a

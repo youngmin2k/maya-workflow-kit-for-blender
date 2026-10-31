@@ -1,4 +1,4 @@
-"""Step 253 (#169) rig QA fixes: Set IK/FK Key keys the RP handle's Twist and Pole Vector — or the pole object when a
+"""#169: rig QA fixes: Set IK/FK Key keys the RP handle's Twist and Pole Vector — or the pole object when a
 Pole Vector constraint drives it (Maya 2026) — and the Skeleton menu /
 P see only the joints the user picked while the Move tool keeps the skeleton in Edit mode."""
 

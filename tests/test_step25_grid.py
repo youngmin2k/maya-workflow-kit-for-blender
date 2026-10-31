@@ -1,4 +1,4 @@
-"""Step 25: the finest perspective grid step (and so X-hold grid snap) is one Maya unit.
+"""The finest perspective grid step (and so X-hold grid snap) is one Maya unit.
 
 Blender skips grid steps below 1 m in user perspective views and divides by scale_length,
 so ``units.grid_scale`` = metres per display unit. The Maya Workflow Kit template has it on every 3D

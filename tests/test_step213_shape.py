@@ -1,4 +1,4 @@
-"""Step 213: Shape Editor (Issue #119) — Maya blendShape editing on Blender shape keys (ui/shape_editor.py).
+"""Shape Editor (Issue #119) — Maya blendShape editing on Blender shape keys (ui/shape_editor.py).
 Maya rules: Create Blend Shape = blendShape1, blendShape2 (one
 past the highest); Add Target = pCube2, pCube3 (duplicate name, next free alias; after renaming pCube2 the next is
 pCube2 again), weight 1.0, zero delta, the new target in Edit; weight w blends base + w * delta."""

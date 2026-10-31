@@ -1,4 +1,4 @@
-"""Step 93 in a real UI (Maya Workflow Kit layout): the Shift+Q pick-mask menu shows check boxes for Faces (and Poly Vertices /
+"""In a real UI (Maya Workflow Kit layout): the Shift+Q pick-mask menu shows check boxes for Faces (and Poly Vertices /
 Poly Edges in their submenus), a Status Line selection mask turned off survives File > New, and the Tool Settings
 popup has Maya's Reset Tool button."""
 

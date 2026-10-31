@@ -1,4 +1,4 @@
-"""Step 46 in a real UI: Maya view furniture in the Maya Workflow Kit layout — ViewCube click on TOP gives the
+"""In a real UI: Maya view furniture in the Maya Workflow Kit layout — ViewCube click on TOP gives the
 top view, four-view panel labels top / persp / side / front, Blender navigation gizmo and text info
 off (screenshots)."""
 

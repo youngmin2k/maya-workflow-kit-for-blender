@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 205 lane A (issue #112): Maya Deform > Tension, Solidify, Sculpt (+ Paint Weights > Tension, Prune Membership >
+"""Lane A (issue #112): Maya Deform > Tension, Solidify, Sculpt (+ Paint Weights > Tension, Prune Membership >
 Sculpt).
 
 Maya 2022 facts: nodes / names / selection / Channel Box rows / option windows, Tension, Solidify, Sculpt.
 Blender has none of these deformers, so
 each is a Geometry Nodes modifier named like the Maya node (``tension1``) on a shared node group built here (the
-pattern of operators/wire_deformer.py, step 169); it reads its input from the modifiers above it (Maya: the upstream
-deformers) and its weights from the vertex group of its name (weight 1 on the deformed points, step 144).
+pattern of operators/wire_deformer.py); it reads its input from the modifiers above it (Maya: the upstream
+deformers) and its weights from the vertex group of its name (weight 1 on the deformed points).
 Maya's ``<shape>Orig`` (the rest shape Tension / Solidify compare with) is the mesh's base positions when the deformer
 is made, kept in a hidden point attribute ``.allset_rest_<node>`` (component edits made later are Maya tweaks = input,
 not rest); a topology change (Delete Non-Deformer History of a bevel, ...) re-takes it with the partner table.
@@ -699,7 +699,7 @@ def _sculpt(context, v):
     origin.empty_display_type = 'PLAIN_AXES'
     origin.empty_display_size = 1.0
     for e in (sculptor, origin):
-        e.delta_scale = (u, u, u)                   # Maya units: Channel Box Scale 1 (like ffd1Lattice, step 148)
+        e.delta_scale = (u, u, u)                   # Maya units: Channel Box Scale 1 (like ffd1Lattice)
         e.location = centre
     context.view_layer.update()
     for ob, idx in items:

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2022 Mesh Display normal commands (step 189): Set Vertex Normal, Lock / Unlock Normals, Average, Set to Face.
+"""Maya 2022 Mesh Display normal commands: Set Vertex Normal, Lock / Unlock Normals, Average, Set to Face.
 
 Maya rules on explicit meshes.
 

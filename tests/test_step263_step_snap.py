@@ -1,4 +1,4 @@
-"""Step 263 (Issue #153): Maya Step Snap Relative / Absolute per tool — Move, Rotate and Scale keep their own
+"""Issue #153: Maya Step Snap Relative / Absolute per tool — Move, Rotate and Scale keep their own
 (manipMoveContext / manipRotateContext / manipScaleContext -snapRelative);
 Blender's one Absolute Grid Snap flag takes the mode of the tool whose transform starts."""
 

@@ -1,4 +1,4 @@
-"""Step 87 in a real UI (Maya Workflow Kit layout): Alt+A cycles X-ray joints / everything / meshes only, Alt+P toggles
+"""In a real UI (Maya Workflow Kit layout): Alt+A cycles X-ray joints / everything / meshes only, Alt+P toggles
 persp / ortho, Alt+Right moves the cube one pixel, ` held = Tweak tool then back to Move, \\ held + LMB drag pans
 the camera view."""
 

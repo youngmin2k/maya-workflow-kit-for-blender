@@ -1,4 +1,4 @@
-"""Step 211 (audit 16 fix batch, #117) in a real window: a new Maya scene's Outliner lists Maya's startup cameras
+"""#117 in a real window: a new Maya scene's Outliner lists Maya's startup cameras
 persp / top / front / side first (real hidden Blender rows, not drawn after the objects), then the objects in creation
 order, the default sets and kit sets last; a click on the persp row makes it the lead (Channel Box "persp"). The
 Attribute Editor (dock fitted, ALLSET_FIT_WARP=1) shows its node tabs as one row and Select / Load Attributes /
@@ -15,7 +15,7 @@ from sim import (MODULE, check, dock_area, dock_region, dock_tab_point, ev, load
                  screenshot, setup, step, view3d, win)
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
-os.environ["ALLSET_FIT_WARP"] = "1"   # the cursor fit is off in event-simulated sessions unless asked for (step 99)
+os.environ["ALLSET_FIT_WARP"] = "1"   # the cursor fit is off in event-simulated sessions unless asked for
 C = {}
 
 

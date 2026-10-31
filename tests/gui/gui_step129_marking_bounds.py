@@ -1,4 +1,4 @@
-"""Step 129 (#5): a marking menu / hotbox opened low in the viewport stays open while the cursor goes down into the
+"""#5: a marking menu / hotbox opened low in the viewport stays open while the cursor goes down into the
 Time Slider (the timeline area under the view), and releasing / clicking over an item drawn there runs it.
 Part 1: factory layout, RMB drag south into the timeline = Face. Part 2: Maya Workflow Kit layout, RMB drag down
 through the list (past the Paint cascade row) onto a row drawn over the Time Slider; the hotbox opened low, a menu
@@ -17,7 +17,7 @@ from sim import MODULE, check, ev, run, setup, step, tap, win, load_maya_layout 
 C = {}
 # rows with an effect the test can see (object mode, one mesh in the scene)
 SAFE_ROWS = ("Select All", "Deselect All", "Invert Selection", "Select")
-# Step 161: the list stays one column (Maya); low in the view it stands beside the ring, slid up from the window
+# the list stays one column (Maya); low in the view it stands beside the ring, slid up from the window
 # bottom, so the rows over the Time Slider are its last ones: the Assign ... Material cascades. Reaching one there
 # opens its cascade (KIT_ROWS); releasing over a cascade row runs nothing and closes the menu.
 KIT_ROWS = ("Assign Favorite Material", "Assign Existing Material")
@@ -114,7 +114,7 @@ def s_in_timeline():
     if s is not None:
         item = s.hover[0]
         print("GUI-DBG on_row stack", len(s.stack), "hover", item and item.label, "pos", s.pos, flush=True)
-        # step 193: the ring stays at the press point (the list goes beside it), so dragging down picks Face
+        # the ring stays at the press point (the list goes beside it), so dragging down picks Face
         check(f"factory: south item (Face) highlighted over the timeline ({item and item.label})",
               item is not None and item.label == "Face")
 
@@ -156,7 +156,7 @@ def s_kit_scene():
 
 def rmb_height():
     """Height over the view's bottom where the RMB list ends with a SAFE_ROWS row over the Time Slider (the
-    engine lays it out the same way: one column, beside the ring when it doesn't fit under it, step 161)."""
+    engine lays it out the same way: one column, beside the ring when it doesn't fit under it)."""
     engine, modal, mm = (import_module(MODULE + ".marking." + n) for n in ("engine", "modal", "menus"))
     _area, region = main_view()
     tl = timeline()

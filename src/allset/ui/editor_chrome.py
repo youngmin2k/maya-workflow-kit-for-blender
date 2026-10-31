@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya editor chrome for the Graph Editor, Dope Sheet and UV Editor (step 104).
+"""Maya editor chrome for the Graph Editor, Dope Sheet and UV Editor.
 
 Maya 2022's editors:
 
@@ -234,7 +234,7 @@ def _hsg(action):
     return ("allset.hs_graph", {"action": action})
 
 
-# Maya Hypershade graph toolbar (step 131: Maya's control names + tooltips); actions run in the Hypershade's graph (ui/hypershade.py)
+# Maya Hypershade graph toolbar (Maya's control names + tooltips); actions run in the Hypershade's graph (ui/hypershade.py)
 HS_GRAPH_ICONS = (
     ("showUpstreamButton", 'BACK', _hsg("UPSTREAM"), "Input connections"),
     ("showUpAndDownstreamButton", 'ARROW_LEFTRIGHT', _hsg("BOTH"), "Input and output connections"),
@@ -470,15 +470,15 @@ def _stats_set(field):
 
 
 # --- Graph Editor channel list (Maya outliner pane: node rows, "Translate X" rows) --------------------------------
-# Maya lists DAG nodes with their animated attributes under them: objects, joints (= pose bones,
-# step 55; their curves live on the armature object as ``pose.bones["joint1"].location``) and the
+# Maya lists DAG nodes with their animated attributes under them: objects, joints (= pose bones;
+# their curves live on the armature object as ``pose.bones["joint1"].location``) and the
 # blendShape node of a mesh (= its shape-key datablock, ``rig_tools`` names it blendShapeN; its curves are the Key
-# ID's ``key_blocks["smile"].value``, one row per target, Maya's attribute = the target name). Step 150, #96.
+# ID's ``key_blocks["smile"].value``, one row per target, Maya's attribute = the target name). #96.
 
 MAYA_ATTR = {"location": "Translate", "rotation_euler": "Rotate", "scale": "Scale", "rotation_quaternion": "Rotate",
              "delta_location": "Delta Translate", "delta_rotation_euler": "Delta Rotate", "delta_scale": "Delta Scale"}
-# One-value attributes: Maya visibility = hide_viewport (step 129); hide_render has no Maya transform attribute,
-# the closest is the shape's render stat Primary Visibility (step 150).
+# One-value attributes: Maya visibility = hide_viewport; hide_render has no Maya transform attribute,
+# the closest is the shape's render stat Primary Visibility.
 MAYA_SCALAR = {"hide_render": "Primary Visibility"}
 AXES = "XYZ"
 # Attribute name colours in the Graph Editor outliner, like Maya (Translate X red,
@@ -544,7 +544,7 @@ def object_curves(ob):
 
 def data_curves(ob):
     """Curves of the object's data-block (Maya shape node attributes: a light's intensity, a camera's focal length):
-    Maya's node row draws its shape's animated channels too (step 281). Shape keys have their own row."""
+    Maya's node row draws its shape's animated channels too. Shape keys have their own row."""
     from .. import compat
     data = getattr(ob, "data", None)
     return compat.id_fcurves(data) if isinstance(data, bpy.types.ID) else []
@@ -582,7 +582,7 @@ def split_object_curves(ob):
 
 
 def character_curves(scene, ks):
-    """F-curves a character set's members (its own and its subcharacters' attributes) have (step 197, #104)."""
+    """F-curves a character set's members (its own and its subcharacters' attributes) have (#104)."""
     from .. import compat
     from ..operators import character_sets
     out = []
@@ -605,7 +605,7 @@ def node_curves(node):
     from .. import compat
     if isinstance(node, bpy.types.KeyingSet):
         return character_curves(bpy.context.scene, node)
-    if isinstance(node, bpy.types.Collection):       # a kit set (Show > Objects > Sets, step 203)
+    if isinstance(node, bpy.types.Collection):       # a kit set (Show > Objects > Sets)
         from ..operators import sets
         return [fc for ob in sets.members(node, bpy.context.scene) for fc in maya_order(split_object_curves(ob)[0])]
     if isinstance(node, bpy.types.PoseBone):
@@ -632,20 +632,20 @@ def row_id(row):
     kind, node, fc = row
     if kind in graph_layers.KINDS:
         return graph_layers.row_id(row)
-    if kind in ("UP_SDK", "UP_CURVE"):       # Show Upstream Curves rows (step 203): one per label under the node
+    if kind in ("UP_SDK", "UP_CURVE"):       # Show Upstream Curves rows: one per label under the node
         return (node_key(node), kind, fc.data_path, fc.array_index, _up_label.get((kind, fc.as_pointer()), ""))
     return node_key(node) if kind != "ATTR" else (node_key(node), fc.data_path, fc.array_index)
 
 
 def listed_objects(context, space):
     """Objects the Maya list shows as rows: the loaded list, else the selection with Auto Load (keyed or not, step
-    281), else all animated ones (also by shape keys / data-block curves); plus Hierarchy Below (Dope Sheet), narrowed by Show > Objects (step 203), by name. Driven
+    281), else all animated ones (also by shape keys / data-block curves); plus Hierarchy Below (Dope Sheet), narrowed by Show > Objects, by name. Driven
     channels count like keyed ones (Maya lists a driven-key / expression
     channel)."""
     ds = space.dopesheet
     base = row_objects(context, space)
     if base is not None:
-        # step 281 (#192): Maya lists every loaded / auto-loaded node, keyed or not (a bare node row until it is keyed)
+        # #192: Maya lists every loaded / auto-loaded node, keyed or not (a bare node row until it is keyed)
         base = set(base)
         obs = [ob for ob in context.scene.objects if ob in base]
     else:
@@ -657,7 +657,7 @@ def listed_objects(context, space):
     return sorted(obs, key=lambda o: o.name)
 
 
-# --- List > Load / Add Selected Objects, Auto Load, Pin Channel, Show filters (step 203, #110) --------------------
+# --- List > Load / Add Selected Objects, Auto Load, Pin Channel, Show filters (#110) --------------------
 # Maya 2022: Auto Load Selected Objects is on by
 # default and the list follows the selection; unchecking it freezes the list shown then; Load / Add Selected Objects
 # are greyed while Auto Load is on (the kit's poll fails) and replace / append the frozen list (nothing selected =
@@ -1101,7 +1101,7 @@ def filter_curves(node, curves, flt=None):
 
 
 # Maya lists a node's attributes in its attribute order (translate, rotate, scale, visibility, then the rest, e.g.
-# custom attributes / blend shape targets), not in the order they were keyed (step 150).
+# custom attributes / blend shape targets), not in the order they were keyed.
 ATTR_ORDER = ("location", "rotation_euler", "rotation_quaternion", "scale", "hide_viewport", "hide_render")
 
 
@@ -1113,7 +1113,7 @@ def maya_order(curves):
 
 
 def listed_nodes(context, space):
-    """[(kind, node, curves)]: per listed object its own row (step 281: also without curves, a bare node row like Maya;
+    """[(kind, node, curves)]: per listed object its own row (also without curves, a bare node row like Maya;
     its curves include its data-block's = Maya shape channels), its joints (with Only
     Show Selected only the selected ones, in any mode: Blender's Graph Editor draws no curves of unselected bones
     then, gui_step150_outliner), its blendShape node. A node's curves are its keyed and its driven
@@ -1152,7 +1152,7 @@ def listed_nodes(context, space):
         if key is not None:
             add("SHAPES", key, object_curves(key) + node_drivers(key))
         if len(out) == start and not flt and not joints:      # keyed joints: the joints are the Maya nodes
-            out.append(("OBJECT", ob, []))     # step 281: Maya lists the node before it has keys (a bare node row)
+            out.append(("OBJECT", ob, []))     # Maya lists the node before it has keys (a bare node row)
     # pinned channels stay listed under their node whatever the list / selection is now, the node below the listed
     # ones (Maya Pin Channel)
     shown = {node_key(n) for _k, n, _c in out}
@@ -1184,7 +1184,7 @@ def rows(context, space):
                     for kind2, ufc, label in upstream_rows(node, fc):
                         _up_label[(kind2, ufc.as_pointer())] = label
                         out.append((kind2, node, ufc))
-            if kind == "OBJECT":         # step 204: the other selected animation layers' rows
+            if kind == "OBJECT":         # the other selected animation layers' rows
                 out += graph_layers.outliner_rows(context.scene, node)
     return out
 
@@ -1260,7 +1260,7 @@ def picked_ids(context, all_rows):
 def highlighted(kind, rid, selected, picked):
     """Maya: once rows were picked in the outliner exactly those are highlighted; before that the selected nodes
     (never their attribute rows — Blender selects every F-curve of a selected object, so ``fc.select`` is not
-    the highlight). Clicking an attribute un-highlights its node like Maya's outliner (step 150)."""
+    the highlight). Clicking an attribute un-highlights its node like Maya's outliner."""
     if picked:
         return rid in picked
     return kind not in ATTR_KINDS and selected
@@ -1268,7 +1268,7 @@ def highlighted(kind, rid, selected, picked):
 
 def metrics(region):
     """(top of the first row, row height) in region pixels: Blender keeps its search field at the top."""
-    s = bpy.context.preferences.system.ui_scale or 1.0     # 0 in background (step 68)
+    s = bpy.context.preferences.system.ui_scale or 1.0     # 0 in background
     return region.height - round(24 * s), round(20 * s)
 
 
@@ -1344,7 +1344,7 @@ def draw_channels():
         if y < 0:
             break
         kind, node, fc = row
-        if kind in graph_layers.KINDS:          # step 204: another selected animation layer (ui/graph_layers.py)
+        if kind in graph_layers.KINDS:          # another selected animation layer (ui/graph_layers.py)
             graph_layers.draw_row(row, y, h, s, font, region.width)
             y -= h
             continue
@@ -1381,7 +1381,7 @@ def draw_channels():
 
 def show_rows(context, chosen):
     """Maya: the curves of the selected outliner rows are shown and selected, the others hidden (pinned curves stay
-    shown, step 203)."""
+    shown)."""
     for _kind, node, curves in listed_nodes(context, context.space_data):
         for fc in curves:
             on = fc in chosen
@@ -1436,7 +1436,7 @@ class ALLSET_OT_graph_channel_click(bpy.types.Operator):
         if row is None:
             return {'FINISHED'}
         kind, node, _fc = row
-        if kind in graph_layers.KINDS:          # step 204: that layer becomes the last picked one
+        if kind in graph_layers.KINDS:          # that layer becomes the last picked one
             graph_layers.activate_row(context, row)
             return {'FINISHED'}
         s = context.preferences.system.ui_scale
@@ -1488,7 +1488,7 @@ class ALLSET_OT_graph_channel_scroll(bpy.types.Operator):
         return self.execute(context)
 
 
-# --- step 203: keeping Blender's drawing in step with the Maya list ------------------------------------------------
+# --- keeping Blender's drawing in step with the Maya list ----------------------------------------------------------
 
 def editor_spaces(context):
     """[(window, area, space)] of every Maya Graph Editor (F-Curves) and Dope Sheet (not the Timeline)."""
@@ -1728,7 +1728,7 @@ def _filters_changed(_self, context):
     _redraw_editors(context)
 
 
-# (WindowManager property, label, Maya annotation) of the step 203 Show / List check items
+# (WindowManager property, label, Maya annotation) of the Show / List check items
 FLAGS = (
     ("allset_attr_hidden", "Hidden", "List only hidden attributes (Channel Box hidden channels)"),
     ("allset_attr_anim_curve", "Driven by Anim Curve", "List only keyed attributes"),
@@ -1784,7 +1784,7 @@ def _dope_header(self, context):
     layout.popover(panel="DOPESHEET_PT_filters", text="", icon='FILTER')
 
 
-# Step 281 (#192): Maya's Graph Editor / Dope Sheet keep the toolbar on its own row under the menu bar (on one row with
+# #192: Maya's Graph Editor / Dope Sheet keep the toolbar on its own row under the menu bar (on one row with
 # the menus the tangent buttons ran past the right edge of a ~750 px editor). Blender gives these editors one header,
 # but their footer (playback controls in 5.x) can sit at the top under it: in a Maya editor the footer is shown, put on
 # top and draws the toolbar. Timeline mode keeps Blender's footer.
@@ -1882,7 +1882,7 @@ def own_draw(cls):
 
 def patch_headers():
     """Swap only the class's own draw (the first draw function), so UI appended to the header by others (e.g. the
-    step 70 toolbar) keeps drawing after it."""
+    kit's Graph Editor toolbar) keeps drawing after it."""
     for key, name, fn in HEADERS:
         funcs = getattr(bpy.types, name)._dyn_ui_initialize()
         if key not in _orig:
@@ -1922,7 +1922,7 @@ def frame_playback_range(context, area):
 def prepare_later(window, ui_type, tries=60):
     """After ``allset.open_editor``: frame the playback range (Graph Editor / Dope Sheet), fold the Dope Sheet to
     object rows (Maya Dopesheet Summary + objects), show the UV Editor's tool header and UV Toolkit. From a timer:
-    a new window's regions have no size inside the operator (step 9)."""
+    a new window's regions have no size inside the operator."""
     state = {"n": tries}
     ptr = window.as_pointer()
 

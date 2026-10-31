@@ -4,7 +4,7 @@ follows the playback range.
 
 Maya's Time Slider (transport buttons, current time
 field, auto key) and Range Slider (animation start, playback start, [range], playback end,
-animation end). Blender form (step 20):
+animation end). Blender form:
 - the timeline header's ``draw_header`` (``DOPESHEET_HT_editor_buttons`` in Timeline mode, a plain class, not in
   bpy.types) is wrapped to draw ``draw_header`` below and restored on unregister.
 - Maya's animation range = scene frame_start/end; its playback range = the preview range
@@ -12,9 +12,9 @@ animation end). Blender form (step 20):
 - Maya's time slider always shows the playback range: after a file load and whenever the
   range changes, every Timeline runs ``anim.scene_range_frame`` (a msgbus subscription and
   a load_post handler defer it to a timer).
-- Step 56: LMB on the timeline = time (Shift = red range), RMB = Maya's
+- LMB on the timeline = time (Shift = red range), RMB = Maya's
   Time Slider menu, MMB = move the time without updating the scene (Maya's MMB drag).
-- Step 50: the
+- The
   header is the Range Slider row in Maya's order; Blender's Playback / Keying / View / Marker menus move
   into the animation preferences menu at its right end (``DOPESHEET_MT_editor_menus.draw_collapsible`` is
   overridden on the class for Timeline mode, deleted on unregister). A timeline with its sidebar shown (the Maya Workflow Kit
@@ -85,7 +85,7 @@ def draw_header(context, layout):
     space, area = context.space_data, context.area
     if has_slider_panel(space) and not has_slider_panel(space, area):
         # Maya Workflow Kit layout whose sidebar can't open (Blender 5.x: the Timeline mode keeps its sidebar 1 px, even in a
-        # factory file, step 118): one row, Range Slider first, the Time Slider buttons at the right end
+        # factory file): one row, Range Slider first, the Time Slider buttons at the right end
         draw_range_slider(layout, context)
         layout.separator_spacer()
         draw_transport(layout, context)
@@ -108,7 +108,7 @@ def draw_range_slider(layout, context):
     row.active = scene.use_preview_range
     row.prop(scene, "frame_preview_start", text="")
     # Maya's range bar. In the Maya Workflow Kit layout an empty label holds its place and
-    # ui/range_bar.py draws the draggable bar there (step 73). Elsewhere Blender has no such
+    # ui/range_bar.py draws the draggable bar there. Elsewhere Blender has no such
     # widget: the toggle = use the playback range (off = the whole animation range), the button frames it.
     from . import range_bar
     bar = layout.row(align=True)
@@ -131,18 +131,18 @@ def draw_range_slider(layout, context):
     layout.separator_spacer()
     row = layout.row(align=True)
     # Maya auto key (:585): Maya's key button, red while on (issue #37: Blender's record circle wasn't recognised)
-    # The kit's own Maya Auto Key (operators/auto_key.py, step 130): keys only already keyed channels without
+    # The kit's own Maya Auto Key (operators/auto_key.py): keys only already keyed channels without
     # Blender's "Only Insert Available" preference.
     on = getattr(scene, "allset_auto_key", False)
     key = row.row(align=True)
     key.alert = on
     key.prop(scene, "allset_auto_key", text="", toggle=True, icon='KEY_HLT' if on else 'KEY_DEHLT')
-    # Maya: the current character set and the current animation layer (step 180: the selected
+    # Maya: the current character set and the current animation layer (the selected
     # layer of operators/anim_layers; "No Anim Layer" while the scene has only BaseAnimation)
     from ..operators import anim_layers
     ls = getattr(context.scene, "allset_anim_layers", ())
     sel = anim_layers.selected(context.scene) if len(ls) > 1 else None
-    # Maya's current character field (step 187: kit character sets = Keying Sets, operators/character_sets.py)
+    # Maya's current character field (kit character sets = Keying Sets, operators/character_sets.py)
     ks = scene.keying_sets.active
     sub = layout.row()
     sub.ui_units_x = 6
@@ -195,7 +195,7 @@ class ALLSET_PT_time_slider(bpy.types.Panel):
         draw_transport(self.layout.row(align=False), context)
 
 
-# --- Time Slider hand feel (step 56) ---------------------------------------------------------------
+# --- Time Slider hand feel ---------------------------------------------------------------
 # Maya: LMB anywhere on the Time Slider moves the time, Shift+LMB drag highlights a range, RMB = the
 # Time Slider menu (Maya 2022 labels).
 # Blender's timeline is a Dope Sheet mode, so these sit first in the "Dopesheet" keymap and pass
@@ -286,7 +286,7 @@ class ALLSET_OT_time_scrub(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
 
-RANGE_EDGE_PX = 8          # end-arrow zone of a highlighted range (x UI scale), step 84
+RANGE_EDGE_PX = 8          # end-arrow zone of a highlighted range (x UI scale)
 
 
 def range_zone(context, region, x):
@@ -545,7 +545,7 @@ def _draw_range():
     gpu.state.blend_set('ALPHA')
     shader.uniform_float("color", RANGE_COLOR)
     batch.draw(shader)
-    # Maya's arrows on a highlighted range (step 84): ◀ / ▶ in the end zones (scale), ◀▶ in the middle (move)
+    # Maya's arrows on a highlighted range: ◀ / ▶ in the end zones (scale), ◀▶ in the middle (move)
     edge = RANGE_EDGE_PX * (context.preferences.system.ui_scale or 1.0)
     k = min(edge * 0.6, h * 0.25)
     y = h * 0.5
@@ -565,21 +565,21 @@ def _draw_range():
     gpu.state.blend_set('NONE')
 
 
-# --- Maya ruler (step 186) -------------------------------------------
+# --- Maya ruler -------------------------------------------
 # The Maya Workflow Kit layout's Time Slider is painted over Blender's timeline drawing: a dark background, one 2 px
 # tick + label per step (the smallest step whose spacing fits the labels, like Maya), the bottom band and the
 # translucent current-time block with its white frame number. At UI scale 1.0 (a 32 px tall ruler): rows 1-8 labels
 # #757575, ticks rows 13-27 #7c7c7c, rows 29-31 #373737, background #2b2b2b, current time = white at 18.4 % over the
-# frame's cell (step 195), its number white in rows 16-23.
+# frame's cell, its number white in rows 16-23.
 # Blender draws its own current-frame box in the region overlay after every Python handler (a full-region
 # POST_PIXEL fill hides everything else of Blender's) and no RNA / theme-free switch hides it, so that box stays on
-# top (step 186).
+# top.
 MAYA_RULER_H = 32.0
 RULER_BG = (0x2b / 255, 0x2b / 255, 0x2b / 255, 1.0)
 RULER_BAND = (0x37 / 255, 0x37 / 255, 0x37 / 255, 1.0)
 RULER_TICK = (0x7c / 255, 0x7c / 255, 0x7c / 255, 1.0)
 RULER_LABEL = (0x75 / 255, 0x75 / 255, 0x75 / 255, 1.0)
-# step 195: the current-time block is #525252 over the #2b2b2b ruler = white at (0x52 - 0x2b) / (0xff - 0x2b) = 18.4 %
+# the current-time block is #525252 over the #2b2b2b ruler = white at (0x52 - 0x2b) / (0xff - 0x2b) = 18.4 %
 RULER_CURRENT = (1.0, 1.0, 1.0, (0x52 - 0x2b) / (0xff - 0x2b))
 RULER_CURRENT_LABEL = (1.0, 1.0, 1.0, 1.0)
 # (top row, bottom row) of the 32 px ruler. With Time Slider bookmarks
@@ -739,7 +739,7 @@ def playback_range(scene):
     return scene.frame_start, scene.frame_end
 
 
-# --- key ticks (step 73) -----------------------------------------------------------------------------
+# --- key ticks -----------------------------------------------------------------------------
 # Maya draws the keys of the selected nodes as 1 px lines over the whole Time Slider height: keys red,
 # breakdowns green.
 KEY_RGB = (1.0, 0.0, 0.0, 1.0)
@@ -752,12 +752,12 @@ def key_frames(nodes):
     from . import cb_channels
     frames = {}
     for node in nodes:
-        # Channel Box Sync Timeline Display: only the selected channels' keys (step 158)
+        # Channel Box Sync Timeline Display: only the selected channels' keys
         curves = cb_channels.timeline_curves(bpy.context, node)
         if curves is None:
             curves = time_keys.node_fcurves(node)
             if isinstance(node, bpy.types.Object):
-                # step 194: the shown layer's keys + BaseAnimation keys of channels not in that layer (Maya)
+                # the shown layer's keys + BaseAnimation keys of channels not in that layer (Maya)
                 from ..operators import anim_layers
                 curves = list(curves) + anim_layers.hidden_base_curves(node, bpy.context.scene)
         for fc in curves:
@@ -782,7 +782,7 @@ def playhead_half_width(context, frame):
 
 
 def key_x(region, frame, maya):
-    """Region x of a key tick: Maya draws it on the frame's tick, the left edge of the frame's cell (step 186);
+    """Region x of a key tick: Maya draws it on the frame's tick, the left edge of the frame's cell;
     other timelines keep Blender's frame centre."""
     return region.view2d.view_to_region(frame - 0.5 if maya else frame, 0, clip=False)[0]
 
@@ -879,7 +879,7 @@ classes = (ALLSET_MT_anim_preferences, ALLSET_PT_time_slider, ALLSET_OT_time_scr
 
 
 # Maya's undo never moves the current time (a time change isn't an undo step there); Blender's memfile undo restores
-# the scene's frame_current with everything else, so Ctrl+Z after scrubbing jumped back (step 240 QA H2-1). The frame
+# the scene's frame_current with everything else, so Ctrl+Z after scrubbing jumped back. The frame
 # is put back from a 0 s timer, not inside undo_post (data written there before the next push is unsafe for redo).
 _KEEP = {}
 

@@ -1,4 +1,4 @@
-"""QA step 240 F, order others_first (own Blender process): see tools/qa/qa_addons.py."""
+"""QA F, order others_first (own Blender process): see tools/qa/qa_addons.py."""
 
 import importlib.util
 from pathlib import Path

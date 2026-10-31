@@ -1,4 +1,4 @@
-"""Step 21: one length rule for every creation path.
+"""One length rule for every creation path.
 
 A Maya length of 1 = one scene display unit: Create / shelf / menu / marking menu
 (``allset.create``), ``cmds.polyCube()`` and a Maya FBX import give the same size,
@@ -107,14 +107,14 @@ def test_other_kinds_scale_with_the_unit():
     assert _close((cam.data.clip_start, cam.data.clip_end), (0.001, 100.0)), \
         (cam.data.clip_start, cam.data.clip_end)
     assert abs(cam.data.display_size - 0.01) < TOL
-    assert (cam.data.lens, cam.data.sensor_width) == (35.0, 36.0), "camera 35 mm on 36 mm film (step 81)"
+    assert (cam.data.lens, cam.data.sensor_width) == (35.0, 36.0), "camera 35 mm on 36 mm film"
     circle = create.create(bpy.context, 'NURBS_CIRCLE')
     assert _close(circle.dimensions[:2], (0.02, 0.02), 1e-3), tuple(circle.dimensions)
     curve = create.create(bpy.context, 'CV_CURVE')
     assert curve.name == "curve1" and curve.type == 'CURVE', curve.name
     assert max(curve.dimensions) < 0.1, tuple(curve.dimensions)
     area = create.create(bpy.context, 'AREA_LIGHT')
-    assert abs(area.data.size - 0.02) < TOL, area.data.size     # area light 2 x 2 units (step 137)
+    assert abs(area.data.size - 0.02) < TOL, area.data.size     # area light 2 x 2 units
     _set_units("factory")
 
 
@@ -129,11 +129,11 @@ def test_every_creation_path_uses_allset_create():
                if isinstance(action, tuple) and action and str(action[0]).startswith(("mesh.", "allset.create"))}
     assert set(created) == {"Disc", "Sphere", "Torus", "Cube", "Cone", "Cylinder", "Plane",
                             "Platonic Solid", "Pyramid", "Prism", "Pipe", "Helix", "Gear",
-                            "Type"}, created   # Type: step 54; Pipe / Helix / Gear: step 190
+                            "Type"}, created   # Type, Pipe / Helix / Gear included
     for label, action in created.items():
         assert action[0] == "allset.create" and action[1]["kind"] in create.KINDS, (label, action)
     assert menu_map.MAP["Create/Curve Tools/Bezier Curve Tool"][0] == "allset.create"
-    # step 156: CV / EP Curve Tool are click tools (operators/curve_draw.py; clicked points are already scene units)
+    # CV / EP Curve Tool are click tools (operators/curve_draw.py; clicked points are already scene units)
     assert menu_map.MAP["Create/Curve Tools/CV Curve Tool"] == "allset.cv_curve_tool"
     assert shelf_map.BY_COMMAND["EPCurveTool"][0] == "allset.ep_curve_tool"
     for cmd in ("CreateBezierCurveTool", "CreatePolygonCube"):

@@ -1,4 +1,4 @@
-"""QA activity I (step 240): change impact map since the previous release tag.
+"""QA activity I: change impact map since the previous release tag.
 
 For every changed file under src/: lines changed, which test files mention its module, and a risk score
 (lines x past bug count from commit messages x exposure). Files no test mentions are listed

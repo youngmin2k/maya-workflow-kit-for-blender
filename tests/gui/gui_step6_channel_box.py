@@ -1,4 +1,4 @@
-"""Step 6 in a real UI: Channel Box MMB virtual slider (and pass-through), screenshot."""
+"""In a real UI: Channel Box MMB virtual slider (and pass-through), screenshot."""
 
 import os
 import sys
@@ -39,7 +39,7 @@ def s_setup():
     C["x"], C["y"] = setup()
     C["cb"] = import_module(MODULE + ".ui.channel_box")
     area, _r = view3d()
-    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport (step 116; was the 3D View sidebar)
+    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport (was the 3D View sidebar)
     for o in bpy.context.view_layer.objects:
         o.select_set(o.name == "Cube")
     bpy.context.view_layer.objects.active = cube()

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya light Intensity and Decay Rate on Blender lights (step 137, issue #71).
+"""Maya light Intensity and Decay Rate on Blender lights (issue #71).
 
 Maya: a new point / spot / area light
 has intensity 1 and Decay Rate No Decay; a lambert surface facing a point / spot light at any distance renders
@@ -195,7 +195,7 @@ PENUMBRA_PROP = "allset_penumbra"     # Maya penumbra angle (degrees) last writt
 
 
 def cone_penumbra(light):
-    """(Maya coneAngle, penumbraAngle) in degrees from Blender's spot (step 158): a positive penumbra widens the
+    """(Maya coneAngle, penumbraAngle) in degrees from Blender's spot: a positive penumbra widens the
     cone outward (size = cone + 2p, blend = 2p / size), a negative one softens inward (size = cone, blend = 2|p| / cone)."""
     size = math.degrees(light.spot_size)
     soft = light.spot_blend * size / 2.0
@@ -235,7 +235,7 @@ def _penumbra():
 
 
 def channel_attrs(light=None):
-    """Maya light shape channels Blender keeps differently (keyable attributes, steps 148 / 158): Color R / G / B
+    """Maya light shape channels Blender keeps differently (keyable attributes): Color R / G / B
     (one colour vector), spot Cone Angle / Penumbra Angle (``spot_size`` + ``spot_blend``) — Channel Box SHAPES rows
     ``maya:colorR`` ... (ui/channel_box._virtual). ``paths`` = the Blender properties a key on the row keys."""
     from .deformers import Attr
@@ -261,7 +261,7 @@ def channel_attr(name, light=None):
     return None
 
 
-# Blender properties a key on a Light row keys: Maya Intensity is read from the power (step 137)
+# Blender properties a key on a Light row keys: Maya Intensity is read from the power
 KEY_PATHS = {"allset_intensity": (("energy", -1),)}
 
 

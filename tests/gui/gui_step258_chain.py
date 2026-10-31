@@ -1,4 +1,4 @@
-"""Step 258 (Issues #152 #155) as a Maya user in the Maya layout: pCube1 -> Skin > Bind Skin with only the cube (no
+"""Issues #152 #155 as a Maya user in the Maya layout: pCube1 -> Skin > Bind Skin with only the cube (no
 joint) -> Maya's Error, no traceback -> grid snap on from the Status Line -> move -> Ctrl+Z undoes the move and keeps
 the snap (Maya: snap toggles aren't undoable) -> F frames with a margin -> save / open.
 Screenshots: gui_step258_bind_error.png, gui_step258_snap_undo.png."""

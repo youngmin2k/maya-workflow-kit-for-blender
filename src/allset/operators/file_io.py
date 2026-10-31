@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya File > Import / Export All / Export Selection: one file dialog with Files of type and an Options panel
-(step 102).
+.
 
 Maya opens a single dialog for every format and picks the translator from "Files of type" (or the extension,
 "Best Guess" on import); Blender has one operator per format. ``allset.file_dialog`` is that single dialog: the
@@ -67,8 +67,8 @@ def import_args(fmt, k, maya=True):
     Maya writes centimetres with Y up: FBX carries its unit and axes and Blender's
     importer converts both itself; OBJ and Alembic have no unit, so their numbers are Maya units (× k) and Y up;
     USD carries metersPerUnit, which Blender converts to metres, so cm files need ×100 to become Maya units.
-    Blender's readers leave that conversion on the objects' channels (Rotate X 90, Scale 0.01, step 133 I2):
-    ``after_import`` moves it into the geometry (step 138; FBX's own ``bake_space_transform`` does it there).
+    Blender's readers leave that conversion on the objects' channels (Rotate X 90, Scale 0.01):
+    ``after_import`` moves it into the geometry (FBX's own ``bake_space_transform`` does it there).
     Maya writes frame 1 at FBX time 1/24 s, which Blender already reads as frame 1 (no extra offset).
     OBJ: Maya names the object with ``g`` (no ``o`` line), so groups split the objects.
     """
@@ -90,7 +90,7 @@ def export_args(fmt, k, selection, maya=True):
     """(operator id, kwargs) that write ``fmt`` the way Maya reads it back: centimetres (one Maya unit per
     ``k`` BU), Y up; ``selection`` = only the selected objects (Export Selection).
 
-    Step 138: Maya must read the same channels the kit shows — no Rotate X -90 / Scale 100 from the axis / unit
+    Maya must read the same channels the kit shows — no Rotate X -90 / Scale 100 from the axis / unit
     conversion. FBX bakes it into the geometry itself (``bake_space_transform``) and writes the timeline as one
     take (the NLA-strip default wrote no animation without strips); OBJ gets ``g`` lines and Alembic / USD are
     scaled / converted around Blender's writers (``write``, ``after_export``)."""
@@ -101,7 +101,7 @@ def export_args(fmt, k, selection, maya=True):
             args.update(axis_forward='-Z', axis_up='Y', apply_unit_scale=True, global_scale=1.0,
                         apply_scale_options='FBX_SCALE_NONE', add_leaf_bones=False, bake_space_transform=True,
                         bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False,
-                        # step 222: Maya joints point X down the bone; step 232: Maya Y = the bone's
+                        # Maya joints point X down the bone; Maya Y = the bone's
                         # Z, Maya Z = its X (joints.JOINT_AXES, what Orient Joint sets) — '-Y' put Maya Y on the
                         # bone's -X (jointOrient 90 deg off Maya's); Maya exports joints, not the kit's control bones; a key per frame like Maya's bake (also re-composable by fbx_rig)
                         primary_bone_axis='X', secondary_bone_axis='Z', use_armature_deform_only=True,
@@ -131,7 +131,7 @@ def export_args(fmt, k, selection, maya=True):
     raise ValueError(fmt)
 
 
-# --- step 138: the conversion goes into the geometry, not onto the channels ----------------------------
+# --- the conversion goes into the geometry, not onto the channels ----------------------------
 #
 # Maya reads its transforms' channels straight from the file, so a Y-up / cm conversion written as a root
 # rotation or scale shows as Rotate X -90 / Scale 100 in Maya and Blender's readers
@@ -352,7 +352,7 @@ def after_import(context, fmt, path, obs, materials, args):
                 bpy.data.objects.remove(ob)
             bake_conversion(context, obs, _axis_matrix(up_y) @ Matrix.Scale(c, 4))
     elif fmt == 'FBX':
-        # rigs: Maya's curves / Euler rotations / skeleton without the conversion node (step 223, L12)
+        # rigs: Maya's curves / Euler rotations / skeleton without the conversion node (L12)
         # (a rig file is read without bake_space_transform, see execute: the reader would shrink skinned meshes)
         from . import fbx_rig_import, joints, naming
         done, conv = set(), None
@@ -377,7 +377,7 @@ def after_import(context, fmt, path, obs, materials, args):
 
 
 def normalise_skin_weights(ob, eps=1e-6):
-    """Step 284 (#189): Maya's FBX export leaves out skin weights of 0.001 or less without scaling the rest, and
+    """#189: Maya's FBX export leaves out skin weights of 0.001 or less without scaling the rest, and
     Maya's FBX import renormalises each vertex's weights to sum 1 (its skin cluster normalises). Blender's reader
     keeps the file values, so the Component Editor / Paint Skin Weights / a later export showed up to 0.0016 less.
     Divide every vertex's joint weights (groups named after a bone of the mesh's Armature modifiers) by their sum;
@@ -406,9 +406,9 @@ def normalise_skin_weights(ob, eps=1e-6):
 
 
 def _file_time_slider(context, path, obs):
-    """Step 238 (#146): an animated FBX without a skeleton sets the Time Slider to the file's range too —
+    """#146: an animated FBX without a skeleton sets the Time Slider to the file's range too —
     Maya's FBXImport does even with Fill Timeline off; Blender's reader
-    leaves the scene's range (0-250). Rigs get it in fbx_rig_import.fix_armature (step 235)."""
+    leaves the scene's range (0-250). Rigs get it in fbx_rig_import.fix_armature."""
     if not any(o.animation_data is not None and o.animation_data.action is not None for o in obs):
         return None
     from . import fbx_rig, fbx_rig_import
@@ -428,7 +428,7 @@ def _file_time_slider(context, path, obs):
 
 def _write_obj_groups(path):
     """Maya's OBJ reader names objects after ``g`` lines and ignores ``o``: add ``g <name>`` after every
-    ``o <name>`` Blender writes (step 133 I4: the cube came in as "Mesh")."""
+    ``o <name>`` Blender writes (otherwise a cube comes in as "Mesh")."""
     with open(path, encoding="utf-8", errors="surrogateescape") as fh:
         lines = fh.readlines()
     if any(line.startswith("g ") for line in lines):
@@ -598,17 +598,17 @@ def usd_maya_axes(path, k):
 
 
 def write(context, fmt, path, op, args, maya, k, deform_only=True, maya_names=True):
-    """Run Blender's writer with the Maya preset's pre / post steps (step 138); lambert-family Base Color is linked
-    straight to the Maya colour / texture while it writes (``material.diffuse_bypass``, step 214). FBX with the Maya
+    """Run Blender's writer with the Maya preset's pre / post steps; lambert-family Base Color is linked
+    straight to the Maya colour / texture while it writes (``material.diffuse_bypass``). FBX with the Maya
     preset: ``deform_only`` = only the deforming joints, hung on the deforming chain; ``maya_names`` = Maya-safe
-    node names (step 236, operators/fbx_skeleton.py)."""
+    node names (operators/fbx_skeleton.py)."""
     from . import material
     with material.diffuse_bypass():
         _write(context, fmt, path, op, args, maya, k, (deform_only, maya_names))
 
 
 class _BlendShapesKept:
-    """Step 235 (Issue #144): Blender's FBX writer exports the EVALUATED mesh and drops its shape keys
+    """Issue #144: Blender's FBX writer exports the EVALUATED mesh and drops its shape keys
     when any non-Armature modifier is on ($S/addons_core/io_scene_fbx/export_fbx_bin.py:2645-2690, 2773), so a mesh
     with a blend shape and a cluster / lattice / kit deformer lost every blend shape. Maya's FBX keeps the blendShape
     (and skinCluster) and leaves the other deformers out: while writing, those deformer modifiers of meshes with
@@ -664,7 +664,7 @@ def _write_one(context, fmt, path, op, args, maya, k, rig=(True, True)):
             fbx_rig.set_time_span(path, sc.frame_start, sc.frame_end, fps)     # Maya's Time Slider range (235)
             if rig[1]:
                 from . import fbx_skeleton
-                fbx_skeleton.rewrite_names(path)       # step 236: no FBXASC names in Maya
+                fbx_skeleton.rewrite_names(path)       # no FBXASC names in Maya
     elif fmt == 'OBJ':
         _write_obj_groups(path)
     elif fmt == 'USD' and not usd_maya_axes(path, k):
@@ -681,8 +681,8 @@ def _exported_armatures(context, args):
 
 
 def rig_fbx_maya(context, path, run, args, deform_only=True):
-    """Step 222: joint orient as PreRotation, no armature Null (operators/fbx_rig.py). Needs a second export of the
-    same objects at the rest pose (the writer's own conventions). ``deform_only`` (step 236): only the
+    """Joint orient as PreRotation, no armature Null (operators/fbx_rig.py). Needs a second export of the
+    same objects at the rest pose (the writer's own conventions). ``deform_only``: only the
     deforming joints, on the deforming chain (``fbx_skeleton.deform_parents``). Returns (joints, nulls) or None."""
     from . import fbx_rig
     rigs = _exported_armatures(context, args)
@@ -760,7 +760,7 @@ def export_blend(context, path, selection):
         bpy.ops.wm.save_as_mainfile(filepath=path, copy=True)
         return
     from . import dag
-    obs = set(dag.hierarchy(context.selected_objects))     # Maya: the selection with its descendants (step 164)
+    obs = set(dag.hierarchy(context.selected_objects))     # Maya: the selection with its descendants
     bpy.data.libraries.write(path, obs, fake_user=False, compress=False)
 
 
@@ -787,7 +787,7 @@ class _FileDialog:
     maya_conversion: BoolProperty(name="Maya Units and Axes", default=True,
                                   description="Convert to / from a Maya scene: centimetres and Y up")
     animation: BoolProperty(name="Animation", default=True, description="Write the animation (FBX, Alembic, USD)")
-    # step 236 (Issue #145): engine-ready skeletons (operators/fbx_skeleton.py)
+    # Issue #145: engine-ready skeletons (operators/fbx_skeleton.py)
     deform_only: BoolProperty(name="Deforming Joints Only", default=True,
                               description="FBX: write only the joints that deform the skin (a Rigify rig's DEF "
                                           "bones), parented along the deforming chain; helper and control bones "
@@ -877,7 +877,7 @@ class _FileDialog:
                     from . import fbx_rig_import
                     if fbx_rig_import.has_skeleton(path):
                         # Blender's reader bakes the conversion into a skinned mesh but leaves it on the armature
-                        # (mesh 0.01 x, first_hour #37): read plain, after_import converts (step 223)
+                        # (mesh 0.01 x, first_hour #37): read plain, after_import converts
                         args = dict(args, bake_space_transform=False)
                 before, mats = set(bpy.data.objects), set(bpy.data.materials)
                 mod, name = op.split(".")
@@ -896,10 +896,10 @@ class _FileDialog:
                     return {'FINISHED'}
                 op, args = export_args(fmt, k, self.selection, self.maya_conversion)
                 args.update(_animation_args(fmt, self.animation))
-                # Maya Export Selection writes the selected nodes with everything below them (step 164);
+                # Maya Export Selection writes the selected nodes with everything below them;
                 # Blender's writers take only the selected objects
                 from . import dag
-                from .control_shapes import excluded as shapes_excluded   # step 226: no control shape curves
+                from .control_shapes import excluded as shapes_excluded   # no control shape curves
                 if self.selection:
                     with dag.selected_hierarchy(context), shapes_excluded(context.scene, context.view_layer):
                         write(context, fmt, path, op, args, self.maya_conversion, k,
@@ -916,7 +916,7 @@ class _FileDialog:
         if self.mode != 'IMPORT':
             many = multi_skin_meshes(context.selected_objects if self.selection else context.scene.objects)
             if many:
-                # step 224: Blender reads a second Armature modifier back as one, engines keep one skin
+                # Blender reads a second Armature modifier back as one, engines keep one skin
                 self.report({'WARNING'}, f"{', '.join(many)}: several skin clusters — FBX and game engines keep one "
                                          "skin per mesh")
         results.result(self, f"{verb} {os.path.basename(path)}")

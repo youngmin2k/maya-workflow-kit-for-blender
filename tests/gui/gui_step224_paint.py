@@ -1,4 +1,4 @@
-"""Step 224 (Issue #134) in a real UI: Visualization > Numeric > Show Numbers on a ~20k-vertex skinned mesh draws at
+"""Issue #134: in a real UI: Visualization > Numeric > Show Numbers on a ~20k-vertex skinned mesh draws at
 most 2,000 weight labels (whole mesh in view: only around the brush, Help Line note; zoomed in: every vertex in view),
 with the draw time timed; a second Bind Skin on the skinned mesh opens Maya's question. Shots in the shots folder."""
 

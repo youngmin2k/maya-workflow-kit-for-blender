@@ -1,7 +1,7 @@
-"""Step 131 lane MENU (#23) in a real UI: Maya menus show the kit-drawn picture of the same command beside the items
+"""Lane MENU (#23) in a real UI: Maya menus show the kit-drawn picture of the same command beside the items
 Maya draws with an icon (Create > Polygon / NURBS Primitives, Mesh, Edit Mesh, Mesh Tools, Deform, Constrain, Key,
 Windows > General Editors), made at the menu icon size before any menu opens; labels, the right-aligned Maya
-hotkeys (step 108) and the option-box marks (step 103) stay aligned. Screenshots go to ALLSET_GUI_SHOTS (run once
+hotkeys and the option-box marks stay aligned. Screenshots go to ALLSET_GUI_SHOTS (run once
 with --ui-scale 0.8 = effective 1.0 on a 125 % display, once without)."""
 
 import os
@@ -30,7 +30,7 @@ MENUS = [
     ("constrain", ms.menu_idname("mainRigConstraintsMenu"), 400),
     ("key", ms.menu_idname("mainKeysMenu"), 400),
     ("general_editors", ms.SUBMENU_IDS["Windows/General Editors"], 400),
-    ("visualize", ms.menu_idname("mainVisualizeMenu"), 400),      # step 219: Maya 2026 Visualize
+    ("visualize", ms.menu_idname("mainVisualizeMenu"), 400),      # Maya 2026 Visualize
 ]
 
 
@@ -55,7 +55,7 @@ def s_setup():
 @step
 def s_prefs():
     bpy.ops.allset.keymap_activate()
-    # an open tooltip hides the popup menu from screen.screenshot (step 108): no tooltips in this session
+    # an open tooltip hides the popup menu from screen.screenshot: no tooltips in this session
     bpy.context.preferences.view.show_tooltips = False
 
 

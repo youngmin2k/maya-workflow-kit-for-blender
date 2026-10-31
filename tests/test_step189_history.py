@@ -1,4 +1,4 @@
-"""Step 189 (audit 13 BS5): Maya's Status Line Construction History toggle.
+"""Maya's Status Line Construction History toggle.
 
 Maya: with the toggle off Maya's menu commands run
 with -ch 0 — CreatePolygonCube / CreateNURBSSphere / CreateNURBSCircle leave no polyCube1 / makeNurb* node,

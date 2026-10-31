@@ -1,4 +1,4 @@
-"""Step 256 (#172): Maya UV Shell selection in the 3D View and the UV Editor (operators/uv_shell_select.py, Maya 2026
+"""#172: Maya UV Shell selection in the 3D View and the UV Editor (operators/uv_shell_select.py, Maya 2026
 rules). Cube with the top face's edges cut = shells A = f[0] f[4] f[5],
 B = f[1], C = f[2] f[3]. The session: Alt+F12 over the viewport, clicks with Shift / Ctrl, an empty click, a box, the UV
 Editor (same selection, a click there), F11 back to faces, Ctrl+Z, save / open. Shots: ALLSET_GUI_SHOTS."""
@@ -147,7 +147,7 @@ click("empty", empty_px, lambda: check(f"click on empty space clears ({sorted(se
 
 def box(tag, a, b, then, shift=False, ctrl=False):
     """A box: the kit's drag item (allset.uv_shell_box, first in the Select Box keymap) then Blender's own
-    view3d.select_box, both run in the view (event simulation makes no CLICK_DRAG here, step 170 note)."""
+    view3d.select_box, both run in the view (event simulation makes no CLICK_DRAG here)."""
     def run_box():
         area, r = view3d()
         (x0, y0), (x1, y1) = a(), b()

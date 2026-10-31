@@ -1,4 +1,4 @@
-"""Marketing clips (step 123): feature clips (MP4 + GIF) and the 30-45 s trailer.
+"""Marketing clips: feature clips (MP4 + GIF) and the 30-45 s trailer.
 
     python tools/marketing/make_clips.py [--blender PATH] [--no-build] [--only a,b] [--no-record] [--no-encode]
 

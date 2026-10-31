@@ -1,4 +1,4 @@
-"""Marketing images (step 122): captioned feature screens, key visuals, icon.
+"""Marketing images: captioned feature screens, key visuals, icon.
 
     python tools/marketing/make_marketing.py [--blender PATH] [--no-build] [--no-shots] [--compose-only]
 

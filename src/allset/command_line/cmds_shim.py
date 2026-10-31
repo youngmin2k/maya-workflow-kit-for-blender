@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""A ``maya.cmds`` look-alike for the command line (steps 7, 208).
+"""A ``maya.cmds`` look-alike for the command line.
 
 Re-implemented from Maya's documented command behaviour (flag long/short
 names, return values and Maya's results) — no Maya code. Numbers are in the
@@ -28,7 +28,7 @@ __all__ = ["ls", "select", "move", "rotate", "scale", "setAttr", "getAttr", "add
            "objExists", "listRelatives", "currentTime",
            "parent", "group", "duplicate", "spaceLocator",
            "setKeyframe", "cutKey", "keyframe", "playbackOptions", "file",
-           # step 216 (cmds_rig.py, cmds_misc.py)
+           # cmds_rig.py, cmds_misc.py
            "makeIdentity", "parentConstraint", "pointConstraint", "orientConstraint", "scaleConstraint",
            "aimConstraint", "joint", "connectAttr", "disconnectAttr", "isConnected", "listConnections",
            "connectionInfo", "nodeType", "objectType", "attributeQuery", "currentUnit", "sets", "shadingNode",
@@ -359,7 +359,7 @@ def move(*args, **kwargs):
         if os_ and relative:      # along the object's own axes (its rotate), in its parent's units
             ob.location = ob.location + ob.rotation_euler.to_matrix() @ v
             continue
-        # Maya ``move -a`` puts the rotate pivot at the point: the kit's pivot is the origin (step 10)
+        # Maya ``move -a`` puts the rotate pivot at the point: the kit's pivot is the origin
         mw = ob.matrix_world.copy()
         mw.translation = mw.translation + v if relative else v
         ob.matrix_world = mw
@@ -392,7 +392,7 @@ def scale(*args, **kwargs):
     return None
 
 
-# --- Maya matrices (no pivot offset: the kit's delta_location is Maya's pivot, step 10) ---------------------------
+# --- Maya matrices (no pivot offset: the kit's delta_location is Maya's pivot) ---------------------------
 
 def _frame(ob):
     """Matrix taking ``ob.matrix_basis`` to world (parent, parent inverse, bone / vertex parents)."""
@@ -811,7 +811,7 @@ _PRIM_FLAGS = {
 
 
 def _primitive(cmd, kwargs):
-    """Build a Maya primitive with its creation node (operators/prim_history.py, step 129): returns
+    """Build a Maya primitive with its creation node (operators/prim_history.py): returns
     [transform, node] like Maya, or [transform] with constructionHistory off."""
     from ..operators import prim_history
     kind, values, flags = _PRIM_FLAGS[cmd]

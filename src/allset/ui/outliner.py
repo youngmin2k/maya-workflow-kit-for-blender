@@ -10,11 +10,11 @@ Rows (``WindowManager.allset_outliner_rows``) are rebuilt outside drawing
 (ID data can't be written while drawing): from the depsgraph / load handlers
 and from this module's operators, skipped when nothing they show changed.
 
-Joints (step 55): a Maya joint is a bone, so an
+Joints: a Maya joint is a bone, so an
 expanded armature lists its bones as JOINT rows in bone hierarchy order; clicking one enters
 pose mode and selects that bone.
 
-Sets (step 96): kit sets (``operators/sets.py``) follow the DAG rows as SET rows; clicking one selects
+Sets: kit sets (``operators/sets.py``) follow the DAG rows as SET rows; clicking one selects
 its members.
 """
 
@@ -99,7 +99,7 @@ def dag_rows(scene, shapes):
     armature's bones come first under it, like the joints under a Maya skeleton group."""
     order = {ob: i for i, ob in enumerate(scene.objects)}
     # Object.children scans every object in the file: once per object made each depsgraph update O(n^2)
-    # (step 240 QA G: 620 objects = 65 ms per update)
+    # (620 objects = 65 ms per update)
     children = {}
     for ob in order:
         if ob.parent in order:
@@ -156,7 +156,7 @@ def rebuild(context=None, force=False):
 
 @persistent
 def _on_depsgraph(scene, depsgraph):
-    # step 286 (#191): the rows are names / parents / membership / bones — a move, a mesh edit or a selection change
+    # #191: the rows are names / parents / membership / bones — a move, a mesh edit or a selection change
     # can't change them, and building the rows walks the whole scene (1.6 ms per update at 620 objects)
     if depsgraph_filter.outliner_skip(depsgraph):
         return
@@ -446,7 +446,7 @@ def _shapes_changed(self, context):
 classes = (ALLSET_PG_outliner_row, ALLSET_OT_outliner_select, ALLSET_OT_outliner_expand,
            ALLSET_OT_outliner_refresh, ALLSET_UL_outliner)
 # ALLSET_PT_outliner (a 3D View sidebar list, shown when the dock-only option was off) went with the sidebar dock
-# (step 116): the Outliner is the layout's own Outliner area / floating window.
+#: the Outliner is the layout's own Outliner area / floating window.
 
 
 def _first_rebuild():

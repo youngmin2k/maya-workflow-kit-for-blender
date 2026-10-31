@@ -1,4 +1,4 @@
-"""Step 281 (#192): Graph Editor key moves the Maya way: Shift axis lock (first 3 px decide) and time snap landing on
+"""#192: Graph Editor key moves the Maya way: Shift axis lock (first 3 px decide) and time snap landing on
 whole frames."""
 
 import math

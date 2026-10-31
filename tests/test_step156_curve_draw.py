@@ -1,4 +1,4 @@
-"""Step 156 lane T: Maya curve drawing tools (operators/curve_draw.py) — click projection (persp ground / ortho view plane),
+"""Maya curve drawing tools (operators/curve_draw.py) — click projection (persp ground / ortho view plane),
 the point-list state machine (press / drag / release / Backspace / Enter rules), grid snap and that finishing calls the
 curves_maya maker with the clicked points. GUI: tests/gui/gui_step156_curves.py."""
 
@@ -155,7 +155,7 @@ def test_make_calls_curves_maya_with_points():
 def test_operators_registered_undo_only():
     for idname in ("cv_curve_tool", "ep_curve_tool", "arc3_tool", "arc2_tool"):
         cls = getattr(bpy.types, "ALLSET_OT_" + idname)
-        assert cls.bl_options == {'UNDO'}, (idname, cls.bl_options)     # Maya has no redo panel (step 147)
+        assert cls.bl_options == {'UNDO'}, (idname, cls.bl_options)     # Maya has no redo panel
         assert hasattr(bpy.ops.allset, idname)
     # background INVOKE runs execute: without points nothing happens, no preview handler left
     assert bpy.ops.allset.ep_curve_tool('INVOKE_DEFAULT') == {'CANCELLED'}

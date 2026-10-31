@@ -1,4 +1,4 @@
-"""Step 158 (#97): Channel Box Channels menu complete (Breakdown / Mute All, Sync Graph Editor / Timeline, Cut / Copy /
+"""#97: Channel Box Channels menu complete (Breakdown / Mute All, Sync Graph Editor / Timeline, Cut / Copy /
 Paste Selected, Freeze, Select Connection, layers notice), SHAPES rows as channels (light Intensity / Color keyable,
 spot Cone Angle / Penumbra Angle), muted state, Bind Skin INPUTS = skinCluster1.
 GUI: tests/gui/gui_step158_cb_menus.py."""
@@ -84,7 +84,7 @@ def test_channels_menu_has_every_maya_item_in_order():
     assert got == want, got
     assert props == ["Sync Selection in Graph Editor", "Sync Timeline Display"], props
     assert menus == ["ALLSET_MT_cb_freeze"]
-    # step 188: Add to / Remove From Selected Layers run allset.anim_layer_attrs (no notice any more)
+    # Add to / Remove From Selected Layers run allset.anim_layer_attrs (no notice any more)
     ops = [e[1][0] for e in log if e[0] == "operator"]
     assert ops.count("allset.anim_layer_attrs") == 2, ops
 

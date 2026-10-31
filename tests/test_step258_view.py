@@ -1,4 +1,4 @@
-"""Step 258 (Issue #155): F frames Maya-style (viewFit, fit factor 0.95), the Status Line snap
+"""Issue #155: F frames Maya-style (viewFit, fit factor 0.95), the Status Line snap
 toggles stay out of the undo queue, the Symmetry control opens Maya's drop-down.
 
 Expected: unit polyCube, persp camera (35 mm, film 36 x 24:

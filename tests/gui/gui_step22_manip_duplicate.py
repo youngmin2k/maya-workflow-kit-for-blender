@@ -1,4 +1,4 @@
-"""Step 22 in a real UI: Shift+drag on the Move gizmo's X arrow duplicates the cube and
+"""In a real UI: Shift+drag on the Move gizmo's X arrow duplicates the cube and
 moves the copy (Maya Smart Duplicate); a plain drag moves the original; Rotate gizmo too."""
 
 import os
@@ -52,7 +52,7 @@ def drag(x, y, d, dist, shift):
 def drag_press():
     x, y, d, dist, shift = C["drag"]
     if shift:
-        # a real Shift drag: only a keyboard event's modifiers reach the window event state (step 261)
+        # a real Shift drag: only a keyboard event's modifiers reach the window event state
         ev('LEFT_SHIFT', 'PRESS', shift=True)
     ev('LEFTMOUSE', 'PRESS', x=x, y=y, shift=shift)
     for i in range(1, STEPS + 1):

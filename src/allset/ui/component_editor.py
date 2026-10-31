@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Component Editor window (step 213, Issue #119).
+"""Maya's Component Editor window (Issue #119).
 
 Maya 2022: menu bar Options /
 Layout / Help, a tab bar (CE2), a table — Smooth Skins: one column per skinCluster influence + Total, a Hold row, a
@@ -8,7 +8,7 @@ and the bottom row "Auto Normalization: Interactive", Load Components / Close (C
 
 Blender: a ``marked_window`` kind "COMPONENT_EDITOR" (a Properties Tool tab in its own window) drawn by
 ``ALLSET_PT_component_editor``. The cells are Scene proxies (``Scene.allset_ce``: UI edits of Scene properties push undo
-steps, step 38) whose get / set read and write the live mesh: positions ÷ ``units.maya_unit()`` (Maya units),
+steps) whose get / set read and write the live mesh: positions ÷ ``units.maya_unit()`` (Maya units),
 weights through ``skin_tools_199._Weights`` with Maya's Interactive normalisation (``normalize``, CE5). The proxy rows
 follow the selection from a depsgraph handler → timer while Auto Update is on (CE7); never written in ``draw``.
 """
@@ -544,7 +544,7 @@ class ALLSET_PT_component_editor(bpy.types.Panel):
     """Maya's Component Editor (a marked Properties Tool tab in its own window)"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"            # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"            # = drawn by the Properties Tool tab (like the Tool Settings dock)
     bl_label = "Component Editor"
     bl_options = {'HIDE_HEADER'}
     bl_order = -300

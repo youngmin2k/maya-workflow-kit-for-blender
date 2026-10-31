@@ -1,4 +1,4 @@
-"""Step 260 (Issue #174): the Space hotbox.
+"""Issue #174: the Space hotbox.
 
 1. A click on each hotbox menu name (press and release in separate ticks, mouse not moved) opens that menu and runs no
    menu row. Before: Blender opened the popup on the PRESS with a row under the pointer and the RELEASE ran it (18 of 40
@@ -172,7 +172,7 @@ def s2_done():
           C["up"] and n == 0)
 
 
-# --- Step 267 (#174 on Windows 11): Windows auto-repeat = raw-input key-downs only, no release (GHOST_SystemWin32.cc
+# --- #174 on Windows 11: Windows auto-repeat = raw-input key-downs only, no release (GHOST_SystemWin32.cc
 # processKeyEvent :1334-1341 flags them is_repeat by the thread key state; event_simulate can't set the flag, the modal
 # handles a PRESS the same either way). Space held 2 s (0.5 s delay, then a repeat each 50 ms tick), OS state down ---
 @step

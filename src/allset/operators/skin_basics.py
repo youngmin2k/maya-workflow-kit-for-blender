@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Skin basics with Maya's meaning (step 247, Issue #164): Prune Small Weights, Set Max Influences, Go to Bind Pose,
+"""Skin basics with Maya's meaning (Issue #164): Prune Small Weights, Set Max Influences, Go to Bind Pose,
 Maintain max influences. Fixture numbers:
 tests/test_step247_skin_basics.py.
 

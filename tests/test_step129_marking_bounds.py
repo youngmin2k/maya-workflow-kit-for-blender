@@ -1,4 +1,4 @@
-"""Step 129 (#5): dragging down through a marking menu's list keeps the menu open. A list row with a submenu
+"""#5: dragging down through a marking menu's list keeps the menu open. A list row with a submenu
 (Paint, Assign Favorite Material) opens it beside the row like a Qt cascade, the list stays up and hit-tested,
 and moving on to another row closes the cascade again (engine, no bpy UI).
 GUI: tests/gui/gui_step129_marking_bounds.py."""

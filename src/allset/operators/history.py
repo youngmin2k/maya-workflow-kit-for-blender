@@ -27,7 +27,7 @@ NONLINEARS = {'SIMPLE_DEFORM', 'WAVE', 'CAST'}
 def is_deformer(md):
     """``md`` plays a Maya deformer: a DEFORMERS modifier, or a kit Geometry Nodes deformer — the wire
     (operators/wire_deformer.py, Maya wire) and the skin's weight sum (operators/skin_tools_199.py, part of the
-    skinCluster). Non-Deformer History keeps both like Maya (step 202 / #109)."""
+    skinCluster). Non-Deformer History keeps both like Maya (#109)."""
     if md.type in DEFORMERS:
         return True
     if md.type != 'NODES':
@@ -69,29 +69,29 @@ def _bake(context, ob, keep):
 def delete_history(context, objects, non_deformer=False, before_only=False):
     """Bake history on mesh ``objects``. Returns (baked, notes).
 
-    ``non_deformer``: Maya Delete Non-Deformer History keeps the deformers. Its option window (step 162):
+    ``non_deformer``: Maya Delete Non-Deformer History keeps the deformers. Its option window:
     "All non-deformer history" (default, ``bakePartialHistory
     -prePostDeformers``) also removes the non-deformer nodes *after* a deformer — polyCube / extrude / bend / bevel
     keeps only bend — so every non-deformer modifier is baked into the mesh under the deformers;
     ``before_only`` = "History before deformers only" (``-preDeformers``) bakes only the modifiers above the first
-    deformer (the kit's rule before step 162)."""
+    deformer (the kit's older rule)."""
     from . import extrude, prim_history
     baked, notes = 0, []
     for ob in objects:
-        # Step 239 (#124): the kit's polyExtrudeFace / polyBevel record is a non-deformer
+        # #124: the kit's polyExtrudeFace / polyBevel record is a non-deformer
         # history node too — Maya's Delete History (both kinds) removes it from the Channel Box INPUTS
-        rec = extrude.park(ob.name)              # kept for Ctrl+Z (step 283)
+        rec = extrude.park(ob.name)              # kept for Ctrl+Z
         if rec is not None:
             if not ob.modifiers and not (ob.type == 'MESH' and ob.data.shape_keys) and prim_history.owner_of(ob) is None:
                 baked += 1
                 continue
         # The primitive's creation node (polyCube1, makeNurbCircle1) is history too: both kinds drop it, the shape
-        # stays as it is (step 129)
+        # stays as it is
         if prim_history.drop(ob) and not ob.modifiers and not (ob.type == 'MESH' and ob.data.shape_keys):
             baked += 1
             continue
         # Smooth Mesh Preview (1/2/3) is a display attribute in Maya, not history
-        # (Maya): never baked, always kept (step 15).
+        # (Maya): never baked, always kept.
         preview = {md.name for md in ob.modifiers if is_preview(md)}
         history = [md for md in ob.modifiers if md.name not in preview]
         if not history and not (ob.type == 'MESH' and ob.data.shape_keys):
@@ -173,7 +173,7 @@ TYPES = (
     ('IK_HANDLES', "IK Handles", "Remove the IK constraints and their handle empties"),
     ('NONLINEARS', "Nonlinears", "Remove Simple Deform / Wave / Cast modifiers"),
     ('PARTICLES', "Particles", "Remove particle systems"),
-    # step 202 (#109): the kit's wire / nCloth / nParticle / nRigid nodes (operators/by_type.py)
+    # #109: the kit's wire / nCloth / nParticle / nRigid nodes (operators/by_type.py)
     ('WIRES', "Wires", "Remove the kit wire deformers and their base wires (the curves stay)"),
     ('NCLOTHS', "nCloths", "Remove the cloth from the meshes (the meshes stay)"),
     ('NPARTICLES', "nParticles", "Remove the nParticle systems (the emitters stay)"),
@@ -191,7 +191,7 @@ def delete_by_type(context, kind, objects):
     if kind in ('HISTORY', 'NON_DEFORMER_HISTORY'):
         return delete_history(context, objects, kind == 'NON_DEFORMER_HISTORY')
     n = 0
-    if kind in ('CLUSTERS', 'IK_HANDLES'):     # the kit's cluster / IK handle nodes with their handles (step 166)
+    if kind in ('CLUSTERS', 'IK_HANDLES'):     # the kit's cluster / IK handle nodes with their handles
         from . import by_type
         if kind == 'CLUSTERS':
             return by_type.delete_clusters(context.scene, objects), []
@@ -219,7 +219,7 @@ def delete_by_type(context, kind, objects):
         from . import constrain_199
         helpers = []
         for ob in objects:
-            # a kit Normal / Tangent constraint's hidden helper empty is part of the constraint node (step 202, #109)
+            # a kit Normal / Tangent constraint's hidden helper empty is part of the constraint node (#109)
             helpers += [h for h in (constrain_199.helper_of(c) for c in ob.constraints) if h is not None]
             n += len(ob.constraints)
             ob.constraints.clear()
@@ -240,7 +240,7 @@ def delete_by_type(context, kind, objects):
     return n, []
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_delete_history(bpy.types.Operator):
     """Bake the modifier stack and shape keys into the mesh (Maya Edit > Delete by
     Type > History, Alt+Shift+D)"""
@@ -250,7 +250,7 @@ class ALLSET_OT_delete_history(bpy.types.Operator):
 
     non_deformer: BoolProperty(name="Non-Deformer Only",
                                description="Keep deformers (Armature, Lattice, ...) and shape keys")
-    # Maya's option window "Delete: History before deformers only" (step 162); off = All non-deformer history
+    # Maya's option window "Delete: History before deformers only"; off = All non-deformer history
     before_only: BoolProperty(name="Before Deformers Only", options={'SKIP_SAVE'},
                               description="Bake only the modelling modifiers above the first deformer")
 

@@ -1,4 +1,4 @@
-"""Step 17: Maya framing fit (0.95 of the visible part of the view) and hotbox rows kept
+"""Maya framing fit (0.95 of the visible part of the view) and hotbox rows kept
 out from under the sidebar."""
 
 import math
@@ -51,7 +51,7 @@ def _check_fit(b, rect, factor=framing.FIT, persp=False):
     assert b[0] >= x0 - 0.5 and b[2] <= x1 + 0.5 and b[1] >= y0 - 0.5 and b[3] <= y1 + 0.5, (b, rect)
     ratio = max((b[2] - b[0]) / (x1 - x0), (b[3] - b[1]) / (y1 - y0))
     if persp:
-        # step 258: Maya's perspective viewFit leaves more room than the fit factor (box centre aimed at, its half
+        # Maya's perspective viewFit leaves more room than the fit factor (box centre aimed at, its half
         # extents across the view fill the factor at the near side's depth; tests/test_step258_view.py)
         assert 0.5 < ratio < factor, ratio
         return

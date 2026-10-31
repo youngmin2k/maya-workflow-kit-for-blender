@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Deform menu edit items (step 169): Wire > Add / Remove / Reset / Show Base Wire / Parent Base Wire / Wire
+"""Maya Deform menu edit items: Wire > Add / Remove / Reset / Show Base Wire / Parent Base Wire / Wire
 Dropoff Locator, ShrinkWrap > Set Target / Remove Target / Add surfaces / Remove surfaces, Lattice > Reset Lattice /
 Remove Lattice Tweaks, Prune Membership > Cluster / Lattice / Wire, Point On Curve.
 

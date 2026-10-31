@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Preferences window (Windows > Settings/Preferences > Preferences; step 215, Issue #121).
+"""Maya's Preferences window (Windows > Settings/Preferences > Preferences; Issue #121).
 
 Maya 2022: an 817 x 531 window — menu bar Edit (Revert to Saved, Restore Default
 Settings) / Help, a "Categories" list on the left (38 rows, children indented), the page "<Category>: <description>"

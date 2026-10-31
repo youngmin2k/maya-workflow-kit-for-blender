@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Editor Modify commands (step 178).
+"""Maya UV Editor Modify commands.
 
 Distribute UVs, Match Grid, Layout Along, Stack Similar Shells, Map Border and Straighten Border, with the default
 options. Shells and Maya UVs (points: loops of one vertex sharing one coordinate, ordered by first loop index = Maya's UV

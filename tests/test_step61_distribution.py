@@ -1,4 +1,4 @@
-"""Step 61: the package stays within the Extensions platform rules that can be checked offline.
+"""The package stays within the Extensions platform rules that can be checked offline.
 
 Rules: manifest fields (https://docs.blender.org/manual/en/latest/advanced/extensions/getting_started.html —
 tagline / permission reasons <= 64 chars without end punctuation, tags from the platform list, optional
@@ -41,7 +41,7 @@ def _code_lines(text):
 def test_manifest_fields():
     m = _manifest()
     assert "blender" not in m["name"].lower(), "ToS 2.1: no 'Blender' in the extension name"
-    assert m["license"] == ["SPDX:GPL-3.0-or-later", "SPDX:CC0-1.0"], m["license"]   # code GPL, kit-made assets CC0 (step 114)
+    assert m["license"] == ["SPDX:GPL-3.0-or-later", "SPDX:CC0-1.0"], m["license"]   # code GPL, kit-made assets CC0
     tagline = m["tagline"]
     assert len(tagline) <= 64 and tagline[-1] not in ".!?,;:", tagline
     for key, reason in m.get("permissions", {}).items():
@@ -74,7 +74,7 @@ def test_no_hard_coded_repository_names():
 
 
 def test_writes_outside_the_extension_folder_are_known():
-    """Writable data goes to bpy.utils.extension_path_user only. Since step 130 the layout file is never copied out
+    """Writable data goes to bpy.utils.extension_path_user only. The layout file is never copied out
     of the extension (no app template), the switch keeps no snapshot and the shelf's legacy-build fallback is a
     folder inside the add-on (#42): no user_resource() call is left. A new one must be reviewed first."""
     known = set()

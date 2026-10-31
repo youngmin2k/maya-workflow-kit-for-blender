@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 3D Cut and Sew UV Tool (step 79).
+"""Maya 3D Cut and Sew UV Tool.
 
 UV > 3D Cut and Sew UV Tool switches to edge mode; in the 3D View an LMB drag
 along edges cuts the UVs there, Ctrl+drag sews; tool keys x / s / d = Cut / Sew / Unfold + Layout (Maya
-hotkeys); shell borders (Texture Borders) show thick. The cut / sew themselves are step 66's ``uv_tools.cut`` /
-``sew``; the edge under the mouse is the pre-selection pick (step 74), so the red highlight is the edge a press takes.
+hotkeys); shell borders (Texture Borders) show thick. The cut / sew themselves are ``uv_tools.cut`` /
+``sew``; the edge under the mouse is the pre-selection pick, so the red highlight is the edge a press takes.
 """
 
 import bmesh

@@ -1,4 +1,4 @@
-"""Step 205: the Maya menu paths of the new deformers / pins run what their modules declare (ui/menu_map.py writes
+"""The Maya menu paths of the new deformers / pins run what their modules declare (ui/menu_map.py writes
 them literally because tools/menu_count.py loads the menu maps without bpy; a hand copy once passed `kind="tension"`
 where the operator's enum is 'TENSION' — the GUI run caught it)."""
 

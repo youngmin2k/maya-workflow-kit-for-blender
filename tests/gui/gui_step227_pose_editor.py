@@ -1,4 +1,4 @@
-"""Step 227 lane B (#137) in a real UI: an arm (shoulder -> elbow) skinning a line mesh, Deform > Pose Space Deformation >
+"""Lane B (#137) in a real UI: an arm (shoulder -> elbow) skinning a line mesh, Deform > Pose Space Deformation >
 Create Pose Interpolator on the elbow, pose elbowBent at -90, Add Shape, elbow at -45; Windows > Animation Editors >
 Pose Editor opens a new window whose Properties area is the kit Pose Editor (no Blender header); shot of it."""
 

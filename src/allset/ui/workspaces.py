@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya workspaces: Windows > Workspaces, the Status Line "Workspace:" dropdown, Reset Current Workspace (step 160, #81).
+"""Maya workspaces: Windows > Workspaces, the Status Line "Workspace:" dropdown, Reset Current Workspace (#81).
 
 Maya 2022 lists its factory workspaces in this order (Windows > Workspaces;
 dividers after General, XGen - Interactive Groom, Animation and Rendering - Expert), then the actions Reset /
@@ -102,7 +102,7 @@ def reset_label(ws):
 
 # --- Status Line dropdown -------------------------------------------------------------------------------------------
 # items = the Maya workspaces (in Maya's order, also those not yet in the file: choosing one appends it), then the
-# file's other workspaces. Blender keeps pointers into item strings: one cached list per set of names (step 113).
+# file's other workspaces. Blender keeps pointers into item strings: one cached list per set of names.
 
 _items = {}
 

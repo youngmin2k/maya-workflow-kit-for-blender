@@ -1,4 +1,4 @@
-"""Step 16: Maya z / Shift+Z / Ctrl+Y undo-redo, h / Ctrl+H / Alt+H / Shift+H /
+"""Maya z / Shift+Z / Ctrl+Y undo-redo, h / Ctrl+H / Alt+H / Shift+H /
 Ctrl+Shift+H visibility, Ctrl+1 isolate, Ctrl+Shift+I invert."""
 
 from importlib import import_module
@@ -52,7 +52,7 @@ def test_visibility_keys():
 
 def test_isolate_and_invert_keys():
     got = _items("3D View", "ONE", ctrl=True)
-    # step 164: allset.isolate = local view without framing (keeps the camera) with the selection's descendants
+    # allset.isolate = local view without framing (keeps the camera) with the selection's descendants
     assert [g[0] for g in got] == ["allset.isolate"], got
     assert _items("Mesh", "ONE", ctrl=True) == [], "Mesh Ctrl+1 vertex mode removed"
     assert [g[0] for g in _items("Object Mode", "I", ctrl=True, shift=True)] == ["object.select_all"]
@@ -132,7 +132,7 @@ def test_show_selected_uses_kept():
 
 
 def test_outliner_visibility_keys():
-    # step 293 (#223): the Maya visibility keys work with the mouse over the Outliner
+    # #223: the Maya visibility keys work with the mouse over the Outliner
     want = {(False, False, False): "TOGGLE", (False, True, False): "HIDE",
             (False, False, True): "HIDE_UNSELECTED", (True, False, False): "SHOW_SELECTED",
             (True, True, False): "SHOW_LAST"}

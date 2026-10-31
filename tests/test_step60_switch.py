@@ -1,8 +1,8 @@
-"""Step 60: Maya ⇄ Blender switch, without any snapshot since step 130.
+"""Maya ⇄ Blender switch, without any snapshot.
 
 In one process: factory → the user's own changes (a key edit, theme colour, navigation, splash,
 another add-on) → Maya Workflow Kit on → Make Blender Maya → Blender's preferences unchanged even in Maya mode
-(step 130: nothing to restore) → switch to Blender → everything as before → Maya again → Blender again → as
+(nothing to restore) → switch to Blender → everything as before → Maya again → Blender again → as
 before → disable → as before.
 Across processes (saved preferences re-read by a new Blender): the same round trip, the saved
 userpref.blend compared, and the extension disabled in Maya mode.
@@ -54,7 +54,7 @@ def _user_setup():
     addon_utils.enable("node_wrangler", default_set=True)
 
 
-# Since step 130 the Maya keys live in the add-on keyconfig, so not even the stored keyconfig name changes:
+# The Maya keys live in the add-on keyconfig, so not even the stored keyconfig name changes:
 # no preference may change while Maya mode is on.
 KEYMAP_KEYS = ()
 

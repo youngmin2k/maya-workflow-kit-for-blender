@@ -1,4 +1,4 @@
-"""PR #125 follow-up (#36 crash class, step 129): the joint watchers PR #125 added (``allset.pose_empty_click``
+"""PR #125 follow-up (#36 crash class): the joint watchers PR #125 added (``allset.pose_empty_click``
 in 3D Views, ``allset.joint_outliner_select`` in Outliners, the Channel Box wheel watcher, the armature mode ticks)
 must not keep Window / Area objects across timer ticks. A second window is opened, the watchers start in it, each
 click watcher schedules its deferred check, and the window closes before the check runs. The checks used to read

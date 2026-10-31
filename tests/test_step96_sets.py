@@ -1,4 +1,4 @@
-"""Step 96: Maya object sets — Create > Sets > Set / Quick Select Set, members, select, add / remove, delete, rename,
+"""Maya object sets — Create > Sets > Set / Quick Select Set, members, select, add / remove, delete, rename,
 save / reload, the sidebar Outliner SET rows, the Outliner overlay helpers, menu mapping."""
 
 import os
@@ -57,7 +57,7 @@ def test_create_set_like_maya():
     assert [s.name for s in sets.all_sets()] == ["set1", "set2", "set3"], "names and creation order (S2)"
     assert len(bpy.data.collections["set3"].objects) == 0, "nothing selected = empty set"
     sets.delete(bpy.data.collections["set1"])
-    assert sets.next_name() == "set4", "one past the highest, no gap filling (step 211)"
+    assert sets.next_name() == "set4", "one past the highest, no gap filling"
     bpy.ops.allset.create_set(name="propSet")
     assert sets.all_sets()[-1].name == "propSet"
 

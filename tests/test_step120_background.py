@@ -1,4 +1,4 @@
-"""Step 120 / 130: Maya's viewport background — Alt+B cycle (rule and colours of Maya 2022),
+"""Maya's viewport background — Alt+B cycle (rule and colours of Maya 2022),
 every view at once, per view: flat colours and the kit-drawn gradient (the kit never edits the
 user's theme), Ctrl+B stays Maya's Bevel, Windows > Settings/Preferences > Color Settings."""
 

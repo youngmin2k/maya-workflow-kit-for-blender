@@ -1,4 +1,4 @@
-"""Step 207 in a real UI: a CV curve in the Maya layout, Curves > Bend / Curl / Scale Curvature / Duplicate Surface
+"""In a real UI: a CV curve in the Maya layout, Curves > Bend / Curl / Scale Curvature / Duplicate Surface
 Curves / Intersect from the menu map; Lock Length keeps every CV leg while a CV is moved with the Move tool's transform
 in edit mode; shot of the viewport."""
 

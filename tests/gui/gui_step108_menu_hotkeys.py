@@ -1,4 +1,4 @@
-"""Step 108 in a real UI: the Maya File and Edit Mesh menus opened from the top of the window show Maya's hotkeys
+"""In a real UI: the Maya File and Edit Mesh menus opened from the top of the window show Maya's hotkeys
 right-aligned (Ctrl+N / Ctrl+O / Ctrl+S ..., Ctrl+B / Ctrl+E / Ctrl+Del), no Blender shortcut (Recent Files had
 "Shift Ctrl O"), and File reaches Exit inside a 900 px window at the default scale (screenshots beside audit-7
 pairs menu_Modeling_File / menu_Modeling_Edit_Mesh)."""

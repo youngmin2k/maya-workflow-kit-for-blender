@@ -1,4 +1,4 @@
-"""Step 162: Ctrl+Shift+click on a Maya menu item adds it to the current shelf (Maya
+"""Ctrl+Shift+click on a Maya menu item adds it to the current shelf (Maya
 menuItemToShelf appends a shelfButton for the item to the shelf tab shown, factory tabs included).
 
 GUI: tests/gui/gui_step162_shelf_add.py (Ctrl+Shift+click Display > Grid, the button drawn on Poly Modeling)."""
@@ -105,7 +105,7 @@ def test_ctrl_shift_click_adds_to_the_factory_shelf():
             extras = shelf.factory_extras("Polygons")
             assert extras == [{"label": "Cube", "icon": "SCRIPT", "script": "", "menu": CUBE}], extras
             after = shelf.icon_buttons(bpy.context)[1]
-            assert after[:n_factory] == before                # every Maya slot keeps its index (step 109)
+            assert after[:n_factory] == before                # every Maya slot keeps its index
             assert after[n_factory] == (n_factory, "Cube", None, True)
             assert shelf.button_record("Polygons", n_factory)["menu"] == CUBE
             assert shelf.button_record("Polygons", n_factory - 1) is None      # a factory slot
@@ -158,7 +158,7 @@ def test_ctrl_shift_from_python_or_marking_menus_runs():
         try:
             bpy.ops.allset.menu_item(item=CUBE)
             assert shelf.factory_extras("Polygons") is None
-            assert calls == [CUBE]                            # Shift / Ctrl held: the step 146 rule
+            assert calls == [CUBE]                            # Shift / Ctrl held: the option-box rule
         finally:
             menu_sets.ALLSET_OT_menu_option_box.execute = orig_box
 

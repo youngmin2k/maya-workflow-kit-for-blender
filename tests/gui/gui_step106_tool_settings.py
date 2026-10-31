@@ -1,4 +1,4 @@
-"""Step 106 in a real UI: the Maya Workflow Kit layout, pCube1 with its top face extruded, Move tool. Windows > General Editors >
+"""In a real UI: the Maya Workflow Kit layout, pCube1 with its top face extruded, Move tool. Windows > General Editors >
 Tool Settings (ToggleToolSettings) opens the dock left of the viewport with Maya's Move Settings, a second toggle
 closes it (the old popup stayed open: audit 7 c03), a third opens it again; Rotate / Scale show their sections;
 the Attribute Editor shows the history / material tabs, menu bar, buttons and Notes (screenshots beside audit-7

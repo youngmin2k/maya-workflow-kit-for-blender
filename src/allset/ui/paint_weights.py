@@ -275,7 +275,7 @@ def current_profile(brush):
 
 
 def _maya_brush_fields(col, context, brush):
-    """Maya 2026 Brush frame rows the kit adds (step 224): Profile, Weight Type, Normalize Weights."""
+    """Maya 2026 Brush frame rows the kit adds: Profile, Weight Type, Normalize Weights."""
     s = model.state(context)
     col.separator(factor=0.35)
     row = col.row(align=True)
@@ -402,7 +402,7 @@ def _visualization(layout, context):
     sub.enabled = prefs.use_weight_color_range
     sub.template_color_ramp(prefs, 'weight_color_range', expand=True)
     _muted(col, 'This color ramp is shared across Blender.', 'INFO')
-    # Maya 2024+ Numeric (Show Numbers, Decimal Places, Number Color, Color Ramp; step 224, ui/weight_numbers.py)
+    # Maya 2024+ Numeric (Show Numbers, Decimal Places, Number Color, Color Ramp; ui/weight_numbers.py)
     s = model.state(context)
     col.separator(factor=0.5)
     col.label(text='Numeric')

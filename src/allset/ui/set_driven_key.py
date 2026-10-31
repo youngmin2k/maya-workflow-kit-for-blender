@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Set Driven Key window drawn in the dock under the Channel Box (step 62).
+"""Set Driven Key window drawn in the dock under the Channel Box.
 
 Layout of Maya's window: a "Driver" bar, node list |
 attribute list; a "Driven" bar, node list | attribute list; buttons Key · Load Driver · Load Driven · Close.
 Drawn by the Layer Editor panel while the window is open (its place in the dock), so the Channel Box stays
 above it for posing. The lists are fixed-height scrolling UILists like Maya's (all ten channels in plain
-rows pushed the buttons out of the sidebar, GUI shot step 62).
+rows pushed the buttons out of the sidebar in a GUI shot).
 """
 
 import bpy
@@ -16,7 +16,7 @@ ROWS = 4
 MIN_ROWS = 2
 BAR = "Driver", "Driven"
 HELP = ("Pose in the Channel Box, then Key",)
-# Step 142 (#77): at UI scale 1.5 the window ran out of the dock under a full Channel Box (Load Driver / Load Driven /
+# #77: at UI scale 1.5 the window ran out of the dock under a full Channel Box (Load Driver / Load Driven /
 # Key below the region's bottom, GUI shot). The lists give up rows (down to MIN_ROWS) so the buttons stay in the dock:
 # UI units the window needs besides its list rows (separator, the two bars, the lists' grips and spacing, the 2 x 2
 # button grid; the help line only when there is room), checked on GUI shots at UI scale 1.0 / 1.25 / 1.5.
@@ -100,7 +100,7 @@ def draw(layout, context):
                         rows=rows, maxrows=rows)
 
     # Maya's one button row (Key · Load Driver · Load Driven · Close) as a 2 x 2 grid in the same reading
-    # order: four buttons in one sidebar row cut "Load Driver" to "Load Dr..." (GUI shot, step 62).
+    # order: four buttons in one sidebar row cut "Load Driver" to "Load Dr..." (GUI shot).
     grid = layout.grid_flow(row_major=True, columns=2, even_columns=True, align=True)
     grid.operator("allset.sdk_key", text="Key")
     grid.operator("allset.sdk_load", text="Load Driver").which = 'DRIVER'

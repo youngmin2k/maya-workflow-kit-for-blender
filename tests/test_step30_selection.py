@@ -1,5 +1,5 @@
-"""Step 30: selection feel — marquee select-through keymap items, the X-ray watch, the
-pre-selection gizmo group, Blender's undo steps left alone (step 130).
+"""Selection feel — marquee select-through keymap items, the X-ray watch, the
+pre-selection gizmo group, Blender's undo steps left alone.
 
 Box/lasso through hidden vertices and the highlight are checked in tests/gui/gui_step30_selection.py.
 """
@@ -27,7 +27,7 @@ def test_select_through_items_lead_box_and_lasso():
             for ctrl in (False, True):
                 same = [k.idname for k in items if k.type == 'LEFTMOUSE' and k.value == 'CLICK_DRAG'
                         and k.shift == shift and k.ctrl == ctrl and not k.alt]
-                # other kit PASS_THROUGH items may sit between (step 256: allset.uv_shell_box)
+                # other kit PASS_THROUGH items may sit between (allset.uv_shell_box)
                 rest = [i for i in same[1:] if i not in patches.PASS_THROUGH_FIRST]
                 assert same[0] == "allset.select_through" and rest[:1] == [target], (km_name, shift, ctrl, same)
 
@@ -37,7 +37,7 @@ def _fake_entry(running):
     space = types.SimpleNamespace(shading=shading)
     window = types.SimpleNamespace(modal_operators=[types.SimpleNamespace(bl_idname="VIEW3D_OT_select_box")]
                                    if running else [])
-    # entries hold pointers (step 129, #36): resolve the fake ones through the lookup hooks
+    # entries hold pointers (#36): resolve the fake ones through the lookup hooks
     _FAKES[id(space)], _FAKES[id(window)] = space, window
     return shading, window, [id(space), id(window), "show_xray", "xray_alpha", 0.5, False, 0.0]
 
@@ -86,7 +86,7 @@ def test_preselect_group_registered_and_polls_off():
 
 
 def test_undo_steps_left_alone():
-    """The 256-step undo preset is gone since step 130: Blender's value stays."""
+    """The kit sets no undo preset: Blender's value stays."""
     prefs = bpy.context.preferences
     default = type(prefs.edit).bl_rna.properties["undo_steps"].default
     assert prefs.edit.undo_steps == default, prefs.edit.undo_steps

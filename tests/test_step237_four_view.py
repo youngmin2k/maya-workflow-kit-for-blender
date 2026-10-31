@@ -1,4 +1,4 @@
-"""Step 237 (Issue #148): Maya Four View = four real 3D View panels, each with its own shading / Show settings / camera.
+"""Issue #148: Maya Four View = four real 3D View panels, each with its own shading / Show settings / camera.
 
 Blender's Quad View is one area cut by a cross (one header, one shading for all four). The kit now splits
 the 3D View area in four (ui/four_view.py). Background mode never gives a just-split area a size (0 x 0, so

@@ -1,4 +1,4 @@
-"""Step 59 in a real UI, in Maya's order:
+"""In a real UI, in Maya's order:
 
 Maya Workflow Kit layout, a cube, Move tool: the Maya-shaped manipulator (size, X handle drag, active
 handle), X hold + X arrow drag from 0.3 cm lands on whole cm (S2), D hold + drag moves only
@@ -131,12 +131,12 @@ def s_setup():
 def s_cube():
     bpy.ops.allset.keymap_activate()
     # Keep the on-screen sizes this test was written for: the template view went from lens 35 to 70
-    # (step 81), which doubles them. (The V-snap drag below queues its moves in one tick; Blender recomputes the
-    # snap target at most once per 10 ms, so a longer drag never caught — step 95.)
+    #, which doubles them. (The V-snap drag below queues its moves in one tick; Blender recomputes the
+    # snap target at most once per 10 ms, so a longer drag never caught.)
     view3d()[1].data.view_distance *= 2.0
     ts = bpy.context.scene.tool_settings
     slots = bpy.context.scene.transform_orientation_slots
-    check(f"template: Maya axis modes Move World / Rotate+Scale Object, pivot at the lead, rotate step 15 "
+    check(f"template: Maya axis modes Move World / Rotate+Scale Object, pivot at the lead, rotate snap 15 "
           f"({slots[1].type}, {slots[2].type}, {slots[3].type}, {ts.transform_pivot_point}, "
           f"{ts.snap_angle_increment_3d:.4f})",
           (slots[1].type, slots[2].type, slots[3].type) == ('GLOBAL', 'LOCAL', 'LOCAL')
@@ -171,7 +171,7 @@ def s_shot_move():
 @step
 def s_measure():
     o = screen(ob1().matrix_world.translation)
-    blue = mod("ui.manipulator").axis_colours()['Z']     # Maya's Z blue since step 142 (#76), not the theme's
+    blue = mod("ui.manipulator").axis_colours()['Z']     # Maya's Z blue (#76), not the theme's
     want = arrow_len_px()
     got = measure(TMP, o, blue, int(want * 1.6))
     check(f"Move Z (Maya Y) arrow at the Maya size ({got:.0f} px drawn, {want:.0f} px = 108 x gizmo/75 x UI)",
@@ -402,7 +402,7 @@ def s_scale_shot():
     b = bpy.data.objects["pCube2"]
     C["verts2"] = [b.matrix_world @ v.co for v in b.data.vertices]
     # the pCube2 vertex nearest the camera: the dragged pCube1 must not cover it (Blender snaps to visible
-    # elements only; with Maya's persp angle, step 81, the nearest-to-pCube1 corner ended up behind pCube1)
+    # elements only; with Maya's persp angle the nearest-to-pCube1 corner ended up behind pCube1)
     eye = region.data.view_matrix.inverted().translation
     C["target"] = min(C["verts2"], key=lambda p: (p - eye).length)
     C["p"] = screen(ob.matrix_world.translation)
@@ -418,7 +418,7 @@ def s_point_snap():
 
 @step
 def s_point_snap_move():
-    # moves in their own tick: the transform modal started on the press misses moves queued with it (step 28)
+    # moves in their own tick: the transform modal started on the press misses moves queued with it
     p, to = C["p"], C["to"]
     for i in range(1, STEPS + 1):
         q = p + (to - p) * (i / STEPS)

@@ -1,4 +1,4 @@
-"""Step 263 (Issue #154): the Game Exporter is a kit window that stays open (Maya: a plain floating
+"""Issue #154: the Game Exporter is a kit window that stays open (Maya: a plain floating
 window), with Maya 2026's field facts (the
 and the node's attributes): an "Up Axis" label before Y / Z, File Name empty with the grey hint
 "Enter a filename" (one file) / "Multi File Prefix" / "Clip File Prefix", a new clip = empty name shown as the

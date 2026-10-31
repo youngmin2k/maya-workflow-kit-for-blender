@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""A click on the option box ❒ of a Maya menu item opens its option window (step 183, #82).
+"""A click on the option box ❒ of a Maya menu item opens its option window (#82).
 
 Blender runs a menu item's operator with EXEC and tells Python nothing about the popup menu (no region, no rect:
 ``context.region`` in ``Menu.draw`` is the region the menu was called from, ``Screen`` has no popup
@@ -13,7 +13,7 @@ regions, a screenshot taken in ``execute`` already shows the menu closed). Two t
   the aligned text width (checked on screenshots at UI scale 1.0 / 1.25, ``tests/test_step183_option_click.py`` +
   ``tests/gui/gui_step183_option_click.py``).
 So the ❒ zone of a row is known for menus opened from the Maya menu bar (and their submenus); anywhere else
-(hotbox, marking menus, the » overflow, editor menu bars, a torn-off menu) the item keeps step 146's press-and-hold /
+(hotbox, marking menus, the » overflow, editor menu bars, a torn-off menu) the item keeps the press-and-hold /
 Shift / Ctrl+click.
 """
 

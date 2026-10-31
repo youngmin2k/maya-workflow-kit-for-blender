@@ -1,4 +1,4 @@
-"""Step 159 lane L: Skeleton > Joint Labelling (labels as bone ID properties, Rename Joints From Labels, Label Based
+"""Skeleton > Joint Labelling (labels as bone ID properties, Rename Joints From Labels, Label Based
 on Joint Names, Toggle / Show / Hide labels + viewport drawing), Mirror Skin Weights Label association, Enable /
 Disable Selected IK Handles, following Maya."""
 

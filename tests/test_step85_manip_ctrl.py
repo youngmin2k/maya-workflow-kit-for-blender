@@ -1,4 +1,4 @@
-"""Step 85: manipulator Ctrl+LMB (Move: snapped drag of that handle, Scale axis: the other two), Ctrl+click centre =
+"""Manipulator Ctrl+LMB (Move: snapped drag of that handle, Scale axis: the other two), Ctrl+click centre =
 free, Shift+MMB = closest axis.
 GUI: tests/gui/gui_step85_manip_ctrl.py."""
 

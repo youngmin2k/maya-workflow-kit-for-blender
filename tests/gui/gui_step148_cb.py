@@ -1,4 +1,4 @@
-"""Step 148 in the Maya Workflow Kit layout. Run at the default 1.25, ``--ui-scale 0.8``
+"""In the Maya Workflow Kit layout. Run at the default 1.25, ``--ui-scale 0.8``
 (1.0) and ``--ui-scale 1.2`` (1.5) in the 1600 x 900 test window; shots with ``--shots``.
 
 #87: RMB on a Channel Box channel name opens Maya's Channels menu (not Blender's button menu with its 15 rows on
@@ -19,7 +19,7 @@ from sim import (MODULE, check, dock_area, dock_region, ev, find_button, load_ma
                  screenshot, setup, step, tap, view3d, win)
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
-os.environ["ALLSET_FIT_WARP"] = "1"   # the fitted dock width (step 132 / 142)
+os.environ["ALLSET_FIT_WARP"] = "1"   # the fitted dock width
 C = {}
 GUI_TIMEOUT = 240
 
@@ -156,7 +156,7 @@ def s_menu_open():
 
 @step
 def s_pick():
-    # step 158: the complete Channels menu is taller than the space under the mouse and slides up, so Key Selected
+    # the complete Channels menu is taller than the space under the mouse and slides up, so Key Selected
     # is picked by its underlined letter
     tap('K')
 

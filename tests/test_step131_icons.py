@@ -1,4 +1,4 @@
-"""Step 131 (#23): kit-drawn Maya-recognisable icons — every shelf button and every Status Line / panel toolbar
+"""#23: kit-drawn Maya-recognisable icons — every shelf button and every Status Line / panel toolbar
 button has its own picture, drawn at 1x and 2x.
 """
 

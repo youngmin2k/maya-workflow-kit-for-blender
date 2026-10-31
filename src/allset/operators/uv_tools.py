@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV workflow on Blender's UV Editor (step 66).
+"""Maya UV workflow on Blender's UV Editor.
 
 - Opening the UV Editor (Maya UV > UV Editor) enters edit mode with UV Sync Selection on, so the object's UVs show at
   once. Maya's UV / UV Shell components are UVs picked apart from the mesh
   vertices: Blender needs sync off for that (and then draws only the selected faces' UVs, so every face is selected).
 - UV Shell = Blender UV island. Blender's island operators group UVs by shared coordinates and ignore seams
-  (step 66: pack_islands / average_islands_scale), only unwrap reads seams. So Cut = seam + the smaller side moved
+  (pack_islands / average_islands_scale), only unwrap reads seams. So Cut = seam + the smaller side moved
   2e-4 off the cut (a real split that still looks in place), Sew = seam cleared + the smaller shell moved onto the edge.
 - Unfold = Blender Unwrap (Minimum Stretch) on the chosen shells with their borders kept as seams, each shell put back where
   it was; Layout = Pack Islands with Maya's shell padding in pixels of the map; Texel Density = px per Maya unit.
@@ -155,7 +155,7 @@ def cut(bm, uv, edges):
     owner = {f: i for i, isl in enumerate(groups) for f in isl}
     moved = set()
     split = 0
-    centres = {}      # island -> UV centre, taken before its first nudge (each nudge is NUDGE; step 254)
+    centres = {}      # island -> UV centre, taken before its first nudge (each nudge is NUDGE)
     for e in edges:
         fs = [f for f in e.link_faces if f in owner]
         if len(fs) != 2 or owner[fs[0]] == owner[fs[1]]:
@@ -175,7 +175,7 @@ def cut(bm, uv, edges):
             d = centre - c
             d = d.normalized() * NUDGE if d.length > 1e-9 else Vector((NUDGE, 0.0))
             # the island's loops at v are v's own loops in that island: no scan of the whole island per vertex
-            # (that made Cut UV Edges O(edges x island), 36 s on 48 k faces, step 254)
+            # (that made Cut UV Edges O(edges x island), 36 s on 48 k faces)
             for loop in v.link_loops:
                 if owner.get(loop.face) == side and _same(loop[uv].uv, c):
                     loop[uv].uv = c + d
@@ -193,7 +193,7 @@ def sew(bm, uv, edges):
         fs = [f for f in e.link_faces if not f.hide]
         if len(fs) != 2:
             continue
-        if groups is None:     # islands change only when a shell moves onto another (step 254: once per edge was
+        if groups is None:     # islands change only when a shell moves onto another (once per edge was
             groups = islands(bm, uv, [f for f in bm.faces if not f.hide])      # O(edges x mesh))
             where = {f: i for i, isl in enumerate(groups) for f in isl}
         a, b = fs
@@ -323,7 +323,7 @@ def layout(context, ob, padding_px, map_size):
     return len(shells)
 
 
-# --- Automatic / Contour Stretch (step 139) -------------------
+# --- Automatic / Contour Stretch -------------------
 
 def auto_planes(count):
     """Projection directions of Maya's Automatic mapping (object space). 3 and 6 = the six axis planes (Maya 3 planes
@@ -382,7 +382,7 @@ def auto_project(bm, uv, faces, planes=6, spacing=0.2, unit=1.0, optimize=True):
     flood fill that stops where a shell would overlap itself); other
     plane counts give every face the plane its normal faces most. Shells are laid out in 0-1 at one scale with
     ``spacing`` percent between them (default 0.2 %) by Maya's packed "Into square"
-    layout (operators/autoproj_layout.py, step 257). ``unit`` = Blender length of one Maya unit
+    layout (operators/autoproj_layout.py). ``unit`` = Blender length of one Maya unit
     (``units.maya_unit``): Maya projects and packs in Maya units. Returns the shell count."""
     from . import autoproj_layout
     faces = [f for f in faces if not f.hide]
@@ -509,7 +509,7 @@ class ALLSET_OT_uv_automatic(bpy.types.Operator):
                 bm = bmesh.from_edit_mesh(ob.data)
                 if not any(f.select and not f.hide for f in bm.faces):
                     continue
-                # the polyAutoProj history node (step 257, #150): Channel Box INPUTS / AE, editable values
+                # the polyAutoProj history node (#150): Channel Box INPUTS / AE, editable values
                 if extrude.record_new(context, ob, bm, AUTOPROJ, params, unit) is not None:
                     n += 1
                     made.append(ob)
@@ -522,7 +522,7 @@ class ALLSET_OT_uv_automatic(bpy.types.Operator):
         return {'FINISHED'}
 
 
-# --- polyAutoProj history node (step 257, Issue #150) ------------------------------------------------
+# --- polyAutoProj history node (Issue #150) ------------------------------------------------
 # Maya's UV > Automatic leaves a polyAutoProj node whose Channel Box INPUTS rows can be edited
 # (Planes, Optimize, Layout, Percentage Space, Scale Mode, Layout Method
 # after the projection's Translate / Rotate / Scale / Pivot). The kit's node shows the rows it rebuilds with
@@ -582,7 +582,7 @@ def _autoproj_spec():
 AUTOPROJ = _autoproj_spec()
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_uv_automatic_edit(bpy.types.Operator):
     """Change the last UV > Automatic (Maya: edit the polyAutoProj node). Blender keeps no history, so only the
     last one can be changed"""
@@ -706,14 +706,14 @@ def _uv_poll(context):
     return context.mode == 'EDIT_MESH'
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_uv_cut(bpy.types.Operator):
     """Cut the UVs along the selected edges (Maya Cut UV Edges): a seam, and the shells separate in place"""
     bl_idname = "allset.uv_cut"
     bl_label = "Cut UV Edges"
     bl_options = {'REGISTER', 'UNDO'}
 
-    # 3D Cut and Sew tool x (step 79): the edges selected in the 3D View, whatever the UV sync setting
+    # 3D Cut and Sew tool x: the edges selected in the 3D View, whatever the UV sync setting
     mesh_select: BoolProperty(name="3D View Edges", default=False, options={'SKIP_SAVE'})
 
     poll = classmethod(lambda cls, context: _uv_poll(context))
@@ -734,14 +734,14 @@ class ALLSET_OT_uv_cut(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_uv_sew(bpy.types.Operator):
     """Sew the UVs along the selected edges (Maya Sew UV Edges): the smaller shell moves onto the bigger one"""
     bl_idname = "allset.uv_sew"
     bl_label = "Sew UV Edges"
     bl_options = {'REGISTER', 'UNDO'}
 
-    mesh_select: BoolProperty(name="3D View Edges", default=False, options={'SKIP_SAVE'})   # step 79 tool s
+    mesh_select: BoolProperty(name="3D View Edges", default=False, options={'SKIP_SAVE'})   # 3D Cut and Sew tool
 
     poll = classmethod(lambda cls, context: _uv_poll(context))
 
@@ -777,7 +777,7 @@ class ALLSET_OT_uv_unfold(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_uv_layout(bpy.types.Operator):
     """Lay the selected UV shells (all when none are selected) out in 0-1 (Maya Layout; Blender Pack Islands)"""
     bl_idname = "allset.uv_layout"
@@ -912,7 +912,7 @@ def leave_uv_mode(context):
     ts = context.scene.tool_settings
     from . import uv_shell_select
     was_shell = uv_shell_select.flag(context)
-    uv_shell_select.set_flag(context, False)      # another component mode ends the UV Shell mask (step 256)
+    uv_shell_select.set_flag(context, False)      # another component mode ends the UV Shell mask
     if ts.use_uv_select_sync and not was_shell:
         return
     ts.use_uv_select_sync = True
@@ -934,8 +934,8 @@ def leave_uv_mode(context):
 
 
 def set_component(context, mode):
-    """'SHELL' = Maya's UV Shell mask (operators/uv_shell_select.py, step 256); 'ISLAND' = Blender's UV island
-    selection in the UV Editor (UV Sync off; Move UV Shell, step 155)."""
+    """'SHELL' = Maya's UV Shell mask (operators/uv_shell_select.py); 'ISLAND' = Blender's UV island
+    selection in the UV Editor (UV Sync off; Move UV Shell)."""
     from . import uv_shell_select
     ts = context.scene.tool_settings
     if mode == 'SHELL':
@@ -986,7 +986,7 @@ class ALLSET_OT_uv_component(bpy.types.Operator):
         ob = context.view_layer.objects.active
         if ob is not None and ob.type == 'MESH' and ob.mode != 'EDIT' and not ob.visible_get():
             # a hidden object: Maya converts silently; Blender can't enter
-            # edit mode on it, so only the component type is set (step 258)
+            # edit mode on it, so only the component type is set
             if self.mode in ('VERTEX', 'EDGE', 'FACE'):
                 ts.mesh_select_mode = (self.mode == 'VERTEX', self.mode == 'EDGE', self.mode == 'FACE')
             return {'FINISHED'}
@@ -1001,7 +1001,7 @@ class ALLSET_OT_uv_component(bpy.types.Operator):
             remember_mesh_selection(context)
         # open the editor first: its prepare() turns UV Sync Selection on, which undid F12's UV mode the first time
         # (issue #80)
-        # Maya's UV Shell mask picks shells in the 3D View too: no UV Editor needed (step 256)
+        # Maya's UV Shell mask picks shells in the 3D View too: no UV Editor needed
         if (self.mode != 'SHELL' and find_uv_editor(context)[1] is None and context.window is not None
                 and not bpy.app.background):
             bpy.ops.allset.open_editor(ui_type='UV')

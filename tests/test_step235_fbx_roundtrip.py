@@ -1,4 +1,4 @@
-"""Step 235 (Issue #144): kit FBX back into the kit, blend shapes next to other deformers.
+"""Issue #144: kit FBX back into the kit, blend shapes next to other deformers.
 
 Audit 0.5.0 (③-17): File > Import of a file the kit wrote brought the
 skinned mesh in at 1/100 size turned 90 deg and the Time Slider at 0-24 instead of the file's 1-20. ④-8: a mesh with a

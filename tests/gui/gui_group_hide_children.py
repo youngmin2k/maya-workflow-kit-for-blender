@@ -1,4 +1,4 @@
-"""Maya: hiding a group hides everything below it, and a node parented under a hidden group is hidden too (step 164
+"""Maya: hiding a group hides everything below it, and a node parented under a hidden group is hidden too (Maya
 DAG rule). In a real UI: Ctrl+H on group1 in the Outliner and in the viewport, then pCube2 parented into the hidden
 group (no explicit ``dag.sync``: the depsgraph handler has to catch it), and Shift+H in the Outliner shows the group
 again. Before the fix the Outliner's Ctrl+H was Blender's ``outliner.hide`` (``hide_set``): pCube1 stayed visible and

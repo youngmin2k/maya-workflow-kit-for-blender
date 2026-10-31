@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Deform > Morph and Deform > Jiggle > Jiggle Deformer (step 205 lane B, issue #112).
+"""Maya Deform > Morph and Deform > Jiggle > Jiggle Deformer (issue #112).
 
 Maya rules: nodes / names / option windows, Morph, Jiggle.
 Blender has neither deformer, so each is a Geometry Nodes modifier named like the Maya node (``morph1``,
@@ -46,7 +46,7 @@ MIRROR_DIRECTIONS = ("+X", "-X", "+Y", "-Y", "+Z", "-Z", "Flip X", "Flip Y", "Fl
 JIGGLE_ENABLE = ("Enable", "Disable", "Enable Only After Object Stops")
 
 # Maya mirrorDirection -> (Blender axis, receiving side): Maya Y-up -> Blender Z-up = X -> X, Y -> Z, Z -> -Y
-# (step 57). +X: the vertices with x < 0 receive; Flip: every vertex (side 0).
+#. +X: the vertices with x < 0 receive; Flip: every vertex (side 0).
 MIRROR_AXES = ((0, -1), (0, 1), (2, -1), (2, 1), (1, 1), (1, -1), (0, 0), (2, 0), (1, 0))
 
 # (socket name, socket type, default, min, max) — Maya attribute order of the Channel Box / AE
@@ -145,7 +145,7 @@ class _B(wire_deformer._B):
 
     def compare(self, op, a, b, dtype='INT'):
         n = self.node("FunctionNodeCompare", data_type=dtype, operation=op)
-        sa, sb = compat.compare_inputs(n)          # 5.2 keeps only the current type's sockets (step 212)
+        sa, sb = compat.compare_inputs(n)          # 5.2 keeps only the current type's sockets
         self._in(sa, a)
         self._in(sb, b)
         return n.outputs[0]

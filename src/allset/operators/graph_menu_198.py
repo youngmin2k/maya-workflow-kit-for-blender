@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Graph Editor menu items of step 198 (Issue #105).
+"""Graph Editor menu items (Issue #105).
 
 - Edit > Select Unsnapped (Maya ``cmds.selectKey(unsnappedKeys=1)``,
   Graph Editor Edit menu): the keys of the shown curves whose time isn't a whole frame replace the key selection.

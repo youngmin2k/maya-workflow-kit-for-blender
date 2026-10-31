@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya IK / FK switching on kit IK handles (step 223, Issue #133).
+"""Maya IK / FK switching on kit IK handles (Issue #133).
 
 A kit IK handle is the ``ikHandleN`` empty an IK constraint targets (operators/skin.create_ik). Maya's handle
 attribute **Ik Blend** (keyable, default 1) is the handle's custom property
@@ -15,9 +15,9 @@ Maya 2026 rules:
 - **Set IK/FK Key** (``ikFK(0, sel)``): keys on the handle every keyable channel (translate / rotate / scale /
   visibility, Ik Blend — in auto / out clamped), the chain joints' rotate X / Y / Z (= the solved pose), the chain
   root's translate and preferred angle (out step). Maya also keys the handle's Twist and Pole Vector — or, when a Pole
-  Vector constraint drives it, the pole object's translate (step 253): the kit RP handle's ``twist`` /
-  ``poleVectorX/Y/Z`` channels (step 245) and the pole object's
-  location. Maya's Offset / Roll exist on the kit's spline handles only (step 249), not on RP handles.
+  Vector constraint drives it, the pole object's translate: the kit RP handle's ``twist`` /
+  ``poleVectorX/Y/Z`` channels and the pole object's
+  location. Maya's Offset / Roll exist on the kit's spline handles only, not on RP handles.
 - **Enable IK Solver**: a global check (default off); each use flips it and sets Ik Blend of
   the selected handles — or of the handles whose chain holds a selected joint — to the new state, keeping the
   joints' rotation (so switching IK off keeps the IK pose). Nothing selected: Maya's error.
@@ -176,7 +176,7 @@ def fk_end(arm, pb, con):
 # --- keys ---------------------------------------------------------------------------------------------------------
 
 def _key(owner, path, frame, group, index=-1, interp=None):
-    """Key ``path`` with Maya's auto tangents (Auto Clamped + Continuous Acceleration, step 223) or ``interp``."""
+    """Key ``path`` with Maya's auto tangents (Auto Clamped + Continuous Acceleration) or ``interp``."""
     owner.keyframe_insert(path, index=index, frame=frame, group=group)
     from .. import compat
     full = owner.path_from_id(path) if owner is not owner.id_data else path
@@ -191,7 +191,7 @@ def _key(owner, path, frame, group, index=-1, interp=None):
 
 
 def _key_rp_channels(handle, frame):
-    """Twist + Pole Vector of a kit RP handle (step 245), or the pole object's translate when a Pole Vector
+    """Twist + Pole Vector of a kit RP handle, or the pole object's translate when a Pole Vector
     constraint drives the vector (Maya keys the constraint's target then, not the driven poleVector)."""
     from . import ik_rp
     if ik_rp.HELPER not in handle.keys():
@@ -255,7 +255,7 @@ def clamped_slope(keys, i):
 
 def _clamped_out(handle, frame):
     """Ik Blend keys: in auto / out clamped (Maya IK/FK keys). Auto = Auto Clamped with Continuous Acceleration
-    (step 223); the clamped out side is a free handle on Maya's clamped slope, recomputed for every
+   ; the clamped out side is a free handle on Maya's clamped slope, recomputed for every
     key because a clamped tangent follows its neighbours."""
     from .. import compat
     for fc in compat.id_fcurves(handle):
@@ -343,7 +343,7 @@ class ALLSET_OT_move_ik_to_fk(bpy.types.Operator):
         return {'FINISHED'}
 
 
-# Step 238 (Issue #146): Maya draws Enable IK Solver as a check item, so the hand
+# Issue #146: Maya draws Enable IK Solver as a check item, so the hand
 # sees the state. The menu draws it as this WindowManager property (``("prop", ...)`` kind, ui/menu_map.py); a click
 # runs the operator above (undo step, report) instead of only flipping the value.
 def _get_solver(_self):

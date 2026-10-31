@@ -1,4 +1,4 @@
-"""Step 218 lane P (Issue #126 A1 A2 A5 A6): Paint Skin Weights keys and UI in a GUI session, Maya 2026 rules
+"""Lane P (Issue #126 A1 A2 A5 A6): Paint Skin Weights keys and UI in a GUI session, Maya 2026 rules
 (Maya 2026 Paint Skin Weights). Alt+F = the kit Flood (Replace 0.3 into joint2 with Maya's
 redistribution), Ctrl+. / Ctrl+, = Skin Paint Mode cycle (real tools), Alt+R = X reflection, Ctrl+Alt+C / V = copy /
 paste vertex weights, RMB on an Influences list row = 7 items (screenshot), Select Vertices from it."""

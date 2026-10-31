@@ -1,4 +1,4 @@
-"""In-Blender part of tools/qa/fresh_eye.py (QA activity H, step 240): replay QA_ACTIONS, one action per tick,
+"""In-Blender part of tools/qa/fresh_eye.py (QA activity H): replay QA_ACTIONS, one action per tick,
 a screenshot of the window after each, kit reports / Python errors / an optional state dump into QA_OUT/log.json."""
 
 import io

@@ -1,4 +1,4 @@
-"""Step 250 (Issue #167) in a real UI: Joint Tool arm -> a cylinder -> Skin > Bind Skin -> the Attribute Editor's
+"""Issue #167: in a real UI: Joint Tool arm -> a cylinder -> Skin > Bind Skin -> the Attribute Editor's
 skinCluster1 tab shows Maya's Skinning Method; Dual Quaternion keeps the elbow's volume, Weight Blended mixes per
 vertex by blendWeights (painted 1 on half the cylinder) -> Ctrl+Z -> save + open keeps the method."""
 

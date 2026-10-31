@@ -1,4 +1,4 @@
-"""QA activity J (step 240): mutation sample — do the green tests really guard the changed code?
+"""QA activity J: mutation sample — do the green tests really guard the changed code?
 
     python tools/qa/qa_mutants.py [--only N,M] [--blender PATH]
 

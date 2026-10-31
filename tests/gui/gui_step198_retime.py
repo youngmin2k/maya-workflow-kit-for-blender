@@ -1,4 +1,4 @@
-"""Step 198 (#105) in a real UI: the Maya Retime Tool in the Graph Editor (big view switched to the Graph Editor).
+"""#105: in a real UI: the Maya Retime Tool in the Graph Editor (big view switched to the Graph Editor).
 Double-click adds markers (Snap On Frame), dragging a marker's handle 15 -> 20 retimes the keys like Maya
 (1 5 12.5 20 25 35), dragging the line low moves only the marker, the ✕
 deletes it, Esc ends the tool, Ctrl+Z restores the keys."""
@@ -103,7 +103,7 @@ def s_start():
 def s_dbl_5():
     check(f"the Retime Tool runs ({running()})", running())
     x, y = at(5.2, 0.25)                      # Snap On Frame -> 5
-    for _ in range(2):                        # two press/release pairs in one tick = a double-click (step 167)
+    for _ in range(2):                        # two press/release pairs in one tick = a double-click
         ev('LEFTMOUSE', 'PRESS', x=x, y=y)
         ev('LEFTMOUSE', 'RELEASE', x=x, y=y)
 

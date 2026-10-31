@@ -18,7 +18,7 @@ from . import units
 
 
 def next_group_name(names):
-    """Maya's next ``groupN`` given existing object names: one past the highest (no gap filling, step 208)."""
+    """Maya's next ``groupN`` given existing object names: one past the highest (no gap filling)."""
     from . import naming
     return f"group{naming.next_number('group', set(names))}"
 
@@ -72,7 +72,7 @@ def ungroup(context, groups, world=False, preserve=True):
     transform, then the group goes. Preserve position off (``cmds.ungroup(relative=True)``) folds the group's local
     transform into each child's local values instead (grp t 0 5 0, child t 1 2 3 -> child t 1 7 3).
     A selected object that has data of its own (a mesh with
-    children) only loses its children (step 34). Returns the moved children."""
+    children) only loses its children. Returns the moved children."""
     moved = []
     for grp in groups:
         kids = list(grp.children)

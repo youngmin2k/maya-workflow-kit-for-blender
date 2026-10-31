@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""The Maya pivot concept on top of Blender's origin (step 59).
+"""The Maya pivot concept on top of Blender's origin.
 
 Maya:
 
@@ -13,7 +13,7 @@ Maya:
   of a component selection.
 
 The kit's pivot is the Blender origin and ``delta_location`` is Maya's pivot offset
-(step 10, ``freeze.shift_pivot``). D / Insert turn on Blender's Affect Only Origins (and
+(``freeze.shift_pivot``). D / Insert turn on Blender's Affect Only Origins (and
 Affect Only Parents, so children stay); Blender then writes the new origin into the
 location / rotation channels. ``watch()`` waits for each such transform to end and
 rewrites the result the Maya way: channels back, the new pivot position into
@@ -192,7 +192,7 @@ def set_custom_orientation(context, axes):
                 bpy.ops.transform.create_orientation(name=ORIENT_NAME, use=True, overwrite=True)
         except RuntimeError:
             # edit mode builds it from the selection, which can fail (nothing / a closed shell selected);
-            # the view's axes always work (the matrix is replaced below) — step 77
+            # the view's axes always work (the matrix is replaced below)
             try:
                 with context.temp_override(**kw):
                     bpy.ops.transform.create_orientation(name=ORIENT_NAME, use=True, use_view=True,
@@ -371,7 +371,7 @@ _last_lead = [None]
 
 def follow_lead(context, scene):
     """The "Maya Pivot" axes belong to the object whose pivot was turned (Maya keeps pivot axes per object):
-    a new lead with a turned pivot gets its own axes, one without goes back to Object axes (step 97: the next
+    a new lead with a turned pivot gets its own axes, one without goes back to Object axes (the next
     object was moved along the previous object's pivot axes)."""
     ob = context.view_layer.objects.active if context.mode == 'OBJECT' else None
     key = ob.as_pointer() if ob is not None else None

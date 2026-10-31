@@ -1,4 +1,4 @@
-"""Step 116 in a real UI: Maya's docking model. The Maya Workflow Kit layout has the Channel Box / Layer Editor | Attribute Editor
+"""In a real UI: Maya's docking model. The Maya Workflow Kit layout has the Channel Box / Layer Editor | Attribute Editor
 | Modeling Toolkit tab stack in its own area right of the viewport (no sidebar, no overlap). Clicking the stack's
 ::::: handle tears the Channel Box off into a floating window that shows only it; Dock puts it back; a floating
 Attribute Editor closed by its window docks back by itself; Tool Settings and the Outliner tear off and dock back;

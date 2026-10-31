@@ -1,4 +1,4 @@
-"""Step 130 (#40): the extension uninstalls like any other — everything register() adds,
+"""#40: the extension uninstalls like any other — everything register() adds,
 unregister() takes back, and nothing it does needs an extra step to undo.
 
 In one process: before enable → enable (Blender mode) → Maya mode on (+ Make Blender Maya) → off → disable, with
@@ -185,7 +185,7 @@ def _session(root, env, name, *actions):
                     *actions], env)
     if not os.path.isfile(out):
         raise AssertionError(f"session {name} wrote nothing (exit {rc}):\n{log[-3000:]}")
-    # a start in Maya mode registers everything while Blender restricts data access (step 271: bpy.data.collections)
+    # a start in Maya mode registers everything while Blender restricts data access (bpy.data.collections)
     assert "Exception in module register" not in log, f"session {name}: register failed:\n{log[-3000:]}"
     with open(out, encoding="utf-8") as fh:
         data = json.load(fh)
@@ -236,7 +236,7 @@ def _check_back(root, env, a, files_a, bytes_a, label):
     bytes_c = _userpref(root)
     ndiff = sum(1 for x, y in zip(bytes_a, bytes_c) if x != y)
     print(f"{label}: userpref.blend {len(bytes_a)} -> {len(bytes_c)} bytes, {ndiff} bytes differ (pointer values)")
-    # Same size; differing bytes are memory addresses Blender writes into a .blend across processes (step 60)
+    # Same size; differing bytes are memory addresses Blender writes into a .blend across processes
     assert len(bytes_a) == len(bytes_c), (label, len(bytes_a), len(bytes_c))
 
 

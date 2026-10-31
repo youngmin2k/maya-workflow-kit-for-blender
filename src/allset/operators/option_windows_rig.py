@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Step 140 Maya option windows: rigging, skinning, deformers and constraints (issue #32, Aim / Pole Vector of #35).
+"""Maya option windows: rigging, skinning, deformers and constraints (issue #32, Aim / Pole Vector of #35).
 
 Same spec as operators/option_windows.py (``F`` fields, ``Window`` = one ``allset.opt_<key>`` operator); labels follow
 Maya's windows.
@@ -7,7 +7,7 @@ option_windows.py appends ``WINDOWS`` to its own list, so this module only impor
 
 Maya tool boxes (Create Joints, Create IK Handle, Create IK Spline Handle, Paint Skin Weights) open Tool Settings,
 not a window: here they are the same kind of window titled with the tool name, whose
-button starts the tool with the values (step 140). Fields Blender can't honour are only listed
+button starts the tool with the values. Fields Blender can't honour are only listed
 (``missing``), never faked.
 """
 
@@ -81,7 +81,7 @@ _BIND_METHOD = {"Closest distance": "CLOSEST_DISTANCE", "Closest in hierarchy": 
 
 
 def _run_bind(context, v):
-    # step 247: skinning method, dropoff and Maintain max influences are Bind Skin operator options
+    # skinning method, dropoff and Maintain max influences are Bind Skin operator options
     return bpy.ops.allset.bind_skin('EXEC_DEFAULT', bind_to='SELECTED' if v["bind_to"] == "Selected joints" else
                                     'HIERARCHY', max_influences=v["max_influences"],
                                     bind_method=_BIND_METHOD.get(v.get("bind_method"), 'CLOSEST_DISTANCE'),
@@ -204,7 +204,7 @@ _ANIM_LAYER = ("Animation Layer", "Set layer to override")
 
 WINDOWS = [
     # Skeleton > Create Joints: Tool Settings "Joint Tool"
-    # Orientation section of Maya 2026 (step 244): Orient Joint to World, Secondary
+    # Orientation section of Maya 2026: Orient Joint to World, Secondary
     # Axis, its world orientation, Auto orient secondary axis (factory on since 2025)
     Window("joint_tool", "Joint Tool", "Create Joints", None, [
         F("orient_world", "", "bool", False, text="Orient Joint to World"),
@@ -221,14 +221,14 @@ WINDOWS = [
     Window("ik_handle_tool", "IK Handle Tool", "Create IK Handle", None, _ik_fields(), _run_ik_handle,
            paths=("Skeleton/Create IK Handle",), missing=_IK_MISSING),
     # Skeleton > Create IK Spline Handle: Tool Settings "IK Spline Handle Tool" (Maya
-    # 2026 factory values ikSplineHandleCtx, step 218)
+    # 2026 factory values ikSplineHandleCtx)
     Window("ik_spline_tool", "IK Spline Handle Tool", "Create IK Spline Handle", None, [
         F("root_on_curve", "", "bool", True, text="Root on curve"),
         F("parent_curve", "", "bool", True, text="Auto parent curve"),
         F("snap_curve", "", "bool", False, text="Snap curve to root"),
         F("create_curve", "", "bool", True, text="Auto create curve"),
         F("spans", "Number of spans:", "enum", "1", items=("1", "2", "3", "4")),
-        # step 249 (#166): Twist type of the new handle (operators/spline_twist.py)
+        # #166: Twist type of the new handle (operators/spline_twist.py)
         F("twist_type", "Twist type:", "enum", "Linear", items=("Linear", "Ease In", "Ease Out", "Ease In Out"))],
         _run_ik_spline, paths=("Skeleton/Create IK Spline Handle",),
         missing=("Auto create root axis", "Auto simplify curve (the kit always fits the curve: on)",

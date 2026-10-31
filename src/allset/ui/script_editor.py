@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Script Editor window (step 105).
+"""Maya Script Editor window.
 
 Maya 2022:
 menu bar File / Edit / History / Command / Tabs / Help, an icon row, the history pane (echo of commands and results)
@@ -12,7 +12,7 @@ marked (window pointer); in it the Info header draws the Maya menu bar + icon ro
 Python tab runs through the command line runner (``command_line/runner.py``: ``cmds`` subset, ``bpy``, C, D; the
 value of a last expression is the result); the MEL tab gives Maya's warning (no MEL).
 
-History menu (step 216): Maya's scriptEditorInfo options are add-on preferences (``se_*``) drawn as check / radio
+History menu: Maya's scriptEditorInfo options are add-on preferences (``se_*``) drawn as check / radio
 items; ``runner.history_lines`` applies them to what a run writes into the history, ``runner.echo_command`` writes
 Echo All Commands lines (``allset.script_echo``).
 """
@@ -76,7 +76,7 @@ def open_window(context):
         bpy.ops.screen.area_split(direction='HORIZONTAL', factor=0.55)
     top = next((a for a in window.screen.areas if a != target), None)
     if top is not None:
-        top.type = 'INFO'      # a horizontal split gives the new area the top part (step 12)
+        top.type = 'INFO'      # a horizontal split gives the new area the top part
     mark(window)
     return window
 
@@ -104,13 +104,13 @@ def run_text(text, code):
 
 
 # Blender report type of each history line kind (runner.KINDS); the echo / output / results are INFO like Blender's
-# own Python console echo (step 161 keeps the Script Editor's INFO reports).
+# own Python console echo (the Script Editor keeps its INFO reports).
 REPORT_TYPES = {"WARNING": 'WARNING', "ERROR": 'ERROR', "TRACE": 'ERROR'}
 
 
 def write_history(op, echo, res, lang="Python"):
     """Write a run into the history pane (Blender's report log, listed by the Info editor) after the History menu
-    options (step 216: Line numbers / Stack Trace / Suppress ... / History Output, ``runner.history_lines``)."""
+    options (Line numbers / Stack Trace / Suppress ... / History Output, ``runner.history_lines``)."""
     from ..command_line import runner
     lines = runner.history_lines(echo, res, lang)
     for kind, line in lines:
@@ -121,7 +121,7 @@ def write_history(op, echo, res, lang="Python"):
     return lines
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_script_run(bpy.types.Operator):
     """Maya Script Editor: execute the selection, else the whole tab (Ctrl+Enter keeps the input, Execute / numpad
     Enter clears it)"""
@@ -272,7 +272,7 @@ def _text_header(self, context):
     layout.operator(ALLSET_OT_script_run.bl_idname, text="Execute", icon='PLAY').clear = True
 
 
-# --- the tabs survive File > New / Open (Maya keeps the Script Editor's input; step 208, ``cmds.file``) ----------
+# --- the tabs survive File > New / Open (Maya keeps the Script Editor's input; ``cmds.file`` too) ----------
 
 _carry = {"texts": [], "shown": {}, "loads": 0}
 

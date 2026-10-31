@@ -1,4 +1,4 @@
-"""Step 77 in a real UI: Maya Insert in component mode — F9, W, Insert = cursor tool + cursor pivot,
+"""In a real UI: Maya Insert in component mode — F9, W, Insert = cursor tool + cursor pivot,
 a click on a side face places and orients the pivot ("Maya Pivot" Move axis), a drag moves it, Insert again
 = Move tool back with the pivot kept; Insert on + F8 out of edit mode closes it, the tool comes back in
 edit mode."""

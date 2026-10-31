@@ -1,4 +1,4 @@
-"""Step 278 (#187) in a real UI: F8 / F9 over the viewport with the active cube hidden (Display > Hide) do nothing to
+"""#187: in a real UI: F8 / F9 over the viewport with the active cube hidden (Display > Hide) do nothing to
 the scene, print no Python error, and say why in the kit's words; after Display > Show All, F9 enters vertex mode."""
 
 import os

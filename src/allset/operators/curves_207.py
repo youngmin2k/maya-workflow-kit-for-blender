@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2022 Curves menu, step 207 (maths in
+"""Maya 2022 Curves menu (maths in
 ``curves_math`` / ``surfaces_math``, bpy-free).
 
 - Bend / Curl / Scale Curvature = Maya's Curves menu commands on the CVs in object space (Maya Y-up: Blender local

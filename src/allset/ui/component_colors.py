@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya-style component colours in mesh edit mode (step 134).
+"""Maya-style component colours in mesh edit mode.
 
 A mesh in component mode is drawn with these colours (at UI scale 1.0):
 every visible edge 1 px hilite #64dcff; vertex mode: unselected vertices #c800c8 at the theme's Vertex Size
 (factory 3 px), selected vertices #fdff88 one pixel larger; edge mode: selected edges #e3ac79; face mode:
 selected faces a 1-in-4 pixel stipple #e3ac79, no fill.
 
-Blender draws edit meshes with the user's theme (orange / black). The kit ships no theme (step 130),
+Blender draws edit meshes with the user's theme (orange / black). The kit ships no theme,
 so this POST_VIEW handler draws the Maya colours on top of Blender's own edit-mesh drawing (which stays under it).
 
 Reading the edit mesh (a mesh of 101 124 vertices): the evaluated object's ``to_mesh()`` is the current
@@ -15,15 +15,15 @@ the evaluated mesh is not the cage, so the cage is read from the BMesh, only up 
 (bigger meshes keep Blender's drawing). Arrays and GPU batches are cached per object and re-read when a
 depsgraph update names the object or its mesh.
 
-Selected faces (step 176): Blender's own selected-face tint (theme ``face_select``, drawn when the view's overlay
+Selected faces: Blender's own selected-face tint (theme ``face_select``, drawn when the view's overlay
 ``show_faces`` is on) sat under the kit stipple and turned the 1-in-4 stipple into a near-opaque orange (pixels between the stipple
 dots #9d856b where the unselected face is #747577; Maya keeps the base grey there). In a
 Maya layout 3D View, while the kit draws every edited mesh, the view's ``overlay.show_faces`` is switched off (view
 data, not preferences; from a timer, never inside the draw) and switched back when the kit stops drawing there
 (preference off, mesh over ``BMESH_LIMIT``) and on unregister. Views the kit didn't switch are left alone.
 
-Edges (step 185): Maya draws a thin hilite wire with crisp orange selected edges.
-Kit primitives keep Maya's hard edges as ``sharp_edge`` (step 134), so
+Edges: Maya draws a thin hilite wire with crisp orange selected edges.
+Kit primitives keep Maya's hard edges as ``sharp_edge``, so
 Blender drew its theme sharp-edge colour (factory #00ffff) about 3 px wide around the kit's line (at UI 1.25,
 cross-section of a silhouette edge: 519a9a 00dfdf 008a8a with the kit's 64dbff only in the middle) and the selected
 edge looked like an orange sliver inside a thick cyan band. ``overlay.show_edge_sharp`` is now switched off with
@@ -43,16 +43,16 @@ EDGE_SEL = "#e3ac79"        # selected edges
 FACE_SEL = "#e3ac79"        # selected face stipple
 VERT_PX = 3.0               # pixel sizes at UI scale 1.0 when the theme vertex size can't be read
 VERT_SEL_PX = 4.0           # selected = theme vertex size + 1 (Blender's factory 3 gives Maya's 3 / 4)
-LINE_PX = 1.5               # thin lines; 1.5 x UI scale just covers Blender's own 2 px edit edge (step 185)
+LINE_PX = 1.5               # thin lines; 1.5 x UI scale just covers Blender's own 2 px edit edge
 EDGE_SEL_PX = 2.0           # selected edges a little wider, drawn over the hilite wire
 BMESH_LIMIT = 50000         # cage read from the BMesh (modifiers shown in edit mode) only up to this many vertices
-DEPTH_BIAS = 0.002          # relative pull toward the camera: 0.0005 lost the line's far side on silhouettes (step 185)
+DEPTH_BIAS = 0.002          # relative pull toward the camera: 0.0005 lost the line's far side on silhouettes
 EDGE_SEL_BIAS = 0.003       # selected edges in front of the hilite wire
-FACE_BIAS = 0.0005          # selected face stipple (steps 134 / 176)
+FACE_BIAS = 0.0005          # selected face stipple
 POINT_BIAS = 0.003          # vertices: Blender's own edit vertices write depth well in front of the surface
 
 _handle = []
-OVERLAY_OFF = ("show_faces", "show_edge_sharp")   # Blender edit-mesh overlays under the Maya look (steps 176, 185)
+OVERLAY_OFF = ("show_faces", "show_edge_sharp")   # Blender edit-mesh overlays under the Maya look
 _faces_off = set()          # (space pointer, overlay prop) the kit switched off (restored on unregister)
 _pending = {}               # (space pointer, overlay prop) -> value the timer writes
 _shader = {}

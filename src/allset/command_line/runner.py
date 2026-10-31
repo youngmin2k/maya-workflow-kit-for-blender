@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Run one command-line entry: Python only (MEL is not supported).
 
-Maya's Command Line (steps 7, 130).
+Maya's Command Line.
 
 The kit runs no code itself (extension review, issue #40): the entry is written into a Text datablock and run by
 Blender's own ``text.run_script`` — the path of the Text Editor's Run Script. Before that the source is rewritten
@@ -41,7 +41,7 @@ CONSOLE = "<maya console>"              # Maya's file name of Script Editor / Co
 
 class Result:
     """``text`` = the one line the Command Line result field shows; ``lines`` = what the run writes into the Script
-    Editor history, as (kind, text) with kind in ``KINDS`` (step 216)."""
+    Editor history, as (kind, text) with kind in ``KINDS``."""
     __slots__ = ("text", "error", "lines")
 
     def __init__(self, text="", error=False, lines=None):
@@ -276,7 +276,7 @@ def _format(value):
     return repr(value)
 
 
-# --- Script Editor History menu (step 216): Maya scriptEditorInfo options as add-on preferences -------------------
+# --- Script Editor History menu: Maya scriptEditorInfo options as add-on preferences -------------------
 #
 # Kinds of history lines: ECHO (the executed input), OUTPUT (printed text), RESULT ("# Result: ... #"), INFO /
 # WARNING / ERROR (messages), TRACE (the traceback after an error, Show Stack Trace). Maya prints a Python error as
@@ -359,7 +359,7 @@ def _log(lines, lang):
 def action_call(kind, target, props):
     """The Python line Echo All Commands prints for a menu action (``menu_map.normalize`` form): the call the kit
     runs, so it can be run again from the Python tab. Maya prints its runtime command (``CreatePolygonCube;``),
-    which the kit has no table of (step 216)."""
+    which the kit has no table of."""
     args = ", ".join(f"{k}={v!r}" for k, v in props.items())
     if kind in ("op", "v3d"):
         return f"bpy.ops.{target}({args})"

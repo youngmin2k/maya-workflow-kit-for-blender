@@ -1,4 +1,4 @@
-"""Step 65: Maya polyExtrudeFace (Thickness / Local Translate Z / Offset / Divisions / Keep Faces Together), the
+"""Maya polyExtrudeFace (Thickness / Local Translate Z / Offset / Divisions / Keep Faces Together), the
 last-operation record (INPUTS row, In-View Editor). GUI: tests/gui/gui_step65_extrude.py."""
 
 from importlib import import_module

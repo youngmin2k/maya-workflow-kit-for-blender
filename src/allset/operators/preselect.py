@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya pre-selection highlight in mesh edit mode (steps 30, 74).
+"""Maya pre-selection highlight in mesh edit mode.
 
 Maya highlights the component under the mouse before you click (``preSelectHilite true``),
 following the select mode, also while the
@@ -8,7 +8,7 @@ square, an edge = 2 px red line (an edge also near its vertices), a face = red o
 Maya 2022 doesn't highlight objects in object mode (pre_01), so neither does the kit,
 except for component targets while editing a custom pivot.
 
-Blender's ``GIZMO_GT_mesh_preselect_elem_3d`` (step 30) picks the nearest vertex in every select
+Blender's ``GIZMO_GT_mesh_preselect_elem_3d`` picks the nearest vertex in every select
 mode, so this is a Python gizmo with its own picking:
 
 - ``pick_*`` (numpy, no bpy): nearest vertex / edge within ``RADIUS_PX`` on screen that the
@@ -16,7 +16,7 @@ mode, so this is a Python gizmo with its own picking:
 - Occlusion: a per-object ``BVHTree`` of the visible faces, cached until the next depsgraph update;
   X-ray (the shading flag) turns it off.
 - With a transform tool, ``test_select`` declines over the manipulator's handles (a Python gizmo's
-  test_select wins the hover over them, step 30).
+  test_select wins the hover over them).
 - The gizmo has no invoke / modal, so a click goes on to the select tool (GUI test).
 """
 
@@ -31,11 +31,11 @@ from mathutils import Vector
 from mathutils.bvhtree import BVHTree
 
 MODES = {'EDIT_MESH'}
-SELECT_TOOLS = ("builtin.select", "allset.target_weld_tool", "allset.cut_sew_tool")   # step 79: the edge a press cuts
+SELECT_TOOLS = ("builtin.select", "allset.target_weld_tool", "allset.cut_sew_tool")   # the edge a press cuts
 TRANSFORM_TOOLS = {"builtin.move": 'TRANSLATE', "builtin.scale": 'RESIZE', "builtin.rotate": 'ROTATE',
                    "builtin.transform": 'TRANSFORM'}
 
-# --- Maya-style look (step 74) ------------------------------------------------------------------
+# --- Maya-style look ------------------------------------------------------------------
 RGB = (1.0, 0.0, 0.0)               # preselect_hilite_component
 VERT_PX = 5.0
 LINE_PX = 2.0
@@ -151,7 +151,7 @@ def mesh_arrays(bm):
 
 class MeshCache:
     """World vertex positions, edges, visible-face BVH and (lazily) selection of one mesh.
-    Rebuilt after geometry / transform updates only (selection updates keep it, step 74)."""
+    Rebuilt after geometry / transform updates only (selection updates keep it)."""
 
     def __init__(self, ob):
         import bmesh
@@ -381,8 +381,8 @@ def _handles_block(context, region, rv3d, mouse, cs):
 
 
 def _extrude_block(context, region, rv3d, mouse):
-    """The mouse is over the polyExtrudeFace arrow or the In-View Editor box (step 65): like the manipulator's
-    handles, they must get the click, not the hovered face under them (step 97)."""
+    """The mouse is over the polyExtrudeFace arrow or the In-View Editor box: like the manipulator's
+    handles, they must get the click, not the hovered face under them."""
     from ..ui import in_view
     from ..ui import smart_extrude
     if smart_extrude.handles_hit(context, region, rv3d, mouse, HANDLE_PX * (context.preferences.system.ui_scale or 1.0)):
@@ -400,7 +400,7 @@ def _extrude_block(context, region, rv3d, mouse):
     if lay is not None and any(x0 <= mouse[0] <= x1 and y0 <= mouse[1] <= y1
                                for x0, y0, x1, y1 in (lay["box"], lay["title"])):
         return True
-    # step 151: every handle of Maya's extrude manipulator (arrows, scale cubes, plane handles, centre square)
+    # every handle of Maya's extrude manipulator (arrows, scale cubes, plane handles, centre square)
     return in_view.handles_hit(context, region, rv3d, mouse, HANDLE_PX * (context.preferences.system.ui_scale or 1.0))
 
 
@@ -561,7 +561,7 @@ class ALLSET_GGT_preselect(bpy.types.GizmoGroup):
 
     def setup(self, context):
         self.gz = self.gizmos.new(ALLSET_GT_preselect.bl_idname)
-        self.gz.hide_keymap = True   # a click goes to the select tool, not to a gizmo tweak (step 74)
+        self.gz.hide_keymap = True   # a click goes to the select tool, not to a gizmo tweak
         _last[:] = [self]
 
 

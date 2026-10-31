@@ -1,4 +1,4 @@
-"""Step 213 (#119): Maya's Connection Editor = drivers (ui/connection_editor.py;
+"""#119: Maya's Connection Editor = drivers (ui/connection_editor.py;
 Maya connectAttr: the right attribute follows the left, a second connect warns, break keeps the value)."""
 
 import math

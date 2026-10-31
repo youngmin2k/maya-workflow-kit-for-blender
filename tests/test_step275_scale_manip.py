@@ -1,4 +1,4 @@
-"""Step 275 (#200): the Scale manipulator's centre and axis handles drag Maya's way.
+"""#200: the Scale manipulator's centre and axis handles drag Maya's way.
 
 Centre: f = 1 + dx * wpp / R (horizontal px since the press, world length of a px at the pivot depth, pivot to the
 farthest corner of the lead's world box); axis: f = 1 + d / L along the handle. Numbers below are Maya's results

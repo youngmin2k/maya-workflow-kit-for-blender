@@ -1,4 +1,4 @@
-"""Step 73 in a real UI (Maya Workflow Kit layout): red key ticks on the Time Slider at the keyed frames, and the
+"""In a real UI (Maya Workflow Kit layout): red key ticks on the Time Slider at the keyed frames, and the
 Range Slider bar dragged like Maya's (segment = move, end handle = that end, double-click = whole range)."""
 
 import os
@@ -82,7 +82,7 @@ def s_wait():
 @step
 def s_ticks():
     _area, r, _h = timeline()
-    # step 186: in the Maya layout a key tick sits on the frame's Maya tick, the left edge of its cell
+    # in the Maya layout a key tick sits on the frame's Maya tick, the left edge of its cell
     ts = import_module(MODULE + ".ui.time_slider")
     C["tick_x"] = {f: r.x + int(ts.key_x(r, f, True)) for f in (12, 20)}
     C["tick_y"] = r.y + r.height // 2

@@ -1,5 +1,5 @@
-"""Step 271: UV Editor > Cut/Sew > Stitch Together runs Blender's UV Stitch from the menu in a real UV Editor.
-Blender 5.2.3 crashes on a scripted UV Stitch in background mode (no region, factory Blender: tmp repro in step 271);
+"""UV Editor > Cut/Sew > Stitch Together runs Blender's UV Stitch from the menu in a real UV Editor.
+Blender 5.2.3 crashes on a scripted UV Stitch in background mode (no region, also in a factory Blender);
 this checks the menu path in a GUI session survives and stitches."""
 
 import os

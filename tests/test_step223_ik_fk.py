@@ -1,4 +1,4 @@
-"""Step 223 (Issue #133, ATTACH_PLAN L14): Maya IK / FK switching on kit IK handles — Ik Blend on the handle drives
+"""Issue #133: Maya IK / FK switching on kit IK handles — Ik Blend on the handle drives
 the IK constraint's Influence (Channel Box "Ik Blend"), poses at Ik Blend 1 / 0 equal Maya's, Set IK/FK Key / Enable
 IK Solver / Move IK to FK follow Maya 2026 (RP arm shoulder (0,0,0)
 -> elbow (4,0,-1) -> wrist (8,0,0), handle moved to (6,0,2))."""
@@ -81,7 +81,7 @@ def _select(*obs):
 def test_menu_items_mapped():
     for label, op in (("Set IK/FK Key", "allset.ik_fk_key"), ("Move IK to FK", "allset.move_ik_to_fk")):
         assert menu_map.MAP[f"Key/IK/FK Keys/{label}"] == op
-    # step 238: a Maya check item drawn as the WindowManager property that runs allset.ik_solver_toggle
+    # a Maya check item drawn as the WindowManager property that runs allset.ik_solver_toggle
     assert menu_map.MAP["Key/IK/FK Keys/Enable IK Solver"] == ("prop", "window_manager.allset_ik_solver", {})
 
 

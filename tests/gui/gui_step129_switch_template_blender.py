@@ -1,4 +1,4 @@
-"""Step 129 (#19), from the audit 128 repro: Maya -> Blender while the Maya Workflow Kit template file is open (what
+"""#19: , from the audit 128 repro: Maya -> Blender while the Maya Workflow Kit template file is open (what
 "Make Blender feel like Maya" opens and what every Maya-mode start opens) must give a usable Blender
 screen: no empty Status Line / Shelf image-editor strips, no Tool-tab-only Properties dock without
 header, and File > New in Blender mode must not load the Maya template again.

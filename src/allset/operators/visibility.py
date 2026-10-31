@@ -7,14 +7,14 @@ Shift+H shows the selected hidden objects; Ctrl+Shift+H shows what was hidden la
 
 Maya's ``visibility`` attribute is ``Object.hide_viewport`` (per object, keyable; the Channel
 Box Visibility row reads the same flag): h, Display > Hide / Show and the Channel Box write one
-attribute (step 129, #26). A display layer's V uses the view-layer flag
+attribute (#26). A display layer's V uses the view-layer flag
 (``hide_set``) instead, so it never changes this attribute.
 
 A hidden object can't stay selected in Blender, so Maya's "hidden but still selected" is kept
 as an ID property on the object (``KEPT``). ``LAST`` marks what the latest hide of this
-operator hid (step 16).
+operator hid.
 
-Step 162: Toggle Show/Hide (h) follows Maya's "Toggle Visibility Options": the toggled set is
+Toggle Show/Hide (h) follows Maya's "Toggle Visibility Options": the toggled set is
 the selection = the visible selected objects plus the hidden-but-selected ones (``KEPT``). First Selection Independent
 (default, 1) flips each object; Dependent (2) gives every one the opposite of the first selected object's visibility.
 The saved window value (option_windows.saved("toggle_show_hide")) applies to h and the menu click alike.
@@ -128,7 +128,7 @@ def apply(context, action, dependent=None):
     if action == 'HIDE':
         return _hide(selected, objs)
     if action == 'HIDE_UNSELECTED':
-        # step 164: the selection's own hierarchy stays (its children aren't "unselected" objects, and hiding a
+        # the selection's own hierarchy stays (its children aren't "unselected" objects, and hiding a
         # selected object's parent would hide the selection: Maya draws a node only under visible parents)
         from .dag import hierarchy
         keep = {o.session_uid for o in hierarchy(selected)}
@@ -149,7 +149,7 @@ def apply(context, action, dependent=None):
     raise ValueError(action)
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_visibility(bpy.types.Operator):
     """Maya object visibility (h, Ctrl+H, Alt+H, Shift+H, Ctrl+Shift+H)"""
     bl_idname = "allset.visibility"
@@ -157,7 +157,7 @@ class ALLSET_OT_visibility(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     action: EnumProperty(name="Action", items=ACTIONS, default='TOGGLE')
-    # Toggle: Maya's First Selection (step 162); SAVED = the Toggle Visibility Options window's value
+    # Toggle: Maya's First Selection; SAVED = the Toggle Visibility Options window's value
     behaviour: EnumProperty(name="First Selection", options={'SKIP_SAVE', 'HIDDEN'}, default='SAVED', items=(
         ('SAVED', "Saved", ""), ('INDEPENDENT', "Independent", ""), ('DEPENDENT', "Dependent", "")))
 
@@ -175,7 +175,7 @@ class ALLSET_OT_visibility(bpy.types.Operator):
         changed = apply(context, self.action,
                         None if self.behaviour == 'SAVED' else self.behaviour == 'DEPENDENT')
         from . import dag
-        dag.sync(context.scene, vl)          # a hidden parent hides its children (Maya, step 164)
+        dag.sync(context.scene, vl)          # a hidden parent hides its children (Maya)
         text = message(self.action, had_selection, changed)
         if text:
             from ..ui import view_message

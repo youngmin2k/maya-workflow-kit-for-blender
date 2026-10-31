@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""``maya.cmds`` time and key commands of the kit's look-alike (step 208, Issue #115): currentTime, setKeyframe,
+"""``maya.cmds`` time and key commands of the kit's look-alike (Issue #115): currentTime, setKeyframe,
 cutKey, keyframe, playbackOptions.
 
 Maya's behaviour: return values (setKeyframe = keys set, cutKey /
 keyframe -e = curves changed, cutKey -clear = 0), values in Maya units / degrees, a keyed attribute takes its curve's
 value at the current time. Keys go on the Channel Box channels' F-curves (``ui/channel_box.py``) with the kit's
-default tangents (``graph_key_menu.after_insert``, step 157). Maya's animation range = the scene frame range,
-its playback range = the preview range (step 20).
+default tangents (``graph_key_menu.after_insert``). Maya's animation range = the scene frame range,
+its playback range = the preview range.
 """
 
 import math
@@ -306,7 +306,7 @@ def _playback(scene):
 
 def playbackOptions(*args, **kwargs):
     """Maya's playback range (-min / -max = the Time Slider's) is the preview range, the animation range (-ast /
-    -aet = the Range Slider's ends) the scene frame range (step 20). A min past the max pushes the max to min + 1
+    -aet = the Range Slider's ends) the scene frame range. A min past the max pushes the max to min + 1
     (Maya: min 90 with max 60 -> 90 / 91)."""
     f = _Flags("playbackOptions", kwargs)
     query = f.get("query", "q", False)

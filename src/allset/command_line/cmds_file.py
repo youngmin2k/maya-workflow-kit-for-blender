@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""``maya.cmds.file`` of the kit's look-alike (step 208, Issue #115): -new / -open / -rename / -save and the
+"""``maya.cmds.file`` of the kit's look-alike (Issue #115): -new / -open / -rename / -save and the
 -query flags scripts use (-sceneName, -shortName, -modified).
 
 Maya's behaviour: ``file -rename`` only names the scene (returns the path),

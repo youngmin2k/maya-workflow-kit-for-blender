@@ -1,4 +1,4 @@
-"""Step 29: Maya material assignment (Lighting/Shading menu, RMB menu, Shift+T).
+"""Maya material assignment (Lighting/Shading menu, RMB menu, Shift+T).
 
 Object assignment = whole shape, face selection = only those faces.
 """
@@ -23,7 +23,7 @@ def _scene():
     for mat in list(bpy.data.materials):
         bpy.data.materials.remove(mat)
     bpy.ops.mesh.primitive_cube_add()
-    bpy.context.view_layer.update()   # step 100: the new cube joins lambert1 (Maya's initialShadingGroup)
+    bpy.context.view_layer.update()   # the new cube joins lambert1 (Maya's initialShadingGroup)
     return bpy.context.active_object
 
 
@@ -148,7 +148,7 @@ def test_material_attributes_opens_ae_tab():
     assert wm.allset_dock == 'ATTRIBUTE_EDITOR' and wm.allset_ae_tab == "MAT:1"
     wm.allset_dock = 'CHANNEL_BOX'
     bare = _scene()
-    bare.data.materials.clear()   # (a new mesh joins lambert1, step 100)
+    bare.data.materials.clear()   # (a new mesh joins lambert1)
     assert not bare.material_slots
     assert not bpy.ops.allset.material_attributes.poll()
 
@@ -182,7 +182,7 @@ def test_favorite_and_existing_menus():
     assert [(t, p.kind) for _i, t, p in fav.ops] == [
         ("Lambert", 'LAMBERT'), ("Blinn", 'BLINN'), ("Phong", 'PHONG'), ("Standard Surface", 'STANDARD_SURFACE')]
     assert {i for i, _t, _p in fav.ops} == {"allset.shelf_material"}
-    # step 100: Maya's scene always has lambert1, so Assign Existing Material lists it
+    # Maya's scene always has lambert1, so Assign Existing Material lists it
     assert [t for _i, t, _p in _draw(material.ALLSET_MT_assign_existing_material).ops] == ["lambert1"]
     bpy.data.materials.new("phong1")
     bpy.data.materials.new("Blinn2")
@@ -239,6 +239,6 @@ def test_list_submenu_kept_inside_region():
         assert bounds[0] <= cx + it.rect[0] and cx + it.rect[2] <= bounds[2], (it.label, cx, it.rect)
     # Without bounds (headless callers) the submenu stays at the row's corner.
     s = engine.Session(mm.RMB_MESH, (400.0, 120.0), 0.0, measure)
-    fav = next(it for it in s.layout.items if it.label == "Assign Favorite Material")  # unmoved root (step 33)
+    fav = next(it for it in s.layout.items if it.label == "Assign Favorite Material")  # unmoved root
     s.move(400 + fav.rect[0] + 5, 120 + (fav.rect[1] + fav.rect[3]) / 2, 0.3)
     assert s.center == (400 + fav.rect[2], 120 + fav.rect[3])

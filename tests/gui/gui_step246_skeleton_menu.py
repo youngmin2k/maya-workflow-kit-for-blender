@@ -1,4 +1,4 @@
-"""Step 246 (Issue #163) in a real UI, the skeleton chain a Maya rigger walks:
+"""Issue #163: in a real UI, the skeleton chain a Maya rigger walks:
 Joint Tool 3 clicks -> Enter -> Skeleton > Insert Joints: press on joint2, drag halfway to joint3, release, Enter ->
 joint4 sits between them, joint3 didn't move -> Remove Joints on joint4 -> Ctrl+Z brings it back -> Disconnect Joint
 on joint3 (root + end joint5 left behind) -> Connect Joint joint3 to joint5 (factory connect mode) -> Mirror Joints

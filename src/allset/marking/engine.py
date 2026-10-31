@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya marking menu and hotbox logic, without Blender (step 9).
+"""Maya marking menu and hotbox logic, without Blender.
 
 Coordinates are region pixels (y up, as Blender's ``mouse_region_*``). Text
 width comes from a ``measure(text) -> width`` callback (``blf`` in Blender, a
@@ -82,7 +82,7 @@ def _inside(rect, x, y):
 
 TOGGLE_OPS = ("wm.context_toggle", "allset.prevent_negative_scale", "allset.xform_constraint", "allset.manip_option", "allset.symmetry", "allset.component_mask",
               "allset.pivot_option", "allset.mm_camera_based")
-# Shift+Q pick mask: Poly Vertices / Poly Edges / Faces are check boxes, "All Components on" is a command (step 93).
+# Shift+Q pick mask: Poly Vertices / Poly Edges / Faces are check boxes, "All Components on" is a command.
 MASK_CHECKS = ("VERT", "EDGE", "FACE")
 
 
@@ -167,7 +167,7 @@ class Layout:
 
     @staticmethod
     def _text(label, action):
-        # Toggles keep room on the right for their check box (draw.py, step 26).
+        # Toggles keep room on the right for their check box (draw.py).
         # A Blender menu ("menu", id) opens as a submenu too (e.g. Assign Existing Material).
         return label + (" ▸" if Layout.has_arrow(action) else "    " if is_toggle(action) else "")
 
@@ -220,7 +220,7 @@ def _slide(lo, hi, low, high):
 MIN_COLUMN_ROWS = 4
 
 
-# --- area borders (step 136, #56) --------------------------------------------------------------------------------
+# --- area borders (#56) --------------------------------------------------------------------------------
 # ``edges`` = rectangles (x0, y0, x1, y1) where nothing a region draws is seen: the gaps between the window's areas
 # and the rim Blender draws over every area edge after all regions (draw.window_edges). A list row or radial box
 # overlapping one is cut, so rows go below horizontal bands (one column kept, like
@@ -253,7 +253,7 @@ def _below_bands(row_top, height, x0, x1, bands):
 def _flow(rows, top, floor, w, gap_unit, edges=(), x_first=None):
     """Lay list rows (in order) out top-down from ``top`` in columns of width ``w`` from ``x_first`` (default: where
     the first row is): a divider = ``gap_unit`` (Layout), a row that would overlap a horizontal band goes below it,
-    a row under ``floor`` starts the next column (step 52), a column on a vertical band moves right past it (the
+    a row under ``floor`` starts the next column, a column on a vertical band moves right past it (the
     next columns follow). Returns the number of columns."""
     hbands = [b for b in edges if _horizontal(b)]
     vbands = [b for b in edges if not _horizontal(b)]
@@ -313,7 +313,7 @@ def _off_bands(rect, edges, x0, y0, x1, y1, others=()):
             ys.update((b[1] - rect[3], b[3] - rect[1]))
         else:
             xs.update((b[0] - rect[2], b[2] - rect[0]))
-    for o in others:      # beside / above / below a box already placed (or the list's column, step 151)
+    for o in others:      # beside / above / below a box already placed (or the list's column)
         xs.update((o[0] - rect[2], o[2] - rect[0]))
         ys.update((o[1] - rect[3], o[3] - rect[1]))
     xs.update((x0 - rect[0], x1 - rect[2]))
@@ -387,27 +387,27 @@ def _settle_list(rows, top, floor, x0, x1, gap_unit, edges, center=None, lift=No
 
 def fit_ring(layout, center, bounds, edges=()):
     """Keep a menu's items inside ``bounds`` (region x0, y0, x1, y1). The centre stays the press point the gesture
-    directions start from (step 33): returns 0.0 (how far the centre moved).
+    directions start from: returns 0.0 (how far the centre moved).
 
     Radial boxes slide inside; the list goes under the ring (Maya), else beside it in one column (the side with no
-    radial submenu on the way, step 161), else above it, else is pushed up from under the ring. Maya draws the whole
+    radial submenu on the way), else above it, else is pushed up from under the ring. Maya draws the whole
     menu higher only when the list would run past the *screen* bottom;
-    Blender can't draw outside its window, which is smaller, so lifting at the window edge (step 184) moved the ring
-    off the pointer in the middle of the view and killed the radial marks — step 193 moves only the list.
-    ``edges`` = area border bands (region pixels, step 136): no box or row is left overlapping one."""
+    Blender can't draw outside its window, which is smaller, so lifting at the window edge moved the ring
+    off the pointer in the middle of the view and killed the radial marks — so only the list moves.
+    ``edges`` = area border bands (region pixels): no box or row is left overlapping one."""
     _place(layout, center, bounds, edges)
     return 0.0
 
 
 def _place(layout, center, bounds, edges):
-    """fit_ring's placement around a fixed centre (step 33 / 136 / 161 rules)."""
+    """fit_ring's placement around a fixed centre."""
     cx, cy = center
     x0, y0, x1, y1 = bounds[0] - cx, bounds[1] - cy, bounds[2] - cx, bounds[3] - cy  # centre-relative
     edges = _rel_edges(edges, cx, cy)
     placed = []
     rows = [it for it in layout.items if it.kind == "list"]
     if rows and edges:
-        # Maya's ring is compact (radius 55, step 151): a box moved off a border must not land in the column the
+        # Maya's ring is compact (radius 55): a box moved off a border must not land in the column the
         # list takes under the ring, or the list is drawn over it.
         lx0, _ly0, lx1, ly1 = _bbox(rows)
         placed.append((lx0, y0 - 1.0, lx1, ly1))
@@ -434,7 +434,7 @@ def _place(layout, center, bounds, edges):
         # small window) and moves it when the screen ends; it never wraps into columns (step-154 dogfood G2). A
         # column that doesn't fit under the ring goes beside it (the side with no radial submenu on the way, else
         # right; moved up it would cover the ring's S boxes and the gestures), then above it; only a list taller than the window gets more columns,
-        # still under the ring (step 52).
+        # still under the ring.
         if h > y1 - y0 and ly1 - y0 >= MIN_COLUMN_ROWS * layout.params.item_h:
             if edges:
                 _settle_list(rows, ly1, y0, x0, x1, gap_unit, edges, center=0.0)
@@ -452,7 +452,7 @@ def _place(layout, center, bounds, edges):
         right = (rx1 + gap - lx0, -h / 2 - ly0)
         left = (rx0 - gap - lx1, -h / 2 - ly0)
         dx = dy = None
-        lift = y1           # how high re-flowed rows may go (step 136): not into the ring when under it
+        lift = y1           # how high re-flowed rows may go: not into the ring when under it
         if ly0 >= y0 and ly1 <= y1:
             dx, dy = _slide(lx0, lx1, x0, x1), 0.0
             lift = None
@@ -498,8 +498,8 @@ class Session:
 
     def __init__(self, menu, origin, t0, measure, params=None, enabled=None, bounds=None, edges=()):
         """``bounds`` = (x0, y0, x1, y1): the visible part of the region; list
-        submenus that would cross it are moved inside (step 29). ``edges`` = area
-        border bands in region pixels (step 136, ``fit_ring``)."""
+        submenus that would cross it are moved inside. ``edges`` = area
+        border bands in region pixels (``fit_ring``)."""
         self.params = params or Params()
         self.bounds = bounds
         self.edges = tuple(edges) if bounds is not None else ()
@@ -512,7 +512,7 @@ class Session:
         self.t0 = t0
         self.stack = [(root, origin)]
         # Per stack level: the item of the level below that opened it, when it is a list row's cascade (a Qt
-        # menu submenu beside the row, step 129): the menus under a cascade stay drawn and hit-tested. In-place
+        # menu submenu beside the row): the menus under a cascade stay drawn and hit-tested. In-place
         # radial submenus (None) replace the menu, like Maya's.
         self.openers = [None]
         self.mode = "PRESS"           # "PRESS" (button held) | "CLICK" (menu stays open)
@@ -567,7 +567,7 @@ class Session:
 
     def _hit_stack(self, x, y):
         """(level, item, on option box) under (x, y): the top menu first (directions included); when it has
-        nothing there and is a cascade, the boxes / rows of the menus it hangs from (step 129, #5: dragging on
+        nothing there and is a cascade, the boxes / rows of the menus it hangs from (#5: dragging on
         down the list after passing a submenu row closed the whole menu)."""
         top = len(self.stack) - 1
         lay, (cx, cy) = self.stack[top]
@@ -596,7 +596,7 @@ class Session:
         return (x, y)
 
     def _around_edges(self, layout, at):
-        """A list submenu's rows off the area border bands (step 136, ``_settle_list``): a row that would overlap a
+        """A list submenu's rows off the area border bands (``_settle_list``): a row that would overlap a
         horizontal band goes below it; when that runs the rows past the window bottom they move up (as far as the
         top allows) before wrapping into a second column."""
         x0, y0, x1, y1 = self.bounds
@@ -626,8 +626,8 @@ class Session:
             return
         # Dragging onto a submenu opens it in place (also the second stroke of a
         # zig-zag mark): radial once the pointer reaches the ring, list on hover.
-        # A radial one only from its own sector: Maya-wide N / S boxes (step 151) reach into the diagonal
-        # sectors, and a quick NE / NW gesture crossing them must not open the N submenu (step 153).
+        # A radial one only from its own sector: Maya-wide N / S boxes reach into the diagonal
+        # sectors, and a quick NE / NW gesture crossing them must not open the N submenu.
         if item.kind == "radial" and math.hypot(dx, dy) >= self.params.radius \
                 and direction(dx, dy, self.params.dead) == item.key:
             self._push(item, (x, y))
@@ -681,18 +681,18 @@ class Session:
 # --- hotbox ---------------------------------------------------------------------------
 
 class HotboxLayout:
-    """Maya-style hotbox (step 52): menu rows above the cursor
+    """Maya-style hotbox: menu rows above the cursor
     (``rows``, top first), the cursor row (``side`` = left / right boxes beside the centre box), rows under it
     (``below``, top first), zone lines on the diagonals. Sizes at scale 1: row pitch
     35 = box 26 + gap 9; the centre box is the title with padding."""
 
     ROW_H, ROW_GAP, SIDE_GAP = 26.0, 9.0, 88.0
-    LINE_GAP, LINE_LEN = 20.0, 28.0     # zone lines: start past the rows, length per axis (step 52)
+    LINE_GAP, LINE_LEN = 20.0, 28.0     # zone lines: start past the rows, length per axis
 
     def __init__(self, rows, center, measure, params=None, style="ALL", scale=1.0, bounds=None,
                  below=(), side=None, title=PRODUCT):
-        """``bounds`` = (x0, y0, x1, y1): where the hotbox may draw (step 52: the window's screen areas,
-        in region pixels); rows are wrapped / moved to stay inside it (steps 17, 33)."""
+        """``bounds`` = (x0, y0, x1, y1): where the hotbox may draw (the window's screen areas,
+        in region pixels); rows are wrapped / moved to stay inside it."""
         self.params = p = (params or Params()).scaled(scale) if scale != 1.0 else (params or Params())
         self.center = center
         self.style = style
@@ -746,7 +746,7 @@ class HotboxLayout:
         total = sum(widths)
         x = cx - total / 2
         if bounds is not None:
-            # centred on the cursor like Maya, slid sideways to stay visible (step 17)
+            # centred on the cursor like Maya, slid sideways to stay visible
             x = max(bounds[0], min(x, bounds[2] - total))
         out = []
         for (key, label), w in zip(row, widths):
@@ -756,7 +756,7 @@ class HotboxLayout:
 
     def _fit_blocks(self, blocks, bounds, gap):
         """Rows over the top edge go under the lower rows; rows under the bottom edge go over the upper
-        rows (order kept); what still doesn't fit is pushed inside (steps 17, 33)."""
+        rows (order kept); what still doesn't fit is pushed inside."""
         def span(kind):
             rs = [r for k, row in blocks if k == kind for r, _k, _l in row]
             return (min(r[1] for r in rs), max(r[3] for r in rs)) if rs else None
@@ -792,7 +792,7 @@ class HotboxLayout:
 
     @staticmethod
     def _wrap(rows, measure, pad, width):
-        """Split rows wider than ``width`` into several (order kept, step 17)."""
+        """Split rows wider than ``width`` into several (order kept)."""
         out = []
         for row in rows:
             line, used = [], 0.0
@@ -833,7 +833,7 @@ def is_tap(press_t, release_t, clicked):
     return not clicked and release_t - press_t < TAP_TIME
 
 
-# Step 260 (#174): a held Space must keep the hotbox up whatever the input path sends while the key is down. Some
+# #174: a held Space must keep the hotbox up whatever the input path sends while the key is down. Some
 # send auto-repeat as RELEASE + PRESS pairs (X11 without detectable repeat, remote / remapping input; with
 # simulated pairs the hold ended at each RELEASE and a fast pair toggled Four View), and
 # Windows' key state can read "up" for a moment. Kit design: a RELEASE ends the hold only when no PRESS

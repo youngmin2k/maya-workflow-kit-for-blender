@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya polyExtrudeFace and the "last kit modeling operation" history (step 65).
+"""Maya polyExtrudeFace and the "last kit modeling operation" history.
 
-Maya 2022 (step 65): Edit Mesh > Extrude = a zero-length extrusion
+Maya 2022: Edit Mesh > Extrude = a zero-length extrusion
 (Thickness 0, Local Translate Z 0, Offset 0, Divisions 1, Keep Faces Together on); Local Translate Z moves each face along
 its normal (a vertex shared by several extruded faces moves by the average), Thickness offsets every face plane by the
 same distance (shell), Offset shrinks the extruded faces in their plane (no new faces), Divisions = rings along the sides.
@@ -11,11 +11,11 @@ its node name (``polyExtrudeFaceN``), the mesh before it and the values; changin
 mesh (``allset.extrude_edit``), so it is one undo step and the Adjust Last Operation panel shows the same Maya names.
 The record is valid only while the mesh equals one of the states the kit made (Ctrl+Z / Ctrl+Shift+Z included).
 
-Step 139 (#70 M4, #16): the record is one ``Spec`` per Maya node - polyExtrudeEdge / polyExtrudeVertex here (edges /
+#70, #16: the record is one ``Spec`` per Maya node - polyExtrudeEdge / polyExtrudeVertex here (edges /
 vertices extrude at once, no drag) and polyBevel3 in operators/bevel_maya.py - each with its Maya fields, edit
 operator and arrow field.
 
-Step 151 (lane B): the extrude manipulator's other handles drive polyExtrudeFace Local Translate X / Y and Local
+The extrude manipulator's other handles drive polyExtrudeFace Local Translate X / Y and Local
 Scale X / Y / Z (Maya 2022, data in tests/test_step151_extrude_manip.py): every extruded face has its own frame
 - Z = its normal, X = Maya world X (``localDirection`` 1 0 0, in world space) projected into the face plane
 (Maya world Z = Blender -Y when the face faces X), Y = Z x X; Local Translate moves the face along X / Y, Local Scale scales it about its vertex mean along its X / Y / Z
@@ -37,7 +37,7 @@ FIELDS = ("thickness", "local_translate_z", "offset", "divisions", "keep_faces_t
 LABELS = {"thickness": "Thickness", "local_translate_z": "Local Translate Z", "offset": "Offset",
           "divisions": "Divisions", "keep_faces_together": "Keep Faces Together"}
 DEFAULTS = {"thickness": 0.0, "local_translate_z": 0.0, "offset": 0.0, "divisions": 1, "keep_faces_together": True}
-# polyExtrudeFace attributes only the manipulator handles set (step 151): not In-View / Channel Box rows
+# polyExtrudeFace attributes only the manipulator handles set: not In-View / Channel Box rows
 MANIP_FIELDS = ("local_translate_x", "local_translate_y", "local_scale_x", "local_scale_y", "local_scale_z")
 MANIP_LABELS = {"local_translate_x": "Local Translate X", "local_translate_y": "Local Translate Y",
                 "local_scale_x": "Local Scale X", "local_scale_y": "Local Scale Y", "local_scale_z": "Local Scale Z"}
@@ -50,7 +50,7 @@ NOTICE = "Edit-mode operations have no history in Blender: only the last one can
 
 
 class Spec:
-    """One kind of Maya modeling node the kit records (step 139: edge / vertex extrusion, bevel).
+    """One kind of Maya modeling node the kit records (edge / vertex extrusion, bevel).
 
     ``kinds`` = Channel Box text kind per field (cb_entry: "NONE" float, "INT", "BOOL"); ``arrow`` = the field the
     In-View manipulator arrow drags (None: no arrow); ``edit_op`` = the operator that rebuilds the node with new
@@ -59,11 +59,11 @@ class Spec:
     def __init__(self, kind, node, fields, labels, defaults, kinds, arrow, edit_op, build=None, node_type=None,
                  manip=(), in_view=True, object_check=None, pre_uv=False):
         self.pre_uv = pre_uv                   # a rerun on the same mesh also needs the same UVs (UV projections)
-        self.in_view = in_view                 # the In-View Editor shows it (not a UV projection, step 257)
+        self.in_view = in_view                 # the In-View Editor shows it (not a UV projection)
         self.object_check = object_check       # (ob, rec) -> the object-mode mesh is still the node's result
         self.node_type = node_type or node     # Maya node type (the AE history tab title)
         self.kind, self.node, self.fields, self.labels = kind, node, tuple(fields), dict(labels)
-        self.manip = tuple(manip)              # values only the manipulator sets (step 151): not shown as rows
+        self.manip = tuple(manip)              # values only the manipulator sets: not shown as rows
         self.defaults, self.kinds, self.arrow, self.edit_op, self.build = dict(defaults), dict(kinds), arrow, \
             edit_op, build
 
@@ -123,7 +123,7 @@ def _offset_dir(perps):
 
 
 def face_axes(normal, direction=WORLD_X, fallback=MAYA_Z):
-    """Maya's local X / Y of an extruded face (polyExtrudeFace ``localDirection`` 1 0 0, step 151): the
+    """Maya's local X / Y of an extruded face (polyExtrudeFace ``localDirection`` 1 0 0): the
     direction projected into the face plane, ``fallback`` (Maya world Z) when the face looks along it; Y = Z x X."""
     n = normal.normalized() if normal.length > 1e-12 else Vector((0.0, 0.0, 1.0))
     for d in (direction, fallback, Vector((0.0, 1.0, 0.0))):
@@ -136,7 +136,7 @@ def face_axes(normal, direction=WORLD_X, fallback=MAYA_Z):
 
 def _face_parts(f, v, direction, fallback):
     """(X, Y, SX, SY, SZ) of vertex ``v`` in face ``f``: the face's local X / Y and the move of ``v`` per unit of
-    Local Scale - 1 along X / Y / Z about the face's vertex mean (step 151)."""
+    Local Scale - 1 along X / Y / Z about the face's vertex mean."""
     n = f.normal.normalized()
     x, y = face_axes(n, direction, fallback)
     r = v.co - f.calc_center_median()
@@ -200,7 +200,7 @@ def _region(bm, faces):
     caps = _caps(ret["geom"])
     gone = [f for f in faces if f.is_valid]
     if gone and closed:
-        # whole closed shells: Maya keeps the old faces, turned inside out (step 257);
+        # whole closed shells: Maya keeps the old faces, turned inside out;
         # bmesh has already turned them (Blender 4.5)
         pass
     elif gone:   # an isolated region keeps its faces in bmesh; Maya's extrusion has no bottom
@@ -297,11 +297,11 @@ def extrude(bm, faces, thickness=0.0, local_translate_z=0.0, offset=0.0, divisio
             unit=1.0, direction=WORLD_X, fallback=MAYA_Z, **manip):
     """Maya polyExtrudeFace on ``faces`` (bmesh). Returns (caps, moved); the caps end up selected. ``manip`` =
     Local Translate X / Y and Local Scale X / Y / Z (MANIP_FIELDS); ``direction`` / ``fallback`` = world X / Z
-    in mesh space (the faces' local X, step 151)."""
+    in mesh space (the faces' local X)."""
     bm.faces.index_update()
     picked = sorted({f.index for f in faces if f.is_valid})
     plan = maya_plan(bm, picked, divisions, keep_faces_together)
-    src = bm.verts.layers.int.new(".allset_extrude_src")     # added before elements are collected again (step 64)
+    src = bm.verts.layers.int.new(".allset_extrude_src")     # added before elements are collected again
     for v in bm.verts:
         v[src] = v.index + 1
     bm.faces.ensure_lookup_table()
@@ -334,7 +334,7 @@ def extrude(bm, faces, thickness=0.0, local_translate_z=0.0, offset=0.0, divisio
     return caps, moved
 
 
-# --- Maya's numbering of the result (step 257, #149) ---------------------------------------------------------------
+# --- Maya's numbering of the result (#149) ---------------------------------------------------------------
 # polyExtrudeFacet (Maya 2026): vertices, edges and faces by index, with a border and for whole closed
 # shells. The mesh's edge index is taken as Maya's edge id: kit
 # primitives (polyCube / polyCylinder) and kit extrusions keep it so (bevel_maya.maya_edge_ids).
@@ -469,7 +469,7 @@ def renumber(bm, plan, levels, src, caps, moved):
     return [bm.faces[i] for i in cap_ids], [(bm.verts[i], *rest) for i, rest in moved_ids]
 
 
-# --- polyExtrudeEdge / polyExtrudeVertex (step 139) ------------
+# --- polyExtrudeEdge / polyExtrudeVertex ------------
 
 def deselect_all(bm):
     for seq in (bm.faces, bm.edges, bm.verts):
@@ -648,7 +648,7 @@ class Record:
 
     def __init__(self, name, pre, params, spec=None):
         self.name = name            # polyExtrudeFaceN (polyExtrudeEdgeN, polyExtrudeVertexN, polyBevelN)
-        self.spec = spec or FACE    # which Maya node (step 139)
+        self.spec = spec or FACE    # which Maya node
         self.pre = pre              # BMesh copy before the extrusion
         self.params = dict(params)
         self.cap_verts = []         # vertex indices whose positions identify the kit's state
@@ -668,7 +668,7 @@ class Record:
 
 
 RECORDS = {}   # object name -> Record
-# Step 283: Delete History drops an object's record; Maya's undo brings the node back (redo drops it again). Delete
+# Delete History drops an object's record; Maya's undo brings the node back (redo drops it again). Delete
 # History doesn't change the mesh, so the parked record is valid again after the undo (its signature still matches).
 PARKED = {}    # object name -> Record dropped by Delete History
 
@@ -699,7 +699,7 @@ def _on_redo(*_args):
 
 def keep(context, ob, rec):
     """Remember ``rec`` as the object's history node, unless Maya's Construction History is off (Status Line
-    toggle, step 189): Maya's menu commands then run without construction history and leave no polyExtrude / polyBevel
+    toggle): Maya's menu commands then run without construction history and leave no polyExtrude / polyBevel
     node (Maya's Construction History)."""
     from . import prim_history
     if prim_history.history_on(context):
@@ -779,7 +779,7 @@ def run(ob, rec, params, unit):
 
 
 def mesh_axes(ob):
-    """Maya world X / Z in ``ob``'s mesh space (Maya takes ``localDirection`` in world space, step 151)."""
+    """Maya world X / Z in ``ob``'s mesh space (Maya takes ``localDirection`` in world space)."""
     m = ob.matrix_world.to_3x3().inverted_safe()
     return {"direction": m @ WORLD_X, "fallback": m @ MAYA_Z}
 
@@ -881,7 +881,7 @@ def mesh_state_ok(ob, rec):
 def object_record(ob):
     """The record of ``ob`` in object mode, else None. Maya lists a mesh's history nodes in object mode too: a kit
     node shows (and can be edited) there while the mesh is still the result the kit made (UV > Automatic checks its
-    UVs instead, step 257)."""
+    UVs instead)."""
     if not isinstance(ob, bpy.types.Object) or ob.type != 'MESH' or ob.mode == 'EDIT':   # a pose bone lead too
         return None
     rec = RECORDS.get(ob.name)
@@ -1048,7 +1048,7 @@ def _props():
                                  description="Segments along the extruded sides"),
         "keep_faces_together": BoolProperty(name="Keep Faces Together", default=True,
                                             description="Extrude adjacent faces as one piece (off: each face alone)"),
-        # polyExtrudeFace values of the manipulator handles (step 151)
+        # polyExtrudeFace values of the manipulator handles
         "local_translate_x": FloatProperty(name="Local Translate X", default=0.0, options={'SKIP_SAVE'},
                                            description="Move the extruded faces along their local X (Maya units)"),
         "local_translate_y": FloatProperty(name="Local Translate Y", default=0.0, options={'SKIP_SAVE'},
@@ -1059,7 +1059,7 @@ def _props():
                                        description="Scale the extruded faces along their local Y"),
         "local_scale_z": FloatProperty(name="Local Scale Z", default=1.0, options={'SKIP_SAVE'},
                                        description="Scale the extruded faces along their normal"),
-        # polyExtrudeVertex (step 139)
+        # polyExtrudeVertex
         "width": FloatProperty(name="Width", default=0.5, soft_min=0.0, soft_max=1.0, options={'SKIP_SAVE'},
                                description="Base of the extruded vertex as a fraction of each of its edges"),
         "length": FloatProperty(name="Length", default=1.0, options={'SKIP_SAVE'},
@@ -1075,7 +1075,7 @@ class _ExtrudeProps:
     __annotations__ = _props()
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_extrude(_ExtrudeProps, bpy.types.Operator):
     """Extrude the selection now (Maya polyExtrudeFace / polyExtrudeEdge / polyExtrudeVertex by the component
     type): change its values with the manipulator, the In-View Editor or Channel Box INPUTS"""
@@ -1167,7 +1167,7 @@ class _ExtrudeEdit(_ExtrudeProps):
         return {'FINISHED'}
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_extrude_edit(_ExtrudeEdit, bpy.types.Operator):
     """Change the last extrusion (Maya: edit the polyExtrudeFace node). Blender keeps no edit-mode history,
     so only the last one can be changed"""
@@ -1176,7 +1176,7 @@ class ALLSET_OT_extrude_edit(_ExtrudeEdit, bpy.types.Operator):
     _op = "extrude_edit"
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_extrude_edge_edit(_ExtrudeEdit, bpy.types.Operator):
     """Change the last edge extrusion (Maya: edit the polyExtrudeEdge node). Blender keeps no edit-mode history,
     so only the last one can be changed"""
@@ -1185,7 +1185,7 @@ class ALLSET_OT_extrude_edge_edit(_ExtrudeEdit, bpy.types.Operator):
     _op = "extrude_edge_edit"
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_extrude_vertex_edit(_ExtrudeEdit, bpy.types.Operator):
     """Change the last vertex extrusion (Maya: edit the polyExtrudeVertex node). Blender keeps no edit-mode
     history, so only the last one can be changed"""

@@ -1,4 +1,4 @@
-"""Step 5 in a real UI: Maya layout template in the user's theme (no kit theme since step 130), area placement,
+"""In a real UI: Maya layout template in the user's theme (the kit ships no theme), area placement,
 screenshots."""
 
 import os
@@ -30,7 +30,7 @@ def s_wait():
 
 @step
 def s_layout():
-    # Maya General (step 49): Tool Box | Outliner | view (+ sidebar dock), full-width strip and timeline
+    # Maya General: Tool Box | Outliner | view (+ sidebar dock), full-width strip and timeline
     check("workspace General", win().workspace.name == "General")
     views = sorted(areas('VIEW_3D'), key=lambda a: -a.width * a.height)
     v3d, column = views[0], views[-1]
@@ -38,7 +38,7 @@ def s_layout():
     time = areas('DOPESHEET_EDITOR')[0]
     check("Tool Box column, then Outliner, left of the viewport",
           len(views) == 2 and column.x < outl.x and outl.x + outl.width <= v3d.x + 2)
-    # step 116: CB/LE | AE | MTK = Maya's tab stack, its own area right of the viewport (no other Properties column)
+    # CB/LE | AE | MTK = Maya's tab stack, its own area right of the viewport (no other Properties column)
     md = import_module(MODULE + ".ui.maya_dock")
     props = areas('PROPERTIES')
     check("one Properties area: the Maya tab stack, right of the viewport",

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 252 (#168): Maya orient / parent constraint Interp Type for the kit's multi-target groups (constrain_multi).
+"""#168: Maya orient / parent constraint Interp Type for the kit's multi-target groups (constrain_multi).
 
 Maya: every target gives a quaternion
 q_i = canon(rotation(targetParent · constraintParent⁻¹)) ⊗ q_Euler(rotate) [⊗ q_Euler(targetOffsetRotate), parent
@@ -17,12 +17,12 @@ The kit (Blender constraints only blend by influence = a shortest slerp):
 - Shortest: the group's rotation members get influence w_i / W_total (member 0 = 1) — Blender alone, exact.
 - the other types: the rotation members get influence 0 and one Copy Rotation ``<group> blend`` (after the group) reads
   a hidden empty ``<owner>_<group>Blend`` whose world rotation the kit computes from the targets (depsgraph / frame
-  handlers, like the step 245 pole helper). Frames are the Maya node frames: an object's Maya axes are its Blender X / Z /
+  handlers, like the pole helper). Frames are the Maya node frames: an object's Maya axes are its Blender X / Z /
   -Y (joints.MAYA_WORLD), a joint's are its bone's Y / Z / X (joints.JOINT_AXES); the own rotation is the node's
   rotation channels (the sign of q_Euler).
 - per-group state on the owner (Object / PoseBone): ``allset_interp_<group>`` (Maya enum value), ``allset_last_<group>``
   (No Flip memory), ``allset_rest_<group>`` (zero-weight output), ``allset_ooff_<group>`` (orient offset).
-- a parent constraint's offset Euler = Maya's offset Euler (step 266): the
+- a parent constraint's offset Euler = Maya's offset Euler: the
   standard solution or the alternate
   (first + 180, 180 − middle, last + 180, not wrapped), whichever has the smaller sum of |angles| (ties: standard);
   the branch decides the offset quaternion's sign, which Average / No Flip read. A bone target's rest (Maya
@@ -47,7 +47,7 @@ EPS_W = 1e-10
 
 
 # --- quaternion maths: tuples (w, x, y, z) in double precision (mathutils is float32: 0.05 deg off on near-opposite
-# targets, step 252) ------------------------------------------------------------------------------------------------
+# targets) ------------------------------------------------------------------------------------------------
 
 def q_tuple(q):
     return (float(q[0]), float(q[1]), float(q[2]), float(q[3]))
@@ -282,7 +282,7 @@ def group_kind(owner, group):
 
 
 def mode_of(owner, group):
-    """Maya interpType of a group; groups made before step 252 have none (their cumulative stack ~ Shortest)."""
+    """Maya interpType of a group; older groups have none (their cumulative stack ~ Shortest)."""
     v = owner.get(INTERP + group)
     return int(v) if v is not None else None
 
@@ -422,7 +422,7 @@ def set_mode(context, owner, group, mode):
     if not rms:
         return
     before = _owner_world_r(owner)
-    first_time = REST + group not in owner.keys()      # creation (or a group made before step 252)
+    first_time = REST + group not in owner.keys()      # creation (or an older group)
     owner[INTERP + group] = mode
     _remove_blend(owner, group)
     names = [p for p, _l in constrain_multi.weights(owner, group)]
@@ -456,7 +456,7 @@ def set_mode(context, owner, group, mode):
     ms = constrain_multi.members(owner, group)
     last_index = max(list(owner.constraints).index(m) for m in ms)
     owner.constraints.move(len(owner.constraints) - 1, last_index + 1)
-    # Maya (step 252): the constraint evaluates once when it is made (interpType Average): that output is
+    # Maya: the constraint evaluates once when it is made (interpType Average): that output is
     # restRotate (all weights 0) and the first No Flip memory; an orient offset (Maintain Offset) is one rotation after
     # the blend computed then (out = offset * result). They are node
     # attributes: a later Interp Type change keeps them.

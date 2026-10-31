@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Multi-Cut (step 129, GitHub #27).
+"""Maya Multi-Cut (GitHub #27).
 
 The kit tool ``allset.multi_cut_tool`` (ui/mesh_tools.py) runs ``allset.multi_cut``, a modal that places Maya's cut
 points and cuts on completion:
@@ -9,14 +9,14 @@ points and cuts on completion:
   point along its edge, Shift snaps it to the Snap Step %; a live line runs from the last point to the mouse;
 - Backspace removes the last point, Enter / RMB completes the cut (one undo step) and the tool stays, Esc drops the
   points (with none placed it leaves the tool for Select);
-- Ctrl+click on an edge = an edge loop through the ring at that point (step 64's ``allset.multicut_loop``, so its
+- Ctrl+click on an edge = an edge loop through the ring at that point (``allset.multicut_loop``, so its
   Position is in Adjust Last Operation; Ctrl+Shift = at the Snap Step, Ctrl+MMB = in the middle); Ctrl hover
   previews the loop;
 - a drag that starts on a face / empty space = slice along the dragged line (Slice Tool options), and with
   Slice Along Plane YZ / ZX / XY on, a click slices along that world plane.
 
 The cut itself (``cut``) and the slice (``slice_mesh``) are bmesh-only (tests/test_step129_multi_cut.py); picking
-uses step 74's pre-selection caches (numpy + BVH occlusion).
+uses the pre-selection caches (numpy + BVH occlusion).
 """
 
 import math
@@ -42,7 +42,7 @@ REJECT_RGB = (0.9, 0.2, 0.2)
 POINT_PX = 7.0
 LINE_PX = 2.0
 
-# Maya Y-up plane names -> Blender plane normal (X -> X, Y -> Z, Z -> -Y; step 57)
+# Maya Y-up plane names -> Blender plane normal (X -> X, Y -> Z, Z -> -Y)
 PLANE_NORMALS = {'YZ': Vector((1, 0, 0)), 'ZX': Vector((0, 0, 1)), 'XY': Vector((0, 1, 0))}
 
 

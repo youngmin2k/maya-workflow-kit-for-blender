@@ -1,4 +1,4 @@
-"""Step 104 in a real UI: the Maya Workflow Kit layout, pCube1 keyed like the audit-7 scene (translateX 0 -> 5 at 1 / 24,
+"""In a real UI: the Maya Workflow Kit layout, pCube1 keyed like the audit-7 scene (translateX 0 -> 5 at 1 / 24,
 translateY 3 at 12), Windows > Animation Editors > Graph Editor / Dope Sheet and UV > UV Editor in new windows ->
 Maya menu bars, icon rows, channel names, UV Toolkit (screenshots with ALLSET_GUI_SHOTS)."""
 

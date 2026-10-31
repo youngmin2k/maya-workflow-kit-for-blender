@@ -52,7 +52,7 @@ MENUS = {
     'MainHelpMenu': ('Help', '(always visible)', 'maya2026', [('Search',), ('Maya Help',), ('-', 'Learn'), ('Quick Tour',), ('Interactive Tutorials', [('Basic Skills',), ('Intro to Modeling',), ('Intro to Animation',), ('Intro to Lighting and Shading',), ('View All Interactive Tutorials...',)]), ('YouTube Learning Channel',), ('-', 'Advance'), ('Scripting Reference', [('MEL Command Reference',), ('Python Command Reference',), ('Node and Attribute Reference',)]), ('-', 'Support'), ('Services and Support', [('Autodesk Account',), ('Release Notes Updates',), ('Support Center',)]), ('Feedback', [('Report a Problem...',), ('Maya Ideas Community...',), ('Join Product Research...',), ('Desktop Analytics Program...',)]), ('-', ''), ('Blender Extensions',), ('About Maya',)]),
 }
 
-# Label paths of the items with a Maya option box (step 51).
+# Label paths of the items with a Maya option box.
 OPTION_BOXES = frozenset({
     'Cache/Alembic Cache/Export All to Alembic...',
     'Cache/Alembic Cache/Export Selection to Alembic...',

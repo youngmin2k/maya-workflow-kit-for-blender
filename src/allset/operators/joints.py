@@ -2,8 +2,8 @@
 """Maya joints: Joint Tool, Orient Joint, Mirror Joints, joint pick-walk and P / Shift+P.
 
 Maya rigging (a Maya joint = a bone of one armature per
-skeleton, ``skeleton1`` / ``joint1``, rotate order XYZ, Blender's bone Y points at the child), design
-step 57. A Maya joint is a point and a Blender bone a segment, so N clicks make N
+skeleton, ``skeleton1`` / ``joint1``, rotate order XYZ, Blender's bone Y points at the child).
+A Maya joint is a point and a Blender bone a segment, so N clicks make N
 bones: bone K runs from click K to click K+1, the last (Maya's end joint) gets a short tail along the
 previous segment.
 """
@@ -94,7 +94,7 @@ def add_joint(ob, point, parent_name=None, up=Vector((0.0, 0.0, 1.0)), length=1.
         return parent.name
     eb = ebs.new(next_joint_name())
     eb.inherit_scale = 'NONE'      # Maya segmentScaleCompensate on (the default; Blender 4.5)
-    stamp_last(eb)                 # Maya child order = creation order (step 248)
+    stamp_last(eb)                 # Maya child order = creation order
     eb.head = p
     if parent is None:
         eb.tail = p + Vector(up).normalized() * length
@@ -172,13 +172,13 @@ SECONDARY_AXES = (("X", "X", "Maya X is the primary axis: not allowed"), ("Y", "
 WORLD_AXES = {"X": Vector((1.0, 0.0, 0.0)), "Y": Vector((0.0, 0.0, 1.0)), "Z": Vector((0.0, -1.0, 0.0))}
 
 # A Maya joint's axes in its bone's axes: X = bone Y (down the chain), Y = bone Z, Z = bone X (rig_tools.local_axis);
-# the kit's FBX writer uses the same mapping (file_io export_args primary 'X' / secondary 'Z', step 232).
+# the kit's FBX writer uses the same mapping (file_io export_args primary 'X' / secondary 'Z').
 JOINT_AXES = Matrix(((0.0, 0.0, 1.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)))
 # Maya's world axes in Blender world coordinates (Maya X -> X, Y -> Z, Z -> -Y)
 MAYA_WORLD = Matrix(((1.0, 0.0, 0.0), (0.0, 0.0, -1.0), (0.0, 1.0, 0.0)))
 # A Maya joint frame a bone can't take: a Blender bone always points its Y at the child, a Maya joint's X need not.
 # Such joints store their Maya frame relative to the bone's joint frame (``MAYA_FRAME``, quaternion in joint axes) and
-# the FBX writer turns the joint by it (fbx_rig.rewrite, step 232). Two cases:
+# the FBX writer turns the joint by it (fbx_rig.rewrite). Two cases:
 # - Orient Joint / Joint Tool (oj xyz, any sao) leave an END joint (no child joint) lined up with the world: joint3
 #   jointOrient (0, 7.31, 0) after joint1 (0, 7.01, 0) and joint2 (0, -14.32, 0);
 # - Mirror Joints Behavior: the copy's frame is -(reflection x source frame) — its X points back up the chain
@@ -228,7 +228,7 @@ def maya_frames(ob):
     return out
 
 
-# Step 233 (Issue #142): Blender ignores every location constraint on a CONNECTED bone (its head is glued to the
+# Issue #142: Blender ignores every location constraint on a CONNECTED bone (its head is glued to the
 # parent's tail; 4.5: Copy Location / Child Of / Copy Transforms / Limit Location leave it in place, rotation
 # constraints work), while a Maya joint's translate is free: Constrain > Point / Parent on a child joint moves it.
 # The joint that gets such a constraint is disconnected (only that bone — Joint Tool chains stay connected,
@@ -317,7 +317,7 @@ def _rotated(ob, name):
 
 def fix_frames(ob, frames):
     """After edit mode: Blender rebuilds each bone's matrix through its parent chain in float32 (a few 1e-6 off on
-    short bones, step 244); store the remainder against the intended Maya ``frames`` {name: frame} in ``MAYA_FRAME``
+    short bones); store the remainder against the intended Maya ``frames`` {name: frame} in ``MAYA_FRAME``
     of the Bone."""
     if ob.mode == 'EDIT':
         return
@@ -341,7 +341,7 @@ def orient_bones(ob, ebs, names, oj="xyz", sao="yup", aos=True, skipped=None, re
     joints are skipped (``skipped`` gets (name, reason)). Returns the number oriented."""
     from . import joint_orient
     # Skin-bound joints are oriented too, without a warning. Maya then moves the skinned mesh (bindPreMatrix
-    # kept); Blender's skin follows the new rest, so the kit's mesh stays (step 252, a kit difference).
+    # kept); Blender's skin follows the new rest, so the kit's mesh stays (a kit difference).
     depth = {eb.name: len(eb.parent_recursive) for eb in ebs}
     order = sorted(names, key=lambda nm: depth.get(nm, 0))
     todo = []
@@ -419,8 +419,8 @@ def joint_sphere_radius(arm, bone):
     """World radius of the sphere Blender draws at ``bone``'s head (0 when it draws none: Stick / B-Bone / ...)."""
     scale = max(arm.matrix_world.to_scale())
     maya = bone.get(RADIUS)
-    if maya is not None:     # step 244: the Maya joint radius (Joint Tool variable bone size) is the click sphere
-        # step 248: x Display > Animation > Joint Size (Maya jointDisplayScale)
+    if maya is not None:     # the Maya joint radius (Joint Tool variable bone size) is the click sphere
+        # x Display > Animation > Joint Size (Maya jointDisplayScale)
         size = float(getattr(bpy.context.scene, "allset_joint_size", 1.0) or 1.0)
         return float(maya) * units.maya_unit(bpy.context.scene) * scale * size
     if arm.data.display_type != 'OCTAHEDRAL':
@@ -722,7 +722,7 @@ class ALLSET_OT_joint_tool(bpy.types.Operator):
             if hit is not None and 'FINISHED' in result:
                 with context.temp_override(window=context.window, area=hit[0], region=hit[1]):
                     bpy.ops.wm.tool_set_by_id(name=tool)
-                # step 241: this command picked the Pose-mode tool itself; the one-tool carry (step 174) must not
+                # this command picked the Pose-mode tool itself; the one-tool carry must not
                 # replace it with the placing mode's Select tool on the first Pose visit
                 from . import tool_keys
                 tool_keys._seen[context.mode] = tool
@@ -799,9 +799,9 @@ def _armature(context):
 
 
 def selected_joint_names(ob):
-    """The joints the user picked. In Edit mode (the Move tool, step 241) a picked joint selects its whole subtree
-    so W carries the children: the Skeleton menu / P act on the picked joints only, like Maya's selection (step 253
-    rig QA: clicking joint1 then P / Mirror / Orient saw joint1's children as picked too)."""
+    """The joints the user picked. In Edit mode (the Move tool) a picked joint selects its whole subtree
+    so W carries the children: the Skeleton menu / P act on the picked joints only, like Maya's selection (
+    clicking joint1 then P / Mirror / Orient saw joint1's children as picked too)."""
     if ob.mode == 'EDIT':
         from .joint_selection import _edit_picked
         picked = [eb.name for eb in _edit_picked(ob)]
@@ -913,7 +913,7 @@ class ALLSET_OT_orient_joint(bpy.types.Operator):
         return _armature(context) is not None
 
     def invoke(self, context, event):
-        # Maya: a plain menu click runs with the saved options, the option box opens the window (step 232; the
+        # Maya: a plain menu click runs with the saved options, the option box opens the window (the
         # dialog on every click kept the keyboard until closed). Blender keeps the last values.
         if self.option_box:
             return context.window_manager.invoke_props_dialog(self, width=360, confirm_text="Orient")
@@ -1040,7 +1040,7 @@ class ALLSET_OT_mirror_joints(bpy.types.Operator):
     bl_label = "Mirror Joints Options"
     bl_options = {'UNDO'}
 
-    # default XY (step 246)
+    # default XY
     plane: EnumProperty(name="Mirror Across", items=[(k, k, "") for k in ("XY", "YZ", "XZ")], default="XY")
     function: EnumProperty(name="Mirror Function", items=(("BEHAVIOR", "Behavior", "Mirrored joints rotate "
                                                            "the opposite way (Blender symmetrize)"),
@@ -1055,7 +1055,7 @@ class ALLSET_OT_mirror_joints(bpy.types.Operator):
         return _armature(context) is not None
 
     def invoke(self, context, event):
-        # Maya: a plain menu click runs with the saved options, the option box opens the window (step 232; the
+        # Maya: a plain menu click runs with the saved options, the option box opens the window (the
         # dialog on every click kept the keyboard until closed). Blender keeps the last values.
         if self.option_box:
             return context.window_manager.invoke_props_dialog(self, width=360, confirm_text="Mirror")
@@ -1084,7 +1084,7 @@ class ALLSET_OT_mirror_joints(bpy.types.Operator):
 
 # --- joint pick-walk and parenting --------------------------------------------------------------
 
-# Step 217: Maya's pick walk walks the DAG and
+# Maya's pick walk walks the DAG and
 # goes into hidden nodes; with controller tags it follows the controller
 # hierarchy. Kit controller tags live on data Bones (operators/controllers.py). An untagged armature treats
 # bones whose bone collections are all hidden as "not a control" and walks past them (preference
@@ -1094,7 +1094,7 @@ CONTROLLER = "allset_controller"
 CONTROLLER_PARENT = "allset_controller_parent"
 
 
-# Step 248 (Issue #165): Maya's pickWalk goes down to the first child and sideways through the siblings in the
+# Issue #165: Maya's pickWalk goes down to the first child and sideways through the siblings in the
 # parent's child order, wrapping at the ends (SELECT_PICK: spine's children L_arm, R_arm,
 # neck — L_arm left -> neck, neck right -> L_arm). Maya's child order = creation order, a re-parented node goes last.
 # Blender keeps bones in creation order (``arm.bones``, the edit-bone list); the kit stamps ``CHILD_ORDER`` on a bone
@@ -1123,7 +1123,7 @@ def stamp_last(eb):
 
 
 def _by_name(bones):
-    """Siblings in Maya child order (the name kept for the callers' history: it sorted by name before step 248)."""
+    """Siblings in Maya child order (the name is historical: it used to sort by name)."""
     return sorted(bones, key=child_order_key)
 
 
@@ -1210,7 +1210,7 @@ def _visible_walk(bone, direction):
     return _wrap(sibs, bone, direction)
 
 
-# Step 236 (Issue #145): in a Rigify rig 63 % of the controls hang on hidden MCH
+# Issue #145: in a Rigify rig 63 % of the controls hang on hidden MCH
 # bones, so the nearest shown ancestor of upper_arm_fk.L is tweak_spine.003, not shoulder.L. The
 # Rigify rule (ORG hierarchy projection): a generated rig (data property ``rig_id``) without kit tags gets
 # controller parents computed from its ORG bones (never stored, so Tag / Parent Controller still win): control C ->
@@ -1309,7 +1309,7 @@ def walk_bone(bone, direction, skip_hidden=False):
     """Bone reached from ``bone`` (data Bone) by a Maya arrow key (Up / Down / Left / Right, siblings wrap).
 
     Controller-tagged armature = the controller rule; else ``skip_hidden`` (the preference) walks a Rigify rig's
-    controls by its ORG hierarchy (step 236) and other armatures past bones hidden by their bone collections; else
+    controls by its ORG hierarchy and other armatures past bones hidden by their bone collections; else
     the plain DAG (parent, first child by name, siblings by name)."""
     if has_controllers(bone.id_data):
         return _controller_walk(bone, direction)
@@ -1328,7 +1328,7 @@ def _skip_hidden_pref(context):
         return True
 
 
-@undo_steps.no_redo_panel      # step 147: no Adjust Last Operation (Maya has none)
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_pick_walk_joint(bpy.types.Operator):
     """Walk the joint selection through the skeleton (Maya arrow keys)"""
     bl_idname = "allset.pick_walk_joint"

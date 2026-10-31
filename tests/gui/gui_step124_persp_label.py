@@ -1,5 +1,5 @@
-"""Step 124: the Maya camera label "persp" drew twice in pose / paint modes. Those modes add a 29 px asset shelf
-header strip under the view; with Region Overlap off (Maya mode, step 112) it never draws and kept the pixels of the
+"""The Maya camera label "persp" drew twice in pose / paint modes. Those modes add a 29 px asset shelf
+header strip under the view; with Region Overlap off (Maya mode) it never draws and kept the pixels of the
 label drawn there before the mode change. ui/view_furniture.py hides that strip while the shelf is collapsed (the
 view gets the height back) and shows it again when the kit unregisters. Checked on the regions and on a screenshot
 (the camera label drawn once)."""
@@ -104,7 +104,7 @@ def s_unregister():
     if hid:
         check(f"unregister gives the strip back ({header and header.height} px)",
               header is not None and header.height > 1)
-    else:   # 5.2.3 (step 153): Blender keeps the collapsed shelf's header at 1 px itself, the kit hid nothing
+    else:   # 5.2.3: Blender keeps the collapsed shelf's header at 1 px itself, the kit hid nothing
         check(f"the kit hid no strip, so unregister has nothing to give back ({header and header.height} px)",
               header is not None and header.height <= 1)
 

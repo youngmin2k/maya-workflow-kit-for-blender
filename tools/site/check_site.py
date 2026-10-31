@@ -1,4 +1,4 @@
-"""Step 127: local link / media check and page weight of site/ (no network).
+"""Local link / media check and page weight of site/ (no network).
 
     python tools/site/check_site.py
 

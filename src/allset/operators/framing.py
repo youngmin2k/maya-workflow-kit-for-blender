@@ -5,7 +5,7 @@ the visible part of a 3D view with Maya's fit factor.
 Maya: F frames the selection (no children), Ctrl+Shift+F
 with children, A everything; fit factor 0.95. Blender's view_selected fits a
 sphere into the region width only, so a cube overfills a wide 35 mm view and part of it
-sits under the sidebar (step 17).
+sits under the sidebar.
 
 Pure ``mathutils`` (no bpy): the view matrix is rebuilt from location / rotation / distance
 (``RegionView3D.update`` does not exist in 4.5, so ``perspective_matrix`` would be stale);
@@ -123,7 +123,7 @@ def fit(points, rot, win0, dist0, ortho, size, rect, factor=FIT, min_half=MIN_HA
         return max((b[2] - b[0]) / (2.0 * hw), (b[3] - b[1]) / (2.0 * hh))
 
     if not ortho and win0[0][0] > 0.0 and win0[1][1] > 0.0:
-        # Maya viewFit in perspective (step 258, Maya 2026 for fitFactor 1.0 / 0.95 / 0.9): the camera stands back from
+        # Maya viewFit in perspective (Maya 2026 for fitFactor 1.0 / 0.95 / 0.9): the camera stands back from
         # the box centre by the box's half depth
         # along the view plus the distance at which the box's half extents across the view (the axis-aligned box
         # projected on the view's right / up axes) fill the field of view times the fit factor. The field of view is
@@ -144,7 +144,7 @@ def fit(points, rot, win0, dist0, ortho, size, rect, factor=FIT, min_half=MIN_HA
         return loc, d
 
     # Distance search on the centred box: refitting the distance and panning in turns oscillated for a box much
-    # wider than deep in a narrow perspective view (A with a far child: the view ended off by 100+ px, step 112).
+    # wider than deep in a narrow perspective view (A with a far child: the view ended off by 100+ px).
     lo, hi = radius * 1e-3, max(dist0, radius * 4.0)
     while scale(hi) > 1.0 and hi < radius * 1e7:
         hi *= 2.0

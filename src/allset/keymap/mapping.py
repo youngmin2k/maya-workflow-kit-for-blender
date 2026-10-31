@@ -77,7 +77,7 @@ V3D, OBJ, OBJ_NM = "3D View", "Object Mode", "Object Non-modal"
 
 # Keyed by runTimeCommand (global context unless the key says otherwise).
 ENTRIES = {
-    # --- KIT: step 2 ---
+    # --- KIT ---
     "Group": _e("KIT", (OBJ, "allset.group", {}), note="Empty 그룹, 피벗 원점, group1 명명 (Outliner 도; 루트 조인트 선택 = 스켈레톤을 그룹)"),
     "DisplayWireframe": _e("KIT", (V3D, "allset.display_mode", {"mode": "WIREFRAME"})),
     "DisplayShaded": _e("KIT", (V3D, "allset.display_mode", {"mode": "SHADED"})),
@@ -93,42 +93,42 @@ ENTRIES = {
 
     # --- IC already matches ---
     "Duplicate": _e("KIT", (OBJ, "allset.duplicate", {}),
-                    note="제자리, 자식 포함, pCube2/pCubeShape2 (컴포넌트 모드: Maya처럼 복제 없음 + 경고, step 129)"),
+                    note="제자리, 자식 포함, pCube2/pCubeShape2 (컴포넌트 모드: Maya처럼 복제 없음 + 경고)"),
     "FrameSelectedWithoutChildren": _e("KIT", (V3D, "allset.frame", {"selected": True}),
-                                       note="여백 0.95, 사이드바 밑 제외, 선택 없으면 전체 (step 17)"),
+                                       note="여백 0.95, 사이드바 밑 제외, 선택 없으면 전체"),
     "SelectAllMarkingMenu": _e("KIT", (V3D, "allset.tap_hold", {"binding": "select_all"}),
-                               note="탭=Frame All, 홀드+클릭=선택 메뉴 (마킹메뉴 엔진은 Step 9)"),
+                               note="탭=Frame All, 홀드+클릭=선택 메뉴"),
     "RepeatLast": _e("KIT", ("Screen", "allset.repeat_last", {}), step=175,
                      note="메뉴 · 셸프 · 마킹 명령도 반복 (Blender repeat_last 는 등록된 연산자만)"),
     "SetKey": _e("KIT", (OBJ, "allset.set_key", {}),
                   note="키 가능한 모든 채널 (가시성·커스텀 포함, Hide/Nonkeyable 제외), 포즈 모드 = 선택 본; "
-                       "활성 Keying Set 이 있으면 그것 (step 56)"),
+                       "활성 Keying Set 이 있으면 그것"),
     "TimeDraggerToolActivate": _e("KIT", ("Screen", "allset.tap_hold", {"binding": "time_drag"}),
                                   note="K 누른 채 LMB 드래그 = 시간 (어느 에디터든), 선택 그대로; Mesh knife K → "
-                                       "Multi-Cut 은 Ctrl+Shift+X (step 56)"),
+                                       "Multi-Cut 은 Ctrl+Shift+X"),
     "SetKeyTranslate": _e("KIT", ("Screen", "allset.set_key", {"channels": "TRANSLATE", "global_key": True}),
-                          note="Translate X / Y / Z 만 키, 보고 문구 없음 (IC keying set 보고 대신, step 151 #100); "
+                          note="Translate X / Y / Z 만 키, 보고 문구 없음 (IC keying set 보고 대신, #100); "
                                "어느 에디터든 (Screen), 편집 · 페인트 · 스컬프트 모드는 통과"),
     "SetKeyRotate": _e("KIT", ("Screen", "allset.set_key", {"channels": "ROTATE", "global_key": True}),
-                       note="Rotate X / Y / Z 만 키 (step 151 #100); Shift+W 처럼 어느 에디터든"),
+                       note="Rotate X / Y / Z 만 키 (#100); Shift+W 처럼 어느 에디터든"),
     "SetKeyScale": _e("KIT", ("Screen", "allset.set_key", {"channels": "SCALE", "global_key": True}),
-                      note="Scale X / Y / Z 만 키 (step 151 #100); Shift+W 처럼 어느 에디터든"),
+                      note="Scale X / Y / Z 만 키 (#100); Shift+W 처럼 어느 에디터든"),
     "TranslateToolWithSnapMarkingMenu": _e("KIT", (OBJ, "allset.tap_hold", {"binding": "tool_move"}),
-        note="누름=툴 전환, 누른 채 LMB=Move 옵션 마킹메뉴(파이, Step 8)"),
+        note="누름=툴 전환, 누른 채 LMB=Move 옵션 마킹메뉴(파이)"),
     "RotateToolWithSnapMarkingMenu": _e("KIT", (OBJ, "allset.tap_hold", {"binding": "tool_rotate"}),
-        note="누름=툴 전환, 누른 채 LMB=Rotate 옵션 마킹메뉴(파이, Step 8)"),
+        note="누름=툴 전환, 누른 채 LMB=Rotate 옵션 마킹메뉴(파이)"),
     "ScaleToolWithSnapMarkingMenu": _e("KIT", (OBJ, "allset.tap_hold", {"binding": "tool_scale"}),
-        note="누름=툴 전환, 누른 채 LMB=Scale 옵션 마킹메뉴(파이, Step 8)"),
+        note="누름=툴 전환, 누른 채 LMB=Scale 옵션 마킹메뉴(파이)"),
     "SelectToolOptionsMarkingMenu": _e("KIT", (OBJ, "allset.tap_hold", {"binding": "tool_select"}),
-        note="누름=툴 전환, 누른 채 LMB=Select 옵션 마킹메뉴(파이, Step 8)"),
+        note="누름=툴 전환, 누른 채 LMB=Select 옵션 마킹메뉴(파이)"),
 
     # --- Planned ---
     "SnapToGridPress": _e("KIT", (V3D, "allset.hold", {"name": "grid"}),
-                          note="누르는 동안 GRID 스냅 (절대 그리드 선, 매니퓰레이터 중심), 놓으면 복원 — step 59"),
+                          note="누르는 동안 GRID 스냅 (절대 그리드 선, 매니퓰레이터 중심), 놓으면 복원"),
     "SnapToCurvePress": _e("KIT", (V3D, "allset.hold", {"name": "curve"}),
                            note="누르는 동안 EDGE 스냅 (커브 전용 없음, 근사)"),
     "SnapToPointPress": _e("KIT", (V3D, "allset.hold", {"name": "point"}),
-                           note="누르는 동안 VERTEX 스냅 (매니퓰레이터 중심이 정점에) — step 59"),
+                           note="누르는 동안 VERTEX 스냅 (매니퓰레이터 중심이 정점에)"),
     "MoveRotateScaleToolToggleSnapMode": _e("KIT", (V3D, "allset.hold", {"name": "step"}),
                                             note="누르는 동안 INCREMENT 스냅"),
     "MoveRotateScaleToolToggleSnapRelativeMode": _e("KIT", (V3D, "allset.hold", {"name": "step"}),
@@ -147,7 +147,7 @@ ENTRIES = {
                                           {"selected": True, "children": True}),
                                   note="자식 포함, 창의 모든 3D 뷰"),
     "GoToDefaultView": _e("KIT", (V3D, "allset.view_home", {}),
-                          note="Maya 새 씬 persp 자리 (정사영: 방향 유지, 원점) — step 27"),
+                          note="Maya 새 씬 persp 자리 (정사영: 방향 유지, 원점)"),
     "LowQualityDisplay": _e("KIT", (OBJ, "allset.smooth_preview", {"level": 1}),
                             note="Subsurf 뷰포트 끔"),
     "MediumQualityDisplay": _e("KIT", (OBJ, "allset.smooth_preview", {"level": 2}),
@@ -155,7 +155,7 @@ ENTRIES = {
     "HighQualityDisplay": _e("KIT", (OBJ, "allset.smooth_preview", {"level": 3}),
                              note="Subsurf 뷰포트 켬 (없으면 추가, 렌더 영향 없음)"),
     "DefaultQualityDisplay": _e("KIT", (OBJ, "allset.smooth_preview", {"level": 1}),
-                                note="1 과 같음 (거친 표시) — step 27"),
+                                note="1 과 같음 (거친 표시)"),
     "SelectVertexMask": _e("KIT", (OBJ_NM, "allset.component_mode", {"type": "VERT"})),
     "SelectEdgeMask": _e("KIT", (OBJ_NM, "allset.component_mode", {"type": "EDGE"})),
     "SelectFacetMask": _e("KIT", (OBJ_NM, "allset.component_mode", {"type": "FACE"})),
@@ -164,8 +164,8 @@ ENTRIES = {
     "SelectUVMask": _e("KIT", (OBJ, "allset.uv_component", {"mode": 'UV'}),
                        note="UV Editor 를 열고 (편집 모드) UV 선택 = UV Sync 끔 + UV 정점. 3D 뷰 오브젝트·메시 편집과 UV Editor 밖의 F12 = Blender Render Image (render.render)"),
     "SelectMeshUVShell": _e("KIT", (OBJ, "allset.uv_component", {"mode": 'SHELL'}),
-                            note="Maya UV Shell 마스크: 3D View / UV Editor 클릭·박스가 UV 셸 전체 (면) 를 고름 (step 256, operators/uv_shell_select.py)"),
-    # --- step 66: UV Editor ---
+                            note="Maya UV Shell 마스크: 3D View / UV Editor 클릭·박스가 UV 셸 전체 (면) 를 고름 (operators/uv_shell_select.py)"),
+    # --- UV Editor ---
     "polyTexturePlacementPanel:CutUVs": _e("KIT", ("UV Editor", "allset.uv_cut", {}),
                                            note="솔기 + 작은 쪽 셸을 0.2 px 떼어 그 자리에서 분리 (IC 스냅 파이 제거)"),
     "polyTexturePlacementPanel:SewUVs": _e("KIT", ("UV Editor", "allset.uv_sew", {}),
@@ -177,7 +177,7 @@ ENTRIES = {
     "SelectVertexFaceMask": _e("NO", note="Blender 에 vertex-face 컴포넌트 없음"),
     "ToggleFullScreenMode": _e("KIT", ("Screen", "screen.screen_full_area", {"use_hide_panels": True}),
                                note="UI 숨긴 전체 화면"),
-    # --- step 18: mesh component keys ---
+    # --- mesh component keys ---
     "ConvertSelectionToVertices": _e("KIT", ("Mesh", "allset.convert_selection", {"type": "VERT"})),
     "ConvertSelectionToEdges": _e("KIT", ("Mesh", "allset.convert_selection", {"type": "EDGE"}),
                                   note="닿는 엣지 (면 -> 테두리 엣지)"),
@@ -191,14 +191,14 @@ ENTRIES = {
     "ShrinkLoopPolygonSelectionRegion": _e("KIT", ("Mesh", "mesh.select_prev_item", {}),
                                            note="선택 순서 따라 한 칸 되돌림 (근사)"),
     "PolyExtrude": _e("KIT", ("Mesh", "allset.extrude", {}),
-                      note="polyExtrudeFace: 길이 0 압출 + 매니퓰레이터·In-View Editor·INPUTS (step 65); 엣지/정점은 압출 + 법선 드래그"),
+                      note="polyExtrudeFace: 길이 0 압출 + 매니퓰레이터·In-View Editor·INPUTS; 엣지/정점은 압출 + 법선 드래그"),
     "BevelPolygon": _e("KIT", ("Mesh", "allset.bevel", {}),
                        note="정점 모드 = 정점 베벨, 그 외 엣지; 드래그로 폭"),
-    # --- step 24: component Delete; plain Delete/Backspace is
+    # --- component Delete; plain Delete/Backspace is
     # Maya's Edit > Delete (not a default hotkey row): Mesh "allset.delete_components" ---
     "DeletePolyElements": _e("IC", ("Mesh", "mesh.dissolve_mode", {}),
-                             note="엣지·정점 dissolve (Delete Edge/Vertex); Delete/Backspace = 바로 삭제 (step 24)"),
-    # --- step 16: undo / visibility / isolate ---
+                             note="엣지·정점 dissolve (Delete Edge/Vertex); Delete/Backspace = 바로 삭제"),
+    # --- undo / visibility / isolate ---
     "Undo": _e("KIT", ("Screen", "ed.undo", {}),
                note="Screen 키맵: 모든 에디터. z 를 가리던 zoom/viewer border 제거 (Shift+B 로 남음)"),
     "Redo": _e("KIT", ("Screen", "ed.redo", {})),
@@ -214,37 +214,37 @@ ENTRIES = {
                          note="킷 숨김 동작(h/Ctrl+H/Alt+H)의 마지막 대상; 컴포넌트: mesh.reveal"),
     "ShowAllPolyComponents": _e("KIT", ("Mesh", "mesh.reveal", {})),
     "ToggleIsolateSelect": _e("KIT", (V3D, "allset.isolate", {}),
-                              note="로컬 뷰 (카메라 그대로, 선택의 자손 포함 — step 164), 다시 누르면 해제"),
+                              note="로컬 뷰 (카메라 그대로, 선택의 자손 포함), 다시 누르면 해제"),
     "SelectIsolate": _e("IC", (V3D, "view3d.localview", {}), note="로컬 뷰 토글 (프레이밍 포함)"),
     "InvertSelection": _e("KIT", (OBJ, "object.select_all", {"action": "INVERT"}),
                           note="편집 모드: mesh.select_all(INVERT)"),
     "ToggleWireframeOnShadedCmd": _e("KIT", (V3D, "wm.context_toggle",
                                              {"data_path": "space_data.overlay.show_wireframes"}),
-                                     note="뷰포트 오버레이 Wireframe (모든 오브젝트) — step 27"),
+                                     note="뷰포트 오버레이 Wireframe (모든 오브젝트)"),
     "SmoothingLevelIncrease": _e("KIT", (OBJ, "allset.smooth_level", {"delta": 1}),
-                                 note="스무스 프리뷰 단계 0–4 — step 27"),
+                                 note="스무스 프리뷰 단계 0–4"),
     "SmoothingLevelDecrease": _e("KIT", (OBJ, "allset.smooth_level", {"delta": -1})),
     "IncreaseManipulatorSize": _e("KIT", (V3D, "allset.manip_size", {"factor": 1.25}),
-                                  note="gizmo_size ×1.25, 끄면 원래 값 — step 27"),
+                                  note="gizmo_size ×1.25, 끄면 원래 값"),
     "DecreaseManipulatorSize": _e("KIT", (V3D, "allset.manip_size", {"factor": 0.8})),
     "Parent": _e("KIT", (OBJ, "allset.parent", {}),
                  note="월드 유지, parent inverse 단위행렬 (환경설정 Parent Mode=Blender 로 IC 방식); "
-                      "포즈·아마추어 편집 모드 = `allset.parent_joint` (조인트, 제자리) — step 57"),
+                      "포즈·아마추어 편집 모드 = `allset.parent_joint` (조인트, 제자리)"),
     "Unparent": _e("KIT", (OBJ, "allset.unparent", {}),
-                   note="월드로, 월드 유지; 포즈·아마추어 편집 모드 = `allset.unparent_joint` (step 57)"),
+                   note="월드로, 월드 유지; 포즈·아마추어 편집 모드 = `allset.unparent_joint`"),
     "PickWalkUp": _e("KIT", (OBJ, "allset.pick_walk", {"direction": "UP"}),
-                     note="편집 모드: 엣지 = 링, 정점·면 = 화면 위쪽 이웃 (step 39); 포즈 모드: 부모 조인트 (step 57)"),
+                     note="편집 모드: 엣지 = 링, 정점·면 = 화면 위쪽 이웃; 포즈 모드: 부모 조인트"),
     "PickWalkDown": _e("KIT", (OBJ, "allset.pick_walk", {"direction": "DOWN"}),
-                       note="편집 모드: 엣지 = 링, 정점·면 = 화면 아래쪽 이웃 (step 39); 포즈 모드: 첫 자식 조인트 (step 57)"),
+                       note="편집 모드: 엣지 = 링, 정점·면 = 화면 아래쪽 이웃; 포즈 모드: 첫 자식 조인트"),
     "PickWalkLeft": _e("KIT", (OBJ, "allset.pick_walk", {"direction": "LEFT"}),
-                       note="이름순 형제 순환; 편집 모드: 엣지 = 루프, 정점·면 = 화면 왼쪽 이웃 (step 39); 포즈 모드: 형제 조인트"),
+                       note="이름순 형제 순환; 편집 모드: 엣지 = 루프, 정점·면 = 화면 왼쪽 이웃; 포즈 모드: 형제 조인트"),
     "PickWalkRight": _e("KIT", (OBJ, "allset.pick_walk", {"direction": "RIGHT"}),
-                        note="이름순 형제 순환; 편집 모드: 엣지 = 루프, 정점·면 = 화면 오른쪽 이웃 (step 39); 포즈 모드: 형제 조인트"),
+                        note="이름순 형제 순환; 편집 모드: 엣지 = 루프, 정점·면 = 화면 오른쪽 이웃; 포즈 모드: 형제 조인트"),
     "EnterEditModePress": _e("KIT", (OBJ, "allset.hold", {"name": "pivot"}),
-                             note="오브젝트 모드: 누르는 동안 피벗 편집 (Translate 불변, 자식 제자리, step 59); 편집 모드: 3D 커서 피벗 배치 (step 18), 피벗 방향 = Maya Pivot (step 77)"),
+                             note="오브젝트 모드: 누르는 동안 피벗 편집 (Translate 불변, 자식 제자리); 편집 모드: 3D 커서 피벗 배치, 피벗 방향 = Maya Pivot"),
     "EnterEditMode": _e("KIT", (OBJ, "allset.pivot_toggle", {}),
-                        note="피벗 편집 토글: 오브젝트 모드 = Translate 불변 (step 59); 편집 모드 = 3D 커서 피벗 + 커서 툴, 면 클릭 방향 = Maya Pivot (step 77)"),
-    # --- step 20: key / frame stepping ---
+                        note="피벗 편집 토글: 오브젝트 모드 = Translate 불변; 편집 모드 = 3D 커서 피벗 + 커서 툴, 면 클릭 방향 = Maya Pivot"),
+    # --- key / frame keys ---
     "NextKey": _e("KIT", ("Frames", "screen.keyframe_jump", {"next": True}),
                   note="Frames 키맵 (대부분 에디터); 3D View 피벗 파이는 헤더로"),
     "PreviousKey": _e("KIT", ("Frames", "screen.keyframe_jump", {"next": False}),
@@ -256,16 +256,16 @@ ENTRIES = {
     "DuplicateSpecial": _e("KIT", (OBJ, "allset.duplicate_special", {}),
                            note="복사/인스턴스, 사본 수, 누적 오프셋 (Adjust Last Operation)"),
     "ShowAttributeEditorOrChannelBox": _e("KIT", (OBJ, "allset.ae_toggle", {}),
-                                          note="CB/LE ↔ AE 전환. 편집 / 포즈 / 페인트 마스크 / UV Editor 모드도 (IC Ctrl+A 전체 선택 제거, step 141 #65), Graph Editor / Dope Sheet / NLA / 채널 목록도 (step 150 #96)"),
+                                          note="CB/LE ↔ AE 전환. 편집 / 포즈 / 페인트 마스크 / UV Editor 모드도 (IC Ctrl+A 전체 선택 제거, #65), Graph Editor / Dope Sheet / NLA / 채널 목록도 (#96)"),
     "SelectAll": _e("KIT", (OBJ, "object.select_all", {"action": 'SELECT'}),
-                    note="편집 / 포즈 / UV 모드: <모드>.select_all(SELECT) (step 141)"),
+                    note="편집 / 포즈 / UV 모드: <모드>.select_all(SELECT)"),
     "SelectNone": _e("KIT", (OBJ, "allset.select_none", {}),
                      note="allset.select_none clears object/bone selection and the active object, leaving component/Pose mode"),
     "DuplicateWithTransform": _e("KIT", (OBJ, "allset.duplicate_with_transform", {}),
                                  note="직전 복제의 변환을 반복"),
     "AssignNewMaterial": _e("KIT", (OBJ, "allset.assign_new_material", {}),
-                            note="재질 종류 검색 팝업 → 만들어 지정 (편집 모드 면 선택 = 면에만, step 29)"),
-    # --- step 35 ---
+                            note="재질 종류 검색 팝업 → 만들어 지정 (편집 모드 면 선택 = 면에만)"),
+    # --- menu sets / last tool / box zoom ---
     **{rtc: _e("KIT", ("Screen", "allset.menu_set", {"set": sid}),
                note="메뉴 세트 전환 (IC 3D 뷰 F2–F5 뷰 키 대신; 직교 뷰는 핫박스·Space·Ctrl+F1–F3)")
        for rtc, sid in (("ShowModelingUI", "modelingMenuSet"), ("ShowRiggingUI", "riggingMenuSet"),
@@ -277,10 +277,10 @@ ENTRIES = {
     "NonSacredTool": _e("KIT", (OBJ, "allset.last_tool", {}),
                         note="Q/W/E/R/T 가 아닌 마지막 툴 (모드별 기억)"),
     "MultiCutToolNameCommand": _e("KIT", (OBJ, "allset.menu_tool", {"tool": "allset.multi_cut_tool"}),
-                                  note="kit Multi-Cut 툴 (step 129), 오브젝트 모드면 편집 모드로; 툴 안 Ctrl+클릭 = 엣지 "
+                                  note="kit Multi-Cut 툴, 오브젝트 모드면 편집 모드로; 툴 안 Ctrl+클릭 = 엣지 "
                                        "루프 (Ctrl+MMB 가운데), Shift = Snap Step %, Backspace, Enter/RMB 완료"),
     "QuadDrawToolNameCommand": _e("KIT", (OBJ, "allset.quad_draw_start", {}),
-                                  note="kit Quad Draw 툴 (step 144): 선택한 메시 / 새 polySurfaceN 편집, 라이브 표면 위 점, "
+                                  note="kit Quad Draw 툴: 선택한 메시 / 새 polySurfaceN 편집, 라이브 표면 위 점, "
                                        "Shift+클릭 채우기, Ctrl+클릭 루프, Ctrl+Shift+클릭 지우기, Tab+드래그 연장"),
     "CompleteCurrentTool": _e("NO", note="Blender 모달 툴은 자기 키맵의 Return 으로 확정; 3D 뷰의 IC 이름 바꾸기 팝오버는 제거"),
 
@@ -291,7 +291,7 @@ ENTRIES = {
     "DecrementFluidCenter": _e("NO", note="Maya Fluids 없음"),
     "CoarserSubdivLevel": _e("NO", note="Maya subdiv surface 노드 없음"),
     "CreateSubdivRegion": _e("NO", note="Maya subdiv surface 노드 없음"),
-    # --- step 70: Graph Editor, Shift+S keyframe / tangent marking menu (operators/graph_keys.py) ---
+    # --- Graph Editor, Shift+S keyframe / tangent marking menu (operators/graph_keys.py) ---
     "graphEditor:GraphEditorFrameAll": _e("KIT", ("Graph Editor", "allset.graph_frame", {"mode": 'ALL'}),
                                           note="보이는 커브 전체 (구간 제어 다각형 포함), 시간 10 % / 값 25 % 여백"),
     "graphEditor:GraphEditorFrameSelected": _e("KIT", ("Graph Editor", "allset.graph_frame", {"mode": 'SELECTED'}),
@@ -302,7 +302,7 @@ ENTRIES = {
                                   note="선택 키 = Bezier + Auto Clamped"),
     "KeyframeTangentMarkingMenu": _e("KIT", (OBJ, "allset.tap_hold", {"binding": "key_tangent"}),
                                      note="홀드 + LMB = Keys / Tangents 마킹 메뉴 (Graph Editor·Dope Sheet·포즈도), 탭 = 없음"),
-    # --- step 79: 3D Cut and Sew UV Tool keys (tool keymap, operators/cut_sew.py) ---
+    # --- 3D Cut and Sew UV Tool keys (tool keymap, operators/cut_sew.py) ---
     "polyCutUV:CutUVs3D": _e("KIT",
                              note="툴 안에서 x = 선택 엣지 Cut (드래그 = 바로 자르기)"),
     "polyCutUV:SewUVs3D": _e("KIT",
@@ -310,7 +310,7 @@ ENTRIES = {
     "polyCutUV:UnfoldPackUVs3DInCurrentTile": _e("KIT",
                                                  note="툴 안에서 d = Unfold + Layout (0-1)"),
     "polyCutUV:UnfoldPackUVs3DInEmptyTile": _e("NO", note="Blender 에 UDIM 빈 타일 배치 없음 (d = 0-1 에 Layout)"),
-    # --- step 78: key batch 2 ---
+    # --- key batch 2 ---
     "graphEditor:GraphEditorAbsoluteView": _e("KIT", ("Graph Editor", "allset.graph_view_mode", {"mode": "ABSOLUTE"}),
                                               note="Normalize 끔"),
     "graphEditor:GraphEditorStackedView": _e("KIT", ("Graph Editor", "allset.graph_view_mode", {"mode": "STACKED"}),
@@ -326,7 +326,7 @@ ENTRIES = {
     "RepeatLastActionAtMousePosition": _e("KIT", (V3D, "allset.repeat_at_mouse", {}),
                                           note="마지막 동작 반복 → 선택을 마우스 아래 바닥 (Z=0) 으로"),
     "CreateCameraFromView": _e("KIT", (OBJ, "allset.camera_from_view", {}), note="뷰와 같은 camera1 (렌즈·직교 크기), 뷰는 그대로"),
-    # --- step 83: insert / nudge / select keys (operators/key_insert.py) ---
+    # --- insert / nudge / select keys (operators/key_insert.py) ---
     "InsertKey": _e("KIT", ("Screen", "allset.insert_key", {"channels": "ALL"}),
                     note="곡선 모양 그대로 현재 시간 키: Graph Editor 선택 곡선 → 보이는 곡선, 그 밖 = 선택 노드 곡선"),
     "InsertKeyTranslate": _e("KIT", ("Screen", "allset.insert_key", {"channels": "TRANSLATE"}),
@@ -339,7 +339,7 @@ ENTRIES = {
     "SelectNextKey": _e("KIT", ("Screen", "allset.select_key", {"direction": "NEXT"}),
                         note="선택 키 (없으면 현재 시간) 다음 키로 가서 그 키만 선택"),
     "SelectPreviousKey": _e("KIT", ("Screen", "allset.select_key", {"direction": "PREVIOUS"})),
-    # --- step 87: view keys 3 (operators/view_keys3.py) ---
+    # --- view keys 3 (operators/view_keys3.py) ---
     "CycleDisplayMode": _e("KIT", (V3D, "allset.cycle_display", {}),
                            note="X-ray 조인트 (아마추어 In Front) → 전부 → 메시만 (조인트·커브 숨김) 순환"),
     "CameraModeToggle": _e("KIT", (V3D, "allset.camera_mode_toggle", {}),
@@ -353,7 +353,7 @@ ENTRIES = {
     "TogglePanZoomPress": _e("KIT", (V3D, "allset.pan_zoom_hold", {}),
                              note="카메라 뷰에서 누르는 동안 LMB 팬 / MMB 줌 (camera view offset / zoom, 렌더 그대로)"),
     "TogglePanZoomRelease": _e("KIT", note="놓기 = pan_zoom_hold 모달이 끝냄 (누름 행의 항목)"),
-    # --- step 90: global key batch 4 (operators/global_keys4.py) ---
+    # --- global key batch 4 (operators/global_keys4.py) ---
     "CutSelected": _e("KIT", (OBJ, "allset.cut", {}), note="선택 (+ 그 아래 계층) 을 클립보드로 복사 후 삭제, Ctrl+V 로 되돌림 (Outliner 도)"),
     "WalkContext_Command": _e("KIT", (V3D, "view3d.walk", {}), note="Blender Walk 모달 (클릭 / Enter = 끝, ESC = 취소); IC Alt+X X-ray 제거"),
     "PlaybackRangeAnimStartEnd": _e("KIT", ("Screen", "allset.playback_range_anim", {}),
@@ -374,14 +374,14 @@ ENTRIES = {
                         note="Blender 붙여넣기 + 첫 오브젝트가 lead (Channel Box); Maya 의 pasted_ 접두사는 없음 (이름이 비면 원래 이름)"),
     "outlinerPanel:OutlinerRenameSelectedItem": _e("IC", ("Outliner", "outliner.item_rename", {}), note="활성 행 이름 바꾸기"),
     "outlinerPanel:OutlinerRevealSelected": _e("IC", ("Outliner", "outliner.show_active", {}), note="선택 항목까지 펼치고 보이기"),
-    # --- step 92: Graph Editor key batch (operators/graph_keys.py) ---
+    # --- Graph Editor key batch (operators/graph_keys.py) ---
     "graphEditor:GraphEditorFrameCenterView": _e("KIT", ("Graph Editor", "allset.graph_center_time", {}),
                                                  note="현재 시간을 가운데로 (가로만, 확대 그대로)"),
     "graphEditor:SnapTimeToSelection": _e("KIT", ("Graph Editor", "allset.snap_time_toggle", {}),
                                           note="Snap Time To Selection 켬/끔 (View 메뉴 체크): 키 선택 = 가장 이른 키로 시간"),
     "InsertKeyToolActivate": _e("KIT", ("Graph Editor", "allset.insert_key_tool", {}),
                                 note="Graph Editor 에서 누르는 동안 MMB 클릭 / 드래그 = 선택 곡선에 모양 그대로 키 (정수 프레임); 전역 I = Mesh inset 그대로"),
-    # --- step 69: scene files (Window keymap, operators/project.py) ---
+    # --- scene files (Window keymap, operators/project.py) ---
     "OpenScene": _e("KIT", ("Window", "allset.open_scene", {}), note="파일 창이 프로젝트 scenes 폴더에서 시작 (없으면 Blender 그대로)"),
     "SaveScene": _e("KIT", ("Window", "allset.save_scene", {}), note="처음 저장은 프로젝트 scenes 폴더에서 Save As"),
     "SaveSceneAs": _e("KIT", ("Window", "allset.save_scene_as", {}), note="프로젝트 scenes 폴더에서 시작"),
@@ -389,10 +389,10 @@ ENTRIES = {
                            note="Maya 규칙 shot_v001 → shot_v001.0001 (메뉴와 같음; IC 의 Blender 규칙 shot_v002 대신)"),
     "CreateReference": _e("KIT", ("Window", "allset.create_reference", {}),
                           note=".blend 링크 + library override, 이름 ns:이름 (편집 모드 등 Ctrl+R 이 있는 에디터는 그쪽 우선)"),
-    # --- step 107: wrong daily keys fixed, missing keys bound ---
+    # --- wrong daily keys fixed, missing keys bound ---
     "ToggleReflection": _e("KIT", (V3D, "allset.symmetry", {"mode": "TOGGLE"}),
                            note="대칭 켬/끔 (kit 대칭 = 메시 mirror → 모델링·조각·페인트); IC 의 스케일 초기화 제거; "
-                                "가중치 페인트에서는 X 미러 토글 (allset.paint_reflection, step 218)"),
+                                "가중치 페인트에서는 X 미러 토글 (allset.paint_reflection)"),
     "SelectNextIntermediatObject": _e("NO", note="Blender 에 intermediate object 없음; 3D 모드의 IC Ctrl+I 반전은 제거 "
                                                  "(반전은 Maya 처럼 Ctrl+Shift+I)"),
     "Help": _e("KIT", ("Window", "wm.doc_view_manual_ui_context", {}),
@@ -405,9 +405,9 @@ ENTRIES = {
                      note="자식으로 (포즈: 자식 본); IC 작업공간 순환 제거"),
     "PickWalkOut": _e("KIT", (OBJ, "object.select_hierarchy", {"direction": "PARENT"}), note="부모로"),
     "PrevSkinPaintMode": _e("KIT", ("Weight Paint", "allset.skin_paint_mode", {"step": -1}),
-                            note="Paint → Paint Select → Select 순환 (Select = 박스 선택 도구 + 정점 마스크, step 218); IC Ctrl+, 환경설정 제거"),
+                            note="Paint → Paint Select → Select 순환 (Select = 박스 선택 도구 + 정점 마스크); IC Ctrl+, 환경설정 제거"),
     "NextSkinPaintMode": _e("KIT", ("Weight Paint", "allset.skin_paint_mode", {"step": 1}),
-                            note="Paint → Select → Paint Select 순환 (Paint Select = 원 선택 도구, step 218)"),
+                            note="Paint → Select → Paint Select 순환 (Paint Select = 원 선택 도구)"),
     "ToggleMainMenubar": _e("KIT", ("Screen", "allset.main_menubar_toggle", {}),
                             note="메인 메뉴 막대를 위 막대의 메뉴 버튼으로 접기/펴기"),
     "TogglePanelMenubar": _e("KIT", ("Screen", "wm.context_toggle", {"data_path": "area.show_menus"}),
@@ -415,17 +415,17 @@ ENTRIES = {
     "ToggleModelEditorBars": _e("KIT", (V3D, "wm.context_toggle", {"data_path": "space_data.show_region_header"}),
                                 note="3D 뷰 머리 (메뉴 + 아이콘 줄) 숨김/보임"),
     "CycleBackgroundColor": _e("KIT", (V3D, "allset.cycle_background", {}),
-                               note="모든 뷰: 회색 0.36 → 밝은 회색 0.631 → 그라데이션 → 검정 (그라데이션은 Maya 테마일 때만; step 120)"),
+                               note="모든 뷰: 회색 0.36 → 밝은 회색 0.631 → 그라데이션 → 검정 (그라데이션은 Maya 테마일 때만)"),
     "PaintOperationMarkingMenuPress": _e("KIT", ("Weight Paint", "wm.call_menu", {"name": "ALLSET_MT_paint_operation"}),
                                          note="Replace / Add / Scale / Smooth 메뉴 (누르면 열림, 드래그 아님)"),
     "ModifyPaintValuePress": _e("KIT", ("Weight Paint", "wm.radial_control", {}), note="가중치 값 드래그"),
     "ModifyLowerRadiusPress": _e("NO", note="Blender 브러시는 반지름이 하나 (압력 최소 크기는 브러시 설정); Shift+B 는 안내만"),
     "FloodSurfaces": _e("KIT", ("Weight Paint", "allset.flood_weights", {}),
-                        note="Maya Flood: 연산 × Opacity, 나머지 영향에 기존 비율로 재분배, 잠금 존중, 선택 정점만 (step 218)"),
+                        note="Maya Flood: 연산 × Opacity, 나머지 영향에 기존 비율로 재분배, 잠금 존중, 선택 정점만"),
     "CopyVertexSkinWeights": _e("KIT", ("Mesh", "allset.copy_vertex_weights", {}),
-                                note="편집 모드 활성 버텍스 (step 58); 가중치 페인트에서도 같은 키 (활성 / 첫 선택 정점, step 218)"),
+                                note="편집 모드 활성 버텍스; 가중치 페인트에서도 같은 키 (활성 / 첫 선택 정점)"),
     "PasteVertexSkinWeights": _e("KIT", ("Mesh", "allset.paste_vertex_weights", {}),
-                                 note="선택 정점에; 가중치 페인트에서도 같은 키 (step 218)"),
+                                 note="선택 정점에; 가중치 페인트에서도 같은 키"),
     "sculptMeshCache:SetMeshFreezeTool": _e("KIT", ("Sculpt", "brush.asset_activate", {}), note="Mask 브러시"),
     "sculptMeshCache:SetMeshSculptTool": _e("KIT", ("Sculpt", "brush.asset_activate", {}),
                                            note="Draw (IC 의 Ctrl+0–5 multires 단계 대체)"),
@@ -468,8 +468,8 @@ ENTRIES = {
     "polyTexturePlacementPanel:ToggleUVDistortion": _e("KIT", ("UV Editor", "wm.context_toggle",
                                                                {"data_path": "space_data.uv_editor.show_stretch"})),
     "polyTexturePlacementPanel:DisplayUVShaded": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "SHADED"}),
-                                                   note="UV 면 표시 켬 (step 155)"),
-    # --- step 107: already Blender's (IC) in the editor the kit opens ---
+                                                   note="UV 면 표시 켬"),
+    # --- already Blender's (IC) in the editor the kit opens ---
     "polyTexturePlacementPanel:SelectUVTool": _e("IC", ("UV Editor", "wm.tool_set_by_id", {"name": "builtin.select_box"})),
     "polyTexturePlacementPanel:MoveUVTool": _e("IC", ("UV Editor", "wm.tool_set_by_id", {"name": "builtin.move"})),
     "polyTexturePlacementPanel:RotateUVTool": _e("IC", ("UV Editor", "wm.tool_set_by_id", {"name": "builtin.rotate"})),
@@ -479,7 +479,7 @@ ENTRIES = {
     "polyTexturePlacementPanel:CopyUVs": _e("IC", ("UV Editor", "uv.copy", {})),
     "polyTexturePlacementPanel:PasteUVs": _e("IC", ("UV Editor", "uv.paste", {})),
     "timeEditorPanel:TimeEditorFrameAll": _e("IC", ("NLA Editor", "nla.view_all", {}),
-                                            note="Maya Time Editor = kit 의 NLA (step 34)"),
+                                            note="Maya Time Editor = kit 의 NLA"),
     "timeEditorPanel:TimeEditorFrameSelected": _e("IC", ("NLA Editor", "nla.view_selected", {})),
     "timeEditorPanel:TimeEditorDeleteClips": _e("IC", ("NLA Editor", "nla.delete", {})),
     "timeEditorPanel:TimeEditorCreateGroupFromSelection": _e("IC", ("NLA Editor", "nla.meta_add", {}),
@@ -488,7 +488,7 @@ ENTRIES = {
     "nodeEditorPanel:NodeEditorPaste": _e("IC", ("Node Editor", "node.clipboard_paste", {})),
     "nodeEditorPanel:NodeEditorGridToggleSnap": _e("IC", ("Node Editor", "wm.context_toggle",
                                                           {"data_path": "tool_settings.use_snap_node"})),
-    # --- step 107: classified, no Blender equivalent ---
+    # --- classified, no Blender equivalent ---
     "polyTexturePlacementPanel:IncreaseCheckerDensity": _e("NO", note="UV 체커 밀도 없음 (Blender 체커는 이미지); Maya 2026 은 UV Editor 키"),
     "polyTexturePlacementPanel:DecreaseCheckerDensity": _e("NO", note="UV 체커 밀도 없음; Maya 2026 은 UV Editor 키"),
     "timeEditorPanel:TimeEditorSceneAuthoringToggle": _e("NO", note="Maya Time Editor 클립 편집 (kit Time Editor = NLA, 그 키는 Blender 그대로)"),
@@ -528,8 +528,8 @@ ENTRIES = {
     "FullHotboxDisplay": _e("NO", note="kit 핫박스는 늘 모든 행을 보여 줌"),
     "ToggleDisplacement": _e("NO", note="디스플레이스먼트 미리보기 토글 없음 (모디파이어)"),
     "AbortCurrentTool": _e("NO", note="Blender 모달 도구는 Esc 로 스스로 취소"),
-    "renderWindowPanel:RenderViewNextImage": _e("NO", note="Render View 이미지 = Image 편집기 렌더 슬롯 J / Alt+J (step 97); Maya 2026 은 Render View 키"),
-    "renderWindowPanel:RenderViewPrevImage": _e("NO", note="렌더 슬롯 J / Alt+J (step 97); Maya 2026 은 Render View 키"),
+    "renderWindowPanel:RenderViewNextImage": _e("NO", note="Render View 이미지 = Image 편집기 렌더 슬롯 J / Alt+J; Maya 2026 은 Render View 키"),
+    "renderWindowPanel:RenderViewPrevImage": _e("NO", note="렌더 슬롯 J / Alt+J; Maya 2026 은 Render View 키"),
     "line:429": _e("NO", note="Maya 가 일부러 비워 둔 바인딩 (Alt+Y)"),
     "line:430": _e("NO", note="Maya 가 일부러 비워 둔 바인딩 (Ctrl+Y)"),
     "line:431": _e("NO", note="Maya 가 일부러 비워 둔 바인딩 (Ctrl+Alt+Y)"),
@@ -569,7 +569,7 @@ ENTRIES = {
     "nodeEditorPanel:NodeEditorPickWalkRight": _e("NO", note="Maya Node Editor 표시·탐색 (Blender 노드 편집기에 같은 기능 없음 / Blender 키 그대로)"),
     "nodeEditorPanel:NodeEditorPickWalkLeft": _e("NO", note="Maya Node Editor 표시·탐색 (Blender 노드 편집기에 같은 기능 없음 / Blender 키 그대로)"),
     "nodeEditorPanel:NodeEditorCut": _e("NO", note="Maya Node Editor 표시·탐색 (Blender 노드 편집기에 같은 기능 없음 / Blender 키 그대로)"),
-    # --- step 269: rows new in Maya 2026 ---
+    # --- rows new in Maya 2026 ---
     "dopeSheetPanel:DopeSheetFrameAll": _e("IC", ("Dopesheet", "action.view_all", {})),
     "dopeSheetPanel:DopeSheetFrameSelected": _e("IC", ("Dopesheet", "action.view_selected", {})),
     "dopeSheetPanel:DopeSheetFramePlaybackRange": _e("KIT", ("Dopesheet", "allset.dope_sheet_key", {"action": "RANGE"}),
@@ -603,13 +603,13 @@ ENTRIES = {
     "motionMakerEditor:MotionMakerEditorGoToNextFrame": _e("NO", note="Maya 2026 MotionMaker 편집기 없음"),
     "motionMakerEditor:MotionMakerEditorGoToPreviousTag": _e("NO", note="Maya 2026 MotionMaker 편집기 없음"),
     "motionMakerEditor:MotionMakerEditorGoToNextTag": _e("NO", note="Maya 2026 MotionMaker 편집기 없음"),
-    "polyTexturePlacementPanel:DeleteUVs": _e("KIT", ("UV Editor", "allset.uv_delete", {}), note="step 155"),
-    "polyTexturePlacementPanel:CreateUVShellAlongBorder": _e("KIT", ("UV Editor", "allset.uv_create_shell", {}), note="step 155"),
-    "polyTexturePlacementPanel:DisplayUVWireframe": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "WIREFRAME"}), note="step 155"),
-    "polyTexturePlacementPanel:ToggleUVShellBorder": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "SHELL_BORDERS"}), note="step 155"),
-    "polyTexturePlacementPanel:UVEditorToggleTextureBorderDisplay": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "TEXTURE_BORDERS"}), note="step 155"),
-    "polyTexturePlacementPanel:ToggleUVTextureImage": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "IMAGE"}), note="step 155"),
-    "polyTexturePlacementPanel:ToggleUVIsolateViewSelected": _e("KIT", ("UV Editor", "allset.uv_isolate", {}), note="step 155"),
+    "polyTexturePlacementPanel:DeleteUVs": _e("KIT", ("UV Editor", "allset.uv_delete", {}), note=""),
+    "polyTexturePlacementPanel:CreateUVShellAlongBorder": _e("KIT", ("UV Editor", "allset.uv_create_shell", {}), note=""),
+    "polyTexturePlacementPanel:DisplayUVWireframe": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "WIREFRAME"}), note=""),
+    "polyTexturePlacementPanel:ToggleUVShellBorder": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "SHELL_BORDERS"}), note=""),
+    "polyTexturePlacementPanel:UVEditorToggleTextureBorderDisplay": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "TEXTURE_BORDERS"}), note=""),
+    "polyTexturePlacementPanel:ToggleUVTextureImage": _e("KIT", ("UV Editor", "allset.uv_display", {"mode": "IMAGE"}), note=""),
+    "polyTexturePlacementPanel:ToggleUVIsolateViewSelected": _e("KIT", ("UV Editor", "allset.uv_isolate", {}), note=""),
     "shapePanel:ShapeEditorNewGroup": _e("NO", note="Shape Editor 없음 (Blender Shape Keys 패널)"),
     "shapePanel:ShapeEditorDuplicateTarget": _e("NO", note="Shape Editor 없음 (Blender Shape Keys 패널)"),
     "shapePanel:ShapeEditorSelectNone": _e("NO", note="Shape Editor 없음 (Blender Shape Keys 패널)"),
@@ -653,14 +653,14 @@ ENTRIES = {
     "Unfold3DBrush:U3DBrushSizeOn": _e("NO", note="Unfold3D 브러시 없음"),
     "Unfold3DBrush:U3DBrushPressureOn": _e("NO", note="Unfold3D 브러시 없음"),
     "SymmetrizeUVBrush:SymmetrizeUVBrushSizeOn": _e("NO", note="UV 대칭 브러시 없음"),
-    "texCutContext:TexSewActivateBrushSize": _e("NO", note="3D Cut and Sew 브러시 크기 조정 없음 (step 79 도구는 클릭/드래그)"),
+    "texCutContext:TexSewActivateBrushSize": _e("NO", note="3D Cut and Sew 브러시 크기 조정 없음 (도구는 클릭/드래그)"),
     "ToggleZoomInMode": _e("NO", note="2D Pan/Zoom 확대 모드 없음; IC 에셋 선반 토글 그대로"),
     "CreateSubdivSurface": _e("NO", note="Subdiv Surface 오브젝트 없음 (3 / Smooth Proxy)"),
     "CreateSubdivSurfaceOptions": _e("NO", note="Subdiv Surface 오브젝트 없음"),
     "LockCurveLength": _e("NO", note="커브 길이 잠금 없음"),
     "hyperGraphPanel:HypergraphIncreaseDepth": _e("NO", note="Hypergraph 없음 (Outliner / Drivers)"),
     "hyperGraphPanel:HypergraphDecreaseDepth": _e("NO", note="Hypergraph 없음 (Outliner / Drivers)"),
-    "ToggleSteeringWheel": _e("NO", note="Steering Wheel 없음; Ctrl+Shift+W 는 kit 키 삽입 (step 83)"),
+    "ToggleSteeringWheel": _e("NO", note="Steering Wheel 없음; Ctrl+Shift+W 는 kit 키 삽입"),
     "IncreaseExposureFine": _e("NO", note="Render View 노출 = Color Management (Render 속성)"),
     "DecreaseExposureFine": _e("NO", note="Render View 노출 = Color Management"),
     "IncreaseGammaFine": _e("NO", note="Render View 감마 = Color Management"),
@@ -682,7 +682,7 @@ def entry_for(hotkey):
     press = hotkey.get("press") or {}
     # MTK keys (Ctrl+Shift+X / Q) only have a nameCommand
     rtc = press.get("runTimeCommand") or press.get("nameCommand")
-    if not rtc:         # release-only row (e.g. TogglePanZoomRelease, step 87)
+    if not rtc:         # release-only row (e.g. TogglePanZoomRelease)
         rtc = (hotkey.get("release") or {}).get("runTimeCommand")
     if not rtc:         # an explicitly empty Maya binding (Maya's standard hotkeys)
         return ENTRIES.get(f"line:{hotkey.get('line')}")

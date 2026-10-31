@@ -1,5 +1,5 @@
-"""Step 112: the Tool Box column identity and framing beside the dock. The Solid Side Panels preset (Region Overlap
-off) is gone since step 130: Maya mode leaves Blender's Region Overlap as the user set
+"""The Tool Box column identity and framing beside the dock. The Solid Side Panels preset (Region Overlap
+off) is gone: Maya mode leaves Blender's Region Overlap as the user set
 it."""
 
 from importlib import import_module
@@ -37,7 +37,7 @@ def test_toolbox_identity_ignores_overlays():
 
 def test_fit_wide_box_in_narrow_perspective_view():
     """Ctrl+Shift+F / A with a far child in the view beside the solid dock (matrices from gui_step17_framing):
-    the box ends inside the visible rect, its centre in the middle (Maya viewFit, step 258)."""
+    the box ends inside the visible rect, its centre in the middle (Maya viewFit)."""
     from mathutils import Matrix, Quaternion, Vector
     framing = import_module(kit.MODULE + ".operators.framing")
     rot = Quaternion((0.7123758792877197, 0.4410620927810669, 0.28735825419425964, 0.4641229212284088))
@@ -47,7 +47,7 @@ def test_fit_wide_box_in_narrow_perspective_view():
     loc, d = framing.fit(pts, rot, win, 2.84, False, size, (0, 0) + rect)
     b = framing._bounds(win @ framing.view_matrix(loc, rot, d), framing.box_corners(pts), size)
     assert b[0] >= 0 and b[1] >= 0 and b[2] <= size[0] and b[3] <= size[1], b
-    # step 258: Maya's perspective viewFit aims at the box centre with its margin (test_step258_view)
+    # Maya's perspective viewFit aims at the box centre with its margin (test_step258_view)
     lo, hi = framing.box_corners(pts)[0], framing.box_corners(pts)[-1]
     c = framing.project(win @ framing.view_matrix(loc, rot, d), (lo + hi) / 2, size)
     assert abs(c.x - size[0] / 2) < 1 and abs(c.y - size[1] / 2) < 1, c

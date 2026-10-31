@@ -1,4 +1,4 @@
-"""Step 158 in the Maya Workflow Kit layout: RMB on the Channel Box's empty space opens Maya's
+"""In the Maya Workflow Kit layout: RMB on the Channel Box's empty space opens Maya's
 Channels menu (its first row Key Selected keys the selected channel), Ctrl+RMB opens the Edit menu (shot), the
 point light's Color R row is a selectable channel (click selects it). Shots with ``--shots``."""
 

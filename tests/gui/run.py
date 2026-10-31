@@ -11,7 +11,7 @@ terminated on timeout. Prints PASS/FAIL per check; exit 1 on any failure.
 ``--ui-scale`` sets Preferences > Interface > Resolution Scale for every test (also after
 a template switch, which reloads factory preferences); 0.8 = the Maya density preset on a
 125 % display.
-``--blenders`` (step 279, release smoke): one run per portable Blender
+``--blenders`` (release smoke): one run per portable Blender
 (``%LOCALAPPDATA%/allset_blenders/blender-<ver>-windows-x64/blender.exe``, or a path), one after the other, each in
 its own sandbox ``<ALLSET_SANDBOX or test_env>_<ver>``; the extension is built once.
 """
@@ -82,7 +82,7 @@ def file_timeout(path):
 
 
 def skip_reason(path):
-    """A quarantined file has a top-level ``GUI_SKIP = "<reason>"`` line (step 141): it hangs or fails only for
+    """A quarantined file has a top-level ``GUI_SKIP = "<reason>"`` line: it hangs or fails only for
     environment reasons; it is left out unless --include-skipped and its checks are done by hand."""
     m = re.search(r"^GUI_SKIP\s*=\s*[\"'](.+)[\"']", path.read_text(encoding="utf-8"), re.M)
     return m.group(1) if m else ""
@@ -111,7 +111,7 @@ def main(argv=None):
     else:
         zip_path = headless.build.main(["--blender", args.blender, "--no-legacy"])
     env = headless.make_sandbox()
-    env["ALLSET_NO_WELCOME"] = "1"   # the first-start dialog would eat the simulated events (step 42)
+    env["ALLSET_NO_WELCOME"] = "1"   # the first-start dialog would eat the simulated events
     headless.install(args.blender, zip_path, env)
     if args.ui_scale:
         env["ALLSET_GUI_UI_SCALE"] = str(args.ui_scale)

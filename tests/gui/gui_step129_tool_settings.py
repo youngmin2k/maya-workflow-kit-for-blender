@@ -1,4 +1,4 @@
-"""Step 129 (#3, #29) in a real UI: the Maya Workflow Kit layout, edit mode. One click on the Tool Box's Lasso icon only
+"""#3, #29: in a real UI: the Maya Workflow Kit layout, edit mode. One click on the Tool Box's Lasso icon only
 sets the tool; a second click within the double-click time (Maya double-click) opens the Tool Settings dock with the
 Lasso Tool's Maya sections; the Select Tool shows Common Selection Options / Soft Selection / Symmetry Settings; Paint
 Selection and Insert Edge Loop get their Maya sections too (screenshots of the dock)."""

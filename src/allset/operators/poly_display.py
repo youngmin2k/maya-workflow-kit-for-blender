@@ -115,7 +115,7 @@ class ALLSET_PT_normals_size(bpy.types.Panel):
     bl_idname = "ALLSET_PT_normals_size"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"            # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"            # = drawn by the Properties Tool tab
     bl_label = "Normals Size"
     bl_options = {'HIDE_HEADER'}
     bl_order = -300

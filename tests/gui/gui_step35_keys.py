@@ -1,4 +1,4 @@
-"""Step 35 in a real UI: Ctrl+Alt+LMB box zoom (left→right in, right→left out), Ctrl+T,
+"""In a real UI: Ctrl+Alt+LMB box zoom (left→right in, right→left out), Ctrl+T,
 Ctrl+Shift+X then W then Y, F3 = Rigging menu set (screenshot), Return opens no popover."""
 
 import os
@@ -29,7 +29,7 @@ def tool():
 
 
 def drag(x0, y0, x1, y1):
-    """Three steps: press, moves, release (step 28: one tick each)."""
+    """Three steps: press, moves, release (one tick each)."""
     @step
     def press():
         ev('MOUSEMOVE', 'NOTHING', x=x0(), y=y0())
@@ -104,8 +104,8 @@ def s_y_done():
     tap('W')
     bpy.ops.object.mode_set(mode='OBJECT')
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"])
-    # Record which menu set the top bar draws (step 72: F2-F6 must repaint it without a hover).
-    # step 115: the kit swaps the top bar's own draw, which calls status_line.draw_left (not the class method)
+    # Record which menu set the top bar draws (F2-F6 must repaint it without a hover).
+    # the kit swaps the top bar's own draw, which calls status_line.draw_left (not the class method)
     from importlib import import_module
     sl = import_module(MODULE + ".ui.status_line")
     C["draw_left"] = sl.draw_left

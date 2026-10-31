@@ -1,4 +1,4 @@
-"""Step 258 (#152): Maya's messages on wrong selections instead of Python errors or silence.
+"""#152: Maya's messages on wrong selections instead of Python errors or silence.
 
 Maya's messages + the step-258 additions (constraints with one
 object, Set Blend Shape Target Weight Keys on a skeleton, nothing selected for Remesh / Reduce). Maya's Errors are the
@@ -232,7 +232,7 @@ def test_bind_skin_without_a_joint_is_mayas_error():
 
 
 def test_bind_skin_nothing_selected_and_joints_only_are_mayas_errors():
-    # step 266 independent check: nothing selected / only the skeleton
+    # independent check: nothing selected / only the skeleton
     _clear()
     arm = _skeleton()
     _cube()

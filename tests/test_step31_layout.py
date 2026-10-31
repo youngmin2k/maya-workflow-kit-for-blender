@@ -1,4 +1,4 @@
-"""Step 31: Maya Workflow Kit layout Outliner (width, Maya DAG rows) and marking-menu toggle state in the
+"""Maya Workflow Kit layout Outliner (width, Maya DAG rows) and marking-menu toggle state in the
 Blender pie fallback. GUI: tests/gui/gui_step31_layout.py."""
 
 import sys
@@ -17,7 +17,7 @@ mm = import_module(kit.MODULE + ".marking.menus")
 def test_template_outliner_is_maya_dag():
     sys.path.insert(0, str(ROOT / "tools"))
     import make_startup
-    assert make_startup.OUTLINER_PX >= 260   # Maya narrow dock width (step 49; step 31: names not cut)
+    assert make_startup.OUTLINER_PX >= 260   # Maya narrow dock width (names not cut)
     path = ROOT / "src" / "allset" / "app_template" / "Maya_Workflow_Kit" / "startup.blend"
     bpy.ops.wm.open_mainfile(filepath=str(path), load_ui=True)
     screen = bpy.data.workspaces["General"].screens[0]

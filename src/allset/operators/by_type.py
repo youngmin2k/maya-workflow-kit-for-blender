@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Select > All by Type / Edit > Delete All by Type for the nodes the kit makes (step 166).
+"""Maya Select > All by Type / Edit > Delete All by Type for the nodes the kit makes.
 
 Maya selects the transforms of the type (``SelectAllIKHandles`` = every ikHandle, ``SelectAllClusters`` = every
 clusterHandle; category "Menu items.Common.Select.All by Type") and deletes the
@@ -51,14 +51,14 @@ def cluster_handles(scene):
     return [ob for ob in scene.objects if ob in handles]
 
 
-# --- step 202 (#109): wires, nCloths, nParticles, nRigids -----------------------------------------
+# --- #109: wires, nCloths, nParticles, nRigids -----------------------------------------
 # Maya (SelectAllWires / SelectAllNCloths / SelectAllNParticles /
 # SelectAllNRigids, DeleteAllWires / DeleteAllNCloths / DeleteAllNParticles /
 # DeleteAllNRigids): select the wire nodes / the nCloth, nParticle, nRigid transforms; delete the wire nodes,
 # Remove nCloth / nRigid (nCloth > Remove nCloth: the meshes stay) and the nParticle shapes. The kit's nodes:
 # - wire = a kit wire Geometry Nodes modifier (operators/wire_deformer.py); it has no object, so Select picks the
 #   wire curves that drive one (the curve is what a Maya user grabs to work the wire), Delete removes the
-#   modifiers with their base wires and weights (wire_deformer.remove: the curve stays, step 169);
+#   modifiers with their base wires and weights (wire_deformer.remove: the curve stays);
 # - nCloth = a Cloth modifier, nRigid = a Collision modifier (nCloth > Create nCloth / Create Passive Collider; the
 #   same rule as Modify > Evaluate Nodes, operators/modify_maya.py _set_cloth / _set_nrigid): the meshes carrying one;
 # - nParticle = a particle system whose settings are named ``nParticleN`` (files from older versions; modify_maya
@@ -212,14 +212,14 @@ def delete_clusters(scene, objects=None):
     removable = [h for h in dict.fromkeys(handles) if _unused_empty(h, scene, ignore)]
     for ob, md in pairs:
         if md.name in ob.vertex_groups and md.vertex_group == md.name:
-            ob.vertex_groups.remove(ob.vertex_groups[md.name])   # the kit cluster's own weights (step 144)
+            ob.vertex_groups.remove(ob.vertex_groups[md.name])   # the kit cluster's own weights
         ob.modifiers.remove(md)
     for h in removable:
         bpy.data.objects.remove(h)
     return len(pairs)
 
 
-@undo_steps.no_redo_panel      # step 147: Maya has no Adjust Last Operation
+@undo_steps.no_redo_panel      # Maya has no Adjust Last Operation
 class ALLSET_OT_select_all_by_type(bpy.types.Operator):
     """Select every node of this type in the scene (Maya Select > All by Type)"""
     bl_idname = "allset.select_all_by_type"

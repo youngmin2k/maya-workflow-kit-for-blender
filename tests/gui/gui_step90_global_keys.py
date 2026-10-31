@@ -1,4 +1,4 @@
-"""Step 90 in a real UI (Maya Workflow Kit layout): Ctrl+X cuts the cube, Ctrl+V pastes it back, Alt+X starts Walk (ESC ends it),
+"""In a real UI (Maya Workflow Kit layout): Ctrl+X cuts the cube, Ctrl+V pastes it back, Alt+X starts Walk (ESC ends it),
 Alt+2 hides meshes in the view under the mouse, Alt+\\ sets the playback range to the animation range."""
 
 import os
@@ -64,7 +64,7 @@ def s_cut():
 
 @step
 def s_paste():
-    # step 211: Maya pasteScene = pasted__pCube1 under a new group, the group selected
+    # Maya pasteScene = pasted__pCube1 under a new group, the group selected
     objs = bpy.data.objects
     check(f"Ctrl+V pastes it back as pasted__pCube1 under group ({sorted(objs.keys())})",
           "pasted__pCube1" in objs and objs["pasted__pCube1"].parent == objs.get("group"))

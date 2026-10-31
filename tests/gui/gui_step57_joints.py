@@ -1,6 +1,6 @@
-"""Step 57 in a real UI, Maya rigging_01 hand order on the Maya Workflow Kit layout: Skeleton > Create Joints -> three clicks in
+"""In a real UI, Maya rigging_01 hand order on the Maya Workflow Kit layout: Skeleton > Create Joints -> three clicks in
 the persp view (ground plane) -> Enter -> pose mode, joint1 > joint2 > joint3, Channel Box lead joint1 (Maya 2026: the root) -> Down Down
--> joint3 -> Up Up (pick-walk) -> joint1 -> Skeleton > Mirror Joints (factory XY since step 246) -> six joints."""
+-> joint3 -> Up Up (pick-walk) -> joint1 -> Skeleton > Mirror Joints (default XY) -> six joints."""
 
 import os
 import sys
@@ -159,7 +159,7 @@ def s_mirror_item():
 @step
 def s_dialog():
     shot("gui_step57_mirror_dialog.png")
-    tap('RET')        # Mirror (default XY, Behavior; step 246)
+    tap('RET')        # Mirror (default XY, Behavior)
 
 
 @step

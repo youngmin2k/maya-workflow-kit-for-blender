@@ -1,4 +1,4 @@
-"""Step 69: Maya projects (Set Project / Project Window / Recent Projects), file dialogs in the project's scenes folder,
+"""Maya projects (Set Project / Project Window / Recent Projects), file dialogs in the project's scenes folder,
 render output to images, Ctrl+Alt+S = Maya Increment and Save, Create Reference (Ctrl+R) with namespaces, Reference
 Editor. GUI: tests/gui/gui_step69_scene.py."""
 
@@ -175,7 +175,7 @@ def test_menus_and_notices():
     assert m["File/Open Scene..."] == "allset.open_scene" and m["File/Save Scene"] == "allset.save_scene"
     assert m["File/Save Scene As..."] == "allset.save_scene_as"
     assert m["File/Create Reference..."] == "allset.create_reference"
-    assert m["File/Reference Editor"] == "allset.reference_editor"   # step 209: the kit Reference Editor window
+    assert m["File/Reference Editor"] == "allset.reference_editor"   # the kit Reference Editor window
     assert m["File/Project Window"] == "allset.project_window" and m["File/Set Project..."] == "allset.set_project"
     assert m["File/Recent Projects"] == ("menu", "ALLSET_MT_recent_projects")
     assert "Maya Workflow Kit project" in notices.NOTICES["File/Set Project..."][0]

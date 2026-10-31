@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya in-view messages: a short fading message box in the 3D View.
 
-The kit's box (step 72): a rounded grey box
+The kit's box: a rounded grey box
 (#484848 at opacity 0.75), light text at opacity 0.9 with ``<hl>`` words in yellow #eded08, 25 px lines,
 10 px padding. The default position is the view's top left (10, 11) px in; ``topCenter`` messages sit
 centred at the same height. Fade in about 0.3 s, show 2.0 s, fade
@@ -20,7 +20,7 @@ import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
 
-# --- Maya sizes and colours (step 72) ----------------------------------------------------------------
+# --- Maya sizes and colours ----------------------------------------------------------------
 FADE_IN = 0.3
 HOLD = 2.0          # message display time 2.0 s, like Maya
 FADE_OUT = 1.5
@@ -179,7 +179,7 @@ def draw():
     if not _state["text"] or region is None or region.as_pointer() != _state["region"]:
         return
     from ..marking import draw as marking_draw
-    if marking_draw.menu_up():   # Maya's hotbox / marking menus cover in-view messages (step 197)
+    if marking_draw.menu_up():   # Maya's hotbox / marking menus cover in-view messages
         return
     a = alpha(time.monotonic() - _state["start"])
     if a <= 0.0:

@@ -1,4 +1,4 @@
-"""Step 159: Skeleton / Skin / Deform menu items reach the kit commands (Joint Labelling, IK enable, deformer weights),
+"""Skeleton / Skin / Deform menu items reach the kit commands (Joint Labelling, IK enable, deformer weights),
 Reset Default Weights gives the bind weights back, greyed items carry their notices."""
 
 from importlib import import_module
@@ -32,7 +32,7 @@ def test_menu_paths_mapped():
     assert m["Skin/Reset Default Weights"] == "allset.reset_skin_weights"
     path = "Skin/Interactive Bind Skin"
     assert path not in m and notices.greyed_notice(path)[0] == "Bind Skin / Paint Skin Weights"
-    assert m["Skin/Export Weight Maps..."] == "allset.export_weight_maps"      # step 199
+    assert m["Skin/Export Weight Maps..."] == "allset.export_weight_maps"
 
 
 def test_reset_default_weights():

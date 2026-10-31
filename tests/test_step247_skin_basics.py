@@ -1,4 +1,4 @@
-"""Step 247 (Issue #164): skin basics with Maya's meaning.
+"""Issue #164: skin basics with Maya's meaning.
 
 Expected numbers: tests/maya2026_rig_data.py SKINNING["skin"] (prune_and_max, unbind_and_bind_pose, copy_mirror_weights)
 and further results written here as literals:
@@ -224,7 +224,7 @@ def test_bind_pose_is_the_pose_at_bind_and_follows_remove_and_unbind():
     _select(arm)
     assert bpy.ops.allset.go_to_bind_pose('EXEC_DEFAULT') == {'FINISHED'}
     assert abs(pb.rotation_euler[1] - 0.5236) < 1e-5
-    # Remove Joint drops the member (step 246 + 247)
+    # Remove Joint drops the member
     bpy.ops.object.mode_set(mode='POSE')
     cbm = import_module(kit.MODULE + ".ui.channel_box")
     for p in arm.pose.bones:

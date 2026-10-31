@@ -1,4 +1,4 @@
-"""Step 130: the store review points (GitHub #40) stay fixed — a static scan of the extension.
+"""The store review points (GitHub #40) stay fixed — a static scan of the extension.
 
 The extensions.blender.org moderator asked for: no ``exec`` / ``eval``; no manual ``sys.path`` / ``sys.modules``
 changes (and no import hooks); nothing related to themes; nothing that outlives the add-on (no ``user_disabling``,
@@ -209,7 +209,7 @@ def test_no_theme_files_or_package():
             if rel.endswith(".xml") or rel.startswith("theme/") or "/theme/" in rel:
                 found.append(f"zip:{rel}")
     assert not found, found
-    assert not os.path.exists(os.path.join(PKG, "prefs_preset.py")), "preference presets were dropped (step 130)"
+    assert not os.path.exists(os.path.join(PKG, "prefs_preset.py")), "preference presets were dropped"
 
 
 def test_no_writes_outside_the_extension():

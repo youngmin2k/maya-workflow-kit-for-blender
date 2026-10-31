@@ -1,4 +1,4 @@
-"""Step 74 in a real UI: pre-selection follows the select mode (edge mode lights the edge, also next to
+"""In a real UI: pre-selection follows the select mode (edge mode lights the edge, also next to
 its vertex; face mode the face) and stays on with the Move tool, except over the manipulator's handles.
 Clicks still select."""
 
@@ -28,7 +28,7 @@ def cube():
 
 
 def bm():
-    # keep the wrapper referenced while its elements are used (step 66)
+    # keep the wrapper referenced while its elements are used
     C["bm"] = bmesh.from_edit_mesh(cube().data)
     return C["bm"]
 

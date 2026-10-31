@@ -1,4 +1,4 @@
-"""Step 101: menu honesty — every greyed Maya menu item has a notice, cheap Blender equivalents mapped, mapped
+"""Menu honesty — every greyed Maya menu item has a notice, cheap Blender equivalents mapped, mapped
 items stay enabled in object mode the Maya way."""
 
 

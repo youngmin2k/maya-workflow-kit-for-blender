@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Graph Editor / Dope Sheet key commands in Maya terms (step 157).
+"""Graph Editor / Dope Sheet key commands in Maya terms.
 
 - Edit menu key windows from a key editor act on the **selected keys** (Maya's Edit > Cut / Copy / Delete Keys & co.:
   from the Graph Editor with keys selected and the "keys" option; else the time range of the nodes,
@@ -364,7 +364,7 @@ def _new_curve_weights(idd, full, index):
 def after_insert(owner, path, index, frame):
     """Apply the default tangents to the keys ``owner.keyframe_insert(path, index=index, frame=frame)`` made.
     ``owner`` is an ID or a struct inside one (pose bone). A curve this insert created gets the Default Tangent
-    Weight (step 198, operators/graph_weights.apply_default)."""
+    Weight (operators/graph_weights.apply_default)."""
     from .. import compat
     idd = owner.id_data
     full = path if owner == idd else owner.path_from_id(path)
@@ -377,7 +377,7 @@ def after_insert(owner, path, index, frame):
         kp = next((k for k in fc.keyframe_points if abs(k.co.x - frame) <= EPS), None)
         if kp is not None and apply_default(fc, kp):
             n += 1
-        # Maya tangent shapes on the curve (the new key and its neighbours; steps 257, 310, #151, #210)
+        # Maya tangent shapes on the curve (the new key and its neighbours; #151, #210)
         maya_tangents.apply(fc)
     return n
 
@@ -571,7 +571,7 @@ class ALLSET_OT_graph_select_type(bpy.types.Operator):
         return {'FINISHED'}
 
 
-# --- Dope Sheet Curves items that are Graph Editor commands (step 166) -----------------------------------------
+# --- Dope Sheet Curves items that are Graph Editor commands -----------------------------------------
 # Maya's Dope Sheet Curves menu runs the Graph Editor's curve commands (Euler Filter, Smooth Filter, Resample, Isolate;
 # same annotations) on the curves of the selected keys. Blender's
 # graph.* operators only run in a Graph Editor, so the Dope Sheet area turns into one for the call and back.

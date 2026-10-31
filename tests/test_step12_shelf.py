@@ -1,4 +1,4 @@
-"""Step 12: Maya shelf (factory shelves as Blender buttons, user Python shelves, strip area).
+"""Maya shelf (factory shelves as Blender buttons, user Python shelves, strip area).
 
 """
 
@@ -125,7 +125,7 @@ def test_poly_cube_button_creates_maya_cube():
     assert ob.name == "pCube1" and tuple(ob.dimensions) == (1.0, 1.0, 1.0)
     bpy.ops.allset.shelf_button(shelf="Polygons", index=_index("Polygons", "Freeze Transformations"))
     bpy.ops.allset.shelf_button(shelf="Rendering", index=_index("Rendering", "Lambert Material"))
-    assert ob.active_material.name == "lambert2"   # lambert1 = the default material (step 100)
+    assert ob.active_material.name == "lambert2"   # lambert1 = the default material
     node = next(n for n in ob.active_material.node_tree.nodes if n.type == 'BSDF_PRINCIPLED')
     assert node.inputs["Roughness"].default_value == 1.0
 
@@ -209,7 +209,7 @@ def test_draw_shelf():
 # --- strip ---------------------------------------------------------------------------------------------
 
 def test_image_headers_patched():
-    # step 115: only Blender's own draw in the class's draw list is swapped (ui/own_draw.py)
+    # only Blender's own draw in the class's draw list is swapped (ui/own_draw.py)
     assert shelf._draw_image_header in bpy.types.IMAGE_HT_header.draw._draw_funcs
     assert shelf._draw_image_tool_header in bpy.types.IMAGE_HT_tool_header.draw._draw_funcs
 
@@ -223,7 +223,7 @@ def test_template_has_marked_strip():
     assert strip is not None, [a.type for a in scr.areas]
     sp = strip.spaces.active
     assert not sp.show_region_ui and sp.mask.name == shelf.MARKER
-    # step 49: Status Line and Shelf are two header-only rows (they follow the UI scale)
+    # Status Line and Shelf are two header-only rows (they follow the UI scale)
     row = shelf.shelf_row_area(scr)
     assert row is not None and row.y < strip.y and not sp.show_region_tool_header
     assert row.spaces.active.mask.name == shelf.SHELF_MARKER

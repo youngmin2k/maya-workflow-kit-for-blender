@@ -1,4 +1,4 @@
-"""Step 85 in a real UI: Move tool, Ctrl+LMB drag on the X arrow moves along X with grid snapping and makes X the
+"""In a real UI: Move tool, Ctrl+LMB drag on the X arrow moves along X with grid snapping and makes X the
 active handle,
 Ctrl+click on the centre frees it, Shift+MMB drag in the front view picks X (sideways) / Z (up), Scale tool Ctrl+X
 arrow scales Y and Z."""
@@ -110,7 +110,7 @@ def s_setup():
 @step
 def s_cube():
     bpy.ops.allset.keymap_activate()
-    view3d()[1].data.view_distance *= 2.0          # the sizes the step 59 test uses
+    view3d()[1].data.view_distance *= 2.0          # the sizes the manipulator test uses
     area, region = view3d()
     with bpy.context.temp_override(window=win(), area=area, region=region):
         bpy.ops.allset.create(kind='CUBE')

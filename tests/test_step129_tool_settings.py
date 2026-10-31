@@ -1,4 +1,4 @@
-"""Step 129 (Tool Settings lane): Tool Box double-click opens Tool Settings (#3); Maya Tool Settings sections for the
+"""Tool Box double-click opens Tool Settings (#3); Maya Tool Settings sections for the
 Tool Box select tools (#29) and the Mesh Tools tools (#28)."""
 
 
@@ -31,8 +31,8 @@ MAYA = {
 }
 TOOLS = {"builtin.select_box": 'SELECT', "builtin.select": 'SELECT', "builtin.select_lasso": 'LASSO',
          "builtin.select_circle": 'PAINT_SELECT', "allset.insert_edge_loop_tool": 'INSERT_EDGE_LOOP',
-         "allset.slide_edge_tool": 'SLIDE_EDGE', "allset.target_weld_tool": 'TARGET_WELD',   # step 144 LOOP: kit tools
-         "allset.crease_tool": 'CREASE', "allset.quad_draw_tool": 'QUAD_DRAW'}     # step 144: the kit Quad Draw
+         "allset.slide_edge_tool": 'SLIDE_EDGE', "allset.target_weld_tool": 'TARGET_WELD',   # kit tools
+         "allset.crease_tool": 'CREASE', "allset.quad_draw_tool": 'QUAD_DRAW'}     # the kit Quad Draw
 NAMES = {'SELECT': "Select Tool", 'LASSO': "Lasso Tool", 'PAINT_SELECT': "Paint Selection Tool",
          'INSERT_EDGE_LOOP': "Insert Edge Loop Tool", 'SLIDE_EDGE': "Slide Edge Tool", 'TARGET_WELD': "Target Weld Tool",
          'CREASE': "Crease Tool", 'QUAD_DRAW': "Quad Draw Tool"}
@@ -97,7 +97,7 @@ def test_tools_have_kinds_and_maya_names():
     for idname, kind in TOOLS.items():
         assert ts_mod.KIND_OF.get(idname) == kind, idname
         assert ts_mod.TOOL_NAMES[kind] == NAMES[kind]
-    # Move / Rotate / Scale unchanged (step 106)
+    # Move / Rotate / Scale unchanged
     assert ts_mod.KIND_OF["builtin.move"] == 'TRANSLATE'
 
 
@@ -105,7 +105,7 @@ def test_sections_follow_maya():
     for kind, expected in MAYA.items():
         got = [(title, is_open) for _key, title, is_open in ts_mod.sections(kind)]
         assert got == expected, (kind, got)
-    # the shared Common Selection Options stays closed for Move (step 106)
+    # the shared Common Selection Options stays closed for Move
     assert ("Common Selection Options", False) in [(t, o) for _k, t, o in ts_mod.sections('TRANSLATE')]
 
 
@@ -156,7 +156,7 @@ def _owners(rec):
 
 
 def test_insert_edge_loop_maintain_position():
-    """Step 144 LOOP: the rows are the kit Insert Edge Loop tool's settings (Scene.allset_loop_tools)."""
+    """LOOP: the rows are the kit Insert Edge Loop tool's settings (Scene.allset_loop_tools)."""
     _set_tool("allset.insert_edge_loop_tool")
     s = bpy.context.scene.allset_loop_tools
     assert ts_mod.edge_loop_position(bpy.context) == 'RELATIVE'
@@ -202,7 +202,7 @@ def test_target_weld_and_crease_bind_kit_settings():
 
 
 def test_quad_draw_rows_are_live():
-    """Step 144: the kit Quad Draw's Maya rows are real settings now (Scene.allset_poly_tools), not greyed Poly Build
+    """The kit Quad Draw's Maya rows are real settings now (Scene.allset_poly_tools), not greyed Poly Build
     stand-ins; the shortcuts section lists Maya's keys."""
     _set_tool("allset.quad_draw_tool")
     rec = _draw('QUAD_DRAW')

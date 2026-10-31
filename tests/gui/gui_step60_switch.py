@@ -1,4 +1,4 @@
-"""Step 60 in a real UI: Ctrl+Alt+Shift+M switches Maya mode off and on without a restart; the
+"""In a real UI: Ctrl+Alt+Shift+M switches Maya mode off and on without a restart; the
 open file's objects stay, Maya mode brings the Maya layout workspace (appended) and Blender mode
 goes back to the user's workspace and removes it; the Maya / Blender switch shows in the top
 bar in both modes (screenshots)."""
@@ -101,7 +101,7 @@ def s_shot_maya():
 
 @step
 def s_back():
-    # the Maya workspace is deleted once the window has left it (a timer, step 118): wait up to 40 ticks
+    # the Maya workspace is deleted once the window has left it (a timer): wait up to 40 ticks
     import sim as _sim
     C.setdefault("back_waits", 0)
     if (sw().is_on() or sw().WORKSPACE in bpy.data.workspaces) and C["back_waits"] < 40:

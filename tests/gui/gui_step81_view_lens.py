@@ -1,4 +1,4 @@
-"""Step 81 in a real UI: the Maya Workflow Kit layout's persp view has a 54.4 deg angle (lens 70), a pCube1 has its
+"""In a real UI: the Maya Workflow Kit layout's persp view has a 54.4 deg angle (lens 70), a pCube1 has its
 usual on-screen size, Four View keeps the angle, Ctrl+Shift+C makes a 35 mm camera."""
 
 import math
@@ -64,7 +64,7 @@ def s_view():
 
 @step
 def s_camera():
-    # since step 211 the scene also has Maya's hidden startup cameras (persp / top / front / side)
+    # the scene also has Maya's hidden startup cameras (persp / top / front / side)
     cams = [o for o in bpy.data.objects if o.type == 'CAMERA' and not o.get("allset_startup_camera")]
     lens = cams[-1].data.lens if cams else None
     check(f"Ctrl+Shift+C = a 35 mm camera ({[c.name for c in cams]}, focal {lens})",

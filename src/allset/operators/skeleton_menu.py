@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Skeleton menu commands with Maya's meaning (step 246, Issue #163).
+"""Skeleton menu commands with Maya's meaning (Issue #163).
 
 Maya:
 
@@ -14,7 +14,7 @@ Maya:
   the second joint's parent; parent mode parents it under the second joint keeping its world.
 
 A kit joint is a bone (head = the joint) whose Maya frame is its bone frame turned by ``joints.MAYA_FRAME``: every
-command keeps the Maya frames of the joints it touches and stores what the bones can't take (step 232 / 243).
+command keeps the Maya frames of the joints it touches and stores what the bones can't take.
 """
 
 import json
@@ -62,7 +62,7 @@ def _new_joint(ob, ebs, like):
 
 def _reparent(eb, parent):
     """Re-hang ``eb`` under ``parent`` keeping where it is (connected only when its head sits on the tail); it becomes
-    the newest child (Maya child order, step 248)."""
+    the newest child (Maya child order)."""
     eb.use_connect = False
     eb.parent = parent
     joints.stamp_last(eb)
@@ -167,7 +167,7 @@ def remove_joints(ob, names):
 
 
 def drop_influences(ob, names):
-    """Maya removes the joint's influence and leaves the other weights alone (step 246)."""
+    """Maya removes the joint's influence and leaves the other weights alone."""
     n = 0
     for mesh in _skinned_meshes(ob):
         for name in names:
@@ -175,7 +175,7 @@ def drop_influences(ob, names):
             if vg is not None:
                 mesh.vertex_groups.remove(vg)
                 n += 1
-    from .skin_basics import drop_bind_pose_members      # ... and the bindPose member (step 247)
+    from .skin_basics import drop_bind_pose_members      # ... and the bindPose member
     drop_bind_pose_members(ob, names)
     return n
 

@@ -1,5 +1,5 @@
-"""Step 115: no surprises — enabling changes nothing until the user opts in, no automatic preference saves, a code-free
-layout file, kit draws that keep other add-ons' UI. Step 130: opting in changes no Blender
+"""No surprises — enabling changes nothing until the user opts in, no automatic preference saves, a code-free
+layout file, kit draws that keep other add-ons' UI. Opting in changes no Blender
 preference either, and nothing is written outside the extension (no app template copy, no snapshot)."""
 
 import os
@@ -66,7 +66,7 @@ def test_opt_in_turns_maya_on_without_changing_preferences():
     changed = [k for k in PREFS if before[k] != during[k]]
     assert not changed, "opting in changed Blender preferences: " + ", ".join(changed)
     assert not os.path.isdir(_templates_dir()), "nothing copied into the user's scripts folder"
-    assert bpy.context.window_manager.keyconfigs.active.name == "Blender", "step 130: the active keyconfig stays"
+    assert bpy.context.window_manager.keyconfigs.active.name == "Blender", "the active keyconfig stays"
     assert _mod("keymap").is_applied()
     assert bpy.context.preferences.is_dirty, "the choice is marked for Blender's own preference save"
     kit.disable()
@@ -75,7 +75,7 @@ def test_opt_in_turns_maya_on_without_changing_preferences():
 
 
 def test_quit_and_user_disable_are_the_same():
-    """No user_disabling any more (step 130): quit / update (default_set=False) and a user disable unregister the
+    """No user_disabling any more: quit / update (default_set=False) and a user disable unregister the
     same way, and neither leaves anything behind."""
     before = kit.snapshot()
     kit.enable()
@@ -111,7 +111,7 @@ def test_no_automatic_preference_save():
 
 
 def test_keymap_never_changes_the_active_keyconfig():
-    """Step 130 replaced the template-switch re-activation (``wants_maya`` / ``_keep_keyconfig``): the Maya keys are
+    """Replaced the template-switch re-activation (``wants_maya`` / ``_keep_keyconfig``): the Maya keys are
     add-on items, so nothing has to be put back after a template switch and no load_post handler is left."""
     kit.enable()
     try:

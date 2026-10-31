@@ -1,6 +1,6 @@
-"""Step 256 (#172): Maya UV Shell selection (operators/uv_shell_select.py), like Maya.
+"""#172: Maya UV Shell selection (operators/uv_shell_select.py), like Maya.
 Maya: polyCube with the four edges of the top face cut = 3 shells A = f[0] f[4]
-f[5] (front, right, left), B = f[1] (top), C = f[2] f[3] (back, bottom). The kit cube has Maya's face order (step 129),
+f[5] (front, right, left), B = f[1] (top), C = f[2] f[3] (back, bottom). The kit cube has Maya's face order,
 so the face indices of the tables apply as they are."""
 
 from importlib import import_module

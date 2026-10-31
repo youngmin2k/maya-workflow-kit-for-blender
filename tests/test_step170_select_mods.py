@@ -1,4 +1,4 @@
-"""Step 170: Maya click / marquee modifiers outside the 3D View (Maya 2022).
+"""Maya click / marquee modifiers outside the 3D View (Maya 2022).
 Per editor, the four variants (plain / Shift / Ctrl / Ctrl+Shift) of a click
 and a marquee: the Blender selection the kit's keymap item makes, then the kit's rule (operators/select_2d.py) —
 the result must be Maya's. Plus the keymap items (first place, PASS_THROUGH ops) and the selection

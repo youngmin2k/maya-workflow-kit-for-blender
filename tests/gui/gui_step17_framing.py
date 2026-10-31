@@ -1,5 +1,5 @@
-"""Step 17 in a real UI: F / A / Ctrl+Shift+F / Shift+F fit 0.95 of the part of the view
-not under the sidebar; hotbox rows stay inside the window (step 52)."""
+"""In a real UI: F / A / Ctrl+Shift+F / Shift+F fit 0.95 of the part of the view
+not under the sidebar; hotbox rows stay inside the window."""
 
 import os
 import sys
@@ -37,7 +37,7 @@ def corners(obs):
 
 
 def maya_fit(inside, ratio, persp=True):
-    """Step 258: Maya's perspective viewFit leaves more room than 0.95 (tests/test_step258_view.py);
+    """Maya's perspective viewFit leaves more room than 0.95 (tests/test_step258_view.py);
     orthographic views still fill 0.95."""
     return inside and (0.5 < ratio < 0.95 if persp else abs(ratio - 0.95) < 0.03)
 
@@ -92,7 +92,7 @@ def s_f():
     area, region = view3d()
     rect = view_mod().visible_bounds(area, region)
     ui = next(r for r in area.regions if r.type == 'UI')
-    # with Region Overlap (Blender's default) the rect stops at the sidebar; Maya mode turns overlap off (step 112)
+    # with Region Overlap (Blender's default) the rect stops at the sidebar; Maya mode turns overlap off
     # and the sidebar is beside the view region
     check(f"sidebar excluded from the visible rect ({rect[2]:.0f} of {region.width} px, sidebar at {ui.x - region.x})",
           region.x + rect[2] <= ui.x + 1)
@@ -139,7 +139,7 @@ def s_a():
 
 @step
 def s_quad_split():
-    # step 237: the four view splits its top row one timer tick later; step 240 QA: a key sent in the tick right
+    # the four view splits its top row one timer tick later; a key sent in the tick right
     # after a layout change can be lost under event simulation (gui_step4_view) — hover a tick first
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"])
 
@@ -166,7 +166,7 @@ def s_quad_drawn():
 
 @step
 def s_quad_check():
-    # step 237: Four View = four real 3D View areas (ui/four_view.py), not one area's Quad View regions
+    # Four View = four real 3D View areas (ui/four_view.py), not one area's Quad View regions
     panes = import_module(MODULE + ".ui.four_view").panes(win().screen)
     pairs = [(a, next(r for r in a.regions if r.type == 'WINDOW')) for a in panes]
     regs = [r for _a, r in pairs]
@@ -179,7 +179,7 @@ def s_quad_check():
     r = next(r for r in persp.regions if r.type == 'WINDOW')
     ev('MOUSEMOVE', 'NOTHING', x=r.x + r.width // 2, y=r.y + r.height // 2)
     # back to one view through Tool Box > Single Perspective View (a Space tap here left the factory layout's view
-    # without a hotbox on the next Space press; in the Maya layout it works, step 240)
+    # without a hotbox on the next Space press; in the Maya layout it works)
     with bpy.context.temp_override(window=win(), area=persp, region=r):
         bpy.ops.allset.quick_layout(layout='SINGLE')
 
@@ -198,7 +198,7 @@ def s_after_leave2():
 
 @step
 def s_hotbox_hover():
-    # step 240 QA: after the four view closed, a key in the same tick as the move is lost under event simulation
+    # after the four view closed, a key in the same tick as the move is lost under event simulation
     area, region = view3d()
     rect = view_mod().visible_bounds(area, region)
     C["hx"] = region.x + int(rect[2]) - 30          # near the sidebar's left edge
@@ -226,7 +226,7 @@ def s_hotbox_wait2():
 def s_hotbox_check():
     draw = import_module(MODULE + ".marking.draw")
     area, region = view3d()
-    # step 52: Maya's hotbox floats over the whole window, sidebar included: rows stay in the window
+    # Maya's hotbox floats over the whole window, sidebar included: rows stay in the window
     rect = draw.window_bounds(win(), region)
     lay = draw.ACTIVE.get("hotbox")
     xs = [r[2] for r, _k, _l in lay.labels] if lay else []

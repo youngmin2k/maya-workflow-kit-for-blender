@@ -6,7 +6,7 @@ A display layer is a child collection of a "Display Layers" collection that
 is excluded from every view layer, so layers are membership lists that do
 not change the scene hierarchy or visibility by themselves. The layer state
 is an override on its member objects that never changes their own Maya
-attributes (step 129 #26; the object's visibility is ``hide_viewport``):
+attributes (#26; the object's visibility is ``hide_viewport``):
   V (visible)  -> the view-layer flag (``hide_set``)
   T (template) -> unselectable, wireframe; R (reference) -> unselectable
                   (the member's own display type / selectability are kept in ``OWN`` and put back)
@@ -128,7 +128,7 @@ def _restore_display(ob):
 
 def apply_object(ob, layer):
     """Apply a layer's state to one member (None = back to the object's own state). Maya: a display layer is an
-    override (drawOverride) that never changes the node's own attributes (step 129 #26)."""
+    override (drawOverride) that never changes the node's own attributes (#26)."""
     if layer is None:
         _layer_hide(ob, False)
         _restore_display(ob)
@@ -147,7 +147,7 @@ def apply_layer(coll):
     for ob in coll.objects:
         apply_object(ob, coll)
     from ..operators import dag
-    dag.sync()                      # a hidden layer hides its members' children too (Maya, step 164)
+    dag.sync()                      # a hidden layer hides its members' children too (Maya)
 
 
 def new_layer(scene, objects=()):
@@ -518,8 +518,8 @@ TABS = (('DISPLAY', "Display", "Display layers"), ('ANIM', "Anim", "Animation la
 MENU_BAR = (("Layers", "ALLSET_MT_le_layers"), ("Options", "ALLSET_MT_le_options"), ("Help", "ALLSET_MT_le_help"))
 
 # Maya Anim tab Layers menu (Maya order and labels): the items the kit's
-# NLA layers carry (step 180 operators/anim_layers.py, step 204 operators/anim_layers_204.py). Zero Key Layer is a Maya
-# toolbar button (also on the kit toolbar), kept here after Merge Layers since step 194.
+# NLA layers carry (operators/anim_layers.py, operators/anim_layers_204.py). Zero Key Layer is a Maya
+# toolbar button (also on the kit toolbar), kept here after Merge Layers.
 ANIM_LAYER_MENU = (
     ("allset.anim_layer_create", "Create Empty Layer", {"from_selected": False}),
     ("allset.anim_layer_create", "Create Layer from Selected", {"from_selected": True}),
@@ -697,7 +697,7 @@ def draw_anim_tab(layout, context):
     if not len(ls):
         return
     sel = anim_layers.selected(scene)
-    picked = {e.name for e in anim_layers.selected_layers(scene)}     # Ctrl / Shift selection (step 204)
+    picked = {e.name for e in anim_layers.selected_layers(scene)}     # Ctrl / Shift selection
     col = layout.column(align=True)
     for i in anim_display_order(scene):
         e = ls[i]
@@ -728,10 +728,10 @@ def draw_anim_tab(layout, context):
 class ALLSET_PT_layer_editor(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Channel Box / Layer Editor"   # not registered since step 116 (ui/maya_dock.py draws it)
+    bl_category = "Channel Box / Layer Editor"   # not registered (ui/maya_dock.py draws it)
     bl_label = "Layer Editor"
     bl_order = 1
-    bl_options = {'HIDE_HEADER'}   # Maya: tabs + menu bar, no collapsible panel title (step 50)
+    bl_options = {'HIDE_HEADER'}   # Maya: tabs + menu bar, no collapsible panel title
 
     def draw(self, context):
         layout = self.layout
@@ -739,7 +739,7 @@ class ALLSET_PT_layer_editor(bpy.types.Panel):
         wm = context.window_manager
         sdk = getattr(wm, "allset_sdk", None)
         if sdk is not None and sdk.open:
-            from . import set_driven_key   # the Set Driven Key window takes the Layer Editor's place (step 62)
+            from . import set_driven_key   # the Set Driven Key window takes the Layer Editor's place
             set_driven_key.draw(layout, context)
             return
         layout.separator(type='LINE')   # Maya's splitter between Channel Box and Layer Editor
@@ -752,14 +752,14 @@ class ALLSET_PT_layer_editor(bpy.types.Panel):
             tabs.prop_enum(wm, "allset_le_tab", ident, text=f"  {i18n.iface(label)}  ", translate=False)
         chrome.menu_bar(layout, MENU_BAR)
         if wm.allset_le_tab == 'ANIM':
-            draw_anim_tab(layout, context)    # step 180: Maya animation layers on NLA tracks
+            draw_anim_tab(layout, context)    # Maya animation layers on NLA tracks
             return
         # Maya's toolbar, right-aligned, frameless icon buttons in Maya's order: move up, move down, create
         # empty layer, create layer from selected (Maya 2022 Layer Editor)
         row = layout.row(align=True)
         row.alignment = 'RIGHT'
         row.emboss = 'NONE'
-        # kit-drawn Maya icons (step 131, #23; Blender's icon until the glyph is made)
+        # kit-drawn Maya icons (#23; Blender's icon until the glyph is made)
         from .kit_icons import button
         for direction, icon in (("UP", 'TRIA_UP_BAR'), ("DOWN", 'TRIA_DOWN_BAR')):
             button(row, "allset.layer_move", f"layer:{direction}", icon, text="").direction = direction
@@ -775,10 +775,10 @@ class ALLSET_PT_layer_editor(bpy.types.Panel):
 
 def list_rows(context):
     """Layer list rows that fill the dock to the bottom (Maya's Layer Editor pane is the dock's lower part,
-    channel_box.CB_SHARE; step 99)."""
+    channel_box.CB_SHARE)."""
     from .channel_box import _round_half_up, cb_share
     region = context.region
-    if region is None or region.type not in {'UI', 'WINDOW'}:   # the dock is a Properties WINDOW (step 116)
+    if region is None or region.type not in {'UI', 'WINDOW'}:   # the dock is a Properties WINDOW
         return 8
     u = _round_half_up(18.0 * context.preferences.system.ui_scale) + 2 * context.preferences.system.pixel_size
     return max(3, int((1.0 - cb_share(region, u)) * region.height / max(u, 1)) - 5)
@@ -788,7 +788,7 @@ classes = (ALLSET_PG_layer, ALLSET_OT_layer_new, ALLSET_OT_layer_assign, ALLSET_
            ALLSET_OT_layer_delete, ALLSET_OT_layer_cycle_type, ALLSET_OT_layer_toggle, ALLSET_OT_layer_move,
            ALLSET_OT_layer_empty, ALLSET_OT_layer_set_type, ALLSET_UL_layers,
            ALLSET_MT_le_layers, ALLSET_MT_le_options, ALLSET_MT_le_help)
-# ALLSET_PT_layer_editor is drawn under the Channel Box by ui/maya_dock.py (step 116), not registered as a panel.
+# ALLSET_PT_layer_editor is drawn under the Channel Box by ui/maya_dock.py, not registered as a panel.
 
 
 def register():

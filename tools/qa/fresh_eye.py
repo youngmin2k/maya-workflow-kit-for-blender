@@ -1,4 +1,4 @@
-"""QA activity H (step 240): drive a clean Maya Workflow Kit install from a list of user actions.
+"""QA activity H: drive a clean Maya Workflow Kit install from a list of user actions.
 
     python tools/qa/fresh_eye.py ACTIONS.json [--out DIR] [--blender PATH] [--reinstall]
 

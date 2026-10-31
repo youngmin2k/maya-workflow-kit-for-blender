@@ -1,4 +1,4 @@
-"""Step 26 in a real UI: Shift+drag the Move gizmo on a face = Smart Extrude (new faces,
+"""In a real UI: Shift+drag the Move gizmo on a face = Smart Extrude (new faces,
 the extruded face moves, nothing else); Shift+click without dragging changes nothing;
 an object Shift+drag cancelled with RMB leaves no copy; W hold menu check boxes."""
 
@@ -55,7 +55,7 @@ def hover(x, y):
 
 def shift_down():
     # A simulated keyboard event's modifiers reach the window event state (mouse events' don't):
-    # pressing LEFT_SHIFT first makes the LMB press and its CLICK_DRAG real Shift events (step 261).
+    # pressing LEFT_SHIFT first makes the LMB press and its CLICK_DRAG real Shift events.
     ev('LEFT_SHIFT', 'PRESS', shift=True)
 
 

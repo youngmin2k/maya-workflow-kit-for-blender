@@ -1,4 +1,4 @@
-"""Step 129: Maya Multi-Cut tool (GitHub #27, #28).
+"""Maya Multi-Cut tool (GitHub #27, #28).
 GUI: tests/gui/gui_step129_multi_cut.py. Cut counts = Maya polySplit."""
 
 import math
@@ -220,7 +220,7 @@ def test_menu_shelf_marking_menu_hotkey_point_to_the_tool():
 
 
 def test_knife_is_blender_again():
-    """Multi-Cut is no longer the knife: the step 64 knife patches are gone (Shift = Blender's ignore snap)."""
+    """Multi-Cut is no longer the knife: there are no knife patches (Shift = Blender's ignore snap)."""
     kc = kit.maya_kc()
     modal = kc.keymaps["Knife Tool Modal Map"]
     shift = {k.propvalue for k in modal.keymap_items if k.type in ('LEFT_SHIFT', 'RIGHT_SHIFT')}

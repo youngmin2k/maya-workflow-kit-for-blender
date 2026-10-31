@@ -1,4 +1,4 @@
-"""Step 281 (#192): Graph Editor F / A frame Maya's rectangle (operators/graph_frame.py) and Auto Frame refits the
+"""#192: Graph Editor F / A frame Maya's rectangle (operators/graph_frame.py) and Auto Frame refits the
 value axis only (ui/graph_view.py)."""
 
 from importlib import import_module

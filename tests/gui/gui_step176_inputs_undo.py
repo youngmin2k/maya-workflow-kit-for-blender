@@ -1,4 +1,4 @@
-"""Step 176 (dogfood G1): Channel Box INPUTS polyCube1 after Ctrl+D / Ctrl+G / Ctrl+Z / P.
+"""Channel Box INPUTS polyCube1 after Ctrl+D / Ctrl+G / Ctrl+Z / P.
 
 tools/dogfood_session.py showed pCube1's INPUTS polyCube1 in 03 / 04 and not in 05. Its key sequence between them is
 3 -> Alt+Shift+D -> 1 -> Ctrl+D -> Ctrl+G -> Ctrl+Z -> P. Here the same keys run twice in the Maya layout:
@@ -126,7 +126,7 @@ def do_undo():
 
 
 def do_parent():
-    # step 176 G2: Maya's result field after Ctrl+Z = "Undo: <command>"
+    # Maya's result field after Ctrl+Z = "Undo: <command>"
     text = import_module(MODULE + ".command_line")._result["text"]
     check(f"G2: result field after Ctrl+Z reads Maya's undo text ({text!r})",
           text.startswith("Undo: ") and "Group" in text)

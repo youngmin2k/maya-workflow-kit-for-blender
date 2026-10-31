@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya animation layers on Blender NLA tracks (step 180).
+"""Maya animation layers on Blender NLA tracks.
 
 Maya 2022: BaseAnimation = the plain anim curves; an Additive
 layer adds weight x its curve (rotations Euler component-wise, scale multiplies: below x layer^weight), an Override
@@ -16,7 +16,7 @@ Layers are scene-wide (``Scene.allset_anim_layers``, first entry BaseAnimation) 
 member object has one NLA track per layer, named like the layer, playing an action ``<layer>_<object>`` marked with
 the ID property ``allset_anim_layer``.
 
-Display (step 194): Maya's Graph Editor, Dope Sheet and Time Slider show the
+Display: Maya's Graph Editor, Dope Sheet and Time Slider show the
 keys of the layers selected in the Anim tab, the Channel Box marks layer members teal. A layered object's active
 action is the selected layer's strip action (BaseAnimation when the object is not in it) at action influence 0: the
 NLA result is unchanged, and every reader of the active action (Graph Editor,
@@ -68,7 +68,7 @@ def selected(scene):
 
 
 def selected_layers(scene):
-    """Maya's selected layers (Layer Editor Ctrl / Shift click, step 204), list order: the ``picked`` entries while
+    """Maya's selected layers (Layer Editor Ctrl / Shift click), list order: the ``picked`` entries while
     they include the last picked one (``allset_anim_layer_index``), else only that one (any direct index write is a
     plain single selection)."""
     cur = selected(scene)
@@ -175,7 +175,7 @@ def remove_object(scene, ob, layer):
         return
     act = _strip(tr).action
     ad = ob.animation_data
-    if ad.action is not None and ad.action == act:      # shown as the active action (step 194)
+    if ad.action is not None and ad.action == act:      # shown as the active action
         ad.action = None
     ad.nla_tracks.remove(tr)
     if act is not None and act.users == 0:
@@ -197,7 +197,7 @@ def order_tracks(ob, names):
     for n in want:
         tr = _add_track(ob, n, data[n][0])
         tr.mute = data[n][1]
-        restore_strip_state(_strip(tr), data[n][2])      # a keyed weight (step 204) survives the rebuild
+        restore_strip_state(_strip(tr), data[n][2])      # a keyed weight survives the rebuild
 
 
 def strip_state(st):
@@ -285,7 +285,7 @@ def display_layer(scene, ob):
     have = tracks(ob)
     if name in have:
         return name
-    for x in reversed(selected_layers(scene)):     # step 204: another selected layer the object is in (top first)
+    for x in reversed(selected_layers(scene)):     # another selected layer the object is in (top first)
         if x.name in have:
             return x.name
     return BASE
@@ -311,7 +311,7 @@ def show(scene):
 
 
 def show_base(ob):
-    """Make BaseAnimation ``ob``'s active action (influence 0) — what a bake writes into (step 234)."""
+    """Make BaseAnimation ``ob``'s active action (influence 0) — what a bake writes into."""
     tr = tracks(ob).get(BASE)
     if tr is None:
         return
@@ -472,7 +472,7 @@ def solve(steps, target, layer, start=0.0):
     return (acc - below) / w
 
 
-# --- attribute membership (step 188) ---------------------------------------
+# --- attribute membership ---------------------------------------
 # Maya layer members are attributes (animLayer -attribute): Channel Box > Channels > Add to / Remove From Selected
 # Layers edits them, a key on a non-member attribute goes to BaseAnimation, removing a keyed attribute deletes its
 # layer curve. The kit's members are objects (one NLA track each, Add Selected Objects = every attribute); an object's
@@ -502,7 +502,7 @@ def channel_key(path, index):
     return character_sets.channel_key_of(path, index)
 
 
-BONE = "bone:"           # step 234: a joint member of a layer (Maya adds the joint node), "bone:<bone name>"
+BONE = "bone:"           # a joint member of a layer (Maya adds the joint node), "bone:<bone name>"
 
 
 def bone_of(path):
@@ -519,7 +519,7 @@ def bone_path(pb, prop):
 
 def is_member(ob, layer, path=None, index=-1):
     """``ob``'s channel (``path``, ``index``) is in ``layer`` (no path: the object is a member at all). A joint
-    channel is a member when its bone is (step 234: Maya Add Selected Objects on joints)."""
+    channel is a member when its bone is (Maya Add Selected Objects on joints)."""
     if layer == BASE:
         return True
     if layer not in tracks(ob):
@@ -571,7 +571,7 @@ def remove_attrs(scene, ob, layer, keys):
     act = _strip(tracks(ob)[layer]).action
     from ..ui import channel_box as cb
     for k in keys:
-        if k.startswith(BONE):         # a joint leaves: all its layer curves go (step 234)
+        if k.startswith(BONE):         # a joint leaves: all its layer curves go
             fcs = [fc for fc in compat.action_fcurves(act, _slot(act)) if bone_of(fc.data_path) == k[len(BONE):]]
         else:
             path, idx, _kind = cb.channel_path(k)
@@ -658,7 +658,7 @@ def key(ob, path, index, frame=None, value=None, scene=None, layer=None):
     return True
 
 
-# Quaternion channels (step 234: Rigify-style joints, shown as Euler). Blender's NLA mixes a quaternion
+# Quaternion channels (Rigify-style joints, shown as Euler). Blender's NLA mixes a quaternion
 # as a whole: REPLACE = component lerp of the lower result and the strip by the influence, COMBINE = lower @ strip^w
 # (checked in tests/test_step234_layer_joints.py against the evaluated pose). The layer's key is solved so the result
 # is the displayed rotation, with the layers above combined after it.
@@ -746,7 +746,7 @@ def key_quaternion(ob, path, frame, value=None, scene=None, layer=None):
 
 
 def key_pose_bone(pb, path, index, frame=None, scene=None):
-    """Channel Box / S key of a joint channel on a layered armature (step 234; Blender's own keying refuses an
+    """Channel Box / S key of a joint channel on a layered armature (Blender's own keying refuses an
     NLA-stacked armature: "Due to the NLA stack setup ..."). ``index`` -1 = every component."""
     scene = scene or bpy.context.scene
     frame = scene.frame_current if frame is None else frame
@@ -780,7 +780,7 @@ def _new_fcurve(ob, act, path, index):
         else:
             fc = act.fcurves.new(path, index=index)
         # Blender's keying gives transform channels X / Y / Z = red / green / blue (Maya's axis colours); a curve
-        # made through the API starts AUTO_RAINBOW (step 204 GUI: a layer's Translate Y drew red)
+        # made through the API starts AUTO_RAINBOW (a layer's Translate Y would draw red)
         if _leaf(path) in {"location", "rotation_euler", "scale", "delta_location", "rotation_quaternion"}:
             fc.color_mode = 'AUTO_RGB'
         return fc
@@ -802,7 +802,7 @@ def _index_update(self, context):
 
 @persistent
 def _load_post(_dummy):
-    """Files layered before step 194 have no active action: show the selected layer."""
+    """Files layered by older kit versions have no active action: show the selected layer."""
     for scene in bpy.data.scenes:
         if len(layers(scene)):
             show(scene)
@@ -821,7 +821,7 @@ class ALLSET_PG_anim_layer(bpy.types.PropertyGroup):
 
 
 def _layer_entry(scene, name=""):
-    """The layer a single-layer command acts on: ``name`` (the layer row's right-click menu, step 204) or the selected
+    """The layer a single-layer command acts on: ``name`` (the layer row's right-click menu) or the selected
     one."""
     if name:
         return next((e for e in layers(scene) if e.name == name), None)

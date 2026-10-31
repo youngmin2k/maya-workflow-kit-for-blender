@@ -1,4 +1,4 @@
-"""Step 265 (Issue #178): Maya D hold (pivot edit) — the OS key repeat of the held key must not cancel the
+"""Issue #178: Maya D hold (pivot edit) — the OS key repeat of the held key must not cancel the
 manipulator's drag, and another add-on's D item mustn't run before the kit's Maya key in Maya mode.
 
 Blender's rule (wm_event_system.cc 4.5 :3740-3749): a keyboard event a handler *handles* cancels the pending LMB

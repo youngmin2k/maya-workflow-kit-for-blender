@@ -1,4 +1,4 @@
-"""Step 226 lane B (#136): measure that a kit Wireframe Color shows on an unselected curve's wire in a Maya layout view
+"""Lane B (#136): measure that a kit Wireframe Color shows on an unselected curve's wire in a Maya layout view
 (solid shading; operators/wire_color.py sets the view's wireframe_color_type to 'OBJECT' and Object.color in scene
 linear). Screenshot pixels of the curve: none red before, red after index 13, and the colour of index 18 after it
 (sRGB -> linear conversion right: the drawn pixel is Maya's sRGB value, not its linear one)."""

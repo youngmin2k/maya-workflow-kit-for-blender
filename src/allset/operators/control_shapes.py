@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 226 L1: NURBS curve shapes as bone Custom Shapes (Maya ``cmds.parent(shape=True)``)
+"""L1: NURBS curve shapes as bone Custom Shapes (Maya ``cmds.parent(shape=True)``)
 
 Maya gives a joint a control shape with ``cmds.parent(curveShape, joint, shape=True, relative=True)``
 (case ``L1_parent_shape_relative``): the curve
@@ -10,7 +10,7 @@ control = a bone Custom Shape — the shape is a copy of the curve data baked in
 hidden collection ``.AllsetControlShapes`` (not linked to any scene, fake user), Custom Shape transform identity and
 bone size off.
 
-Joint frame: Maya joint X / Y / Z = bone Y / Z / X (step 57) and a Blender local point (x, y, z) is Maya (x, z, -y),
+Joint frame: Maya joint X / Y / Z = bone Y / Z / X and a Blender local point (x, y, z) is Maya (x, z, -y),
 so ``-r`` reads the CVs as bone-space (-y, x, z) = +90 deg about Z.
 """
 
@@ -111,7 +111,7 @@ def custom_shape_objects(data=None):
 
 def is_rig_template(ob):
     """A Rigify metarig: its bones carry Rigify rig types (the template Generate builds the rig from, not a skeleton;
-    its bones all deform, so an Export All wrote 159 more joints — step 236)."""
+    its bones all deform, so an Export All wrote 159 more joints)."""
     if ob.type != 'ARMATURE' or ob.pose is None or ob.data.get("rig_id"):      # rig_id = a generated rig
         return False
     return any(getattr(pb, "rigify_type", None) or pb.get("rigify_type") for pb in ob.pose.bones)
@@ -124,7 +124,7 @@ def rig_templates(data=None):
 class excluded:
     """Context manager: every Custom Shape object (kit controls, Rigify WGT objects ...) is out of the scene's
     collections while a kit export runs (controls are not exported), then linked back in the
-    same order with the same select / hide state. Rigify metarigs go out too (step 236)."""
+    same order with the same select / hide state. Rigify metarigs go out too."""
 
     def __init__(self, scene, view_layer):
         self.scene, self.view_layer = scene, view_layer

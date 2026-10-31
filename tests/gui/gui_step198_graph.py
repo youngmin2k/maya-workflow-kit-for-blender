@@ -1,4 +1,4 @@
-"""Step 198 (#105) in a real UI: a Graph Editor shown in the big view has no Blender sidebar (Maya has none), and
+"""#105: in a real UI: a Graph Editor shown in the big view has no Blender sidebar (Maya has none), and
 View > Show Buffer Curves draws the buffer snapshot grey behind the edited curve (screenshot)."""
 
 import os

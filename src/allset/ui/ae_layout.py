@@ -16,7 +16,7 @@ Row forms:
   ("socket", input name, label)  Principled BSDF input (material tabs), with the Maya map button
   ("maya", material prop, label, input name)  a Maya number converted to that Principled input (Material property
                                  with get/set), with the input's map button
-  ("missing", label, note)       Maya attribute Blender doesn't have: a greyed row with the note (step 67)
+  ("missing", label, note)       Maya attribute Blender doesn't have: a greyed row with the note
 
 ``TEMPLATE`` names the research template a section list is checked against
 (tests/test_step11_outliner_ae.py); ``None`` = no Maya template in the research.
@@ -38,7 +38,7 @@ def S(name, open_, *rows, subs=()):
 
 
 # Maya Drawing Overrides colour (overrideEnabled / overrideRGBColors / overrideColor / overrideColorRGB): RNA over the
-# kit's ID properties, operators/wire_color.py (step 226). Objects and
+# kit's ID properties, operators/wire_color.py. Objects and
 # joints (pose bones) both have them. Object.color is written by the kit from these, so it has no row of its own.
 _DRAWING_OVERRIDES = (
     ("prop", "ob", "allset_override_enabled", "Enable Overrides"),
@@ -132,7 +132,7 @@ _LIGHT_MAIN = (("prop", "data", "type", "Type"),
                ("prop", "data", "diffuse_factor", "Emit Diffuse"),
                ("prop", "data", "specular_factor", "Emit Specular"))
 # Maya Decay Rate: No Decay / Linear / Quadratic / Cubic, rendered by
-# Cycles with a Light Falloff node; EEVEE / the viewport keep distance squared (step 137, operators/lights.py).
+# Cycles with a Light Falloff node; EEVEE / the viewport keep distance squared (operators/lights.py).
 _DECAY = ("draw", "light_decay")
 POINT_LIGHT = [
     S("Point Light Attributes", True, *_LIGHT_MAIN, _DECAY),
@@ -187,7 +187,7 @@ STANDARD_SURFACE = [
 
 # standardSurface / aiStandardSurface attribute -> Principled BSDF 4.5 input
 # (names from the public Autodesk Standard Surface spec; Arnold's aiStandardSurface uses the same names).
-# None = no Principled input. Map button tooltips name the Maya attribute (attribute_editor, step 67).
+# None = no Principled input. Map button tooltips name the Maya attribute (attribute_editor).
 STANDARD_SURFACE_ATTRS = (
     ("base", "Weight"), ("baseColor", "Base Color"), ("diffuseRoughness", "Diffuse Roughness"),
     ("metalness", "Metallic"), ("specular", "Specular IOR Level"), ("specularColor", "Specular Tint"),
@@ -206,7 +206,7 @@ STANDARD_SURFACE_ATTRS = (
 MAYA_ATTR = {socket: attr for attr, socket in STANDARD_SURFACE_ATTRS if socket}
 # --- lambert (Maya 2022 Attribute Editor) -----------------------
 # Principled stand-ins: transparency -> Alpha (opacity), incandescence -> Emission, bump ->
-# Normal, diffuse -> the "Maya Diffuse" node factor (Base Color = Color x Diffuse, operators/material.py step 214;
+# Normal, diffuse -> the "Maya Diffuse" node factor (Base Color = Color x Diffuse, operators/material.py;
 # Color = that node's B input), translucence -> Subsurface; refractions -> Transmission.
 _LAMBERT_COMMON = S("Common Material Attributes", True,
                     ("socket", "Base Color", "Color"), ("socket", "Alpha", "Opacity"),
@@ -233,7 +233,7 @@ SURFACE_SHADER = [
     S("Surface Shader Attributes", True, ("socket", "Emission Color", "Out Color"),
       ("socket", "Alpha", "Out Opacity")),
 ]
-# Step 105 kinds (Maya AE section names; Principled stand-ins + the extra nodes of operators/material._build)
+# Further kinds (Maya AE section names; Principled stand-ins + the extra nodes of operators/material._build)
 PHONG_E = [_LAMBERT_COMMON,
            S("Specular Shading", True, ("socket", "Roughness", "Roughness"),
              ("socket", "Specular IOR Level", "Highlight Size"), ("socket", "Specular Tint", "Whiteness")),
@@ -271,7 +271,7 @@ JOINT = [
       ("prop", "arm", "display_type", "Draw Style"),
       ("draw", "joint_stiffness"),
       ("draw", "joint_orient"),
-      ("prop", "bone", "allset_ssc", "Segment Scale Compensate")),       # step 244: Maya's check box
+      ("prop", "bone", "allset_ssc", "Segment Scale Compensate")),       # Maya's check box
     S("Limit Information", False, subs=[
         S("Translate", False, ("draw", "limit:LIMIT_LOCATION")),
         S("Rotate", True, ("draw", "limit:LIMIT_ROTATION")),                # collapse=0
@@ -282,7 +282,7 @@ JOINT = [
       ("prop", "arm", "show_axes", "Display Local Axis"),
       ("prop", "armob", "show_in_front", "Always Draw On Top"),
       ("prop", "ob", "custom_shape", "Display as Control Shape"),
-      subs=[S("Drawing Overrides", False, *_DRAWING_OVERRIDES)]),         # collapse=1 (step 226)
+      subs=[S("Drawing Overrides", False, *_DRAWING_OVERRIDES)]),         # collapse=1
 ]
 
 PLAIN_MATERIAL = [
@@ -335,7 +335,7 @@ BY_KIND = {
     "SPOT": (SPOT_LIGHT, None),
     "AREA": (AREA_LIGHT, None),
     "standardSurface": (STANDARD_SURFACE, "standardSurface"),
-    "aiStandardSurface": (STANDARD_SURFACE, None),      # Arnold's, same attribute names (step 67)
+    "aiStandardSurface": (STANDARD_SURFACE, None),      # Arnold's, same attribute names
     "lambert": (LAMBERT, "lambert"),
     "blinn": (BLINN, None),
     "phong": (PHONG, None),

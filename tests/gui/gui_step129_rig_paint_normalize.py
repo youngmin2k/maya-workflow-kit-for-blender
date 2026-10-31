@@ -1,4 +1,4 @@
-"""Step 129 (#20), from the audit 128 repro: Maya skinClusters normalize weights interactively (normalizeWeights 1, the Bind
+"""#20: , from the audit 128 repro: Maya skinClusters normalize weights interactively (normalizeWeights 1, the Bind
 Skin default), so painting joint3 with Replace 1.0 makes the painted vertices follow joint3 only (joint1 drops to 0)
 and Flood Replace 1.0 assigns every vertex to joint3. In the kit, Skin > Paint Skin Weights paints with Blender's
 Auto Normalize off (tool_settings.use_auto_normalize is False in the factory scene and in the Maya Workflow Kit template)
@@ -143,7 +143,7 @@ def s_painted():
           painted and max(s) < 1.001)
     area, r = main_view()
     with bpy.context.temp_override(window=win(), area=area, region=r):
-        bpy.ops.allset.flood_weights()       # the dock's Flood button (ui/paint_weights.FLOOD_OP, step 129)
+        bpy.ops.allset.flood_weights()       # the dock's Flood button (ui/paint_weights.FLOOD_OP)
 
 
 @step

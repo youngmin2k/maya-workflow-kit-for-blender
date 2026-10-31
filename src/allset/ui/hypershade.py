@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Hypershade = its own window, laid out the Maya way (step 131, issue #25; before:
-step 67 / 105 Shader Editor + sidebar tab).
+"""Maya Hypershade = its own window, laid out the Maya way (issue #25; before:
+a Shader Editor + sidebar tab).
 
 Maya's standard Hypershade is a
 floating window: the menu bar (File / Edit / View / Create / Tabs / Graph / Window / Options / Help) over the Browser
@@ -13,13 +13,13 @@ node list), the Graph work area (centre: graph toolbar, "Untitled_1" tab, node e
   swapped, ``own_draw``); items in ``editor_menu_map`` "Hypershade/...";
 - Graph = a Shader Editor whose header is Maya's graph toolbar (``editor_chrome.ICONS["Hypershade"]``) + Blender's
   node menus folded into "Blender"; a drawn "Untitled_1" tab at its top-left;
-- Browser / Create / Material Viewer / Property Editor = Properties editors on the Tool tab (the step 106 / 116
+- Browser / Create / Material Viewer / Property Editor = Properties editors on the Tool tab (the Maya dock
   mechanism), marked by hidden tab flags (``MARK`` + ``PANE_FLAGS``) and drawn by ``ALLSET_PT_hypershade_pane``.
 
 The Hypershade's current material (Browser click, Create, Edit menu) shows in the Graph (the active object's slot
 when it has it, else the Graph is pinned to it), the Material Viewer and the Property Editor.
 Windows > Rendering Editors > Hypershade, the Status Line icon and the hotbox's Windows menu all run
-``allset.hypershade``; other Shader Editors keep the Maya menu bar in their header (``draw_collapsible``, step 105).
+``allset.hypershade``; other Shader Editors keep the Maya menu bar in their header (``draw_collapsible``).
 """
 
 import bpy
@@ -316,7 +316,7 @@ def _node_items(want_textures):
             continue
         for node in mat.node_tree.nodes:
             if node.type in SHADER_NODES or node.name == "Maya Diffuse":
-                continue        # the diffuse multiply is part of the Maya material (operators/material.py, step 214)
+                continue        # the diffuse multiply is part of the Maya material (operators/material.py)
             if (node.type in TEXTURE_NODES) == want_textures:
                 out.append((f"{mat.name}::{node.name}", node.label or node.name, mat, node))
     return out
@@ -389,7 +389,7 @@ class ALLSET_OT_hypershade(bpy.types.Operator):
         if is_hypershade(context.screen):     # Hypershade > Window > Browser / Create / Property Editor: shown here
             return {'FINISHED'}
         # Maya brings its one Hypershade to the front; Blender can't raise a window: the old one closes and a fresh
-        # one opens on top (step 131)
+        # one opens on top
         from . import maya_dock
         for w in hypershade_windows(context.window_manager):
             maya_dock.close_window_later(w)
@@ -752,7 +752,7 @@ def _item_button(layout, tab, key, label, icon, cur, list_row=False):
         if mat is not None and mat.library is None:
             # a property button, not an operator one: the hovered property is the only button a keymap operator
             # can read (``context.property``; ``button_operator`` and ``context_pointer_set`` don't reach keymap
-            # handlers, step 162) -- the MMB swatch drag (ui/hs_drag.py) needs to know the swatch
+            # handlers) -- the MMB swatch drag (ui/hs_drag.py) needs to know the swatch
             layout.prop(mat, PICK_PROP, text=label, toggle=True, **kw)
             return
         op = layout.operator("allset.hs_pick", text=label, depress=picked, **kw)
@@ -845,7 +845,7 @@ class ALLSET_PT_hypershade_pane(bpy.types.Panel):
     """A Hypershade pane: Browser, Create, Material Viewer or Property Editor (a marked Properties Tool tab)"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"           # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"           # = drawn by the Properties Tool tab
     bl_label = "Hypershade"
     bl_options = {'HIDE_HEADER'}
     bl_order = -300

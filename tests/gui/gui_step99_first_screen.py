@@ -1,4 +1,4 @@
-"""Step 99 in a real UI: the Maya first screen.
+"""In a real UI: the Maya first screen.
 
 New Maya Workflow Kit scene -> the Tool Box column shows its tools at the running UI scale (run at the default 1.25 and with
 ``--ui-scale 0.8``: the column is resized through ALLSET_OT_fit_columns, the main view keeps no toolbar), the
@@ -52,7 +52,7 @@ def column():
 
 
 def dock_region():
-    """Maya's tab stack (its own area since step 116)."""
+    """Maya's tab stack (its own area)."""
     return next(r for r in dock_area().regions if r.type == 'WINDOW')
 
 
@@ -103,7 +103,7 @@ def s_toolbox():
           abs(outl_area.width - wo) <= 2)
     r = rows()
     names = [(x[2], x[3]) for x in r]
-    # step 211: persp / top / front / side are Maya's startup cameras = Blender's first four rows; the kit draws the
+    # persp / top / front / side are Maya's startup cameras = Blender's first four rows; the kit draws the
     # default sets right under them
     want_rows = [('DEFAULT_SET', "defaultLightSet"), ('DEFAULT_SET', "defaultObjectSet")]
     check(f"Outliner draws Maya's startup sets ({names})", names == want_rows)
@@ -129,7 +129,7 @@ def s_ae_check():
     redraw()
 
 
-# the user clicks the Modeling Toolkit tab of the stack (step 142: Maya's vertical tab strip on its right edge)
+# the user clicks the Modeling Toolkit tab of the stack (Maya's vertical tab strip on its right edge)
 @step
 def s_tab_hover():
     C["mtk_tab"] = dock_tab_point('MODELING_TOOLKIT')
@@ -176,7 +176,7 @@ def s_lightset():
     check(f"defaultLightSet selects the lights ({sel})", sel == [C["light"]])
     h = outl()[1].height
     u = mod("ui.outliner_sets").unit(bpy.context.preferences)
-    click_row((h - u, h))                     # Blender's first row = the startup persp camera (step 211)
+    click_row((h - u, h))                     # Blender's first row = the startup persp camera
 
 
 @step

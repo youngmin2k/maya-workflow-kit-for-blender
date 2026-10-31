@@ -1,4 +1,4 @@
-"""Step 38: Channel Box text entry (Maya display, relative +=/-=/*=//=), edits on every selected
+"""Channel Box text entry (Maya display, relative +=/-=/*=//=), edits on every selected
 object (custom attributes, SHAPES, INPUTS too) and every selected channel; AE material type
 labels and lambert/blinn/phong sections.
 """
@@ -149,7 +149,7 @@ def test_input_rows_reach_same_modifier_type():
         m = ob.modifiers.new("bevel", 'BEVEL')
         m.segments = 1
     b.modifiers["bevel"].name = "polyBevel2"
-    cb_mod.set_open(a, cb_mod.mod_node(a.modifiers[0]))   # click the node name (step 135)
+    cb_mod.set_open(a, cb_mod.mod_node(a.modifiers[0]))   # click the node name
     cb_mod.rebuild_rows()
     row = cb_mod.row_for(bpy.context, a, "INPUT", "segments", 'BEVEL', 0)
     assert row is not None and row.text == "1", row and row.text
@@ -187,7 +187,7 @@ def test_ae_material_type_labels_and_sections():
     lam = material.new_material('LAMBERT')
     assert lam.name.startswith("lambert") and ae_layout.LAMBERT[0].open
     plain = bpy.data.materials.new("noNodes")
-    # Blender 5.x: every new material has a Principled node tree (step 53)
+    # Blender 5.x: every new material has a Principled node tree
     assert ae.material_type(plain) == "standardSurface"
     principled = bpy.data.materials.new("fromBlender")
     principled.use_nodes = True

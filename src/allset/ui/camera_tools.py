@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya panel View menu commands that had no kit counterpart until step 177:
+"""Maya panel View menu commands with a kit counterpart:
 
 - View > Center View of Selection = Maya ``cmds.viewFit(camera)`` (Maya 2026 panel View menu). In
   Maya the camera keeps its rotation and its straight-line distance to the

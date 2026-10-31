@@ -1,4 +1,4 @@
-"""Step 198 (#105) main line: Graph Editor menu items wired (Retime / buffers / weights / Add Key / Select Unsnapped /
+"""#105: main line: Graph Editor menu items wired (Retime / buffers / weights / Add Key / Select Unsnapped /
 Set Curve Colors), Default Tangent Weight on curves the kit keys, curve colour rules, sidebar hidden once."""
 
 from importlib import import_module

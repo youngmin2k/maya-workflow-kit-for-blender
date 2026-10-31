@@ -1,4 +1,4 @@
-"""Step 39 in a real UI: Alt+Shift+LMB mostly-vertical drag tumbles about the view's right axis
+"""In a real UI: Alt+Shift+LMB mostly-vertical drag tumbles about the view's right axis
 only; Alt+Shift+MMB diagonal drag in the front view tracks along X only; Left arrow in vertex
 mode walks to the next vertex."""
 

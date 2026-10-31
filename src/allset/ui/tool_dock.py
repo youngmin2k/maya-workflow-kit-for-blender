@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Tool Settings as a docked column left of the viewport (step 106).
+"""Maya Tool Settings as a docked column left of the viewport.
 
 Maya's Tool Settings is a dock control on the left of the main window (docked
 left in Maya 2022). The kit's dock is a
@@ -9,7 +9,7 @@ and, for tools without Maya sections, Blender's own tool panels. The dock is rec
 header), so it survives saving and reloading the file. ToggleToolSettings shows / hides it (Maya: visible ->
 hidden -> visible); closing = ``screen.area_close`` (the viewport gets its width back).
 
-GUI facts (step 106): ``screen.area_split(direction='VERTICAL', factor=f)`` with f < 0.5 puts
+GUI facts: ``screen.area_split(direction='VERTICAL', factor=f)`` with f < 0.5 puts
 the new area on the left with width f x the old width; ``SpaceProperties.context`` can only be set the tick after the
 area became a Properties editor (its enum is empty before); ``screen.region_toggle(region_type='NAVIGATION_BAR')``
 hides the tab column. ``screen.area_close`` hangs in background mode, so ``close`` is GUI only.
@@ -30,7 +30,7 @@ def is_dock(area):
     space = area.spaces.active
     if space.show_region_header or space.context != 'TOOL':
         return False
-    from .maya_dock import ROLE_FLAGS     # a Maya panel's dock area (step 116) is a Tool tab too: role flag set
+    from .maya_dock import ROLE_FLAGS     # a Maya panel's dock area is a Tool tab too: role flag set
     return not any(getattr(space, flag, False) for flag in ROLE_FLAGS.values())
 
 
@@ -138,7 +138,7 @@ def close_dock(context, window=None):
 
 
 def show(context, width=None):
-    """Maya Tool Settings from a Tool Box double-click (step 129, #3): a Tool Settings dock that is open in any
+    """Maya Tool Settings from a Tool Box double-click (#3): a Tool Settings dock that is open in any
     window (docked or torn off) is redrawn — Blender can't raise an OS window — else the dock opens left of this
     window's viewport. Returns the dock area (or None)."""
     for window in context.window_manager.windows:

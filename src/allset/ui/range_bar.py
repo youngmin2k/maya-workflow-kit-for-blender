@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Range Slider bar in the timeline header: drag the playback range (step 73).
+"""Maya's Range Slider bar in the timeline header: drag the playback range.
 
 The bar: a dark
 track (#373737) spans the animation range, the playback range is a rounded segment (#5d5d5d) on it with
@@ -17,7 +17,7 @@ stretches before the bar.
 
 import bpy
 
-# --- sizes and colours (step 73) ----------------------------------------------------------------
+# --- sizes and colours ----------------------------------------------------------------
 TRACK_RGB = (0x37 / 255, 0x37 / 255, 0x37 / 255, 1.0)
 SEGMENT_RGB = (0x5d / 255, 0x5d / 255, 0x5d / 255, 1.0)
 HANDLE_RGB = (0x91 / 255, 0x91 / 255, 0x91 / 255, 1.0)
@@ -114,7 +114,7 @@ def set_playback(scene, a, b):
 def active(context):
     from . import time_slider
     space = context.space_data
-    # the Maya Workflow Kit layout's timeline (sidebar on; on 5.x it can't open, step 118 — the bar stays in the header)
+    # the Maya Workflow Kit layout's timeline (sidebar on; on 5.x it can't open — the bar stays in the header)
     return (space is not None and getattr(space, "mode", None) == 'TIMELINE'
             and time_slider.has_slider_panel(space))
 

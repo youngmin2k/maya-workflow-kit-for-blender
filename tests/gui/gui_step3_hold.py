@@ -1,4 +1,4 @@
-"""Step 3 with real (simulated) key events: hold keys, tap/hold, pick-walk."""
+"""With real (simulated) key events: hold keys, tap/hold, pick-walk."""
 
 import os
 import sys
@@ -31,7 +31,7 @@ def s_setup():
     C["x"], C["y"] = setup()
     ts().use_snap, ts().snap_elements = False, {'INCREMENT'}
     ts().use_transform_data_origin = False
-    ts().use_proportional_edit_objects, ts().proportional_size = False, 2.0   # a user radius (1.0 = Blender default becomes Maya 5, step 63)
+    ts().use_proportional_edit_objects, ts().proportional_size = False, 2.0   # a user radius (1.0 = Blender default becomes Maya 5)
     check("keymap active = Maya", sys.modules["sim"].maya_keys())
     ev('X', 'PRESS')
 

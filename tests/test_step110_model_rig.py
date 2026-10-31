@@ -1,4 +1,4 @@
-"""Step 110: modeling / rigging commands and their expected results.
+"""Modeling / rigging commands and their expected results.
 Maya Y-up -> Blender Z-up: Maya (x, y, z) = Blender (x, -z, y).
 """
 

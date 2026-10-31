@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya keymap, as add-on keymap items (step 130).
+"""Maya keymap, as add-on keymap items.
 
-The Maya keymap data = Industry Compatible data (static, ``ic_data``) patched by ``maya_patches``. Until step 130 it became a keyconfig "Maya-style" that was made
+The Maya keymap data = Industry Compatible data (static, ``ic_data``) patched by ``maya_patches``. In older versions it became a keyconfig "Maya-style" that was made
 the *active* keyconfig — its name was saved in the user preferences and outlived the add-on (GitHub #46, #40). Now
 the active keyconfig and every keymap preference stay as the user has them:
 
@@ -29,7 +29,7 @@ import bpy
 
 from .. import compat
 
-# Before step 130 the kit made a keyconfig of this name active and Blender stored the name in the preferences;
+# Older versions of the kit made a keyconfig of this name active and Blender stored the name in the preferences;
 # switch.py still recognises it to clean up after older versions. No keyconfig of this name is made any more.
 KEYCONFIG_NAME = "Maya-style"
 TARGET_VERSION = compat.TARGET
@@ -48,7 +48,7 @@ _state = {
     "off": [],                   # (km name, space, region, index, idname, type, value) switched off there
     "modal_added": set(),        # pointers of Maya modal items added to that keyconfig
     "modal_made": [],            # (name, space, region) of modal keymaps created there (none in a GUI session)
-    "addon_count": -1,           # add-on keyconfig item count _keep_first last saw (step 265)
+    "addon_count": -1,           # add-on keyconfig item count _keep_first last saw
     "overlay_items": {},         # set_overlay owner -> pointers of its items (also in addon_items)
 }
 
@@ -72,9 +72,9 @@ def add_item(km_name, idname, type, value, space_type="EMPTY", region_type="WIND
 
 
 def generate_data():
-    """IC data with the Maya patches applied (fresh list each call). Strict on Blender 5.2 (step 272: the kit's
+    """IC data with the Maya patches applied (fresh list each call). Strict on Blender 5.2 (the kit's
     own static IC data of that minor); elsewhere IC differences are collected in ``patch.DRIFT``
-    (step 53)."""
+   ."""
     from . import ic_data, maya_patches, patch
     patch.STRICT = compat.IS_STRICT
     patch.DRIFT.clear()
@@ -130,7 +130,7 @@ def _apply_addon(data):
             _state["addon_made"].append((name, space, region))
         km = kc.keymaps.new(name, **km_args)
         before = {k.as_pointer() for k in km.keymap_items}
-        # reversed: Blender puts add-on items at the head of the merged keymap one by one (step 130)
+        # reversed: Blender puts add-on items at the head of the merged keymap one by one
         keymap_init_from_data(km, list(reversed(content["items"])))
         _state["addon_items"].update(k.as_pointer() for k in _new_items(km, before))
 
@@ -310,7 +310,7 @@ def same_press(a, b):
 
 
 def _keep_first():
-    """Maya keys first in Maya mode (step 265, Issue #178): Blender merges the add-on keyconfig into the keymaps
+    """Maya keys first in Maya mode (Issue #178): Blender merges the add-on keyconfig into the keymaps
     putting each add-on item at the head in turn, so an item another add-on adds later (a "Draw" add-on's D in Object
     Mode) runs before the kit's same key and the Maya key never fires. When an active item of another add-on that one
     key press could also run (``same_press``: the same event, or ANY / a press against a click) sits after a kit item

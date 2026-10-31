@@ -1,5 +1,5 @@
-"""Step 129, issue #22, in the Maya Workflow Kit layout: Maya double-click component selection.
-Event simulation can't send DOUBLE_CLICK (step 73), so the double-click's operator (``allset.loop_pick``, the
+"""In the Maya Workflow Kit layout: Maya double-click component selection.
+Event simulation can't send DOUBLE_CLICK, so the double-click's operator (``allset.loop_pick``, the
 "Mesh" LEFTMOUSE DOUBLE_CLICK item) is invoked at the simulated mouse; the picks before it are real select-tool
 clicks (click, Shift+click), so the select history is the one a user makes."""
 

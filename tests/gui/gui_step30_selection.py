@@ -1,4 +1,4 @@
-"""Step 30 in a real UI: edit-mode marquee selects occluded vertices (Maya selectPrefUseDepth
+"""In a real UI: edit-mode marquee selects occluded vertices (Maya selectPrefUseDepth
 false) with the X-ray flag set only during the drag; Move tool fallback marquee too; option off =
 Blender's visible-only selection; pre-selection highlight with the select tools; screenshots."""
 
@@ -244,7 +244,7 @@ def s_pre_face():
     st = gz_state()
     with bpy.context.temp_override(window=bpy.context.window_manager.windows[0], area=view3d()[0]):
         on = C["pre"]._enabled(bpy.context)
-    # Step 74: face mode lights the face under the cursor (the kit gizmo follows the select mode).
+    # face mode lights the face under the cursor (the kit gizmo follows the select mode).
     check(f"face mode: the face under the cursor is pre-selected, not a vertex ({st})",
           on and st is not None and st[0] and st[1] == -1 and st[3] >= 0)
 
@@ -264,7 +264,7 @@ def s_pre_move_tool():
     with bpy.context.temp_override(window=bpy.context.window_manager.windows[0], area=view3d()[0]):
         on = C["pre"]._enabled(bpy.context)
     st = gz_state()
-    # Step 74: the Move tool keeps pre-selection (Maya pre_06); nothing is selected, so no manipulator.
+    # the Move tool keeps pre-selection (Maya pre_06); nothing is selected, so no manipulator.
     check(f"Move tool: the vertex is pre-selected ({st})", on and st is not None and st[0] and st[1] == C["v"])
     set_tool("builtin.select_box")
 

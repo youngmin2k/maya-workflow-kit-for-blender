@@ -1,4 +1,4 @@
-"""Step 257 (Issues #149 #150 #151) as a Maya user in the Maya layout: Create > Cylinder -> Ctrl+E on the cap +
+"""Issues #149 #150 #151 as a Maya user in the Maya layout: Create > Cylinder -> Ctrl+E on the cap +
 Local Translate Z 1 -> Ctrl+B on the cap rim (Maya polyBevel3 numbering, #149) -> object mode UV > Automatic from the
 menu (Channel Box INPUTS polyAutoProj1, editable, #150) -> S keys on a locator at 1 / 12 / 24 (Maya 2026 auto
 tangents, #151) -> Ctrl+Z -> save / open. Screenshot: gui_step257_inputs.png (Channel Box with polyAutoProj1 open)."""

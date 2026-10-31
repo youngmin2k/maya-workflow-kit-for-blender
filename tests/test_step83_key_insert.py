@@ -1,4 +1,4 @@
-"""Step 83: Maya Insert Key (shape kept), Nudge Keys, Select Previous / Next Key, keymap.
+"""Maya Insert Key (shape kept), Nudge Keys, Select Previous / Next Key, keymap.
 GUI: tests/gui/gui_step83_key_insert.py."""
 
 from importlib import import_module

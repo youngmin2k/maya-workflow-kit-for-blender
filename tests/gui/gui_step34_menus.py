@@ -1,4 +1,4 @@
-"""Step 34 in a real UI: Windows > General Editors submenu, Windows > Animation Editors >
+"""In a real UI: Windows > General Editors submenu, Windows > Animation Editors >
 Graph Editor opens a Graph Editor window, Display > Heads Up Display > Poly Count turns the
 viewport statistics on, File > Export Selection menu; screenshots."""
 

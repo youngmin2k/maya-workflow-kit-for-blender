@@ -1,4 +1,4 @@
-"""Step 204: animation layers 4 (Issue #111) — Extract Selected Objects, Duplicate Layer, Empty / Delete Empty Layers,
+"""Animation layers 4 (Issue #111) — Extract Selected Objects, Duplicate Layer, Empty / Delete Empty Layers,
 Zero / Full Weight key, Layer Editor Ctrl / Shift multi-selection and the Graph Editor lines of the other selected
 layers (operators/anim_layers_204.py, ui/graph_layers.py). Maya behaviour of the Layer Editor:
 extraction keeps the result, a duplicate adds its layer again, each command is
@@ -94,7 +94,7 @@ def _value(ob, layer, path, index, frame):
 
 
 def _undo_start():
-    bpy.ops.ed.undo_push(message="step 204 start")
+    bpy.ops.ed.undo_push(message="layers test start")
 
 
 def _op(name, **kw):
@@ -442,7 +442,7 @@ def test_normalized_lines_span_minus_one_to_one():
 
 
 def test_layer_curves_use_axis_colours():
-    """A layer's transform curves draw X / Y / Z red / green / blue like Maya (step 204 GUI found AUTO_RAINBOW)."""
+    """A layer's transform curves draw X / Y / Z red / green / blue like Maya (not AUTO_RAINBOW)."""
     sc, cube, _sphere = _layered()
     act = al._strip(al.tracks(cube)["AnimLayer1"]).action
     for idx in (0, 1):

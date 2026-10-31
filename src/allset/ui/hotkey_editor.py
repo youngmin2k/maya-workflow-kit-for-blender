@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Hotkey Editor window (step 215, Issue #121; Windows > Settings/Preferences > Hotkey Editor).
+"""Maya's Hotkey Editor window (Issue #121; Windows > Settings/Preferences > Hotkey Editor).
 
 Maya 2022's Hotkey Editor lists the commands of the current hotkey set with their keys, searches them by name or by
 hotkey, filters by category, and lets a key be assigned (warning when another command already uses it). The kit's
@@ -7,7 +7,7 @@ list = Maya's standard hotkeys (``keymap/hotkey_rows``: Maya's standard hotkey l
 the kit binds for each one.
 
 A binding is changed the Blender way: on the item of ``wm.keyconfigs.user`` — the merged keymap Blender's own
-Preferences > Keymap edits. In Blender 4.5 (step 215, tests/test_step215_hotkeys.py) the user keyconfig holds
+Preferences > Keymap edits. In Blender 4.5 (tests/test_step215_hotkeys.py) the user keyconfig holds
 the kit's add-on items at the head of each keymap; changing ``type`` / modifiers there marks the keymap user-modified
 and leaves the add-on item as it was; ``KeyMap.restore_item_to_default`` brings the Maya key back; the edit survives
 Maya mode off / on (Blender re-applies the keymap diff to the re-added add-on items); the kit writes no file — the

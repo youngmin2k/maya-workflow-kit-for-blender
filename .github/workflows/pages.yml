@@ -1,4 +1,4 @@
-# Product site (step 127): publishes site/ to GitHub Pages on pushes to main / master that touch it.
+# Product site: publishes site/ to GitHub Pages on pushes to main / master that touch it.
 # Pages needs a public repository (or a paid plan for private ones); until then this job may fail — harmless.
 name: Pages
 

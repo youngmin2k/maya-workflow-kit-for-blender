@@ -1,4 +1,4 @@
-"""Step 139 lane UV (#68): UV > Automatic / Contour Stretch from object mode act on the whole
+"""Lane UV (#68): UV > Automatic / Contour Stretch from object mode act on the whole
 object, Automatic = Maya polyAutoProjection (expected shell counts), UV Editor > Create > Best Plane / Contour Stretch
 mapped like the main UV menu.
 GUI: tests/gui/gui_step139_uv.py."""

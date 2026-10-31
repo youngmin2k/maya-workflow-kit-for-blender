@@ -1,17 +1,17 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's startup cameras persp / top / front / side as hidden camera objects of a new Maya scene (step 211, #117).
+"""Maya's startup cameras persp / top / front / side as hidden camera objects of a new Maya scene (#117).
 
 Maya 2022: a new scene's top DAG nodes are persp, top, front, side
 (visibility off, ``cmds.camera(query=True, startupCamera=True)`` true), then the user's nodes in creation order; the
 Outliner lists them in that order and greys them (hidden). ``cmds.delete("persp")`` fails with "Non-deletable node
 'persp' cannot be deleted.".
 
-Blender's Outliner is C: Python can't put rows above its object rows, so the kit-drawn camera rows of step 99
+Blender's Outliner is C: Python can't put rows above its object rows, so the kit-drawn camera rows
 (ui/outliner_sets.py) followed the user's objects. Real hidden cameras linked before any user object are Blender rows
 in Maya's order once the Maya Outliner lists objects unsorted (``use_sort_alpha`` off, ui/maya_outliner.setup);
 selecting one in the Outliner makes it the lead like Maya (Channel Box shows ``persp``, Visibility off). They don't
 render (``hide_render``), aren't drawn (``hide_viewport`` = Maya Visibility) and the kit's exports leave them out
-(``excluded``). Only a kit new Maya scene gets them; other files keep step 99's drawn rows.
+(``excluded``). Only a kit new Maya scene gets them; other files keep the drawn rows.
 """
 
 import math

@@ -1,4 +1,4 @@
-# Credits — models, lighting and font in the marketing images and clips (step 125)
+# Credits — models, lighting and font in the marketing images and clips
 
 The screenshots, key visuals and clips are taken in Blender with Maya Workflow Kit. The scenes are built from the
 third-party assets below — Blender Studio / blender.org files plus one Poly Haven HDRI — downloaded by
@@ -38,7 +38,7 @@ section 2(a)(6) / 3(a)(1)(A)(i)). CC0 assets need no credit; they are listed any
 
 ## Not used
 
-- Superseded step 122–124 assets (files kept, status `superseded` in `assets.json`): Kenney Animated Characters
+- Superseded earlier assets (files kept, status `superseded` in `assets.json`): Kenney Animated Characters
   Protagonists, Quaternius RobotExpressive, Poly Haven Drill 01, Desk Lamp Arm 01, Barrel 01, Cardboard Box 01,
   Wooden Table 01, Potted Plant 02, Metal Toolbox.
 - Rejected (reasons in `assets.json` → `rejected`): blender.org Classroom (STAEDTLER / ZAP BOOK / rotring marks in its
@@ -46,6 +46,6 @@ section 2(a)(6) / 3(a)(1)(A)(i)). CC0 assets need no credit; they are listed any
   Chores (2D Grease Pencil, camera-projected), all CC BY-SA demo files (a promo image showing them is likely an
   adaptation that would itself have to be BY-SA), demo files without a stated licence, Blender Cloud gallery-only
   splashes, Blender Studio characters not labelled Free (subscription), Blend Swap (ad-gated downloads, provenance not
-  verifiable per file), Blender Artists uploads (account needed, free-text licences), and, from steps 122–123, Poly
+  verifiable per file), Blender Artists uploads (account needed, free-text licences), and, from earlier rounds, Poly
   Haven Camera 01 / Television 01 / boombox, Kenney Blaster Kit / Blocky / Mini / Toon, Quaternius packs, Sketchfab /
   Mixamo / 3D Warehouse.

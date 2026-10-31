@@ -1,4 +1,4 @@
-"""Step 257 (Issue #150): UV > Automatic packs the shells with Maya's "Into square" layout and shows an editable
+"""Issue #150: UV > Automatic packs the shells with Maya's "Into square" layout and shows an editable
 polyAutoProj node in the Channel Box INPUTS.
 
 Expected result for the #150 mesh (step-239 chain: cylinder, cap extruded Local Translate Z 1, cap rim bevelled, history

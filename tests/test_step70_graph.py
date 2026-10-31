@@ -1,4 +1,4 @@
-"""Step 70: Graph Editor tangent toolbar, Shift+S keyframe / tangent marking menu, Graph Editor G / D, Maya Auto Key
+"""Graph Editor tangent toolbar, Shift+S keyframe / tangent marking menu, Graph Editor G / D, Maya Auto Key
 (only keyed channels), Playblast. GUI: tests/gui/gui_step70_graph.py."""
 
 import types
@@ -155,7 +155,7 @@ def test_keymap():
 # --- Auto Key ------------------------------------------------------------------------------------------
 
 def test_auto_key_only_keyed_channels():
-    """Step 130: the kit's own Auto Key (Scene.allset_auto_key, operators/auto_key.py); Blender's Only Insert
+    """The kit's own Auto Key (Scene.allset_auto_key, operators/auto_key.py); Blender's Only Insert
     Available preference is never written."""
     prefs = bpy.context.preferences
     factory = type(prefs.edit).bl_rna.properties["use_keyframe_insert_available"].default

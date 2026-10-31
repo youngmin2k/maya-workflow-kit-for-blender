@@ -1,4 +1,4 @@
-"""Step 45: Maya grid — finite 12 units, a line every unit, thicker every 5, axes (Maya
+"""Maya grid — finite 12 units, a line every unit, thicker every 5, axes (Maya
 grid metrics), drawn by the kit in the views that use it; projection maths checked against Blender's."""
 
 import math
@@ -36,7 +36,7 @@ def test_plane_points_and_view_planes():
     assert all(p[0] == 0.0 for p in grid.plane_points(segs, "YZ", unit))
     assert grid.plane_for_view('PERSP', False, (0.3, 0.5, -0.8)) == "FLOOR"
     assert grid.plane_for_view('ORTHO', True, (0.0, 0.0, -1.0)) == "FLOOR"   # top
-    # Maya's front / side cameras grid their own plane (step 161)
+    # Maya's front / side cameras grid their own plane
     assert grid.plane_for_view('ORTHO', True, (0.0, 1.0, 0.0)) == "XZ"       # front (looks +Y)
     assert grid.plane_for_view('ORTHO', True, (-1.0, 0.0, 0.0)) == "YZ"      # right
     assert grid.plane_for_view('ORTHO', False, (0.0, 1.0, 0.0)) == "FLOOR"   # user ortho
@@ -111,7 +111,7 @@ def test_template_views_use_maya_grid():
         bad = [(sp.overlay.show_floor, sp.overlay.show_ortho_grid, sp.overlay.grid_lines)
                for sp in views if not grid.is_on(sp)]
         assert not bad, bad
-        # X-hold snap step (Blender's finest perspective grid step) stays one Maya unit (step 25)
+        # X-hold snap step (Blender's finest perspective grid step) stays one Maya unit
         assert all(abs(sp.overlay.grid_scale - 0.01) < 1e-9 for sp in views)
     finally:
         bpy.ops.wm.read_homefile()
@@ -129,7 +129,7 @@ def test_draw_handler_removed_on_disable():
 
 
 def test_ortho_grid_fills_the_view():
-    # Step 161: Maya's ortho cameras grid the whole panel (16_four_view.png: ~31 units across, lines edge to edge)
+    # Maya's ortho cameras grid the whole panel (16_four_view.png: ~31 units across, lines edge to edge)
     assert grid.fills_view('ORTHO', True) and not grid.fills_view('ORTHO', False)
     assert not grid.fills_view('PERSP', False)
     segs = grid.span_segments((-20.0, 20.0), (-3.0, 7.0), 5, 5)

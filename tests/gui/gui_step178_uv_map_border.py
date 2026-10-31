@@ -1,4 +1,4 @@
-"""Step 178 in a real UI: a pPlane whose UVs are shrunk and turned, UV Editor > Modify > Map Border (Maya untangleUV
+"""In a real UI: a pPlane whose UVs are shrunk and turned, UV Editor > Modify > Map Border (Maya untangleUV
 -mapBorder square) puts the border UVs on the 0-1 square; shot of the UV Editor afterwards. Also Select > Texture
 Borders and Back-Facing run from the menu map without errors."""
 

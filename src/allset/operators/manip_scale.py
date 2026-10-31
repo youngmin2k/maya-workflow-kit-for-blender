@@ -16,7 +16,7 @@ Maya:
 - Plane handle: both plane axes by ``f = 1 + d · D_Q / (0.44 · L · D0)``, ``d`` = movement along the screen
   direction of the point ``Q`` 0.44 handle lengths out on the plane's diagonal.
 - Ctrl at the press on an axis handle scales the other two axes by that handle's factor; Ctrl on the centre or a
-  plane handle changes nothing; Shift duplicates first (Smart Duplicate, step 22). Keys pressed during the drag
+  plane handle changes nothing; Shift duplicates first (Smart Duplicate). Keys pressed during the drag
   change nothing, and nothing slows down or snaps the drag.
 - MMB drag anywhere with an axis / plane as the active handle: the same at half speed; with the centre: the same.
 - Object mode: every selected object scales about its own pivot; ``R`` includes the lead's children.
@@ -27,8 +27,8 @@ Blender's ``transform.resize`` scales by the ratio of the mouse's and the press 
 press on the centre handle (a few px from the pivot) made every px multiply the scale and shrinking near 0 was out
 of reach. ``allset.manip_scale`` computes Maya's factor and runs ``transform.resize`` EXEC with it: on each move
 after putting back the state saved at the press (no undo, not registered), and once more on release with
-``undo=True`` — one undo step, and the registered resize keeps what the active handle (step 28) and the Smart
-Duplicate / Extrude watcher (step 22 / 26) read. So Blender's pivot point, orientation, proportional editing and
+``undo=True`` — one undo step, and the registered resize keeps what the active handle and the Smart
+Duplicate / Extrude watcher read. So Blender's pivot point, orientation, proportional editing and
 mesh symmetry apply exactly as in its own resize.
 """
 
@@ -364,7 +364,7 @@ def apply(context, f, mask=(True, True, True), orient_type='GLOBAL', final=False
     if orient_type:
         kwargs["orient_type"] = orient_type
     if context.mode == 'EDIT_MESH':
-        kwargs["mirror"] = True     # transform.* exec reads the mesh mirror flags only with mirror (step 36)
+        kwargs["mirror"] = True     # transform.* exec reads the mesh mirror flags only with mirror
     if final:
         with _OwnPivots(context):
             res = bpy.ops.transform.resize('EXEC_DEFAULT', True, **kwargs)

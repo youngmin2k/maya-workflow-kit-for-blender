@@ -1,4 +1,4 @@
-"""Step 129 (#36): kit timers keep window / area pointers, not Window / Area objects. Each step opens a kit window
+"""#36: kit timers keep window / area pointers, not Window / Area objects. Each step opens a kit window
 whose setup retries from a timer (Hypershade: sidebar tab; Light Editor: an Outliner window; Graph Editor: frame range; a torn-off
 Channel Box and a torn-off menu: dock role) and closes it in the same step, before the timer's first tick. A timer
 that kept the freed Window crashed Blender (EXCEPTION_ACCESS_VIOLATION). PASSES when Blender is still running 3 s
@@ -84,7 +84,7 @@ def s_tear_panel():
         md.tear_off(bpy.context, stack)
 
 
-# step 129 lane X: a tear-off sizes its window first and opens it from a timer a tick later
+# a tear-off sizes its window first and opens it from a timer a tick later
 step(lambda: None)
 step(lambda: close_new("Torn-off Channel Box"))
 

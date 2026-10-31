@@ -1,4 +1,4 @@
-"""Step 310 (Issue #210): Maya Spline / Clamped / Plateau / Flat tangent shapes.
+"""Issue #210: Maya Spline / Clamped / Plateau / Flat tangent shapes.
 
 Each Maya tangent type has its own slope rule; handles sit at a third of each interval. The kit keeps the Maya type
 per key side on the Action and writes the handles again after Blender edits the curve."""

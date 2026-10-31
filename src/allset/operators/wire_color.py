@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""step 226: Maya Wireframe Color / Drawing Overrides colour index (#136).
+"""Maya Wireframe Color / Drawing Overrides colour index (#136).
 
 Maya has two ways to colour a control's wire:
 

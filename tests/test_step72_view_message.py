@@ -1,4 +1,4 @@
-"""Step 72: Maya in-view messages (ui/view_message.py) and the top bar repaint after F2-F6.
+"""Maya in-view messages (ui/view_message.py) and the top bar repaint after F2-F6.
 GUI: tests/gui/gui_step72_view_message.py, gui_step35 (F3 shot)."""
 
 from importlib import import_module

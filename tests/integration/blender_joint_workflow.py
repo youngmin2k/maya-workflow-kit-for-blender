@@ -103,9 +103,9 @@ assert joints.ALLSET_OT_joint_tool._done(state, proxy) == {'CANCELLED'}
 assert selected() == {a} and bpy.context.mode == 'POSE'
 # Q exits the placement modal instead of letting future clicks keep adding joints
 # (nothing placed yet: the modal ends CANCELLED, like Enter).
-# the real _done ends CANCELLED while nothing was placed (step 217 modal), FINISHED once a chain exists
+# the real _done ends CANCELLED while nothing was placed, FINISHED once a chain exists
 state._done = lambda context: {'CANCELLED'} if state._ob is None else {'FINISHED'}
-# step 217 / #158: the modal finds a 3D view itself (view under the mouse, else any) — the stand-in needs it
+# #158: the modal finds a 3D view itself (view under the mouse, else any) — the stand-in needs it
 state._any_view = joints.ALLSET_OT_joint_tool._any_view
 event = SimpleNamespace(type='Q', value='PRESS', alt=False, ctrl=False,
                         shift=False, oskey=False, mouse_x=-1, mouse_y=-1)

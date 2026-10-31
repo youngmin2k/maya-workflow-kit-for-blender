@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Outliner chrome on Blender's Outliner (step 50).
+"""Maya Outliner chrome on Blender's Outliner.
 
 Maya's Outliner has a menu bar Display / Show / Help and a search field.
 Outliners set up the Maya way (the Maya Workflow Kit layout and Windows > Outliner:
@@ -31,8 +31,8 @@ def setup(space):
     space.use_filter_children = True
     space.show_restrict_column_render = False
     space.show_restrict_column_hide = False
-    space.show_mode_column = False      # Maya has no mode column (step 202: Blender shows it in edit mode)
-    space.use_sort_alpha = False        # Maya lists the DAG in creation order, startup cameras first (step 211)
+    space.show_mode_column = False      # Maya has no mode column (Blender shows it in edit mode)
+    space.use_sort_alpha = False        # Maya lists the DAG in creation order, startup cameras first
 
 
 class ALLSET_MT_outliner_display(bpy.types.Menu):
@@ -76,7 +76,7 @@ def _draw(self, context):
     if not is_maya_outliner(space):
         return own_draw.original("OUTLINER_HT_header", _draw)(self, context)
     layout = self.layout
-    from . import maya_dock      # Maya's dotted handle: tear the Outliner off / dock it back (step 116)
+    from . import maya_dock      # Maya's dotted handle: tear the Outliner off / dock it back
     layout.operator("allset.dock_handle", text=maya_dock.HANDLE[:8], emboss=False)
     chrome.menu_bar(layout, MENU_BAR)
     layout.prop(space, "filter_text", text="", icon='VIEWZOOM', placeholder="Search...")
@@ -88,7 +88,7 @@ classes = (ALLSET_MT_outliner_display, ALLSET_MT_outliner_show, ALLSET_MT_outlin
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    own_draw.swap("OUTLINER_HT_header", _draw)   # Blender's own draw only (step 115)
+    own_draw.swap("OUTLINER_HT_header", _draw)   # Blender's own draw only
 
 
 def unregister():

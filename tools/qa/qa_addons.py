@@ -1,4 +1,4 @@
-"""QA step 240 activity F: the kit next to other add-ons (#79 class of bugs).
+"""QA activity F: the kit next to other add-ons (#79 class of bugs).
 
     ALLSET_SANDBOX=qa_f python tests/run.py --no-build -k __none__ \
         --extra tools/qa/qa_addons_kit_first.py,tools/qa/qa_addons_others_first.py [--blender <exe>]
@@ -220,8 +220,7 @@ def _dummy_items():
 
 def _addon_order(key):
     """Add-on keyconfig items on plain ``key`` in "3D View" / "Object Mode" / "Mesh", in effective order (Blender
-    merges add-on items at the head one by one, so the last one stored runs first; kit stores its own reversed —
-    step 130). Headless the user keyconfig is not populated, so this is read from keyconfigs.addon."""
+    merges add-on items at the head one by one, so the last one stored runs first; kit stores its own reversed). Headless the user keyconfig is not populated, so this is read from keyconfigs.addon."""
     kc = bpy.context.window_manager.keyconfigs.addon
     out = {}
     for km in kc.keymaps:

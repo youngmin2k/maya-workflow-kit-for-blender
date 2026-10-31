@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya UV Toolkit: a "UV Toolkit" tab in the UV Editor sidebar (step 66).
+"""Maya UV Toolkit: a "UV Toolkit" tab in the UV Editor sidebar.
 
 Order of Maya's toolkit: component icons (Vertex · Edge ·
 Face | UV · UV Shell), "N object selected", Pick/Marquee · Drag · Tweak/Marquee, Symmetry, Selection / Transform
@@ -81,7 +81,7 @@ class ALLSET_PT_uv_toolkit(bpy.types.Panel):
         editing = context.mode == 'EDIT_MESH'
         comp = current_component(context) if editing else None
         from . import editor_menu_data, menu_sets
-        bar = layout.row(align=True)    # the toolkit's own menu bar: Options / Help (step 104)
+        bar = layout.row(align=True)    # the toolkit's own menu bar: Options / Help
         for i, (title, _items) in enumerate(editor_menu_data.EDITORS["UV Toolkit"]):
             bar.menu(menu_sets.editor_menu_idname("UV Toolkit", i), text=title)
         row = layout.row(align=True)
@@ -157,7 +157,7 @@ class ALLSET_PT_uv_toolkit(bpy.types.Panel):
             row.operator("allset.uv_cut", text="Cut")
             row.operator("allset.uv_sew", text="Sew")
             row = body.row(align=True)
-            row.operator("allset.uv_create_shell", text="Create UV Shell")    # step 155
+            row.operator("allset.uv_create_shell", text="Create UV Shell")
             row.operator("allset.uv_move_sew", text="Move and Sew")
             body.operator("allset.cut_sew_tool_set", text="3D Cut and Sew Tool")
         body = _section(layout, "ALLSET_uvtk_unfold", "Unfold", default_closed=False)
@@ -178,7 +178,7 @@ class ALLSET_PT_uv_toolkit(bpy.types.Panel):
         if body:
             body.operator("allset.uv_layout", text="Layout")
             body.prop(s, "shell_padding", text="Shell Padding (px)")
-            row = body.row(align=True)        # step 155
+            row = body.row(align=True)
             row.operator("allset.uv_orient_shells", text="Orient Shells")
             row.operator("allset.uv_orient_edges", text="Orient to Edges")
             row = body.row(align=True)

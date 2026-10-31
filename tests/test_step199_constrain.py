@@ -1,4 +1,4 @@
-"""Step 199 lane C: Constrain > Normal / Tangent / Remove Target / Set Rest Position / Modify Constrained Axis against
+"""Constrain > Normal / Tangent / Remove Target / Set Rest Position / Modify Constrained Axis against
 Maya (Maya's values are DATA at
 the end of this file). Maya Y-up -> Blender Z-up: C = (x, y, z) -> (x, -z, y), a world matrix B = C M C^-1."""
 
@@ -73,7 +73,7 @@ def _select(*obs):
 def _mesh(name, verts, faces, sharp=False):
     me = bpy.data.meshes.new(name)
     me.from_pydata([to_b(v) for v in verts], [], faces)
-    me.shade_smooth()           # kit primitives: smooth faces, Maya's hard edges as sharp_edge (step 134)
+    me.shade_smooth()           # kit primitives: smooth faces, Maya's hard edges as sharp_edge
     if sharp:
         attr = me.attributes.new("sharp_edge", 'BOOLEAN', 'EDGE')
         attr.data.foreach_set("value", [True] * len(me.edges))

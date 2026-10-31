@@ -1,4 +1,4 @@
-"""Step 189 in a real UI: the Status Line Construction History toggle (pressed = on, a click turns it off), the panel
+"""In a real UI: the Status Line Construction History toggle (pressed = on, a click turns it off), the panel
 Show menu with IK Handles / Image Planes as check rows, and the Mesh Display menu with its new working items (shots)."""
 
 import os

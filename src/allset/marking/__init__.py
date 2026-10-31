@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya marking menus, first version: Blender pie menus (step 8).
+"""Maya marking menus, first version: Blender pie menus.
 
 Maya's marking-menu triggers and menus; Blender pies: 8 slots, press-drag-release via pie_tap_timeout.
 
@@ -54,12 +54,12 @@ def _entry_spec(action):
 
 
 def draw_entry(layout, label, action, path):
-    if label == mm.OBJECT_TITLE:   # step 52: the RMB list's first row is the object's name
+    if label == mm.OBJECT_TITLE:   # the RMB list's first row is the object's name
         ob = bpy.context.active_object
         label = f"{getattr(bpy.context.window_manager, 'allset_mm_target', '') or (ob.name if ob else 'Object')}..."
-    if mm.is_unavailable(action):  # greyed submenu (step 52)
+    if mm.is_unavailable(action):  # greyed submenu
         return menu_sets.draw_spec(layout, label + " ▸", None, f"Marking menu {path}")
-    # Toggles show their state like the engine's check boxes (step 31: pie fallback had none).
+    # Toggles show their state like the engine's check boxes (pie fallback had none).
     state = draw.checked(action) if not isinstance(action, mm.Sub) else None
     icon = 'NONE' if state is None else ('CHECKBOX_HLT' if state else 'CHECKBOX_DEHLT')
     menu_sets.draw_spec(layout, label, _entry_spec(action), f"Marking menu {path}", icon=icon)
@@ -107,7 +107,7 @@ def _make(sub, name, label, path, is_pie, out=None, reuse=False):
             draw_pie(self.layout.menu_pie(), sub, path)
     elif isinstance(sub, mm.NodeList):
         def draw(self, context):
-            # filled from the object now (step 165); a node's own traversal submenu = its first row (Select <node>)
+            # filled from the object now; a node's own traversal submenu = its first row (Select <node>)
             from . import rmb_nodes
             from . import rmb_items
             data = rmb_nodes.nodes(rmb_items.target(context))
@@ -149,7 +149,7 @@ def user_idname(menu_name, sub_path=""):
 
 
 def pie_idname(menu_name):
-    """The pie class of ``menu_name`` as it is now (a changed kit menu has its own; step 8 fallback style)."""
+    """The pie class of ``menu_name`` as it is now (a changed kit menu has its own; else the fallback style)."""
     return _USER_IDS.get(menu_name) or idname(menu_name)
 
 
@@ -246,7 +246,7 @@ def _clear_user_menus():
     user_menus.reset()
 
 
-# --- choosing the menu (Maya builders, step 8) ---------------------------------------
+# --- choosing the menu (Maya builders) ---------------------------------------
 
 def resolve(trigger, context, picked=None):
     """("pie" | "menu", Menu idname) for a trigger in this context, or None."""
@@ -259,7 +259,7 @@ def resolve(trigger, context, picked=None):
         return ("pie", idname(name)) if name else None
     space = getattr(context, "space_data", None)
     if space is not None and space.type == 'IMAGE_EDITOR':
-        # UV Editor (step 66): Maya 2026's UV Editor RMB marking menu, Shift+RMB = UV / UV Shell tools
+        # UV Editor: Maya 2026's UV Editor RMB marking menu, Shift+RMB = UV / UV Shell tools
         if mode != 'EDIT_MESH' or space.mode != 'UV':
             return None
         if trigger == "RMB":
@@ -272,7 +272,7 @@ def resolve(trigger, context, picked=None):
         return None
     if trigger == "CTRL_RMB":
         # Maya's Ctrl+RMB convert menu picks by the lead's shape type, not the mode: a mesh lead gets CTRL_CONVERT in
-        # object mode too (an item then converts the whole object, modal.CONVERT_FROM_OBJECT; step 136)
+        # object mode too (an item then converts the whole object, modal.CONVERT_FROM_OBJECT)
         if mode == 'EDIT_MESH' or (mode == 'OBJECT' and ob is not None and ob.type == 'MESH'):
             return ("pie", idname("CTRL_CONVERT"))
         trigger = "RMB"  # not a mesh -> object menu
@@ -286,7 +286,7 @@ def resolve(trigger, context, picked=None):
         return ("pie", idname("SHIFT_OBJECT" if meshes else "SHIFT_DEFAULT"))
     # RMB
     from ..operators import pivot_menu
-    if pivot_menu.pivot_editing(context):      # D / Insert held or on: the pivot menu (step 94)
+    if pivot_menu.pivot_editing(context):      # D / Insert held or on: the pivot menu
         return ("pie", idname("PIVOT_EDIT"))
     if mode == 'EDIT_MESH':
         return ("pie", idname("RMB_MESH"))
@@ -302,7 +302,7 @@ def resolve(trigger, context, picked=None):
         if ob.type in {'CURVE', 'SURFACE'}:
             return ("pie", idname("RMB_CURVE"))
         if ob.type == 'LATTICE':
-            return ("pie", idname("RMB_LATTICE"))  # step 294 (#227)
+            return ("pie", idname("RMB_LATTICE"))  # #227
         return ("menu", "VIEW3D_MT_object_context_menu")  # no Maya radial for this type
     return None
 
@@ -389,7 +389,7 @@ class ALLSET_OT_mm_component(bpy.types.Operator):
                 bpy.ops.object.mode_set(mode='EDIT')
             return {'FINISHED'}
         if self.type == "LATTICE":
-            # step 294 (#227): Lattice Point on a lattice = its edit mode
+            # #227: Lattice Point on a lattice = its edit mode
             if ob.type == 'LATTICE' and context.mode == 'OBJECT':
                 bpy.ops.object.mode_set(mode='EDIT')
             return {'FINISHED'}
@@ -479,7 +479,7 @@ class ToolOptionsBinding(taphold.TapHoldBinding):
 
     def tap(self, context):
         # Tapping the key of the active tool again goes back to the centre handle (free MMB
-        # drag), like Maya; step 28.
+        # drag), like Maya.
         kind = HANDLE_KINDS.get(self.tool)
         tool = context.workspace.tools.from_space_view3d_mode(context.mode, create=False)
         if kind and tool is not None and tool.idname == self.tool:
@@ -540,7 +540,7 @@ class SelectComponentBinding(ToolOptionsBinding):
             view_message.show(context, maya_errors.hidden_text(ob), 'TOP_CENTER')
         elif context.mode == 'OBJECT' and ob is not None and ob.type == 'MESH':
             bpy.ops.object.mode_set(mode='EDIT')     # selectMode -component
-            # a tool is set for the mode the call starts in: set the edit-mode tool once in it (step 97)
+            # a tool is set for the mode the call starts in: set the edit-mode tool once in it
             bpy.app.timers.register(lambda: _tool_later(self.tool), first_interval=0.0)
         super()._set_tool()
 

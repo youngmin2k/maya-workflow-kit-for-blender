@@ -67,7 +67,7 @@ def ui_region():
 
 
 def goto_tab(category, then):
-    """Show ``category`` in Maya's tab stack (its own area since step 116; made right of the view if missing)."""
+    """Show ``category`` in Maya's tab stack (its own area; made right of the view if missing)."""
     kinds = {"Channel Box / Layer Editor": 'CHANNEL_BOX', "Attribute Editor": 'ATTRIBUTE_EDITOR',
              "Modeling Toolkit": 'MODELING_TOOLKIT'}
 
@@ -91,15 +91,15 @@ def only(name):
 @step
 def s_first_start():
     kc = bpy.context.window_manager.keyconfigs.active
-    # step 115: nothing changes until the user opts in; setup() opts in like the welcome dialog's button
+    # nothing changes until the user opts in; setup() opts in like the welcome dialog's button
     check(f"keymap untouched before the opt-in (got {kc.name if kc else None})",
           kc is not None and kc.name == "Blender")
     setup()
     kc = bpy.context.window_manager.keyconfigs.active
-    # step 130: the Maya keys are add-on keymap items, the active keyconfig stays the user's
+    # the Maya keys are add-on keymap items, the active keyconfig stays the user's
     check(f"Maya keymap after the opt-in (active keyconfig still {kc.name if kc else None})",
           kc is not None and kc.name == "Blender" and import_module(MODULE + ".keymap").is_applied())
-    # step 130: no app template; a new scene from the startup.blend inside the extension (#49)
+    # no app template; a new scene from the startup.blend inside the extension (#49)
     import_module(MODULE + ".first_start").new_maya_scene()
 
 
@@ -376,13 +376,13 @@ def s_hotbox_wait():
 def s_hotbox_shot():
     shot("07_hotbox.png")
     ev('SPACE', 'RELEASE')
-    # step 237: Four View = four real 3D View panels (ui/four_view.py), not Quad View regions
+    # Four View = four real 3D View panels (ui/four_view.py), not Quad View regions
     C["quad"] = len(import_module(MODULE + ".ui.four_view").panes(win().screen))
 
 
 @step
 def s_space_gap():
-    # step 260 (#174): a Space PRESS within RELEASE_GRACE (0.12 s) of the hold's release belongs to that hold
+    # #174: a Space PRESS within RELEASE_GRACE (0.12 s) of the hold's release belongs to that hold
     time.sleep(0.2)
     tap('SPACE')
 
@@ -501,7 +501,7 @@ def s_h():
 @step
 def s_h_check():
     ob = bpy.data.objects["pCube1"]
-    # step 129 (#26): Maya visibility = hide_viewport (Channel Box Visibility, h, Display > Show)
+    # #26: Maya visibility = hide_viewport (Channel Box Visibility, h, Display > Show)
     check("h toggles visibility of the selection (hidden)", not ob.visible_get())
     ob.hide_viewport = False
     ob.hide_set(False)
@@ -548,8 +548,8 @@ def s_prev_key():
     sc = bpy.context.scene
     check(f"',' steps to the previous key (11 -> {sc.frame_current})", sc.frame_current == 10)
     sc.frame_set(1)
-    tap('ESC')   # in case a pie opened (Blender's . / , before step 20)
-    C["gizmo"] = import_module(MODULE + ".ui.manipulator").SIZE[0]   # step 130: kit manipulator size, no preference
+    tap('ESC')   # in case a pie opened (Blender's . / , in older versions)
+    C["gizmo"] = import_module(MODULE + ".ui.manipulator").SIZE[0]   # kit manipulator size, no preference
     tap('EQUAL')
 
 
@@ -596,7 +596,7 @@ def s_grow_check():
 
 @step
 def s_extrude():
-    # Maya Ctrl+E = polyExtrudeFace: a zero-length extrusion + the extrude manipulator / In-View Editor (step 65)
+    # Maya Ctrl+E = polyExtrudeFace: a zero-length extrusion + the extrude manipulator / In-View Editor
     import bmesh
     bm = bmesh.from_edit_mesh(bpy.data.objects["pCube1"].data)
     extrude = sys.modules[MODULE + ".operators.extrude"]

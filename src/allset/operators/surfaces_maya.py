@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Surfaces menu on Blender legacy NURBS surfaces (step 181;
-maths in ``surfaces_math`` — bpy-free, tested headless).
+"""Maya Surfaces menu on Blender legacy NURBS surfaces
+(maths in ``surfaces_math`` — bpy-free, tested headless).
 
 Representation: a Maya NURBS surface = a Blender
 SURFACE object, one NURBS spline, Maya U = Blender u (along a row), Maya V = the row index. Uniform directions are exact
@@ -205,7 +205,7 @@ class ALLSET_OT_loft(_SurfOp, bpy.types.Operator):
     auto_reverse: BoolProperty(name="Auto reverse", default=True, options={'SKIP_SAVE'})
     degree: EnumProperty(name="Surface degree", items=DEGREES, default='3', options={'SKIP_SAVE'})
     section_spans: IntProperty(name="Section spans", default=1, min=1, max=1000, options={'SKIP_SAVE'})
-    # step 228: Maya Output geometry (NURBS / Polygons; Bezier isn't made)
+    # Maya Output geometry (NURBS / Polygons; Bezier isn't made)
     output: EnumProperty(name="Output geometry", items=[('NURBS', "NURBS", ""), ('POLYGONS', "Polygons", "")],
                          default='NURBS', options={'SKIP_SAVE'})
 
@@ -223,7 +223,7 @@ class ALLSET_OT_loft(_SurfOp, bpy.types.Operator):
         return _done(self, context, [new_surface(context, "loftedSurface", s, select=False)])
 
 
-# --- step 228: Loft > Output geometry Polygons, with kit history -----------------------------------------------
+# --- Loft > Output geometry Polygons, with kit history -----------------------------------------------
 # Maya:
 # ``loft ... -po 1`` gives only a mesh ``loftedSurface1`` (history nurbsTessellate <- loft <- the curves; moving a CV
 # moves the mesh), UVs = the surface's normalised (u, v): UV u across the curves, UV v along them. Maya's general
@@ -484,7 +484,7 @@ def _near(c, p, samples=64):
 
 
 def birail_roles(curves):
-    """(profile, rail1, rail2) from three curves by shape (step 181): the profile is the curve
+    """(profile, rail1, rail2) from three curves by shape: the profile is the curve
     whose two ends lie nearest the other two curves, rail 1 the one at the profile's start; a rail is reversed when the
     profile sits nearer its end (Maya starts the surface at the rails' starts)."""
     best = None
@@ -589,7 +589,7 @@ class ALLSET_OT_surface_attach(_SurfOp, bpy.types.Operator):
 def _picked_lines(context):
     """(ob, Surf, direction, Maya parameters) from the CVs selected in edit mode: a selected CV row (same Blender row)
     = a V isoparm, a column = a U isoparm, at the Greville parameter of that line (Blender can't pick isoparms;
-    like step 156 Detach)."""
+    like the curve Detach)."""
     ob = context.edit_object if context.mode == 'EDIT_SURFACE' else None
     if ob is None or ob.type != 'SURFACE':
         return None
@@ -670,8 +670,8 @@ class ALLSET_OT_surface_insert_isoparm(_SurfOp, bpy.types.Operator):
     bl_idname = "allset.surface_insert_isoparm"
     bl_label = "Insert Isoparms"
 
-    # Maya option box (Insert Isoparms Options factory: At selection,
-    # Increase, 1, Keep original off) — step 189
+    # Maya option box (Insert Isoparms Options defaults: At selection,
+    # Increase, 1, Keep original off)
     between: BoolProperty(name="Between selections", default=False, options={'SKIP_SAVE'},
                           description="Insert evenly between the selected rows / columns instead of at them")
     increase: BoolProperty(name="Increase", default=True, options={'SKIP_SAVE'},

@@ -1,4 +1,4 @@
-"""Step 66: Maya UV workflow — UV Editor entry, UV components, Cut / Sew / Unfold / Layout, Texel Density, UV marking
+"""Maya UV workflow — UV Editor entry, UV components, Cut / Sew / Unfold / Layout, Texel Density, UV marking
 menus, UV Toolkit. GUI: tests/gui/gui_step66_uv.py."""
 
 import types
@@ -198,7 +198,7 @@ def test_uv_components():
     ts.use_uv_select_sync = False
     assert bpy.ops.allset.uv_component(mode='EDGE') == {'FINISHED'}
     assert ob.mode == 'EDIT' and ts.use_uv_select_sync and tuple(ts.mesh_select_mode) == (False, True, False)
-    # step 256: SHELL is Maya's UV Shell mask (sync on, face mode, selection cleared; operators/uv_shell_select.py);
+    # SHELL is Maya's UV Shell mask (sync on, face mode, selection cleared; operators/uv_shell_select.py);
     # Blender's island selection is the internal 'ISLAND' (Move UV Shell)
     assert bpy.ops.allset.uv_component(mode='SHELL') == {'FINISHED'}
     assert ts.use_uv_select_sync and tuple(ts.mesh_select_mode) == (False, False, True)
@@ -228,7 +228,7 @@ def test_uv_editor_marking_menus():
     assert marking.resolve("RMB", _ctx(space_mode='VIEW')) is None, "image viewing: no UV menu"
     rmb = mm.UV_EDITOR_RMB.radial
     assert {p: l for p, (l, _a) in rmb.items()} == {"S": "Face", "N": "Edge", "E": "UV", "W": "Vertex", "NW": "UV Shell"}
-    # step 151: Maya's UV is a submenu (E UV, S UV Shell; Maya 2022 RMB marking menu)
+    # Maya's UV is a submenu (E UV, S UV Shell; Maya 2022 RMB marking menu)
     label, sub = mm.RMB_MESH.radial["E"]
     assert label == "UV" and sub.radial == {"E": ("UV", ("allset.uv_component", {"mode": 'UV'})),
                                             "S": ("UV Shell", ("allset.uv_component", {"mode": 'SHELL'}))}
@@ -253,7 +253,7 @@ def test_keys_and_menus():
         assert _items(k, 'F12', alt=True) == [("allset.uv_component", {"mode": 'SHELL'})]
     assert menu_map.MAP["UV/Cut UV Edges"] == "allset.uv_cut"
     assert menu_map.MAP["UV/Sew UV Edges"] == "allset.uv_sew"
-    assert menu_map.MAP["UV/3D Cut and Sew UV Tool"] == "allset.cut_sew_tool_set"   # step 79 (was a notice)
+    assert menu_map.MAP["UV/3D Cut and Sew UV Tool"] == "allset.cut_sew_tool_set"   # was a notice
     assert hasattr(bpy.types, "ALLSET_PT_uv_toolkit")
 
 

@@ -1,4 +1,4 @@
-"""Step 83 in a real UI: Ctrl+Shift+W / Alt+I insert keys keeping the curve, Shift+) / ( nudge, Ctrl+Alt+. / , select
+"""In a real UI: Ctrl+Shift+W / Alt+I insert keys keeping the curve, Shift+) / ( nudge, Ctrl+Alt+. / , select
 next / previous key, Graph Editor nudge of the selected key."""
 
 import os

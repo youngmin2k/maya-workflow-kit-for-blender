@@ -1,4 +1,4 @@
-"""Step 151 lane A (#99): the marking-menu ring has Maya-style geometry — radius 55, diagonal boxes with their corner
+"""Lane A (#99): the marking-menu ring has Maya-style geometry — radius 55, diagonal boxes with their corner
 on the diagonal, boxes 21 px high and text + 2 x 25 px wide, the submenu arrow inside the right padding, the list
 21 px under the ring. Numbers of the object marking menu and the Shift+RMB menu.
 Engine only (no bpy UI)."""
@@ -124,12 +124,12 @@ def test_list_starts_21_px_under_the_ring():
 
 
 def test_fit_ring_keeps_centre_and_bounds():
-    """The Maya-sized ring near a corner: boxes slide inside without moving the centre (step 33)."""
+    """The Maya-sized ring near a corner: boxes slide inside without moving the centre."""
     bounds = (0.0, 0.0, 400.0, 300.0)
     measure = lambda t: 7.0 * len(t)
     for origin in ((20.0, 20.0), (380.0, 280.0), (200.0, 150.0)):
         s = engine.Session(mm.SHIFT_DEFAULT, origin, 0.0, measure, None, None, bounds)
-        assert s.center == origin           # list taller than the window: the ring stays (step 193), boxes slide
+        assert s.center == origin           # list taller than the window: the ring stays, boxes slide
         for it in s.layout.radial.values():
             r = it.rect
             assert r[0] + origin[0] >= -1e-6 and r[2] + origin[0] <= 400 + 1e-6, (origin, it, r)

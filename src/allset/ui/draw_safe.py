@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Menu / header draw helpers that never raise for a missing operator (step 279, #199).
+"""Menu / header draw helpers that never raise for a missing operator (#199).
 
 ``UILayout.operator`` returns None when Blender doesn't know the operator (not registered yet, or a Blender
 version without it). Setting a property on that None raised AttributeError, and one such line in the tear-off row

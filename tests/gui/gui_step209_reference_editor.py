@@ -1,4 +1,4 @@
-"""Step 209 in a real UI: a source scene referenced twice (prop / prop1, the second unloaded), then File > Reference
+"""In a real UI: a source scene referenced twice (prop / prop1, the second unloaded), then File > Reference
 Editor -> a new window whose Properties area is the kit Reference Editor (Maya menu bar File / Reference / Proxy /
 View / Help, icon row, File Particulars, list "propRN srcA.blend" with load check boxes); Reload from the list's
 selection; shot beside Maya's Reference Editor."""

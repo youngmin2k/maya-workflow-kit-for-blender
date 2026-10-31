@@ -1,4 +1,4 @@
-"""Step 262 (Issue #173): the panel Show menu's Selection Highlighting and NURBS Curves rows really drive what the
+"""Issue #173: the panel Show menu's Selection Highlighting and NURBS Curves rows really drive what the
 viewport draws — icon == setting == behaviour — for the kit selection wire and for rig controls drawn as bone
 custom shapes. The drawn pixels: tests/gui/gui_step262_show.py.
 """
@@ -100,7 +100,7 @@ def test_pose_mode_control_pick_doesnt_highlight_the_child_mesh():
     for o in bpy.context.scene.objects:
         o.select_set(o is rig)
     bpy.context.view_layer.objects.active = rig
-    # object mode: the armature's hierarchy is selected (Maya hierarchy highlight, step 161)
+    # object mode: the armature's hierarchy is selected (Maya hierarchy highlight)
     assert "body_geo" in [o.name for o, _l in wire.highlighted(bpy.context)]
     bpy.ops.object.mode_set(mode='POSE')
     try:

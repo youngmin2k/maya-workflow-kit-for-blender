@@ -1,4 +1,4 @@
-"""Step 147 (#88 #92 #86): every Maya command is one undo step, and kit commands open no Adjust Last Operation.
+"""#88 #92 #86: every Maya command is one undo step, and kit commands open no Adjust Last Operation.
 GUI: tests/gui/gui_step147_hud.py.
 
 ``bpy.ops.ed.undo_push`` makes the undo stack in background (ed_undo.cc #60934), so undo is tested headless. A UI
@@ -78,7 +78,7 @@ def test_shelf_and_marking_runs_are_undo_steps_too():
 def test_redo_option_box_registers_its_operator():
     # option box kind "redo" = run + Adjust Last Operation: the operator must be registered for the panel
     menu_sets = import_module(kit.MODULE + ".ui.menu_sets")
-    path = "Create/Lights/Point Light"      # step 196: the NURBS primitives open Maya windows now
+    path = "Create/Lights/Point Light"      # the NURBS primitives open Maya windows now
     assert menu_sets.option_kind(path) == "redo"
     _start()
     before = _names()

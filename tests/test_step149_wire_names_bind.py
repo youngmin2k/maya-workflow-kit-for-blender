@@ -1,4 +1,4 @@
-"""Step 149 (#91 #93 #94): selection wire follows deformation per frame, Maya names restart after Delete, Bind Skin =
+"""#91 #93 #94: selection wire follows deformation per frame, Maya names restart after Delete, Bind Skin =
 Maya closest distance.
 GUI: tests/gui/gui_step149_wire.py (playback shot)."""
 

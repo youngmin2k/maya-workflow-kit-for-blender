@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Outliner drag: parent / reorder / unparent the Maya way (step 82).
+"""Maya Outliner drag: parent / reorder / unparent the Maya way.
 
 Maya : MMB-drag an item onto another = parent under it,
 between two items = move there (that row's parent, that place), onto empty space = to the world; the world
@@ -343,11 +343,11 @@ class ALLSET_OT_outliner_drag(bpy.types.Operator):
                         + ", ".join(ob.name for ob in cycles))
         from ..ui import outliner_order
         if done and not context.space_data.use_filter_collection:
-            outliner_order.to_end(done, context.scene)      # Maya: last among the new siblings (step 211)
+            outliner_order.to_end(done, context.scene)      # Maya: last among the new siblings
         ordered = False
         if target is not None and where != 'ON' and not context.space_data.use_sort_alpha:
             keep = [ob for ob in movers if ob not in cycles]
-            # step 211: the Maya Outliner's order = creation order numbers (ui/outliner_order.py)
+            # the Maya Outliner's order = creation order numbers (ui/outliner_order.py)
             ordered = not context.space_data.use_filter_collection and outliner_order.place(
                 context.scene, context.view_layer, keep, target, where == 'AFTER', reordered)
             if not ordered:
@@ -383,7 +383,7 @@ class ALLSET_OT_outliner_reparent(bpy.types.Operator):
         for parent, children in groups.items():
             obs = [bpy.data.objects[n] for n in children if n in bpy.data.objects]
             moved, _skipped = reparent(obs, bpy.data.objects.get(parent) if parent else None, mode='MAYA')
-            outliner_order.to_end(moved, context.scene)      # Maya: last among the new siblings (step 211)
+            outliner_order.to_end(moved, context.scene)      # Maya: last among the new siblings
         if self.select:
             _restore_selection(context, (json.loads(self.select), self.active or None,
                                          context.view_layer.active_layer_collection))

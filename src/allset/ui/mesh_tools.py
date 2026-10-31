@@ -4,7 +4,7 @@
 - Target Weld (Maya Mesh Tools > Target Weld): LMB press on a
   vertex / edge starts ``allset.target_weld``; a press away from them falls back to the select tool.
 - Crease Tool (Mesh Tools > Crease Tool): MMB drag = ``allset.crease_drag``; LMB selects (fallback).
-- Multi-Cut (step 129): the kit tool ``allset.multi_cut_tool`` running
+- Multi-Cut: the kit tool ``allset.multi_cut_tool`` running
   ``allset.multi_cut`` (operators/multi_cut.py); its Tool Settings are Maya's.
 Settings live in ``Scene.allset_mesh_tools`` (operators/mesh_tools.py).
 """
@@ -137,7 +137,7 @@ class ALLSET_TL_multi_cut(bpy.types.WorkSpaceTool):
     bl_icon = "ops.mesh.knife_tool"
     bl_widget = None
     bl_keymap = (
-        # loops first: one undo step each and Adjust Last Operation Position (step 64's operator); they pass
+        # loops first: one undo step each and Adjust Last Operation Position (the kit's multicut operator); they pass
         # through when no edge is under the mouse
         ("allset.multicut_loop", {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True}, None),
         ("allset.multicut_loop", {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True, "shift": True},

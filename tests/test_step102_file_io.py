@@ -1,4 +1,4 @@
-"""Step 102: Maya file I/O — one file dialog with Files of type, Maya cm / Y-up presets, default project, round trip
+"""Maya file I/O — one file dialog with Files of type, Maya cm / Y-up presets, default project, round trip
 with Maya. GUI:
 tests/gui/gui_step102_file_dialog.py.
 
@@ -20,7 +20,7 @@ menu_map = import_module(kit.MODULE + ".ui.menu_map")
 menu_data = import_module(kit.MODULE + ".ui.menu_data")
 
 ROOT = Path(__file__).resolve().parent.parent
-# per sandbox: version runs in parallel (step 200) must not share the exported files
+# per sandbox: version runs in parallel must not share the exported files
 IO = ROOT / "tmp" / os.environ.get("ALLSET_SANDBOX", "test_env") / "file_io"
 # pCube1 for the round trip: 10 x 20 x 5 Maya units (cm), the 20 along Maya's up axis.
 SIZE = (10.0, 20.0, 5.0)
@@ -74,7 +74,7 @@ def test_presets_cm_y_up():
     op, a = file_io.export_args('FBX', k, True)
     assert a["use_selection"] and a["axis_up"] == 'Y' and a["apply_unit_scale"]
     op, a = file_io.export_args('USD', k, False)
-    # step 138: Y up / Maya units are written by file_io.usd_maya_axes after Blender's writer (no root prim)
+    # Y up / Maya units are written by file_io.usd_maya_axes after Blender's writer (no root prim)
     assert a["root_prim_path"] == "" and not a.get("convert_orientation")
     assert abs(file_io.import_args('USD', k)[1]["scale"] - 1.0) < 1e-12
     # Maya Units option (1 BU = 1 cm): OBJ / ABC numbers pass straight

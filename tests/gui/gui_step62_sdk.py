@@ -1,4 +1,4 @@
-"""Step 62 in a real UI, Maya's hand order (rigging):
+"""In a real UI, Maya's hand order (rigging):
 locator1 Translate X = driver, pCube1 Rotate Y = driven -> Key -> tx 1 / ry 90 typed in the Channel Box ->
 Key -> tx 0.5 -> ry 45. Clicks the Channel Box rows and the Set Driven Key buttons in the dock; screenshots."""
 
@@ -30,14 +30,14 @@ def shot(name):
 
 
 def ui_region():
-    return dock_region()       # the Maya tab stack (step 116; was the 3D View sidebar)
+    return dock_region()       # the Maya tab stack (was the 3D View sidebar)
 
 
 def dock():
     return dock_area(), dock_region()
 
 
-# step 116: the dock is its own area, so x offsets from the old sidebar's right edge (which held Blender's tab strip)
+# the dock is its own area, so x offsets from the old sidebar's right edge (which held Blender's tab strip)
 # don't hold. Channel Box columns are found once by data path; the Set Driven Key button grid (two columns) by its
 # share of the width (old sidebar content 325 px: Key / Load Driven at 28 %, Load Driver at 71 %).
 GRID = {260: 0.28, 118: 0.71}
@@ -90,7 +90,7 @@ BUTTONS = {KEY_CUBE: ("sdk_key", 0.28), LOAD_DRIVEN_CUBE: ("which='DRIVEN'", 0.2
 
 def click(spot):
     """Hover in one tick, press + release in the next: a Blender button activates on hover. Set Driven Key buttons
-    are looked up by their command (their height follows the dock's, step 116)."""
+    are looked up by their command (their height follows the dock's)."""
     if spot in BUTTONS:
         text, frac = BUTTONS[spot]
         state = {}
@@ -199,7 +199,7 @@ def s_setup():
     loc.empty_display_type = 'PLAIN_AXES'
     loc.location = (0, -3, 0)       # Translate X 0 = the first driven key (Maya scenario)
     bpy.context.scene.collection.objects.link(loc)
-    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport (step 116)
+    dock_area('CHANNEL_BOX')    # Maya's tab stack right of the viewport
     bpy.ops.allset.sdk_window()          # Key > Set Driven Key > Set... (menu mapping: headless test)
     redraw()
 

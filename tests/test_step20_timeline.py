@@ -1,4 +1,4 @@
-"""Step 20: Maya . , Alt+. Alt+, key / frame stepping, Time + Range Slider in the Timeline
+"""Maya . , Alt+. Alt+, key / frame stepping, Time + Range Slider in the Timeline
 header, timeline view following the playback range."""
 
 from importlib import import_module
@@ -31,7 +31,7 @@ def test_stepping_keys():
 
 
 def _buttons():
-    return time_slider.header_classes()[0]   # Blender 5.x: the Dope Sheet's (step 53)
+    return time_slider.header_classes()[0]   # Blender 5.x: the Dope Sheet's
 
 
 def _header_is_kit():

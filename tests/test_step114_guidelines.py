@@ -1,9 +1,8 @@
-"""Step 114: the two extension guideline violations of the audit stay fixed.
+"""The two extension guideline violations of the audit stay fixed.
 
 1. No global module dictionary / module path changes: enabling, using and disabling the kit leaves ``sys.modules``
    without any ``maya`` entry and ``sys.path`` unchanged; ``import maya.cmds`` works only inside the Command Line /
-   shelf / Script Editor entries, whose import lines the runner rewrites to the kit's module (``runner.prepare``,
-   step 130).
+   shelf / Script Editor entries, whose import lines the runner rewrites to the kit's module (``runner.prepare``).
 2. Assets: every non-code file in the package is a kit-made file listed in ``ASSETS_LICENSE.txt`` (CC0-1.0, also
    in the manifest's ``license``); the extension zip carries no legacy ``bl_info`` (the legacy zip does).
 """
@@ -79,7 +78,7 @@ def test_every_asset_is_kit_made_and_cc0():
     listed = open(os.path.join(PKG, "ASSETS_LICENSE.txt"), encoding="utf-8").read()
     assets = _assets()
     assert assets == ["app_template/Maya_Workflow_Kit/splash.png", "app_template/Maya_Workflow_Kit/splash_2x.png",
-                      "app_template/Maya_Workflow_Kit/startup.blend", "welcome.png"], assets   # no theme (step 130)
+                      "app_template/Maya_Workflow_Kit/startup.blend", "welcome.png"], assets   # no theme
     for rel in assets:
         assert rel in listed, f"{rel} missing from ASSETS_LICENSE.txt"
     assert "CC0" in listed

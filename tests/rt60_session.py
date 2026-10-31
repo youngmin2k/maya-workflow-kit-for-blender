@@ -1,4 +1,4 @@
-"""One Blender session of the step 60 round trip (run by test_step60_switch.py, not a test file).
+"""One Blender session of the Maya mode switch round trip (run by test_step60_switch.py, not a test file).
 
     blender -b --python tests/rt60_session.py -- <out.json> <action> [<action> ...]
 

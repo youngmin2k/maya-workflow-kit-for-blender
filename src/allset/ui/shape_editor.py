@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Shape Editor window (step 213, Issue #119).
+"""Maya's Shape Editor window (Issue #119).
 
 Maya: menu bar, a toolbar (Create Blend Shape, Add Target, search) and a tree of blendShape nodes with their targets
 (visibility dot, name, weight field + slider, Edit, Key). Blender: a blendShape node = the base
-mesh's Key datablock (named ``blendShapeN``, step 62), its targets = the key blocks after the Basis, weight =
+mesh's Key datablock (named ``blendShapeN``), its targets = the key blocks after the Basis, weight =
 ``KeyBlock.value``, visibility = ``not KeyBlock.mute``, Edit (sculptTarget) = the target is the object's active shape
 key (moving vertices in Edit Mode then writes into it, Blender's own behaviour). Blender has no envelope: the node row
 shows 1.000 read-only.
@@ -96,7 +96,7 @@ def _targets(context, whole_node=True):
 
 
 def _target_indices(key):
-    """[(key, index)] of ``key``'s Maya targets (step 227: hidden in-between / fix keys left out)."""
+    """[(key, index)] of ``key``'s Maya targets (hidden in-between / fix keys left out)."""
     from ..operators import blend_shapes_227
     hidden = blend_shapes_227.helper_names(key)
     return [(key, i) for i in range(1, len(key.key_blocks)) if key.key_blocks[i].name not in hidden]
@@ -274,7 +274,7 @@ class ALLSET_OT_shape_pick(bpy.types.Operator):
     def execute(self, context):
         wm = context.window_manager
         wm.allset_se_current = (f"{self.key}/{self.index}" if self.index > 0 else self.key) if self.key else ""
-        # step 227: the picked targets in pick order (Add / Set as Combination Target read them)
+        # the picked targets in pick order (Add / Set as Combination Target read them)
         if hasattr(wm, "allset_se_picked"):
             key = bpy.data.shape_keys.get(self.key) if self.key else None
             names = []
@@ -664,7 +664,7 @@ def _draw_inbetween(col, key, kb, w, label, in_edit):
 
 
 def picked_targets(context, key):
-    """Targets picked in the Shape Editor for ``key`` (step 227), else the current target."""
+    """Targets picked in the Shape Editor for ``key``, else the current target."""
     wm = context.window_manager
     name, _, rest = getattr(wm, "allset_se_picked", "").partition("/")
     if key is not None and name == key.name:
@@ -677,7 +677,7 @@ class ALLSET_PT_shape_editor(bpy.types.Panel):
     """Maya's Shape Editor (a marked Properties Tool tab in its own window)"""
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "Tool"            # = drawn by the Properties Tool tab (step 106 mechanism)
+    bl_category = "Tool"            # = drawn by the Properties Tool tab
     bl_label = "Shape Editor"
     bl_options = {'HIDE_HEADER'}
     bl_order = -300

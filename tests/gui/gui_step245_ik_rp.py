@@ -1,4 +1,4 @@
-"""Step 245 (Issue #162) in a real UI, chain ③: Joint Tool 3 clicks (a
+"""Issue #162: in a real UI, chain ③: Joint Tool 3 clicks (a
 bent arm) -> Enter -> Skeleton > Create IK Handle (click joint1, then joint3) -> the handle has a default Pole
 Vector (2 units toward the elbow) and Twist in the Channel Box, the chain doesn't move -> move the handle: the elbow
 stays in the RP plane -> Twist 90 turns the plane about root -> goal -> Ctrl+Z -> save + open keeps it working."""

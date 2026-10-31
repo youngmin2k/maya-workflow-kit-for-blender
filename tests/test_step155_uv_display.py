@@ -1,4 +1,4 @@
-"""Step 155 lane D: Maya UV Editor display keys (4 / 5 / 6 / 8 / 9 / Ctrl+1) and Move UV Shell
+"""Maya UV Editor display keys (4 / 5 / 6 / 8 / 9 / Ctrl+1) and Move UV Shell
 (src/allset/ui/uv_display.py). GUI: tests/gui/gui_step155_uv.py."""
 
 from importlib import import_module

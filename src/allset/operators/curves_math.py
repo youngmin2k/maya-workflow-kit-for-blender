@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2022 NURBS curve maths, bpy-free (step 156).
+"""Maya 2022 NURBS curve maths, bpy-free.
 
 A curve here = (cvs, knots, degree[, weights]); ``cvs`` are 3-tuples, ``knots`` are Maya's knot list (no phantom end
 knots: len = len(cvs) + degree - 1). Coordinates are whatever the caller uses (the tests feed Maya's Y-up numbers,
@@ -686,7 +686,7 @@ def cut_all(curves, last_only=False, keep_longest=False):
     return result
 
 
-# --- Curves > Bend / Curl / Scale Curvature (step 207) ------------------------------------------------------
+# --- Curves > Bend / Curl / Scale Curvature ------------------------------------------------------
 # Maya's Curves > Bend / Curl / Scale Curvature commands: the CVs become "deflections" — each CV leg
 # expressed in a frame carried along the curve (start frame from the first leg with the twist axis taken from Maya's
 # Y-up world, each next frame = the previous one turned onto the next leg by half the angle twice). The

@@ -1,4 +1,4 @@
-"""Step 27: = / - manipulator size (kit manipulator only since step 130), PgUp/PgDn smoothing level, 0,
+"""= / - manipulator size (kit manipulator only), PgUp/PgDn smoothing level, 0,
 Home default view, Alt+5 wireframe on shaded."""
 
 from importlib import import_module
@@ -39,7 +39,7 @@ def test_keys_bound():
 
 
 def test_manip_size_steps_without_touching_preferences():
-    """Step 130: = / - scale the kit manipulator only (ui/manipulator.SIZE); Blender's gizmo_size stays."""
+    """= / - scale the kit manipulator only (ui/manipulator.SIZE); Blender's gizmo_size stays."""
     manipulator = import_module(kit.MODULE + ".ui.manipulator")
     view_prefs = bpy.context.preferences.view
     original = view_prefs.gizmo_size

@@ -1,4 +1,4 @@
-"""Step 87: Maya view keys 3 (Alt+A cycle display, Alt+P camera mode, Alt+arrows pixel move, ` tweak hold,
+"""Maya view keys 3 (Alt+A cycle display, Alt+P camera mode, Alt+arrows pixel move, ` tweak hold,
 \\ 2D pan/zoom) and the mapping table's cell escaping."""
 
 import math

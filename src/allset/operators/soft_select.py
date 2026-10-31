@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya soft selection as ONE global state (issues #1, #15) and the falloff maths of the colour overlay (#2).
 
-Maya's soft select is one global option (``cmds.softSelect(softSelectEnabled=...)``, off by default,
-step 129). Blender has two per-scene flags, ``use_proportional_edit_objects`` (object mode)
+Maya's soft select is one global option (``cmds.softSelect(softSelectEnabled=...)``, off by default).
+Blender has two per-scene flags, ``use_proportional_edit_objects`` (object mode)
 and ``use_proportional_edit`` (edit modes, UV), so the kit keeps both flags of every scene equal to ``STATE``:
 kit toggles call ``set_on``; a flag changed by Blender's own UI is pulled in (``pull``: depsgraph handler +
 msgbus); loads / undo / redo push the state back (a file saved with soft select on follows the global state).
@@ -47,7 +47,7 @@ def push():
 
 def set_on(value, context=None):
     """Turn Maya soft select on / off everywhere. Turning it on with Blender's untouched radius uses Maya's
-    (5 Maya units, step 63)."""
+    (5 Maya units)."""
     STATE["on"] = bool(value)
     push()
     if STATE["on"] and context is not None:
@@ -74,7 +74,7 @@ def toggle(context):
     return set_on(not STATE["on"], context)
 
 
-# Scene.allset_soft_select: the checkbox of the Modeling Toolkit / Tool Settings (step 63 / 106).
+# Scene.allset_soft_select: the checkbox of the Modeling Toolkit / Tool Settings.
 
 def _prop_get(_self):
     return STATE["on"]

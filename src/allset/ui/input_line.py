@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya's Status Line Input Line (step 75).
+"""Maya's Status Line Input Line.
 
 A mode button (Absolute transform / Relative transform / Rename / Select by name) and either three
 X / Y / Z fields or one text field. Behaves like Maya 2022's Status Line
@@ -220,7 +220,7 @@ def select_by_name(context, text):
     for ob in context.scene.objects:
         try:
             ob.select_get(view_layer=vl)
-        except RuntimeError:            # not in this view layer (step 11)
+        except RuntimeError:            # not in this view layer
             continue
         if ob.visible_get() and not ob.hide_select:
             names[ob.name] = ob
@@ -288,7 +288,7 @@ class ALLSET_PG_input_line(bpy.types.PropertyGroup):
 # --- drawing ------------------------------------------------------------------------------------------
 
 def draw_history(layout, context):
-    """Maya's Construction History toggle (Maya 2022 Status Line; step 189): pressed = on."""
+    """Maya's Construction History toggle (Maya 2022 Status Line): pressed = on."""
     layout.operator(ALLSET_OT_construction_history.bl_idname, text="", icon='RECOVER_LAST',
                     depress=context.window_manager.allset_construction_history)
 

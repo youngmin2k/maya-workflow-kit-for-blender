@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya 2022 Mesh Display colour commands (step 189): Apply Color, Rename / Modify Current Set, Set Keyframe for
+"""Maya 2022 Mesh Display colour commands: Apply Color, Rename / Modify Current Set, Set Keyframe for
 Vertex Color, Prelight (Maya), vertex bake sets (Assign New / Existing, Edit Assigned Set), Select Shared Instances.
 
 A Maya colour set = a Blender colour attribute, the current set = the active colour attribute; Maya colours live per

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Channel Box field text: Maya-style display and entry (step 38).
+"""Channel Box field text: Maya-style display and entry.
 
 Maya shows plain numbers in the current units (cm, degrees) and accepts relative entry
 ``+=5``, ``-=2``, ``*=2``, ``/=2`` (Maya's Channel Box entry). Values are

@@ -1,4 +1,4 @@
-"""Step 79 in a real UI: UV > 3D Cut and Sew UV Tool (menu) = edge mode + the tool; a drag around the cube's top face
+"""In a real UI: UV > 3D Cut and Sew UV Tool (menu) = edge mode + the tool; a drag around the cube's top face
 cuts it into its own UV shell (only those 4 edges), Ctrl+drag sews it back, Shift+drag selects edges and x cuts
 them; screenshots of the borders."""
 

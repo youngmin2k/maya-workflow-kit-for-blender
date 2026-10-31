@@ -2,14 +2,14 @@
 """Maya-style viewport grid: finite, 12 units each way, a line every unit, thicker every 5, axes thicker.
 
 Default grid (size 12, spacing 5, divisions 5): lines from -12 to +12 every 1 unit, every
-5th line (and the axes through the origin) thicker, all the same grey #404040 (a kit colour since step 134: no
+5th line (and the axes through the origin) thicker, all the same grey #404040 (a kit colour: no
 theme), aliased. The view shows only the background and #404040, minor lines 1 px, major lines and axes 2 px.
 
 Blender's floor is infinite with unit-system steps of x10 (no 5-unit lines), so
 the kit draws its own grid with a POST_VIEW handler in the 3D views that use it: on the ground in perspective and
 user views, ±size.
 
-Step 161: Maya's ortho cameras draw the grid in their own view plane and across the whole panel, not ±size
+Maya's ortho cameras draw the grid in their own view plane and across the whole panel, not ±size
 (in Maya's four view the top, front and side panels are gridded edge to edge). Axis ortho views (``is_orthographic_side_view``) get
 lines in their plane over the visible span (``span_segments``), in chunks so panning rebuilds the batch rarely.
 
@@ -18,7 +18,7 @@ Per-view state: a 3D View uses the Maya grid when Blender's floor and ortho grid
 (``units.maya_unit``), which ``units.grid_scale`` also makes Blender's finest perspective
 grid step, so X-hold grid snapping lands on these lines.
 
-Step 152 (#101): Display > Grid ❒ = Maya's Grid Options (operators/option_windows_display.py): length and width,
+#101: Display > Grid ❒ = Maya's Grid Options (operators/option_windows_display.py): length and width,
 grid lines every, subdivisions, the three colours and the Display check boxes change what is drawn here
 (``settings()``; the defaults = the constants below).
 """
@@ -36,7 +36,7 @@ DIVISIONS = 5
 WIDTHS = (1.0, 2.0, 2.0)
 # Line colour of grid, axis and highlight lines: #404040.
 # A kit colour, not the theme's grid colour: the kit ships no theme
-# since step 130 and Blender's (#545454) all but vanished on the #5c5c5c background (#59).
+# and Blender's (#545454) all but vanished on the #5c5c5c background (#59).
 # The axes are the same grey, only thicker.
 LINE_RGB = (64 / 255, 64 / 255, 64 / 255)
 OFF_LINES = 16          # Blender's default grid_lines: "not the Maya grid"
@@ -79,7 +79,7 @@ def segments(size=SIZE, spacing=SPACING, divisions=DIVISIONS):
 def styles(opts):
     """What each kind of line is drawn as for Maya Grid Options ``opts`` (``settings()``): {kind: (width px, rgb)}
     for the kinds shown. Axes off = the origin lines are ordinary grid lines; Thicker line for axes off = axes as
-    thin as subdivision lines (step 152)."""
+    thin as subdivision lines."""
     out = {}
     if opts["show_divisions"]:
         out["minor"] = (WIDTHS[0], tuple(opts["division_color"]))
@@ -228,7 +228,7 @@ def line_colour():
 
 
 def frame_ms():
-    """Average time (ms) of the last grid draws (step 45 frame-time record)."""
+    """Average time (ms) of the last grid draws (frame-time record)."""
     return sum(_times) / len(_times) * 1000.0 if _times else 0.0
 
 
@@ -267,7 +267,7 @@ def _draw():
     unit = units.maya_unit(context.scene)
     span = None
     if fills_view(rv3d.view_perspective, rv3d.is_orthographic_side_view):
-        # visible half width along the longer side: view_distance x 72 / lens / 2 (step 161)
+        # visible half width along the longer side: view_distance x 72 / lens / 2
         half = rv3d.view_distance * 36.0 / max(space.lens, 1e-6) / unit
         ix, iy = {"FLOOR": (0, 1), "XZ": (0, 2), "YZ": (1, 2)}[plane]
         loc = rv3d.view_location

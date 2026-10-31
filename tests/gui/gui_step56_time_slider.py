@@ -1,4 +1,4 @@
-"""Step 56 in a real UI, Maya animation_01 hand order: frame 1 S -> LMB on the Time Slider at 24 -> move ->
+"""In a real UI, Maya animation_01 hand order: frame 1 S -> LMB on the Time Slider at 24 -> move ->
 S -> keys [1, 24] -> RMB on the Time Slider at 24 > Delete -> only frame 24's key goes -> K held + LMB drag in the
 view moves the time and keeps the selection -> Shift+LMB drag highlights a red range -> MMB moves the time to 40
 without updating the scene -> S keys the held pose at 40 -> LMB at 30 updates the scene again."""
@@ -96,7 +96,7 @@ def s_scrub_click():
 def s_moved_time():
     check(f"LMB on the Time Slider at 24 = time 24 ({bpy.context.scene.frame_current})",
           bpy.context.scene.frame_current == 24)
-    cube().location.x += 2.0      # W move (step 1-2 GUI tests drag the manipulator)
+    cube().location.x += 2.0      # W move (other GUI tests drag the manipulator)
     hover_view()
 
 

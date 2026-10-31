@@ -1,4 +1,4 @@
-"""Step 22: Shift+drag a manipulator = Maya Smart Duplicate.
+"""Shift+drag a manipulator = Maya Smart Duplicate.
 
 The Maya keyconfig puts ``allset.manip_duplicate`` (Shift+LMB press, PASS_THROUGH)
 in front of the gizmo's own tweak; the operator duplicates only in object mode with a
@@ -35,13 +35,13 @@ def test_gizmo_keymaps_run_smart_duplicate_first():
         dup = items[ids.index("allset.manip_duplicate")]
         assert (dup.type, dup.value, dup.shift, dup.ctrl, dup.alt) == \
             ('LEFTMOUSE', 'PRESS', True, False, False), name
-        # step 28 puts manip_press (plain LMB) in front too; both before the gizmo's tweak
+        # manip_press (plain LMB) is in front too; both before the gizmo's tweak
         assert ids.index("allset.manip_duplicate") < ids.index("gizmogroup.gizmo_tweak"), (name, ids)
     assert "allset.manip_duplicate" in patches.PASS_THROUGH_FIRST
 
 
 def test_gizmo_tweak_takes_shift_drag():
-    # Step 261 (#175): a CLICK_DRAG carries the press's modifiers, so the gizmo's tweak must accept
+    # #175: a CLICK_DRAG carries the press's modifiers, so the gizmo's tweak must accept
     # Shift or the Shift+drag that manip_duplicate passes on starts no transform. Ctrl too (a drag started with
     # Ctrl held moves the handle with snapping); Alt as IC.
     kc = kit.maya_kc()
@@ -88,7 +88,7 @@ def test_duplicates_only_when_it_applies():
 
         copy.select_set(True)
         bpy.ops.object.mode_set(mode='EDIT')
-        assert _run() == 0, "edit mode: Smart Extrude, no new object (step 26)"
+        assert _run() == 0, "edit mode: Smart Extrude, no new object"
         bpy.ops.object.mode_set(mode='OBJECT')
 
         manip.from_xform_gizmo = lambda _context: False

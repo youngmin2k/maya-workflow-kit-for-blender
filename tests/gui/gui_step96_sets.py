@@ -1,4 +1,4 @@
-"""Step 96 in a real UI: Maya object sets in the Maya Workflow Kit layout's Outliner.
+"""In a real UI: Maya object sets in the Maya Workflow Kit layout's Outliner.
 
 Three cubes, two selected -> Create > Sets > Set (the Maya menu item) -> a `set1` row under the DAG rows of
 Blender's Outliner (kit overlay, ui/outliner_sets.py) -> click = the members are selected, Ctrl+click toggles,
@@ -91,7 +91,7 @@ def s_row_drawn():
     r = rows()
     _a, region = outl()
     u = mod("ui.outliner_sets").unit(bpy.context.preferences)
-    # step 99: the default Maya rows (4 cameras, defaultLightSet, defaultObjectSet) come between
+    # the default Maya rows (4 cameras, defaultLightSet, defaultObjectSet) come between
     top3 = region.view2d.view_to_region(0, -9 * u, clip=False)[1]
     check(f"Outliner draws one set row right under the three DAG rows and the six default rows ({[(x[0], x[1], x[2], x[3]) for x in r]}, "
           f"row 3 top {top3})", len(r) == 1 and r[0][2] == 'SET' and r[0][3] == "set1" and abs(r[0][1] - top3) <= 1)
@@ -119,7 +119,7 @@ def s_click_set_done():
 def s_ctrl_done():
     check(f"Ctrl+click toggles the members ({selected()})", selected() == {"pCube2"})
     _a, r = outl()
-    lead = 1.0 if _a.spaces.active.show_mode_column else 0.0   # step 202: the Maya Outliner has no mode column
+    lead = 1.0 if _a.spaces.active.show_mode_column else 0.0   # the Maya Outliner has no mode column
     click(point(C["row"], lead + 0.6))   # the disclosure triangle
 
 
@@ -159,7 +159,7 @@ def s_menu_open():
 @step
 def s_blender_row():
     # Blender's own rows still get their clicks: the third DAG row (pCube3) after Maya's four startup cameras
-    # (step 211: persp top front side pCube1 pCube2 pCube3)
+    # (persp top front side pCube1 pCube2 pCube3)
     _a, region = outl()
     u = mod("ui.outliner_sets").unit(bpy.context.preferences)
     y = int(region.view2d.view_to_region(0, -6.5 * u, clip=False)[1])

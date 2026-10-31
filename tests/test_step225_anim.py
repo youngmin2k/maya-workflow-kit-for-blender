@@ -1,4 +1,4 @@
-"""Step 225 (Issue #135): Game Exporter clips and the Motion Trail Editor.
+"""Issue #135: Game Exporter clips and the Motion Trail Editor.
 
 Maya: gameFbxExporter default values, a new clip =
 the playback range with an empty name, one file = a take per clip (walk 1-10, run 11-24), a file per clip = file name
@@ -99,7 +99,7 @@ def _takes(path):
 # --- Game Exporter -----------------------------------------------------------------------------------------------
 
 def test_game_exporter_factory_equals_maya_node():
-    # the node's createNode values (FACTORY), then the window's first-open presets (step 266: "Model Default" /
+    # the node's createNode values (FACTORY), then the window's first-open presets ("Model Default" /
     # "Anim Default" presets) — what the kit's fields start with
     sc = _clear()
     s = bpy.data.scenes.new("ge_fresh").allset_game_exporter

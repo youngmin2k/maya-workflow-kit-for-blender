@@ -1,4 +1,4 @@
-"""Step 142 (#54) in a real UI: the Maya menus #54 named (Deform, Mesh Tools, Mesh Display, Effects, Fields > Solvers)
+"""#54: in a real UI: the Maya menus #54 named (Deform, Mesh Tools, Mesh Display, Effects, Fields > Solvers)
 show the kit's new menu-only drawings (ui/menu_drawings*.py) on every item Maya draws with an icon, made at the menu
 icon size before a menu opens. Screenshots go to ALLSET_GUI_SHOTS (look at them: icons readable, labels aligned)."""
 
@@ -57,7 +57,7 @@ def s_ready():
     mi = import_module(MODULE + ".ui.menu_icons")
     data = import_module(MODULE + ".ui.menu_icon_data")
     n = mi.icon_px()
-    check(f"menu icons (incl. step 142 drawings) made at {n} px before a menu opens (ready {mi._ready[0]})",
+    check(f"menu icons (incl. menu drawings) made at {n} px before a menu opens (ready {mi._ready[0]})",
           mi._ready[0] == n)
     for path in ("Deform/Nonlinear/Bend", "Mesh Tools/Insert Edge Loop", "Mesh Display/Soften Edge",
                  "Effects/Fire", "Fields/Solvers/Gravity", "Deform/Wire"):
