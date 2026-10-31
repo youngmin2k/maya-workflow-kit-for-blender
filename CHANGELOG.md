@@ -95,6 +95,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   the FX shelf's Emitter follows Create Emitter and 3D Fluid Container with Emitter runs Fluids > 3D Container.
 
 ### Fixed
+- **Channel Box middle-drag after a tool change** (#273): channels picked in the Channel Box change with a
+  middle-drag in a view only until you pick another tool (Q / W / E / R or the toolbar), like Maya. The channels stay
+  highlighted, but the middle-drag is the tool's own again (W moves, E rotates); click a channel to drive it again.
+  To deselect channels, Ctrl+click a selected one, click the empty space under the channels, or deselect everything.
 - **Graph Editor key drags with Auto Key on** (#270): dragging keys in the Graph Editor no longer sometimes adds a
   key at the current time (with the value the curve had before the drag), and one undo takes the whole drag back.
   Editing the curves themselves is not a channel change, like Maya; changing a keyed channel still sets its key.

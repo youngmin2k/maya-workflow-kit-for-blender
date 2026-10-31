@@ -462,6 +462,9 @@ class ToolOptionsBinding(taphold.TapHoldBinding):
     menu = ""
 
     def _set_tool(self):
+        # Maya: a tool key ends the Channel Box middle-drag on the picked channels (they stay highlighted)
+        from ..ui import channel_box
+        channel_box.disarm_slider()
         try:
             bpy.ops.wm.tool_set_by_id(name=self.tool, space_type='VIEW_3D')
         except RuntimeError:  # e.g. the tool doesn't exist in this mode

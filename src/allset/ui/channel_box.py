@@ -731,8 +731,40 @@ def selected_channels(context=None):
 def set_selected_channels(keys, context=None):
     wm = (context or bpy.context).window_manager
     wm.allset_cb_selected = ",".join(dict.fromkeys(keys))
+    if keys:
+        arm_slider(context)
+    else:
+        disarm_slider()
     from . import cb_channels       # Sync Selection in Graph Editor (step 158)
     cb_channels.after_selection(context or bpy.context)
+
+
+# Like Maya, picking channels makes a middle drag in a view change them until another tool is picked (Q / W / E /
+# R, the toolbar): the channels stay highlighted, and the middle drag is that tool's own again.
+_slider = {"armed": False, "tool": None}
+
+
+def _view3d_tool(context=None):
+    context = context or bpy.context
+    try:
+        tool = context.workspace.tools.from_space_view3d_mode(context.mode, create=False)
+    except (AttributeError, RuntimeError, TypeError):
+        return None
+    return tool.idname if tool is not None else None
+
+
+def arm_slider(context=None):
+    _slider["armed"] = True
+    _slider["tool"] = _view3d_tool(context)
+
+
+def disarm_slider():
+    _slider["armed"] = False
+
+
+def slider_armed(context=None):
+    """A middle drag in a view drives the selected channels: channels were picked since the last tool change."""
+    return _slider["armed"] and _view3d_tool(context) == _slider["tool"]
 
 
 def select_channel(key, mode="SET", context=None):
@@ -1360,6 +1392,8 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
     def invoke(self, context, event):
         if context.mode not in {'OBJECT', 'POSE'}:
             return {'PASS_THROUGH'}
+        if not slider_armed(context):
+            return {'PASS_THROUGH'}  # another tool was picked after the channels: its own middle drag
         pairs = slider_targets(context)
         if not pairs:
             return {'PASS_THROUGH'}  # let the tool's MMB drag run
@@ -1685,8 +1719,13 @@ class ALLSET_OT_cb_channel_drag(bpy.types.Operator):
         self._press = None
         # the Channel Box part of a Maya dock: from the region top down to the Layer Editor split (None: no dock)
         self._cb_bottom = None
+        self._rows_bottom = None
         if _is_cb_dock(context):
-            self._cb_bottom = region.y + region.height - cb_share(region, _unit(context)) * region.height
+            u = _unit(context)
+            self._cb_bottom = region.y + region.height - cb_share(region, u) * region.height
+            used = _filled.get(context.area.as_pointer())
+            if used is not None:
+                self._rows_bottom = region.y + region.height - used * u
         _watching.add(self._win)
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -1712,6 +1751,10 @@ class ALLSET_OT_cb_channel_drag(bpy.types.Operator):
                 hit = _hover.get(self._win)
                 if hit is not None:
                     return self._on_press(context, event, hit)
+                if self._in_empty_space(event) and selected_channels(context):
+                    # Maya: a click on the empty space under the channels deselects them
+                    set_selected_channels([], context)
+                    _redraw(self._window)
             if event.type == 'RIGHTMOUSE' and event.value == 'PRESS' and self._inside(event):
                 hit = _hover.get(self._win)
                 in_part = hit is not None or (self._cb_bottom is not None and event.mouse_y >= self._cb_bottom)
@@ -1733,6 +1776,11 @@ class ALLSET_OT_cb_channel_drag(bpy.types.Operator):
             _redraw(self._window)
             return {'RUNNING_MODAL'}
         return {'PASS_THROUGH'}
+
+    def _in_empty_space(self, event):
+        if self._cb_bottom is None or self._rows_bottom is None:
+            return False
+        return self._cb_bottom <= event.mouse_y < self._rows_bottom
 
     def _on_rmb(self, context, hit, edit=False):
         """Maya: RMB in the Channel Box = the Channels menu. Blender's button
@@ -2435,8 +2483,21 @@ def row_for(context, ob, kind, name, mod_type="", nth=0):
     return None
 
 
+def _nothing_selected(context):
+    sel = getattr(context, "selected_objects", None)
+    if sel is None:
+        return False     # a window context without a view layer (File Browser, Preferences)
+    if getattr(context.window_manager, "allset_character_nodes", ""):
+        return False     # picked character nodes stand in for the selection
+    if pose_armature(context) is not None:
+        return not selected_bones(context)
+    return not sel
+
+
 @persistent
 def _on_depsgraph(_scene, _depsgraph):
+    if selected_channels() and _nothing_selected(bpy.context):
+        set_selected_channels([])      # Maya: deselecting everything also deselects the channels
     rebuild_rows()
     # The dock is a custom PROPERTIES-area UI, not Blender's native transform
     # sidebar. Tag it explicitly: transform gizmos can update RNA values without
@@ -2540,6 +2601,7 @@ def _draw_text_row(layout, context, ob, owner, prop, kind, mod_type="", nth=0, l
 _scroll = {}    # area pointer -> first line shown
 _reveal = {"node": None}    # an INPUTS node key to scroll into view at the next draw (``reveal``)
 _last = {}      # area pointer -> (first, total, limit) of the last draw (limit None: every line fits)
+_filled = {}    # area pointer -> UI units from the region top that the Channel Box rows use (empty space below)
 WHEEL_LINES = 3     # Maya: one notch = single step 15 px x QApplication.wheelScrollLines 3 = 45 px ~ 3 rows (PR #125 check)
 BUTTON_LINES = 3
 _wheel_windows = {}   # live window pointer -> registration generation
@@ -3166,6 +3228,8 @@ def fill_pane(layout, context, units):
     u = _unit(context)
     if u <= 0:
         return
+    if context.area is not None:
+        _filled[context.area.as_pointer()] = units + PANE_TOP
     gap = cb_share(region, u) * region.height / u - units - PANE_TOP
     if gap > 0.25:
         col = layout.column()
