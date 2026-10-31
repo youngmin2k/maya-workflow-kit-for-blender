@@ -6,6 +6,13 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [Unreleased]
 
 ### Added
+- **Export / Import Settings** (#275): save the kit's settings to one JSON file and load them again after a
+  reinstall, in a new Blender or on another computer — the kit preferences (option window values included), the
+  hotkeys you changed in the Hotkey Editor, your shelves and your marking menus. The buttons are in Preferences >
+  Add-ons > Maya Workflow Kit and in the Preferences window's Edit menu (Windows > Settings/Preferences >
+  Preferences); the import dialog lets you pick which parts to load. The Hotkey Editor has an Export button for the
+  hotkeys alone, and its Import also reads such a file. Updating the kit already keeps these settings; the file is
+  for when the kit is removed and installed again or Blender starts without its previous settings.
 - **Scale Keys manipulator in the Graph Editor** (#270): with the Scale Keys tool (r) a box with handles is drawn
   around the selected keys. Drag a left / right side to scale the keys in time (speed up or slow down an animation),
   the bottom / top side to scale their values, or a corner for both; the opposite side stays where it is, time snap

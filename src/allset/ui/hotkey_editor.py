@@ -19,6 +19,8 @@ Window = a ``marked_window`` kind "HOTKEY_EDITOR" (Properties Tool tab in its ow
 WindowManager collection rebuilt by the search / category updates and the edit operators, never in ``draw``.
 """
 
+import json
+
 import bpy
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, IntProperty, StringProperty
 
@@ -451,14 +453,14 @@ def import_hotkeys(context, text):
 
 
 class ALLSET_OT_hotkey_import(bpy.types.Operator):
-    """Import a hotkey set exported from Maya's Hotkey Editor (.mhk): its keys replace the kit keys of the same
-    commands (only key bindings are read; nothing in the file is run)"""
+    """Import a hotkey set exported from Maya's Hotkey Editor (.mhk) or the kit's Export (.json): its keys replace
+    the kit keys of the same commands (only key bindings are read; nothing in the file is run)"""
     bl_idname = "allset.hotkey_import"
     bl_label = "Import..."
     bl_options = {'INTERNAL'}
 
     filepath: StringProperty(subtype='FILE_PATH', options={'SKIP_SAVE'})
-    filter_glob: StringProperty(default="*.mhk;*.mel;*.txt", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*.mhk;*.mel;*.txt;*.json", options={'HIDDEN'})
 
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
@@ -471,6 +473,16 @@ class ALLSET_OT_hotkey_import(bpy.types.Operator):
         except OSError as exc:
             self.report({'ERROR'}, f"Could not read {self.filepath}: {exc}")
             return {'CANCELLED'}
+        from .. import results, settings_io
+        if text.lstrip().startswith("{"):           # a kit settings file: only its hotkeys
+            try:
+                lines = settings_io.apply(context, json.loads(text), ("hotkeys",))
+            except ValueError as exc:
+                self.report({'ERROR'}, f"Could not import {self.filepath}: {exc}")
+                return {'CANCELLED'}
+            refresh(context)
+            results.result(self, "Imported " + ("; ".join(lines) if lines else "no hotkeys"))
+            return {'FINISHED'}
         done, skipped = import_hotkeys(context, text)
         refresh(context)
         for b, reason in skipped[:20]:
@@ -478,7 +490,6 @@ class ALLSET_OT_hotkey_import(bpy.types.Operator):
         msg = f"Imported {done} hotkey{'s' if done != 1 else ''}"
         if skipped:
             msg += f"; {len(skipped)} left out (see the system console)"
-        from .. import results
         results.result(self, msg)
         return {'FINISHED'}
 
@@ -552,6 +563,8 @@ class ALLSET_PT_hotkey_editor(bpy.types.Panel):
         top = layout.row(align=True)
         top.label(text=f"Hotkey Set: {SET_NAME}")
         top.operator(ALLSET_OT_hotkey_import.bl_idname, icon='IMPORT')
+        op = top.operator("allset.settings_export", text="Export...", icon='EXPORT')
+        op.preferences = op.shelves = op.marking_menus = False
         top.operator(ALLSET_OT_hotkey_blender_prefs.bl_idname, icon='PREFERENCES')
         search = layout.row(align=True)
         search.prop(wm, "allset_hk_by", text="")

@@ -477,6 +477,9 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         for text in (hint, emulate):
             if text:
                 _wrapped(box, text)
+        row = box.row(align=True)
+        row.operator("allset.settings_export", icon='EXPORT')
+        row.operator("allset.settings_import", icon='IMPORT')
         if not self.maya_mode:
             return
         box = layout.box()

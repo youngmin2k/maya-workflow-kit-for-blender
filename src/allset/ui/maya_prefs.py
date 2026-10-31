@@ -203,6 +203,9 @@ class ALLSET_MT_prefs_edit(bpy.types.Menu):
     def draw(self, _context):
         self.layout.operator("allset.prefs_revert", text="Revert to Saved")
         self.layout.operator("allset.prefs_restore_defaults", text="Restore Default Settings")
+        self.layout.separator()
+        self.layout.operator("allset.settings_export", text="Export Settings...")
+        self.layout.operator("allset.settings_import", text="Import Settings...")
 
 
 class ALLSET_MT_prefs_help(bpy.types.Menu):
