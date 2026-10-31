@@ -18,7 +18,7 @@ circle. Maya's:
 handle (``target_set_operator``), so snapping, constraints, numeric input, Smart
 Duplicate/Extrude (step 22/26) and the active handle (step 28) keep working. The Scale centre and axis handles run
 ``allset.manip_scale`` (operators/manip_scale.py), Maya's scale drag on top of Blender's resize (step 275). It becomes
-the widget of the Move and Scale tools in object and mesh edit mode by swapping their
+the widget of the Move and Scale tools in object, mesh edit and lattice edit mode by swapping their
 ToolDefs in ``VIEW3D_PT_tools_active._tools`` for copies with another ``widget`` (same
 idname, so ``wm.tool_set_by_id`` still finds them); tools already active are set up
 again. Everything is put back on unregister.
@@ -31,7 +31,7 @@ from mathutils import Matrix, Vector
 
 GROUP = "ALLSET_GGT_xform"
 GIZMO = "ALLSET_GT_maya_handle"
-MODES = ('OBJECT', 'EDIT_MESH')
+MODES = ('OBJECT', 'EDIT_MESH', 'EDIT_LATTICE')
 # Rotate keeps Blender's C gizmo: its axis rings (front half), camera ring and trackball already
 # have Maya's layout and take the theme's axis colours; a Python dial can't clip the back half
 # the same way.
@@ -182,12 +182,21 @@ def shapes(kind):
 
 # --- where and how the manipulator sits --------------------------------------------------------
 
+def _lattice_points(ob):
+    """Selected, shown points of a lattice in edit mode, in object space (where the transform moves them)."""
+    return [p.co_deform.copy() for p in ob.data.points if p.select and not getattr(p, "hide", False)]
+
+
 def _edit_points(context):
-    """World positions of the selected vertices of the meshes in edit mode, and the active
-    element's centre (or None)."""
+    """World positions of the selected vertices of the meshes (or points of the lattices) in edit mode, and the
+    active element's centre (or None)."""
     pts, active = [], None
     obs = context.objects_in_mode_unique_data or ([context.edit_object] if context.edit_object else [])
     for ob in obs:
+        if ob is not None and ob.type == 'LATTICE':
+            mw = ob.matrix_world
+            pts += [mw @ co for co in _lattice_points(ob)]
+            continue
         if ob is None or ob.type != 'MESH':
             continue
         bm = bmesh.from_edit_mesh(ob.data)
@@ -241,7 +250,7 @@ def pivot_frame(context, kind):
     (step 85: Shift+MMB picks one of these axes). Centre None = nothing selected."""
     scene = context.scene
     otype = slot_type(scene, kind)
-    if context.mode == 'EDIT_MESH':
+    if context.mode != 'OBJECT':
         pts, act = _edit_points(context)
     else:
         pts, act = _object_points(context)
@@ -356,6 +365,8 @@ def _has_selection(context):
         return any(ob.visible_get() for ob in context.selected_objects)
     for ob in context.objects_in_mode_unique_data or ():
         if ob.type == 'MESH' and ob.data.total_vert_sel:
+            return True
+        if ob.type == 'LATTICE' and _lattice_points(ob):
             return True
     return False
 
@@ -630,7 +641,7 @@ class ALLSET_GGT_xform(GizmoGroup):
         signature = (kind, otype, tuple(v for row in frame for v in row), clamp, live_move, slide)
         if self._ops_for != signature and not any(gz.is_modal for gz, _role, _data in self.handles):
             self._bind_ops(kind, otype, frame=frame, clamp=clamp, live_move=live_move, slide=slide)
-        if context.mode == 'EDIT_MESH':
+        if context.mode != 'OBJECT':
             pts, act = _edit_points(context)
         else:
             pts, act = _object_points(context)
