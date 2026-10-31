@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya Auto Key without Blender's preferences (step 130).
+"""Maya Auto Key without Blender's preferences.
 
 Maya's Auto Key keys only attributes that already have keys. Blender's
 own auto keying keys every changed channel unless the user preference "Only Insert Available" is on, and the kit
-no longer writes preferences (steps 70–129 did, ``prefs_preset`` group ``autokey``). So the kit has its own toggle,
+never writes preferences. So the kit has its own toggle,
 ``Scene.allset_auto_key`` (the Time Slider's key button), and keys by itself while it is on: a depsgraph handler
 notes the objects that changed, and a short timer — once no transform is running, like Blender keys at the end of
 a transform — keys each of their F-curves whose channel value differs from the curve at the current frame. Blender's
@@ -109,7 +109,7 @@ def _value(ob, path, index):
 
 def changed_layer_channels(ob, frame, scene=None):
     """(path, index, value) of a layered object's channels that have keys on the layer a key would go to and whose
-    value differs from the layers' result (step 188: Maya Auto Key keys the selected layer only where that attribute
+    value differs from the layers' result (Maya Auto Key keys the selected layer only where that attribute
     already has keys on it)."""
     from . import anim_layers
     scene = scene or bpy.context.scene
@@ -137,7 +137,7 @@ def key_changed(ob, frame):
     """Key the changed keyed channels of ``ob`` at ``frame``; returns how many keys were set."""
     from . import anim_layers
     if anim_layers.has_layers(ob):
-        # Maya animation layers (step 188): solved onto the target layer like the kit's S key
+        # Maya animation layers: solved onto the target layer like the kit's S key
         return sum(bool(anim_layers.key(ob, path, index, frame, value))
                    for path, index, value in changed_layer_channels(ob, frame))
     count = 0
