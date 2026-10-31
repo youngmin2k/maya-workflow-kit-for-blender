@@ -1,5 +1,5 @@
 """Step 54 in a real UI (Maya Workflow Kit template = cm scene, maya_unit 0.01), Maya hand order:
-Create > Lights > Point Light -> intensity 1, No Decay (step 137: power = 4 pi^2 x 10^2 x maya_unit^2); Fields/Solvers > Gravity -> field 1 Maya unit;
+Create > Lights > Point Light -> intensity 1, No Decay (power = 4 pi^2 x 10^2 x maya_unit^2); Fields/Solvers > Gravity -> Blender's Wind field blowing down (not rescaled);
 Windows > Animation Editors > Trax Editor under the mouse -> tooltip + Help Line "NLA" notice.
 Menus are the kit's Maya menus, opened as menus and picked with the keyboard (accelerator / arrows).
 Screenshot: gui_step54_trax_notice.png."""
@@ -78,8 +78,10 @@ def s_gravity():
 @step
 def s_gravity_check():
     ob = bpy.context.view_layer.objects.active
-    check(f"Fields/Solvers > Gravity: {ob and ob.name}, size {ob and ob.empty_display_size:.4f} BU = 1 Maya unit",
-          ob is not None and ob.field and ob.field.type == 'WIND' and abs(ob.empty_display_size - C["k"]) < 1e-6)
+    down = ob is not None and ob.matrix_world.to_3x3().col[2].z < -0.99
+    check(f"Fields/Solvers > Gravity: {ob and ob.name}, Blender's Wind field blowing down (Blender's own add "
+          f"operator, size {ob and ob.empty_display_size:.4f} BU)",
+          ob is not None and ob.field and ob.field.type == 'WIND' and down)
     open_menu("Windows/Animation Editors")
 
 

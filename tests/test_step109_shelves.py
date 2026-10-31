@@ -66,7 +66,8 @@ def test_drawn_mapped_at_least_150():
     total = sum(mapped.values())
     print("mapped per shelf", mapped, "total", total, "/", sum(EXPECTED_COUNTS.values()))
     assert total >= 150, mapped
-    assert mapped["Sculpting"] >= 19 and mapped["Curves"] + mapped["Surfaces"] >= 24 and mapped["FX"] >= 13, mapped
+    # FX: the Emitter button is greyed like nParticles > Create Emitter (Blender particles come from a mesh)
+    assert mapped["Sculpting"] >= 19 and mapped["Curves"] + mapped["Surfaces"] >= 24 and mapped["FX"] >= 12, mapped
 
 
 def test_every_greyed_button_has_a_notice():
@@ -275,17 +276,10 @@ def test_pencil_and_add_points():
 
 # --- FX ---------------------------------------------------------------------------------------
 
-def test_fluid_container_with_emitter():
-    _fresh()
-    i = next(i for i, lab, _a, _ic in shelf.all_buttons("FX") if lab == "3D Fluid Container with Emitter")
-    assert bpy.ops.allset.shelf_button(shelf="FX", index=i) == {'FINISHED'}
-    dom = bpy.data.objects["fluid1"]
-    em = bpy.data.objects["fluidEmitter1"]
-    assert tuple(round(d, 3) for d in dom.dimensions) == (10.0, 10.0, 10.0), dom.dimensions
-    assert tuple(dom.location) == (0.0, 0.0, 0.0) and em.location.length < 1e-6
-    md = next(m for m in dom.modifiers if m.type == 'FLUID')
-    assert md.fluid_type == 'DOMAIN' and md.domain_settings.resolution_max == 10
-    assert any(m.type == 'FLUID' and m.fluid_type == 'FLOW' for m in em.modifiers)
+def test_fluid_container_button_is_the_menu_item():
+    # the 3D Fluid Container with Emitter button runs its menu item (Fluids > 3D Container = Blender's Quick Smoke)
+    action, _icon = shelf_map.lookup("FX", "3D Fluid Container with Emitter", "Create3DContainerEmitter")
+    assert action == "object.quick_smoke", action
 
 
 def test_fluid_collide_and_ncloth_display():
@@ -296,8 +290,7 @@ def test_fluid_collide_and_ncloth_display():
     assert next(m for m in cube.modifiers if m.type == 'FLUID').fluid_type == 'EFFECTOR'
     bpy.ops.mesh.primitive_plane_add()
     plane = bpy.context.active_object
-    assert bpy.ops.allset.fx_ncloth() == {'FINISHED'}
-    cloth = next(m for m in plane.modifiers if m.type == 'CLOTH')
+    cloth = plane.modifiers.new("Cloth", 'CLOTH')
     assert bpy.ops.allset.ncloth_display(mesh='INPUT') == {'FINISHED'} and not cloth.show_viewport
     assert bpy.ops.allset.ncloth_display(mesh='CURRENT') == {'FINISHED'} and cloth.show_viewport
 

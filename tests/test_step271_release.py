@@ -28,16 +28,6 @@ def test_helpers_with_restricted_data_finds_nothing():
     assert constrain_multi.helpers() == []          # a real file without helpers
 
 
-def test_smoke_in_edit_mode_warns_instead_of_raising():
-    bpy.ops.mesh.primitive_cube_add()
-    bpy.ops.object.mode_set(mode='EDIT')
-    try:
-        assert bpy.ops.allset.quick_smoke() == {'CANCELLED'}
-    finally:
-        bpy.ops.object.mode_set(mode='OBJECT')
-    assert not any(ob.name.startswith("Smoke Domain") for ob in bpy.data.objects)
-
-
 def test_pivot_reset_without_selection_does_nothing():
     bpy.ops.object.select_all(action='DESELECT')
     assert bpy.ops.allset.pivot_reset() == {'CANCELLED'}

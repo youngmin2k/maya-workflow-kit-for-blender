@@ -23,8 +23,8 @@ SETUPS = {
     "maya units": dict(system='METRIC', length_unit='CENTIMETERS', scale_length=0.01),  # 1
     "factory": dict(system='METRIC', length_unit='METERS', scale_length=1.0),          # 1
 }
-RAW_CREATE = {"object.armature_add", "object.text_add", "object.empty_image_add", "object.effector_add",
-              "object.quick_smoke", "object.light_add"}
+# FX creation (force fields, quick smoke) runs Blender's operators at real size and isn't listed here.
+RAW_CREATE = {"object.armature_add", "object.text_add", "object.empty_image_add", "object.light_add"}
 
 
 def _units(name):
@@ -61,19 +61,6 @@ def test_create_paths_in_maya_units():
         plane = _make('IMAGE_PLANE')
         assert plane.empty_display_type == 'IMAGE' and abs(plane.empty_display_size - k) < 1e-5 * k
         assert plane.name == "imagePlane1"
-        for kind, field, name in (('FIELD_AIR', 'WIND', "airField1"), ('FIELD_DRAG', 'DRAG', "dragField1"),
-                                  ('FIELD_GRAVITY', 'WIND', "gravityField1"), ('FIELD_NEWTON', 'FORCE', "newtonField1"),
-                                  ('FIELD_RADIAL', 'FORCE', "radialField1"),
-                                  ('FIELD_TURBULENCE', 'TURBULENCE', "turbulenceField1"),
-                                  ('FIELD_UNIFORM', 'WIND', "uniformField1"), ('FIELD_VORTEX', 'VORTEX', "vortexField1")):
-            ob = _make(kind)
-            assert ob.field.type == field and abs(ob.empty_display_size - k) < 1e-5 * k and ob.name == name, (setup, kind)
-            assert tuple(ob.location) == (0.0, 0.0, 0.0), "Maya fields start at the origin"
-        # gravity blows down (Maya -Y = Blender -Z): the wind's +Z axis points down
-        g = bpy.data.objects["gravityField1"]
-        assert (g.matrix_world.to_3x3().col[2]).z < -0.99
-        u = bpy.data.objects["uniformField1"]
-        assert (u.matrix_world.to_3x3().col[2]).x > 0.99, "uniform field direction (1, 0, 0)"
 
 
 def test_light_power_scaled_by_maya_unit_squared():
@@ -88,20 +75,6 @@ def test_light_power_scaled_by_maya_unit_squared():
             assert abs(ob.data.energy - base * k * k) < 1e-5 * base * k * k, (setup, kind, ob.data.energy)
         sun = _make('DIRECTIONAL_LIGHT')
         assert abs(sun.data.energy - math.pi) < 1e-6, "sun light: no distance falloff, not scaled (Maya 1 = pi)"
-
-
-def test_quick_smoke_domain_in_maya_units():
-    for setup in ("template", "factory"):
-        _fresh()
-        k = _units(setup)
-        cube = _make('CUBE')                         # 1 Maya unit cube at the origin
-        cube.select_set(True)
-        assert bpy.ops.allset.quick_smoke() == {'FINISHED'}
-        domain = next(o for o in bpy.data.objects if o is not cube)
-        half = 0.5 * k
-        want = (half + 1.0 * k, half + 1.0 * k, half + 2.0 * k)
-        assert all(abs(a - b) < 1e-6 for a, b in zip(domain.scale, want)), (setup, tuple(domain.scale), want)
-        assert abs(domain.location.z - 1.0 * k) < 1e-6
 
 
 def _actions():

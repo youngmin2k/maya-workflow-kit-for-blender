@@ -3,7 +3,9 @@ kit's old render camera ``persp`` (no collection, fake user, scene camera) stops
 leftover ``defaultLight`` goes, the old camera Renderable values are dropped; the file opens without errors and
 the user's own objects stay. Old Ambient / Volume Lights: the World's "Maya Ambient" nodes go (the World's own
 output linked back), the lights become plain kit point lights with their Maya intensity, a Light Editor Isolate still
-on is undone and the Illuminates by Default value is dropped."""
+on is undone and the Illuminates by Default value is dropped. Old kit FX: the nucleus gravity (9.8 x the Maya unit)
+goes back to Blender's 9.81 unless changed by hand since, kit cloth stiffness / damping lose their rescale, the old FX
+markers are dropped."""
 
 import os
 from importlib import import_module
@@ -165,3 +167,61 @@ def test_kit_made_world_is_removed():
     bpy.ops.wm.open_mainfile(filepath=path)
     assert bpy.context.scene.world is None
     assert "World" not in bpy.data.worlds
+
+
+def _old_fx_file(name, hand_gravity=None):
+    """A centimetre scene the way an older version saved it after kit FX: nucleus gravity 9.8 x 0.01, a cloth with
+    stiffness and damping x 0.01, the markers of the old FX items."""
+    bpy.ops.wm.read_homefile(use_empty=True)
+    sc = bpy.context.scene
+    us = sc.unit_settings
+    us.system, us.length_unit, us.scale_length = 'METRIC', 'CENTIMETERS', 1.0
+    nuc = getattr(sc, lc.NUCLEUS)
+    nuc.exists = True
+    sc.gravity = hand_gravity or (0.0, 0.0, -0.098)
+    bpy.ops.mesh.primitive_plane_add(size=0.2)
+    cloth = bpy.context.active_object
+    cloth.name = "pPlane1"
+    st = cloth.modifiers.new("nCloth1", 'CLOTH').settings
+    base = {attr: getattr(st, attr) for attr in lc.CLOTH_SCALED}
+    for attr in lc.CLOTH_SCALED:
+        setattr(st, attr, base[attr] * 0.01)
+    cloth[lc.CLOTH_G] = 0.01
+    cloth["allset_nconstraints"] = ["dynamicConstraint1"]
+    cloth.data.attributes.new(lc.FX_MESH_ATTRIBUTE, 'FLOAT_VECTOR', 'POINT')
+    empty = bpy.data.objects.new("dynamicConstraint1", None)
+    empty["allset_nconstraint"] = cloth.name
+    sc.collection.objects.link(empty)
+    coll = bpy.data.collections.new("pPlane1Fields")
+    coll["allset_fields_of"] = cloth.name
+    coll.use_fake_user = True
+    path = _path(name)
+    bpy.ops.wm.save_as_mainfile(filepath=path)
+    return path, base
+
+
+def test_old_fx_scene_is_cleaned_on_open():
+    path, base = _old_fx_file("legacy_fx.blend")
+    bpy.ops.wm.read_homefile(use_empty=True)
+    bpy.ops.wm.open_mainfile(filepath=path)
+    sc = bpy.context.scene
+    assert tuple(round(v, 4) for v in sc.gravity) == (0.0, 0.0, -9.81), tuple(sc.gravity)
+    assert not sc.is_property_set(lc.NUCLEUS), "the nucleus values are dropped"
+    cloth = bpy.data.objects["pPlane1"]
+    st = cloth.modifiers["nCloth1"].settings
+    for attr in lc.CLOTH_SCALED:
+        assert abs(getattr(st, attr) - base[attr]) < 1e-4 * max(1.0, base[attr]), (attr, getattr(st, attr), base[attr])
+    assert lc.CLOTH_G not in cloth.keys() and "allset_nconstraints" not in cloth.keys()
+    assert cloth.data.attributes.get(lc.FX_MESH_ATTRIBUTE) is None
+    empty = bpy.data.objects["dynamicConstraint1"]
+    assert "allset_nconstraint" not in empty.keys(), "the marker goes, the empty stays"
+    assert "allset_fields_of" not in bpy.data.collections["pPlane1Fields"].keys()
+    assert not any(lc.clean().values())
+
+
+def test_gravity_changed_by_hand_stays():
+    path, _base = _old_fx_file("legacy_fx_hand.blend", hand_gravity=(0.0, 0.0, -3.0))
+    bpy.ops.wm.open_mainfile(filepath=path)
+    sc = bpy.context.scene
+    assert abs(sc.gravity.z + 3.0) < 1e-6, tuple(sc.gravity)
+    assert not sc.is_property_set(lc.NUCLEUS)

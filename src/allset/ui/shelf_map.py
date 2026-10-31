@@ -113,11 +113,10 @@ BY_COMMAND = {
     "Art3dPaintTool": ("paint.texture_paint_toggle", 'TPAINT_HLT'),
     "ShowShadingGroupAttributeEditor": (_dock('ATTRIBUTE_EDITOR'), 'MATERIAL'),   # Edit Material Attributes
     # --- FX ---
-    # step 68: operators/fx.py (the old Emitter = particle_system_add was Emit from Object)
-    "NCreateEmitter": ("allset.fx_emitter", 'PARTICLES'),
-    "NEmitFromObject": ("allset.fx_emit_from_object", 'PARTICLE_DATA'),
-    "makeCollideNCloth": ("allset.fx_passive", 'MOD_PHYSICS'),
-    "Create3DContainerEmitter": ("allset.fluid_container_emitter", 'MOD_FLUIDSIM'),   # step 109
+    # Blender's own simulation operators (Emitter and the fluid container follow their menu items, MENU)
+    "NEmitFromObject": (("object.modifier_add", {"type": 'PARTICLE_SYSTEM', "use_selected_objects": True}),
+                        'PARTICLE_DATA'),
+    "makeCollideNCloth": (("object.modifier_add", {"type": 'COLLISION', "use_selected_objects": True}), 'MOD_PHYSICS'),
     "CreateHairOptions": ("object.curves_empty_hair_add", 'CURVES_DATA'),
     "InteractivePlayback": ("screen.animation_play", 'PLAY'),
     # --- FX Caching (Blender point caches) ---
@@ -142,7 +141,7 @@ BY_LABEL = {
     "Rendering/Layered Material": (_shader('LAYERED'), 'MATERIAL'),
     "Rendering/Ramp Material": (_shader('RAMP'), 'MATERIAL'),
     "Rendering/Use Background": (_shader('USE_BACKGROUND'), 'MATERIAL'),
-    "FX/Create nCloth": ("allset.fx_ncloth", 'MOD_CLOTH'),
+    "FX/Create nCloth": (("object.modifier_add", {"type": 'CLOTH', "use_selected_objects": True}), 'MOD_CLOTH'),
     "FX/Remove nCloth": ("allset.fx_remove_ncloth", 'X'),
     "FXCaching/Create New Cache": (("allset.ncache", {"action": 'CREATE', "kind": 'NOBJECT'}), 'FILE_CACHE'),
 }
@@ -225,6 +224,7 @@ MENU = {
     "Rendering/Cancel Batch Render": "Render/Cancel Batch Render",
     "Rendering/Show Batch Render": "Render/Show Batch Render",
     # FX
+    "FX/Emitter": "nParticles/Create Emitter",
     "FX/3D Fluid Container with Emitter": "Fluids/3D Container",
     "FX/2D Fluid Container with Emitter": "Fluids/2D Container",
     "FX/Emit Fluid from Object": "Fluids/Add/Edit Contents/Emit from Object",

@@ -13,6 +13,10 @@ import bpy
 
 from .. import i18n, live_refs
 
+# The line shown on Maya FX items that create a simulation: Blender's simulations are not rescaled.
+METRE_SCENES = ("Blender simulates one unit as one metre: FX works in metre scenes (in the centimetre layout 100 "
+                "units are 1 m).")
+
 # path: (substitute in Blender, one line). Paths with an action in menu_map.MAP run that substitute.
 NOTICES = {
     "Mesh Display/Assign Existing Set/No bakesets defined": ("Render Properties > Bake", "Maya lists the scene's bake sets here; Blender bakes from Render Properties > Bake (Cycles)."),
@@ -136,12 +140,17 @@ NOTICES = {
     "Render/IPR Render Current Frame": (
         "Viewport Rendered", "Blender's IPR is the viewport in Rendered shading (Render Region: Ctrl+B)."),
     # FX (step 68)
-    **{path: ("one-point mesh emitter", "Blender particles come from a mesh: Maya Workflow Kit makes a one-point mesh emitter1 "
-              "with the particles, sized in Maya units.")
-       for path in ("nParticles/Create Emitter", "nParticles/Create Emitter#2")},
-    "nCloth/Create nCloth": (
-        "Cloth modifier", "Blender cloth simulates real sizes: Maya Workflow Kit scales collision distances, stiffness and gravity "
-        "so one unit moves like Maya's (nucleus Space Scale in the Attribute Editor)."),
+    **{path: ("Emit from Object", "Blender particles come from a mesh: select a mesh and use Emit from Object (a "
+              "particle system on it).") for path in ("nParticles/Create Emitter", "nParticles/Create Emitter#2")},
+    # creating items run Blender's own operators at real size
+    "nParticles/Emit from Object": ("Particle system", METRE_SCENES),
+    "nParticles/Emit from Object#2": ("Particle system", METRE_SCENES),
+    "nCloth/Create Passive Collider": ("Collision modifier", METRE_SCENES),
+    "nParticles/Make Collide": ("Collision modifier", METRE_SCENES),
+    "Fields/Solvers/Create Active Rigid Body": ("Rigid body", METRE_SCENES),
+    "Fields/Solvers/Create Passive Rigid Body": ("Rigid body", METRE_SCENES),
+    "Fluids/3D Container": ("Quick Smoke", METRE_SCENES),
+    "nCloth/Create nCloth": ("Cloth modifier", METRE_SCENES),
     **{f"nCache/{item}": (
         "Baked caches", "Blender always plays a baked cache: Delete Cache to simulate again.")
        for item in ("Enable All Caches on Selected", "Disable All Caches on Selected")},
@@ -182,8 +191,8 @@ NOTICES = {
     "Modify/Evaluate Nodes/nucleuses": (
         "Scene gravity", "Blender has no nucleus node: gravity is in Scene properties, solver settings are per object."),
     "Fields/Solvers/Gravity": (
-        "Wind field", "Blender has no gravity field: a wind field blowing down; the scene's gravity is global "
-        "(Scene properties)."),
+        "Wind field", "Blender has no gravity field: a Wind field blowing down (Blender's strength); the scene's "
+        "gravity is global (Scene properties)."),
 }
 
 
@@ -330,11 +339,11 @@ NOTICES.update({
         "Render As Object / Collection", "Blender instances the selected objects on the particles with the particle "
         "system's Render As Object (several objects: a Collection)."),
     **{f"nParticles/Create Options/{label}": (
-        "Particle display", "Blender draws new particle systems as dots (Point, Water) or circles (Balls, Cloud); "
-        "Water also uses Blender's fluid particle physics.") for label in ("Point", "Balls", "Cloud", "Thick Cloud",
-                                                                           "Water")},
+        "Particle display", "Blender sets how particles draw in each particle system's Viewport Display and Render "
+        "panels (Water: Physics > Fluid).") for label in ("Point", "Balls", "Cloud", "Thick Cloud", "Water")},
     "Fluids/Add/Edit Contents/Emitter": (
-        "Fluid flow mesh", "Blender emits fluid from a mesh: a smoke Flow (Inflow) sphere at the container's centre."),
+        "Fluid Flow", "Blender makes the selected meshes smoke Flows (Fluid modifier, Inflow): place them inside a "
+        "container."),
     "Fluids/Edit Fluid Resolution": (
         "Domain Resolution Divisions", "Blender sets the Mantaflow domain's Resolution Divisions (along the "
         "longest side)."),
@@ -349,35 +358,33 @@ NOTICES.update({
         f"Cloth {slot}", f"Blender paints the cloth's {slot} in Weight Paint mode: weight 0 keeps the cloth's "
         "value, 1 uses its Max value (Physics > Cloth).") for label, slot in _PAINT_SLOT.items()},
     "nConstraint/Transform Constraint": (
-        "Pin group + Hook", "Blender pins the selected cloth vertices (Pin Group) and hooks them to the empty "
-        "dynamicConstraintN: move the empty to move them."),
+        "Hook to New Object", "Blender hooks the selected vertices (Edit Mode) to a new empty; move the Hook above "
+        "the Cloth modifier and add the vertices to the cloth's Pin Group so the cloth follows it."),
     "nConstraint/Disable Collision": (
-        "Collision vertex group", "Blender leaves the selected vertices out of the cloth's object and self "
-        "collisions (Collisions > Vertex Group)."),
+        "Collision vertex group", "Blender: put the vertices in a vertex group and pick it in Physics > Cloth > "
+        "Collisions > Vertex Group."),
     "nConstraint/Remove Dynamic Constraint": (
-        "Pin group + Hook removed", "Blender removes the constraint's hook, empty and vertex group (select the "
-        "constraint empty, or the nCloth to remove all)."),
+        "Hook modifier", "Blender: remove the Hook modifier and its empty (Modifier properties)."),
     **{f"nConstraint/{label}": (
-        "Constraint vertex group", "Blender edits the constraint's vertex group with the selected vertices (Edit "
-        "Mode; select the constraint empty too, else the newest constraint).")
-       for label in ("Select Members", "Add Members", "Remove Members", "Replace Members")},
+        "Vertex group", "Blender: edit the Hook's or the Pin Group's vertex group (Object Data > Vertex Groups: "
+        "Assign, Remove, Select).") for label in ("Select Members", "Add Members", "Remove Members", "Replace Members")},
     "nCache/Create Particle Disk Cache": (
         "Particle Disk Cache bake", "Blender bakes the particle cache with Disk Cache on, next to the saved .blend "
         "file."),
     "nCache/Transfer Cache To Input Mesh": (
-        "Simulated shape written", "Blender writes the cloth's simulated shape at this frame into the mesh (the "
-        "Cloth modifier stays) and starts the simulation from it."),
+        "Apply the Cloth modifier", "Blender writes the simulated shape into the mesh when you apply the Cloth "
+        "modifier at that frame (Modifier > Apply)."),
     "nCache/Edit Oversampling or Cache Settings...": (
         "Physics properties", "Blender keeps cache and quality settings in each object's Physics properties "
         "(Cache, Quality Steps)."),
     "Fields/Solvers/Volume Curve": (
         "Curve Guide field", "Blender guides particles along a curve with a Curve Guide force field on the curve."),
     "Fields/Solvers/Initial State/Set for Selected": (
-        "Simulated shape written", "Blender writes the simulated cloth shape into the mesh and the simulated rigid "
-        "body places into the transforms; the simulation then starts from there."),
+        "Apply the simulation", "Blender has no initial state: apply the Cloth modifier at the frame (the mesh takes "
+        "the shape) or Object > Apply > Visual Transform for a rigid body."),
     "Fields/Solvers/Initial State/Set for All Dynamic": (
-        "Simulated shape written", "Blender writes every simulated cloth shape and rigid body place in the scene "
-        "into the start state."),
+        "Apply the simulation", "Blender has no initial state: apply each Cloth modifier at the frame, or Object > "
+        "Apply > Visual Transform for rigid bodies."),
     "Fields/Solvers/Set Active Key": (
         "Rigid body Animated key", "Blender keys the rigid body's Animated checkbox off: the solver moves it from "
         "this frame."),
@@ -392,28 +399,26 @@ NOTICES.update({
     "Fields/Solvers/Create Rigid Body Solver": (
         "Rigid Body World", "Blender has one rigid body solver per scene, the Rigid Body World (made if missing)."),
     "Fields/Solvers/Initial State/Clear Initial State": (
-        "Start shape restored", "Blender puts the cloth mesh and the rigid body transforms back to how they were "
-        "before the initial state was set."),
+        "Undo", "Blender has no initial state to clear: undo, or keep a copy of the mesh before applying."),
     "Fields/Solvers/Initial State/Set From Mesh": (
-        "Start shape from mesh", "Blender writes the other selected mesh's shape (same vertex count) into the "
-        "cloth mesh, so the simulation starts from it."),
+        "Rest Shape Key", "Blender's cloth starts from its own mesh; another mesh can be its rest shape (nCloth > "
+        "Rest Shape > Connect Selected Mesh to Rest Shape)."),
     "Fields/Solvers/Set Rigid Body Interpenetration": (
-        "No-collision constraint", "Blender lets two rigid bodies pass through each other with a Generic rigid "
-        "body constraint that has no limits and Disable Collisions on: one per pair of selected bodies."),
+        "Generic constraint", "Blender lets the selected rigid bodies pass through the active one: a Generic rigid "
+        "body constraint per pair, no limits, Disable Collisions on."),
     "Fields/Solvers/Set Rigid Body Collision": (
-        "No-collision constraint removed", "Blender removes the kit's no-collision constraints between the "
-        "selected rigid bodies, so they collide again."),
+        "Constraint deleted", "Blender: delete the Generic constraint empty between the bodies (or turn its Disable "
+        "Collisions off) so they collide again."),
     "Fields/Solvers/Assign to Selected": (
-        "Effector Collection", "Blender limits a simulation to the force fields in its Effector Collection "
-        "(Physics > Field Weights): the selected fields go into it."),
+        "Effector Collection", "Blender limits a simulation to the force fields in a collection: Physics > Field "
+        "Weights > Effector Collection."),
     "Fields/Solvers/Use Selected as Source": (
-        "Force field on the object", "Blender puts the field's settings on the selected object's own force field "
-        "and removes the field's empty."),
+        "Force field on the object", "Blender gives the selected object its own force field (Physics > Force Field): "
+        "set its type there."),
     "Effects/Flow/Create Curve Flow": (
-        "Curve Guide + emitter", "Blender makes the curve a Curve Guide force field and adds a point emitter at its "
-        "start; the particles follow the curve."),
+        "Curve Guide field", "Blender makes the curve a Curve Guide force field: add a particle emitter at its start."),
     "Effects/Flow/Delete Selected Flow": (
-        "Curve Guide off", "Blender turns the curve's Curve Guide field off and deletes its flow emitter."),
+        "Force field off", "Blender: set the curve's force field Type to None (Physics > Force Field)."),
     "Effects/Collide with Effect": (
         "Fluid effector", "Blender's fire and smoke are Mantaflow fluids: the selected meshes become Fluid "
         "effectors."),

@@ -21,21 +21,17 @@ editor_menu_map = import_module(kit.MODULE + ".ui.editor_menu_map")
 
 FX_PATHS = (
     "nParticles/Fill Object", "nParticles/Instancer",
-    *(f"nParticles/Create Options/{s}" for s in ("Point", "Balls", "Cloud", "Thick Cloud", "Water")),
     "Fluids/Add/Edit Contents/Emitter", "Fluids/Edit Fluid Resolution",
     "nCloth/Rest Shape/Set Rest To Start Shape", "nCloth/Rest Shape/Connect Input Mesh to Rest Shape",
     "nCloth/Rest Shape/Connect Selected Mesh to Rest Shape",
     *(f"nCloth/Paint Vertex Properties/{p}" for p in ("Input Attract", "Stretch", "Compression", "Bend",
                                                        "Rest Length Scale")),
-    *(f"nConstraint/{c}" for c in ("Transform Constraint", "Disable Collision", "Remove Dynamic Constraint",
-                                   "Select Members", "Add Members", "Remove Members", "Replace Members")),
-    "nCache/Create Particle Disk Cache", "nCache/Transfer Cache To Input Mesh",
+    "nConstraint/Transform Constraint", "nCache/Create Particle Disk Cache",
     "nCache/Edit Oversampling or Cache Settings...",
-    "Fields/Solvers/Volume Curve", "Fields/Solvers/Initial State/Set for Selected",
-    "Fields/Solvers/Initial State/Set for All Dynamic", "Fields/Solvers/Set Active Key",
+    "Fields/Solvers/Volume Curve", "Fields/Solvers/Set Active Key",
     "Fields/Solvers/Set Passive Key", "Fields/Solvers/Break Rigid Body Connections",
     "Fields/Solvers/Rigid Body Solver Attributes", "Fields/Solvers/Create Rigid Body Solver",
-    "Effects/Flow/Create Curve Flow", "Effects/Flow/Delete Selected Flow", "Effects/Collide with Effect",
+    "Effects/Flow/Create Curve Flow", "Effects/Collide with Effect",
 )
 RENDER_PATHS = (
     "Lighting/Shading/Transfer Maps...", "Toon/Reverse Surfaces", "Stereo/Create/Stereo Camera",
@@ -74,7 +70,6 @@ def _scene():
     sc.frame_start, sc.frame_end, sc.use_preview_range = 1, 24, False
     if sc.rigidbody_world is not None:
         bpy.ops.rigidbody.world_remove()
-    bpy.context.window_manager.allset_nparticle_style = 'POINT'
     sc.frame_set(1)
     return sc
 
@@ -115,7 +110,7 @@ def _cube(name="pCube1", z=0.0, size=2.0):
 
 def _cloth(ob):
     _select(ob)
-    assert bpy.ops.allset.fx_ncloth() == {'FINISHED'}
+    assert _run("nCloth/Create nCloth") == {'FINISHED'}
     return fx_more.cloth_of(ob)
 
 
@@ -161,7 +156,7 @@ def test_fill_object_fills_the_volume_on_a_grid():
     assert _run("nParticles/Fill Object") == {'FINISHED'}
     psys = cube.particle_systems[0]
     s = psys.settings
-    assert psys.name.startswith("nParticle") and s.emit_from == 'VOLUME' and s.distribution == 'GRID'
+    assert s.emit_from == 'VOLUME' and s.distribution == 'GRID'
     assert s.frame_start == s.frame_end == sc.frame_start and s.grid_resolution == fx_more.FILL_RESOLUTION
     sc.frame_set(2)
     ev = cube.evaluated_get(bpy.context.evaluated_depsgraph_get())
@@ -173,8 +168,9 @@ def test_fill_object_fills_the_volume_on_a_grid():
 
 def test_instancer_renders_the_selected_objects_on_the_particles():
     _scene()
-    assert bpy.ops.allset.fx_emitter() == {'FINISHED'}
-    emitter = bpy.context.active_object
+    emitter = _cube("emitter1")
+    _select(emitter)
+    assert _run("nParticles/Emit from Object") == {'FINISHED'}
     ball = _cube("pSphere1")
     _select(ball, emitter)
     assert _run("nParticles/Instancer") == {'FINISHED'}
@@ -185,21 +181,6 @@ def test_instancer_renders_the_selected_objects_on_the_particles():
     assert _run("nParticles/Instancer") == {'FINISHED'}
     assert s.render_type == 'COLLECTION' and set(s.instance_collection.objects) == {ball, box}
     assert s.instance_collection.name.startswith("instancer")
-
-
-def test_create_options_style_applies_to_new_particles():
-    _scene()
-    assert _run("nParticles/Create Options/Balls") == {'FINISHED'}
-    assert bpy.context.window_manager.allset_nparticle_style == 'BALLS'
-    bpy.ops.allset.fx_emitter()
-    assert bpy.context.active_object.particle_systems[0].settings.display_method == 'CIRC'
-    _run("nParticles/Create Options/Water")
-    bpy.ops.allset.fx_emitter()
-    assert bpy.context.active_object.particle_systems[0].settings.physics_type == 'FLUID'
-    _run("nParticles/Create Options/Point")
-    bpy.ops.allset.fx_emitter()
-    s = bpy.context.active_object.particle_systems[0].settings
-    assert s.display_method == 'DOT' and s.physics_type == 'NEWTON'
 
 
 # --- Fluids -------------------------------------------------------------------------------------------------------------
@@ -216,14 +197,13 @@ def test_fluid_emitter_and_resolution():
     _scene()
     dom, md = _domain()
     _select(dom)
+    assert _run("Fluids/Add/Edit Contents/Emitter") == {'CANCELLED'}, "a container doesn't become a flow"
+    em = _cube("pSphere1")
+    _select(em)
     assert _run("Fluids/Add/Edit Contents/Emitter") == {'FINISHED'}
-    em = bpy.context.active_object
-    assert em.name == "fluidEmitter1" and em.hide_render
     flow = next(m for m in em.modifiers if m.type == 'FLUID')
-    assert flow.fluid_type == 'FLOW' and flow.flow_settings.flow_behavior == 'INFLOW'
-    assert (em.location - dom.location).length < 1e-6
-    radius = max(v.co.length for v in em.data.vertices)
-    assert abs(radius - fx_more.EMITTER_RADIUS * units.maya_unit()) < 1e-5, radius
+    assert flow.fluid_type == 'FLOW' and flow.flow_settings.flow_type == 'SMOKE'
+    assert flow.flow_settings.flow_behavior == 'INFLOW'
     _select(dom)
     assert _run("Fluids/Edit Fluid Resolution", resolution=24) == {'FINISHED'}
     assert md.domain_settings.resolution_max == 24
@@ -282,89 +262,32 @@ def _corner(ob):
     return {v.index for v in ob.data.vertices if abs(v.co.y - lo) < 1e-6}
 
 
-def test_transform_constraint_pins_and_hooks_the_vertices():
-    sc = _scene()
+def test_transform_constraint_is_hook_to_new_object():
+    _scene()
     cloth = _grid("pPlane1", z=5.0)
-    md = _cloth(cloth)
-    edge = _corner(cloth)
-    _edit_select(cloth, edge)
+    _cloth(cloth)
+    _edit_select(cloth, _corner(cloth))
+    before = set(bpy.data.objects)
     assert _run("nConstraint/Transform Constraint") == {'FINISHED'}
     bpy.ops.object.mode_set(mode='OBJECT')
-    empty = bpy.data.objects["dynamicConstraint1"]
-    assert empty[fx_more.MARK] == cloth.name
-    names = [m.name for m in cloth.modifiers]
-    assert names.index("dynamicConstraint1") < names.index(md.name), names
-    assert md.settings.vertex_group_mass == fx_more.PINS
-    assert fx_more.members(cloth, fx_more.PINS) == edge == fx_more.members(cloth, "dynamicConstraint1")
-    # the pinned edge stays up while the rest falls, and follows the empty
-    _play(sc, 12)
-    zs = _world_z(cloth)
-    k = units.maya_unit()
-    assert all(abs(zs[i] - 5.0 * k) < 1e-4 for i in edge), [zs[i] for i in edge]
-    assert min(zs) < 5.0 * k - 1e-3
-    sc.frame_set(1)
-    empty.location.z += 2.0 * k
-    bpy.context.view_layer.update()
-    zs = _world_z(cloth)
-    assert all(abs(zs[i] - 7.0 * k) < 1e-4 for i in edge), [zs[i] for i in edge]
-    # membership commands work on the newest constraint
-    extra = min(set(range(len(cloth.data.vertices))) - edge)
-    _edit_select(cloth, {extra})
-    assert _run("nConstraint/Add Members") == {'FINISHED'}
-    assert fx_more.members(cloth, "dynamicConstraint1") == edge | {extra}
-    assert _run("nConstraint/Remove Members") == {'FINISHED'}
-    assert fx_more.members(cloth, "dynamicConstraint1") == edge
-    _edit_select(cloth, set())
-    assert _run("nConstraint/Select Members") == {'FINISHED'}
-    assert set(fx_more.selected_verts(cloth)) == edge
-    _edit_select(cloth, {extra})
-    assert _run("nConstraint/Replace Members") == {'FINISHED'}
-    assert fx_more.members(cloth, "dynamicConstraint1") == {extra} == fx_more.members(cloth, fx_more.PINS)
-    # Disable Collision = the collision exclusion group
-    assert _run("nConstraint/Disable Collision") == {'FINISHED'}
-    cs = md.collision_settings
-    assert cs.vertex_group_object_collisions == fx_more.NO_COLLIDE == cs.vertex_group_self_collisions
-    assert fx_more.members(cloth, fx_more.NO_COLLIDE) == {extra}
-    bpy.ops.object.mode_set(mode='OBJECT')
-    # Remove Dynamic Constraint on the empty
-    _select(empty)
-    assert _run("nConstraint/Remove Dynamic Constraint") == {'FINISHED'}
-    assert "dynamicConstraint1" not in bpy.data.objects and "dynamicConstraint1" not in cloth.modifiers
-    assert cloth.vertex_groups.get("dynamicConstraint1") is None and md.settings.vertex_group_mass == ""
-    # on the cloth: the rest (the collision group) goes too
-    _select(cloth)
-    assert _run("nConstraint/Remove Dynamic Constraint") == {'FINISHED'}
-    assert cloth.vertex_groups.get(fx_more.NO_COLLIDE) is None and cs.vertex_group_object_collisions == ""
+    hook = next(m for m in cloth.modifiers if m.type == 'HOOK')
+    new = set(bpy.data.objects) - before
+    assert len(new) == 1 and hook.object in new and hook.object.type == 'EMPTY'
+    for label in ("Disable Collision", "Remove Dynamic Constraint", "Select Members", "Add Members",
+                  "Remove Members", "Replace Members"):
+        path = f"nConstraint/{label}"
+        assert path not in menu_map.MAP and notices.greyed_notice(path) is not None, path
 
 
 # --- Initial state / caches -----------------------------------------------------------------------------------------
 
-def test_initial_state_and_transfer_cache_write_the_simulated_cloth():
-    sc = _scene()
-    cloth = _grid("pPlane1", z=5.0)
-    _cloth(cloth)
-    _play(sc, 8)
-    fallen = sorted(_world_z(cloth))
-    _select(cloth)
-    assert _run("nCache/Transfer Cache To Input Mesh") == {'FINISHED'}
-    assert any(md.type == 'CLOTH' for md in cloth.modifiers)
-    base = sorted((cloth.matrix_world @ v.co).z for v in cloth.data.vertices)
-    assert max(abs(a - b) for a, b in zip(base, fallen)) < 1e-5
-    assert base[0] < 5.0 * units.maya_unit() - 1e-3
-
-
-def test_initial_state_for_rigid_bodies_and_break_connections():
+def test_rigid_body_solver_and_break_connections():
     sc = _scene()
     cube = _cube(z=10.0)
     _select(cube)
     assert _run("Fields/Solvers/Create Rigid Body Solver") == {'FINISHED'}
     assert sc.rigidbody_world is not None
-    bpy.ops.allset.fx_rigid(type='ACTIVE')
-    _play(sc, 10)
-    z = cube.matrix_world.translation.z
-    assert z < 10.0 * units.maya_unit()
-    assert _run("Fields/Solvers/Initial State/Set for All Dynamic") == {'FINISHED'}
-    assert abs(cube.location.z - z) < 1e-6
+    assert _run("Fields/Solvers/Create Active Rigid Body") == {'FINISHED'}
     _play(sc, 14)
     z2 = cube.matrix_world.translation.z
     _select(cube)
@@ -376,7 +299,7 @@ def test_rigid_body_active_passive_keys():
     sc = _scene()
     cube = _cube(z=10.0)
     _select(cube)
-    bpy.ops.allset.fx_rigid(type='ACTIVE')
+    assert _run("Fields/Solvers/Create Active Rigid Body") == {'FINISHED'}
     sc.frame_set(1)
     assert _run("Fields/Solvers/Set Passive Key") == {'FINISHED'}
     assert cube.rigid_body.kinematic
@@ -393,9 +316,9 @@ def test_particle_disk_cache_bakes_to_disk():
     folder = os.path.join(bpy.app.tempdir or os.environ.get("TEMP", "."), "issue123")
     os.makedirs(folder, exist_ok=True)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(folder, "disk_cache.blend"))
-    bpy.ops.allset.fx_emitter()
-    em = bpy.context.active_object
+    em = _cube("emitter1")
     _select(em)
+    assert _run("nParticles/Emit from Object") == {'FINISHED'}
     assert _run("nCache/Create Particle Disk Cache") == {'FINISHED'}
     pc = em.particle_systems[0].point_cache
     assert pc.use_disk_cache and pc.is_baked
@@ -411,15 +334,11 @@ def test_volume_curve_and_curve_flow():
     assert _run("Fields/Solvers/Volume Curve") == {'FINISHED'}
     assert cu.field.type == 'GUIDE'
     cu.field.type = 'NONE'
+    before = set(bpy.data.objects)
     assert _run("Effects/Flow/Create Curve Flow") == {'FINISHED'}
-    assert cu.field.type == 'GUIDE'
-    ems = [o for o in bpy.data.objects if o.get(fx_more.FLOW) == cu.name]
-    assert len(ems) == 1 and ems[0].particle_systems
-    first = cu.matrix_world @ cu.data.splines[0].bezier_points[0].co
-    assert (ems[0].location - first).length < 1e-6
-    _select(cu)
-    assert _run("Effects/Flow/Delete Selected Flow") == {'FINISHED'}
-    assert cu.field.type == 'NONE' and not [o for o in bpy.data.objects if fx_more.FLOW in o]
+    assert cu.field.type == 'GUIDE' and set(bpy.data.objects) == before, "a Curve Guide field, no emitter"
+    path = "Effects/Flow/Delete Selected Flow"
+    assert path not in menu_map.MAP and notices.greyed_notice(path) is not None
 
 
 def test_collide_with_effect_is_a_fluid_effector():

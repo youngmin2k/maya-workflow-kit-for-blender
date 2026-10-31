@@ -75,25 +75,7 @@ KINDS = {
     'TEXT': ("Type", "typeMesh", "object.text_add", {"radius": 1.0}, None),
     # Maya's Free Image Plane faces the front camera with no image yet: an image empty, no file browser.
     'IMAGE_PLANE': ("Free Image Plane", "imagePlane", "object.empty_add", {"type": 'IMAGE', "radius": 1.0}, LEVEL),
-    # Fields: Blender force fields are empties, display size 1 Maya unit.
-    # Blender has no gravity field: a wind blowing down (Maya -Y = Blender -Z); Uniform blows along Maya's +X.
-    'FIELD_AIR': ("Air Field", "airField", "object.effector_add", {"type": 'WIND', "radius": 1.0}, None),
-    'FIELD_DRAG': ("Drag Field", "dragField", "object.effector_add", {"type": 'DRAG', "radius": 1.0}, None),
-    'FIELD_GRAVITY': ("Gravity Field", "gravityField", "object.effector_add", {"type": 'WIND', "radius": 1.0},
-                      (math.pi, 0.0, 0.0)),
-    'FIELD_NEWTON': ("Newton Field", "newtonField", "object.effector_add", {"type": 'FORCE', "radius": 1.0}, None),
-    'FIELD_RADIAL': ("Radial Field", "radialField", "object.effector_add", {"type": 'FORCE', "radius": 1.0}, None),
-    'FIELD_TURBULENCE': ("Turbulence Field", "turbulenceField", "object.effector_add",
-                         {"type": 'TURBULENCE', "radius": 1.0}, None),
-    'FIELD_UNIFORM': ("Uniform Field", "uniformField", "object.effector_add", {"type": 'WIND', "radius": 1.0},
-                      (0.0, HALF_PI, 0.0)),
-    'FIELD_VORTEX': ("Vortex Field", "vortexField", "object.effector_add", {"type": 'VORTEX', "radius": 1.0}, None),
 }
-# Fields/Solvers default magnitudes (Gravity / Newton Options):
-# Gravity 9.8 along Maya -Y (the Wind above is turned to blow down),
-# Newton 5 pulling in (Blender Force: negative strength attracts). An acceleration in Maya units per second squared,
-# so it is scaled by the step 68 simulation scale g = maya_unit() / Space Scale like the nucleus gravity (#72).
-FIELD_MAGNITUDES = {'FIELD_GRAVITY': 9.8, 'FIELD_NEWTON': -5.0}
 # Kinds whose data keeps Blender's name (Maya has no "...Shape" node for them).
 NO_SHAPE_NAME = {'JOINT', 'TEXT'}
 # A Maya locator (Create > Locator, cmds.spaceLocator): an Empty with this flag; cmds_shim gives it a shape name
@@ -161,11 +143,6 @@ def create(context, kind, maya_naming=True, overrides=None):
     getattr(getattr(bpy.ops, mod), name)(**kw)
     ob = context.view_layer.objects.active
     _scale_data(ob, k)
-    if kind in FIELD_MAGNITUDES and ob.field is not None:
-        from . import fx
-        g = fx.sim_scale(context.scene) if hasattr(context.scene, "allset_nucleus") else k
-        ob.field.strength = FIELD_MAGNITUDES[kind] * g
-        ob.field.flow = 0.0     # Blender's Wind starts with Flow 1 (a drag towards the wind speed): Maya gravity has none
     if maya_naming:
         naming.apply_maya_name(ob, base, rename_data=kind not in NO_SHAPE_NAME)
     if kind == 'LOCATOR':
@@ -212,64 +189,4 @@ class ALLSET_OT_create(bpy.types.Operator):
         return {'FINISHED'}
 
 
-# Blender's quick smoke (Fluids > 3D Container, Effects > Fire / Smoke) puts a domain around the selection with a
-# margin of (1, 1, 2) BU and 1 BU up ($S\startupl_operators\object_quick_effects.py:482-483): 200 x 200 x 400
-# Maya units in a cm scene. The margin is redone in Maya units here.
-SMOKE_MARGIN = (1.0, 1.0, 2.0)
-SMOKE_LIFT = 1.0
-
-
-def _selection_bounds(objects):
-    from mathutils import Vector
-    pts = [ob.matrix_world @ Vector(c) for ob in objects for c in ob.bound_box]
-    lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
-    hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
-    return lo, hi
-
-
-class ALLSET_OT_quick_smoke(bpy.types.Operator):
-    """Smoke or fire from the selected meshes in a Mantaflow domain sized in Maya units
-    (Maya Fluids > 3D Container, Effects > Fire / Smoke)"""
-    bl_idname = "allset.quick_smoke"
-    bl_label = "Quick Smoke"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    style: EnumProperty(name="Style", items=(('SMOKE', "Smoke", ""), ('FIRE', "Fire", ""), ('BOTH', "Both", "")))
-
-    @classmethod
-    def poll(cls, context):
-        return any(ob.type == 'MESH' for ob in context.selected_objects)
-
-    def execute(self, context):
-        from mathutils import Vector
-        meshes = [ob for ob in context.selected_objects if ob.type == 'MESH']
-        # a mesh can hold one fluid modifier: Blender's quick_smoke fails on a selected container / emitter that already
-        # has one (the new emitter is the rest of the selection)
-        taken = [ob for ob in meshes if any(md.type == 'FLUID' for md in ob.modifiers)]
-        if taken:
-            meshes = [ob for ob in meshes if ob not in taken]
-            if not meshes:
-                self.report({'WARNING'}, "Smoke: select a mesh that isn't a fluid container or emitter yet.")
-                return {'CANCELLED'}
-            for ob in taken:
-                ob.select_set(False)
-            if context.view_layer.objects.active in taken:
-                context.view_layer.objects.active = meshes[0]
-        lo, hi = _selection_bounds(meshes)
-        before = set(bpy.data.objects)
-        if not bpy.ops.object.quick_smoke.poll():
-            self.report({'WARNING'}, "Smoke: switch to Object Mode with the emitting meshes selected first.")
-            return {'CANCELLED'}
-        res = bpy.ops.object.quick_smoke(style=self.style)
-        if res != {'FINISHED'}:
-            return res
-        domain = next((ob for ob in bpy.data.objects if ob not in before), None)
-        if domain is None:
-            return res
-        k = units.maya_unit(context.scene)
-        domain.location = (lo + hi) / 2 + Vector((0.0, 0.0, SMOKE_LIFT * k))
-        domain.scale = (hi - lo) / 2 + Vector(SMOKE_MARGIN) * k
-        return res
-
-
-classes = (ALLSET_OT_create, ALLSET_OT_quick_smoke)
+classes = (ALLSET_OT_create,)

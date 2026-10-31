@@ -17,11 +17,9 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
 - **polyCylinder attributes** (#259): Height Baseline (−1 puts the bottom on the origin, 1 the top), Create UVs
   (None turns the UVs off) and Round Cap Height Compensation (round caps stay inside the height) in the Channel Box
   INPUTS and the Attribute Editor, in Maya's order, next to Subdivisions Caps and Round Cap.
-- **More Fields/Solvers items** (#123): Initial State > Clear Initial State (the cloth or rigid body goes back to how
-  it was before its initial state was set) and Set From Mesh (an nCloth starts from another mesh with the same
-  vertex count); Set Rigid Body Interpenetration / Collision (the selected rigid bodies pass through each other or
-  collide again); Assign to Selected (cloth, soft body and particles react only to the fields assigned to them);
-  Use Selected as Source (the object carries the field).
+- **More Fields/Solvers items** (#123): Set Rigid Body Interpenetration (Blender's Generic rigid body constraint with
+  Disable Collisions between the selected bodies and the active one) and Use Selected as Source (Blender's force
+  field on the selected object).
 
 ### Changed
 - **Render items call Blender's render**: Render > Render Current Frame / Redo Previous Render / Render Sequence,
@@ -41,6 +39,17 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   made stops being the scene camera and is removed, and a leftover `defaultLight` goes. The World's "Maya Ambient"
   nodes are taken out, old Ambient / Volume Lights become point lights with the same intensity, a Light Editor
   Isolate left on is undone.
+- **FX menus call Blender's simulations at real size**: nCloth > Create nCloth / Create Passive Collider and
+  nParticles > Emit from Object / Make Collide add Blender's Cloth / Collision modifier or particle system to every
+  selected mesh, Create Active / Passive Rigid Body are Blender's rigid bodies, the Fields/Solvers fields are
+  Blender's force fields (Gravity and Uniform = a Wind field turned down / along X), Fluids > 3D Container and
+  Effects > Fire / Smoke are Blender's Quick Smoke, nConstraint > Transform Constraint is Blender's Hook to New
+  Object, Fluids > Add/Edit Contents > Emitter makes the selected meshes smoke flows and Effects > Flow > Create
+  Curve Flow a Curve Guide field. Nothing is rescaled: Blender simulates one unit as one metre, so FX works in metre
+  scenes (the creating items say so in their tooltip).
+- **Files saved with older versions** also get their FX back to real size: a scene gravity the kit had scaled to
+  the centimetre layout (0.098) goes back to Blender's 9.81 unless it was changed by hand, and kit nCloth stiffness
+  and damping lose their rescale.
 - **Prevent Negative Scale on every Scale handle** (#261): in component mode the centre handle and the plane
   handles stop at zero too, so a selection scales onto its pivot (ready to merge) or onto a line through it
   without flipping. Object Mode still scales past zero.
@@ -61,6 +70,15 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   Illuminating / Shadowing Object (greyed: each light's Light Linking panel lists its objects).
 - **Kit Light Editor and Render Settings windows**: the Light Editor's list with Isolate, and the Render Settings
   window's Common tab, image size presets and its Edit / Presets / Help menus.
+- **FX unit scaling and the nucleus**: the kit no longer scales gravity, cloth stiffness and damping, collision
+  distances, particle sizes, field strengths or fluid containers to the Maya unit, and the Attribute Editor's
+  nucleus1 tab (Gravity, Space Scale, Substeps) is gone; Blender's Scene > Gravity and each object's Physics
+  settings are the controls.
+- **Kit-only FX items** (greyed with a note on what to use in Blender): nParticles > Create Emitter (the one-point
+  emitter; use Emit from Object on a mesh) and Create Options, Initial State (Set for Selected / All Dynamic, Clear
+  Initial State, Set From Mesh) and nCache > Transfer Cache To Input Mesh (apply the Cloth modifier instead), the
+  other nConstraint items, Set Rigid Body Collision, Assign to Selected and Effects > Flow > Delete Selected Flow;
+  the FX shelf's Emitter follows Create Emitter and 3D Fluid Container with Emitter runs Fluids > 3D Container.
 
 ### Fixed
 - **Joints inside a mesh in wireframe** (#266): a wireframe view (4) shows every joint and bone again, also the ones

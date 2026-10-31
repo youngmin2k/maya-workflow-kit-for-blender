@@ -4490,17 +4490,13 @@ def _m67_5_removed():
 
 
 # --- [M68-2] Emit from Object on two meshes, shelf Emitter / Add Emitter ----------------------------------------------
-# --- [M68-4] AE nucleus1 tab on simulated objects, Gravity 19.6 falls faster, Space Scale 0.01, Substeps 6, note ------
+# --- [M68-4] FX creation runs Blender's own operators: no nucleus tab, the scene gravity is left alone -----------------
 # --- [M68-5] nCache > Create New Cache > nObject (selection / whole scene), Delete Cache, greyed Enable / Disable -----
-# --- [M68-6] Create Active Rigid Body on several meshes: they fall onto a Passive floor and stop ------------------------
-
-def fx():
-    return mod("operators.fx")
-
+# --- [M68-6] Create Active Rigid Body on several meshes: they fall onto a Passive floor and stop (a metre scene) -------
 
 def shelf_action(shelf, label):
     sh = mod("ui.shelf")
-    return next(((i, a) for i, lab, a, _icon in sh.factory_buttons(shelf) if lab == label), (None, None))
+    return next(((i, a) for i, lab, a, _icon in sh.all_buttons(shelf) if lab == label), (None, None))
 
 
 def run_shelf(shelf, label):
@@ -4509,23 +4505,18 @@ def run_shelf(shelf, label):
         return bpy.ops.allset.shelf_button(shelf=shelf, index=i)
 
 
-def cloth_drop(ob, frames):
-    """Lowest world z (units) of ``ob``'s cloth after ``frames`` frames from its cache start (the kit makes the cache
-    cover the playback range)."""
-    sc = bpy.context.scene
-    start = next(m for m in ob.modifiers if m.type == 'CLOTH').point_cache.frame_start
-    for f in range(start, start + frames + 1):
-        sc.frame_set(f)
-    ev_ob = ob.evaluated_get(bpy.context.evaluated_depsgraph_get())
-    me = ev_ob.to_mesh()
-    z = min((ob.matrix_world @ v.co).z for v in me.vertices) / k()
-    ev_ob.to_mesh_clear()
-    sc.frame_set(sc.frame_start)
-    return z
-
-
 def cloth_md(ob):
     return next(m for m in ob.modifiers if m.type == 'CLOTH')
+
+
+def metre_scene(on):
+    """FX works in metre scenes: the rigid body checks run with metres shown (one unit = 1 m)."""
+    us = bpy.context.scene.unit_settings
+    if on:
+        C["units0"] = (us.system, us.length_unit, us.scale_length)
+        us.system, us.length_unit, us.scale_length = 'METRIC', 'METERS', 1.0
+    elif "units0" in C:
+        us.system, us.length_unit, us.scale_length = C.pop("units0")
 
 
 @named("m68_2_emit")
@@ -4541,30 +4532,25 @@ def _m68_2_emit():
     b.location.x = 4 * k()
     select_only(a, b)
     menu("nParticles/Emit from Object")
-    ok = all(len(o.particle_systems) == 1 and o.particle_systems[0].settings.emit_from == 'VERT' for o in (a, b))
-    check(f"[M68-2] Emit from Object with two meshes: both emit from their vertices "
-          f"({[(o.name, len(o.particle_systems), o.particle_systems[0].settings.emit_from if o.particle_systems else None) for o in (a, b)]})",
-          ok)
-    for label, want in (("Emitter", "allset.fx_emitter"), ("Add Emitter", "allset.fx_emit_from_object")):
-        _i, act = shelf_action("FX", label)
-        got = act[0] if isinstance(act, tuple) else act
-        check(f"[M68-2] shelf FX '{label}' = {want} ({got})", got == want)
+    ok = all(len(o.particle_systems) == 1 for o in (a, b))
+    check(f"[M68-2] Emit from Object with two meshes: both get a Blender particle system "
+          f"({[(o.name, len(o.particle_systems)) for o in (a, b)]})", ok)
+    _i, act = shelf_action("FX", "Emitter")
+    check(f"[M68-2] shelf FX 'Emitter' is greyed like nParticles > Create Emitter ({act})", act is None)
+    _i, act = shelf_action("FX", "Add Emitter")
+    check(f"[M68-2] shelf FX 'Add Emitter' = Blender's particle system ({act})",
+          isinstance(act, tuple) and act[0] == "object.modifier_add" and act[1].get("type") == 'PARTICLE_SYSTEM')
     select_only(a)
     run_shelf("FX", "Add Emitter")
     check(f"[M68-2] the shelf's Add Emitter adds an emitter to the selected mesh ({len(a.particle_systems)} systems)",
           len(a.particle_systems) == 2)
-    select_only(b)
-    run_shelf("FX", "Emitter")
-    check(f"[M68-2] the shelf's Emitter = Create Emitter ({[o.name for o in sc.objects if o.name.startswith('emitter')]})",
-          any(o.name.startswith("emitter") for o in sc.objects))
 
 
 @named("m68_4_setup")
 def _m68_4_setup():
     clear()
     sc = bpy.context.scene
-    nuc = fx().nucleus(sc)
-    nuc.gravity, nuc.space_scale, nuc.substeps = 9.8, 1.0, fx().MAYA_SUBSTEPS
+    gravity0 = tuple(sc.gravity)
     cloth = create('PLANE')
     cloth.location.z = 20 * k()
     C["cloth"] = cloth.name
@@ -4575,8 +4561,10 @@ def _m68_4_setup():
     C["floor"] = floor.name
     select_only(floor)
     menu("nCloth/Create Passive Collider")
-    menu("nParticles/Create Emitter")
-    em = bpy.context.view_layer.objects.active
+    em = create('SPHERE')
+    em.location.x = -6 * k()
+    select_only(em)
+    menu("nParticles/Emit from Object")
     C["emitter"] = em.name
     cube = create('CUBE')
     cube.location.x = 6 * k()
@@ -4584,41 +4572,16 @@ def _m68_4_setup():
     select_only(cube)
     menu("Fields/Solvers/Create Active Rigid Body")
     names = [C[n] for n in ("cloth", "floor", "emitter", "rigid")]
-    has = {n: any(t[0] == "NUC" for t in mod("ui.attribute_editor").tabs(sc.objects[n])) for n in names}
-    check(f"[M68-4] the AE has the nucleus1 tab on cloth, collider, particles and rigid body ({has})", all(has.values()))
-    rec = OpRecorder()
-    bpy.context.window_manager.allset_dock = 'ATTRIBUTE_EDITOR'
-    mod("ui.attribute_editor").set_tab(bpy.context, "NUC")
-    with override():
-        mod("ui.attribute_editor").draw(rec, bpy.context, sc.objects[C["cloth"]])
-    text = " ".join(t for kind, t, _x in rec.out if kind == "label")
-    # step 106: the Blender note is the head row's tooltip (allset.tip), not a sentence in the AE
-    tips = " ".join(x[1].get("text", "") for kind, _t, x in rec.out if kind == "op" and x[0] == "allset.tip")
-    check(f"[M68-4] the nucleus1 tab has the note as a tooltip ({text[:70]!r}…)",
-          "no nucleus node" in tips and "no nucleus node" not in text)
-    C["drop98"] = cloth_drop(sc.objects[C["cloth"]], 12)
-    nuc.gravity = 19.6
-
-
-@named("m68_4_gravity")
-def _m68_4_gravity():
-    sc = bpy.context.scene
-    drop = cloth_drop(sc.objects[C["cloth"]], 12)
-    fell98, fell196 = 20 - C["drop98"], 20 - drop
-    check(f"[M68-4] Gravity 19.6: the cloth falls faster (half a second: {fell98:.2f} -> {fell196:.2f} units)",
-          fell196 > 1.6 * fell98 > 0)
-    nuc = fx().nucleus(sc)
-    nuc.gravity = 9.8
-    st = cloth_md(sc.objects[C["cloth"]]).settings
-    C["stiff"] = st.tension_stiffness
-    nuc.space_scale = 0.01
-    check(f"[M68-4] Space Scale 0.01 = real centimetre physics: gravity 9.8 m/s² ({sc.gravity.z:.3f}), cloth "
-          f"stiffness x100 ({C['stiff']:.4g} -> {st.tension_stiffness:.4g})",
-          abs(sc.gravity.z + 9.8) < 1e-3 and abs(st.tension_stiffness / C["stiff"] - 100) < 1e-3)
-    nuc.space_scale = 1.0
-    nuc.substeps = 6
-    check(f"[M68-4] Substeps 6 -> cloth quality 10 ({st.quality})", st.quality == 10)
-    nuc.substeps = fx().MAYA_SUBSTEPS
+    made = {"cloth": any(m.type == 'CLOTH' for m in cloth.modifiers),
+            "collider": any(m.type == 'COLLISION' for m in floor.modifiers),
+            "particles": bool(em.particle_systems), "rigid": cube.rigid_body is not None}
+    check(f"[M68-4] nCloth / Passive Collider / Emit from Object / Active Rigid Body make Blender's own ({made})",
+          all(made.values()))
+    tabs = {n: [t[0] for t in mod("ui.attribute_editor").tabs(sc.objects[n])] for n in names}
+    check(f"[M68-4] no nucleus tab in the AE ({tabs})", not any("NUC" in t for t in tabs.values()))
+    check(f"[M68-4] the scene gravity is left alone ({gravity0} -> {tuple(sc.gravity)})", tuple(sc.gravity) == gravity0)
+    tip = mod("ui.notices").tooltip("nCloth/Create nCloth", True)
+    check(f"[M68-4] Create nCloth's tooltip says FX works in metre scenes ({tip[:60]!r}…)", "metre scenes" in tip)
 
 
 @named("m68_5_selection")
@@ -4655,7 +4618,11 @@ def _m68_5_selection():
 @named("m68_6_rigid")
 def _m68_6_rigid():
     clear()
+    metre_scene(True)
     sc = bpy.context.scene
+    if sc.rigidbody_world is not None:
+        with override():
+            bpy.ops.rigidbody.world_remove()
     floor = create('PLANE')
     floor.scale = (10, 10, 10)
     select_only(floor)
@@ -4691,6 +4658,7 @@ def _m68_6_fall():
     if sc.rigidbody_world is not None:
         with override():
             bpy.ops.rigidbody.world_remove()
+    metre_scene(False)
     sc.frame_start, sc.frame_end = C["frames0"]
     sc.frame_set(sc.frame_start)
 

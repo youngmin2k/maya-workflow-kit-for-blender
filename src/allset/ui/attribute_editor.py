@@ -165,21 +165,9 @@ def tabs(ob):
             # initialShadingGroup | lambert1; step 100)
             out.append((f"SG:{i}", material_ops.shading_group_name(slot.material), "shadingEngine"))
             out.append((f"MAT:{i}", slot.material.name, material_type(slot.material)))
-    if has_nucleus(ob):
-        out.append(("NUC", "nucleus1", "nucleus"))     # Maya's shared solver node (operators/fx.py, step 68)
     out += _constraint_tabs(ob)
     hide = hidden_types()             # AE Hide button: nodes of these types get no tab (the node itself stays)
     return [t for t in out if t[0] in ("T", "S") or t[2] not in hide]
-
-
-def has_nucleus(ob):
-    """The kit nucleus exists and ``ob`` is simulated by it (cloth, particles, collider, rigid body)."""
-    scene = bpy.context.scene
-    nuc = getattr(scene, "allset_nucleus", None)
-    if nuc is None or not nuc.exists:
-        return False
-    return (ob.rigid_body is not None or any(md.type in {'CLOTH', 'COLLISION', 'PARTICLE_SYSTEM', 'SOFT_BODY'}
-                                             for md in ob.modifiers))
 
 
 def _kind(key):
@@ -215,8 +203,6 @@ def tab_target(ob, key):
     if kind in ("MAT", "SG"):
         i = int(key.split(":", 1)[1])
         return ob.material_slots[i].material if i < len(ob.material_slots) else None
-    if kind == "NUC":
-        return bpy.context.scene.allset_nucleus
     if kind == "H":
         return history_record(ob)
     if kind == "CH":
@@ -239,8 +225,6 @@ def sections_for(ob, key):
         mat = tab_target(ob, key)
         name = material_type(mat)
         return ae_layout.BY_KIND[name][0], name
-    if kind == "NUC":
-        return ae_layout.BY_KIND["nucleus"][0], "nucleus"
     return [], None
 
 
@@ -710,9 +694,7 @@ def draw(layout, context, ob):
     entry = next(t for t in tabs(ob) if t[0] == key)
     draw_head(layout, context, ob, key, target, entry)
     kind = _kind(key)
-    if kind == "NUC":
-        draw_sections(layout, context, ob, target, ae_layout.NUCLEUS, "nucleus")
-    elif kind == "SG":
+    if kind == "SG":
         draw_shading_group(layout, key, target)
     elif kind == "C":
         draw_constraint(layout, context, ob, target)
@@ -735,15 +717,12 @@ def draw(layout, context, ob):
 def draw_head(layout, context, ob, key, target, entry):
     """Maya's node row: "<type>: [name]" with the in / out arrows, Focus / Presets, Show / Hide
     (tooltips as Maya's)."""
-    from . import notices
     kind = _kind(key)
     top = layout.row(align=True)
     head = top.row(align=True)
     head.label(text=f"{entry[2]}:")
-    if kind in ("NUC", "SG", "H", "CH"):
+    if kind in ("SG", "H", "CH"):
         head.label(text=entry[1])
-        if kind == "NUC":     # a tooltip, not a Blender sentence in the AE (step 106)
-            notices.tip(head, ae_layout.NUCLEUS_NOTE)
     elif kind == "M" and entry[1] != target.name:
         head.label(text=entry[1])           # the Maya node name (polyBevel31); renaming keeps Blender's name
     else:
@@ -778,7 +757,7 @@ def notes_owner(ob, key):
     if ob is None:
         return None, NOTES_PROP
     target = tab_target(ob, key)
-    if isinstance(target, (bpy.types.ID, bpy.types.PoseBone)) and _kind(key) != "NUC":
+    if isinstance(target, (bpy.types.ID, bpy.types.PoseBone)):
         return target, NOTES_PROP
     return ob, f"{NOTES_PROP}:{key}"
 
@@ -1349,7 +1328,7 @@ class ALLSET_OT_ae_show_node(bpy.types.Operator):
 
 # AE tab kind -> Properties tab of the Copy Tab window and the ID it pins
 COPY_TABS = {"T": 'OBJECT', "S": 'DATA', "M": 'MODIFIER', "H": 'DATA', "CH": 'DATA', "C": 'CONSTRAINT', "MAT": 'MATERIAL',
-             "SG": 'MATERIAL', "J": 'BONE', "NUC": 'PHYSICS'}
+             "SG": 'MATERIAL', "J": 'BONE'}
 
 
 def copy_tab_target(ob, key):

@@ -145,12 +145,17 @@ def shelf():
     return {s for s in out if _ok(s)}
 
 
+def _is_text(e):
+    return isinstance(e, ast.Constant) and isinstance(e.value, str)
+
+
 def _notice_values(node, out):
-    """String literals of the notice tables' (substitute, line) tuples."""
+    """String literals of the notice tables' (substitute, line) tuples; a line may be a named constant
+    (collected from its own assignment)."""
     for sub in ast.walk(node):
-        if isinstance(sub, ast.Tuple) and len(sub.elts) == 2 and all(
-                isinstance(e, ast.Constant) and isinstance(e.value, str) for e in sub.elts):
-            out.update(e.value for e in sub.elts)
+        if isinstance(sub, ast.Tuple) and len(sub.elts) == 2 and _is_text(sub.elts[0]) and (
+                _is_text(sub.elts[1]) or isinstance(sub.elts[1], ast.Name)):
+            out.update(e.value for e in sub.elts if _is_text(e))
 
 
 def notices():
@@ -160,7 +165,11 @@ def notices():
         if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id.isupper() or
                                                 isinstance(t, ast.Name) and t.id.startswith("_")
                                                 for t in node.targets):
-            _notice_values(node.value, out)
+            if _is_text(node.value):
+                if node.value.value.endswith("."):
+                    out.add(node.value.value)      # a shared notice line (NAME = "...")
+            else:
+                _notice_values(node.value, out)
     return {s for s in out if _ok(s) and " " in s}
 
 

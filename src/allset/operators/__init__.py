@@ -177,8 +177,8 @@ from . import interactive_create  # noqa: E402  Create > Polygon Primitives > In
 classes += interactive_create.classes
 from . import autosave  # noqa: E402  project autosave copies (#254)
 from . import sweep_mesh  # noqa: E402  Create > Sweep Mesh: live sweepMeshCreator node (#238)
-from . import fx_more, fx_solvers, render_more  # noqa: E402  Maya FX / Rendering items on Blender systems (#123)
-classes += fx_more.classes + fx_solvers.classes + render_more.classes
+from . import fx_more, render_more  # noqa: E402  Maya FX / Rendering items on Blender systems (#123)
+classes += fx_more.classes + render_more.classes
 
 _register_classes, _unregister_classes = bpy.utils.register_classes_factory(classes)
 
@@ -216,8 +216,6 @@ def register():
     smart_extrude.register_props()
     uv_tools.register_props()
     uv_shell_select.register_props()
-    fx.register_props()
-    fx_more.register_props()
     taphold.register_bindings()
     graph_keys.register_bindings()
     graph_key_menu.register_bindings()
@@ -329,8 +327,6 @@ def unregister():
     sets.unregister_props()
     pivot_menu.unregister_props()
     taphold.unregister_bindings()
-    fx_more.unregister_props()
-    fx.unregister_props()
     anim_layers.unregister_props()
     lights.unregister_props()
     material.unregister_props()

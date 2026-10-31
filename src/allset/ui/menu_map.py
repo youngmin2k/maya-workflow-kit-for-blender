@@ -20,6 +20,8 @@ Items not listed are drawn greyed out. ``EXTRA`` adds items Maya builds at run
 time (not in the static menu data), e.g. Modify's Pivot section.
 """
 
+import math
+
 def _create(kind):
     # Default size at the origin like Maya, Maya names (operators/create.py).
     return ("allset.create", {"kind": kind})
@@ -56,6 +58,15 @@ _DELETE_ALL_ONLY = {"Joints": 'JOINTS', "Lattices": 'LATTICES', "Cameras": 'CAME
 
 def _mod(kind):
     return ("object.modifier_add", {"type": kind})
+
+
+def _mod_selected(kind):
+    # Blender's modifier_add on every selected object, not only the active one
+    return ("object.modifier_add", {"type": kind, "use_selected_objects": True})
+
+
+def _field(kind):
+    return ("object.effector_add", {"type": kind})
 
 
 def _con(kind):
@@ -514,37 +525,35 @@ MAP = {
     "Visualize/Unghost Selected": ("allset.ghost", {"action": "UNGHOST"}),
     "Visualize/Unghost All": ("allset.ghost", {"action": "UNGHOST_ALL"}),
     # --- FX ---
-    # step 68 (operators/fx.py): Maya units + nucleus, every selected mesh
-    "nParticles/Create Emitter": "allset.fx_emitter",
-    "nParticles/Create Emitter#2": "allset.fx_emitter",               # Legacy Particles section
-    "nParticles/Emit from Object": "allset.fx_emit_from_object",
-    "nParticles/Emit from Object#2": "allset.fx_emit_from_object",
-    "nCloth/Create nCloth": "allset.fx_ncloth",
-    "nCloth/Create Passive Collider": "allset.fx_passive",
+    # Blender's own simulation operators, nothing rescaled (Blender simulates one unit as one metre)
+    "nParticles/Emit from Object": _mod_selected('PARTICLE_SYSTEM'),
+    "nParticles/Emit from Object#2": _mod_selected('PARTICLE_SYSTEM'),
+    "nCloth/Create nCloth": _mod_selected('CLOTH'),
+    "nCloth/Create Passive Collider": _mod_selected('COLLISION'),
     "nCloth/Remove nCloth": "allset.fx_remove_ncloth",
     "nCache/Create New Cache/nObject": ("allset.ncache", {"action": 'CREATE', "kind": 'NOBJECT'}),
     "nCache/Create New Cache/Maya Fluid": ("allset.ncache", {"action": 'CREATE', "kind": 'FLUID'}),
     "nCache/Delete Cache": ("allset.ncache", {"action": 'DELETE', "kind": 'ALL'}),
     "Fields/Solvers/Interactive Playback": "screen.animation_play",
     "nHair/Create Hair": "object.curves_empty_hair_add",
-    "Fluids/3D Container": "allset.quick_smoke",
+    "Fluids/3D Container": "object.quick_smoke",
     "Fluids/Ocean": _mod('OCEAN'),
-    # step 54: fields in Maya units at the origin (operators/create.py FIELD_*)
-    "Fields/Solvers/Air": _create('FIELD_AIR'),
-    "Fields/Solvers/Drag": _create('FIELD_DRAG'),
-    "Fields/Solvers/Gravity": _create('FIELD_GRAVITY'),
-    "Fields/Solvers/Newton": _create('FIELD_NEWTON'),
-    "Fields/Solvers/Radial": _create('FIELD_RADIAL'),
-    "Fields/Solvers/Turbulence": _create('FIELD_TURBULENCE'),
-    "Fields/Solvers/Uniform": _create('FIELD_UNIFORM'),
-    "Fields/Solvers/Vortex": _create('FIELD_VORTEX'),
-    "Fields/Solvers/Create Active Rigid Body": ("allset.fx_rigid", {"type": 'ACTIVE'}),
-    "Fields/Solvers/Create Passive Rigid Body": ("allset.fx_rigid", {"type": 'PASSIVE'}),
+    # fields = Blender force field empties; Gravity / Uniform = a Wind field turned down / along +X
+    "Fields/Solvers/Air": _field('WIND'),
+    "Fields/Solvers/Drag": _field('DRAG'),
+    "Fields/Solvers/Gravity": ("object.effector_add", {"type": 'WIND', "rotation": (math.pi, 0.0, 0.0)}),
+    "Fields/Solvers/Newton": _field('FORCE'),
+    "Fields/Solvers/Radial": _field('FORCE'),
+    "Fields/Solvers/Turbulence": _field('TURBULENCE'),
+    "Fields/Solvers/Uniform": ("object.effector_add", {"type": 'WIND', "rotation": (0.0, math.pi / 2, 0.0)}),
+    "Fields/Solvers/Vortex": _field('VORTEX'),
+    "Fields/Solvers/Create Active Rigid Body": ("rigidbody.objects_add", {"type": 'ACTIVE'}),
+    "Fields/Solvers/Create Passive Rigid Body": ("rigidbody.objects_add", {"type": 'PASSIVE'}),
     "Fields/Solvers/Create Pin Constraint": ("rigidbody.connect", {"con_type": 'POINT'}),
     "Fields/Solvers/Create Hinge Constraint": ("rigidbody.connect", {"con_type": 'HINGE'}),
     "Fields/Solvers/Create Spring Constraint": ("rigidbody.connect", {"con_type": 'GENERIC_SPRING'}),
-    "Effects/Fire": ("allset.quick_smoke", {"style": 'FIRE'}),
-    "Effects/Smoke": "allset.quick_smoke",
+    "Effects/Fire": ("object.quick_smoke", {"style": 'FIRE'}),
+    "Effects/Smoke": "object.quick_smoke",
     # --- Rendering ---
     # Materials (operators/material.py, step 29).
     "Lighting/Shading/Material Attributes": ("v3d", "allset.material_attributes", {}),
@@ -891,7 +900,7 @@ MAP.update({
     # FX
     "nParticles/Soft Body": _mod('SOFT_BODY'),
     "nParticles/Soft Body#2": _mod('SOFT_BODY'),
-    "nParticles/Make Collide": "allset.fx_passive",
+    "nParticles/Make Collide": _mod_selected('COLLISION'),
     # Rendering
     # Light / shadow linking = Blender's light linking operators: the active object is the light, the other
     # selected objects are linked (Include) or unlinked (Exclude)
@@ -1017,7 +1026,7 @@ MAP.update({
     # Sculpting stamps Blender lacks: the keymap's step-107 substitutes (sculpt Ctrl+8 / Ctrl+9)
     "Mesh Tools/Sculpting Tools/Spray Tool": _sculpt("Draw Sharp"),
     "Mesh Tools/Sculpting Tools/Repeat Tool": _sculpt("Layer"),
-    "Fluids/Add/Edit Contents/Emit from Object": "allset.quick_smoke",
+    "Fluids/Add/Edit Contents/Emit from Object": "object.quick_smoke",
     "Fluids/Make Collide": "allset.fluid_collide",
     "nCloth/Display Input Mesh": ("allset.ncloth_display", {"mesh": 'INPUT'}),
     "nCloth/Display Current Mesh": ("allset.ncloth_display", {"mesh": 'CURRENT'}),
@@ -1098,20 +1107,13 @@ MAP.update({
 # notice saying which Blender feature it uses (ui/notices.py)
 _NCLOTH_PAINT = {"Input Attract": 'INPUT_ATTRACT', "Stretch": 'STRETCH', "Compression": 'COMPRESSION',
                  "Bend": 'BEND', "Rest Length Scale": 'REST_LENGTH_SCALE'}
-_NCONSTRAINT = {"Transform Constraint": 'TRANSFORM', "Disable Collision": 'DISABLE_COLLISION',
-                "Remove Dynamic Constraint": 'REMOVE', "Select Members": 'SELECT', "Add Members": 'ADD',
-                "Remove Members": 'SUBTRACT', "Replace Members": 'REPLACE'}
 _TOON_FILLS = {"Solid Color": 'SOLID_COLOR', "Light Angle Two Tone": 'LIGHT_ANGLE_TWO_TONE',
                "Shaded Brightness Two Tone": 'SHADED_BRIGHTNESS_TWO_TONE',
                "Shaded Brightness Three Tone": 'SHADED_BRIGHTNESS_THREE_TONE', "Dark Profile": 'DARK_PROFILE',
                "Rim Light": 'RIM_LIGHT', "Circle Highlight": 'CIRCLE_HIGHLIGHT'}
-NPARTICLE_STYLES = {"Point": 'POINT', "Balls": 'BALLS', "Cloud": 'CLOUD', "Thick Cloud": 'THICK_CLOUD',
-                    "Water": 'WATER'}
 MAP.update({
     "nParticles/Fill Object": "allset.fx_fill_object",
     "nParticles/Instancer": "allset.fx_instancer",
-    **{f"nParticles/Create Options/{label}": ("prop", "window_manager.allset_nparticle_style", {"value": key})
-       for label, key in NPARTICLE_STYLES.items()},
     "Fluids/Add/Edit Contents/Emitter": "allset.fluid_add_emitter",
     "Fluids/Edit Fluid Resolution": "allset.fluid_resolution",
     "nCloth/Rest Shape/Set Rest To Start Shape": ("allset.ncloth_rest", {"mode": 'START'}),
@@ -1119,26 +1121,21 @@ MAP.update({
     "nCloth/Rest Shape/Connect Selected Mesh to Rest Shape": ("allset.ncloth_rest", {"mode": 'SELECTED'}),
     **{f"nCloth/Paint Vertex Properties/{label}": ("allset.ncloth_paint_vertex", {"attr": key})
        for label, key in _NCLOTH_PAINT.items()},
-    **{f"nConstraint/{label}": ("allset.nconstraint", {"action": key}) for label, key in _NCONSTRAINT.items()},
+    # Hook to New Object (Edit Mode): Blender pins cloth vertices with a Pin Group
+    "nConstraint/Transform Constraint": "object.hook_add_newob",
     "nCache/Create Particle Disk Cache": "allset.particle_disk_cache",
-    "nCache/Transfer Cache To Input Mesh": "allset.fx_initial_state",
     "nCache/Edit Oversampling or Cache Settings...": _props('PHYSICS'),
     "Fields/Solvers/Volume Curve": "allset.fx_curve_field",
-    "Fields/Solvers/Initial State/Set for Selected": "allset.fx_initial_state",
-    "Fields/Solvers/Initial State/Set for All Dynamic": ("allset.fx_initial_state", {"all": True}),
     "Fields/Solvers/Set Active Key": ("allset.fx_rigid_key", {"passive": False}),
     "Fields/Solvers/Set Passive Key": ("allset.fx_rigid_key", {"passive": True}),
     "Fields/Solvers/Break Rigid Body Connections": "allset.fx_break_rigid",
     "Fields/Solvers/Rigid Body Solver Attributes": _props('SCENE'),
     "Fields/Solvers/Create Rigid Body Solver": "allset.fx_rigid_world",
-    "Fields/Solvers/Initial State/Clear Initial State": "allset.fx_clear_initial_state",
-    "Fields/Solvers/Initial State/Set From Mesh": "allset.fx_start_from_mesh",
-    "Fields/Solvers/Set Rigid Body Interpenetration": ("allset.fx_rigid_interpenetrate", {"on": True}),
-    "Fields/Solvers/Set Rigid Body Collision": ("allset.fx_rigid_interpenetrate", {"on": False}),
-    "Fields/Solvers/Assign to Selected": "allset.fx_assign_fields",
-    "Fields/Solvers/Use Selected as Source": "allset.fx_field_source",
-    "Effects/Flow/Create Curve Flow": ("allset.fx_curve_field", {"flow": True}),
-    "Effects/Flow/Delete Selected Flow": "allset.fx_delete_flow",
+    # a Generic rigid body constraint with no limits (Disable Collisions on) between the selection and the active
+    "Fields/Solvers/Set Rigid Body Interpenetration": ("rigidbody.connect", {"con_type": 'GENERIC',
+                                                                             "connection_pattern": 'SELECTED_TO_ACTIVE'}),
+    "Fields/Solvers/Use Selected as Source": "object.forcefield_toggle",
+    "Effects/Flow/Create Curve Flow": "allset.fx_curve_field",
     "Lighting/Shading/Transfer Maps...": "allset.transfer_maps",
     **{f"Toon/Assign Fill Shader/{label}": ("allset.toon_fill", {"kind": key}) for label, key in _TOON_FILLS.items()},
     **{f"Toon/Set Camera Background Color/{cam}": ("allset.camera_background", {"camera": cam})

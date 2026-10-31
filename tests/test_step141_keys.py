@@ -1,6 +1,5 @@
 """Step 141 lane KEYS: Ctrl+A = Attribute Editor / Channel Box in every mode (#65), UV / Image Editor Alt+RMB dolly
-without Blender's Zoom Axis preference (B4), undo-depth hint (B6), joint names restart at joint1 (#73), Gravity /
-Newton field defaults (#72).
+without Blender's Zoom Axis preference (B4), undo-depth hint (B6), joint names restart at joint1 (#73).
 GUI: tests/gui/gui_step141_keys.py."""
 
 from importlib import import_module
@@ -16,8 +15,6 @@ mapping = import_module(kit.MODULE + ".keymap.mapping")
 view = import_module(kit.MODULE + ".operators.view")
 joints = import_module(kit.MODULE + ".operators.joints")
 create = import_module(kit.MODULE + ".operators.create")
-fx = import_module(kit.MODULE + ".operators.fx")
-units = import_module(kit.MODULE + ".operators.units")
 preferences = import_module(kit.MODULE + ".preferences")
 welcome = import_module(kit.MODULE + ".welcome")
 
@@ -202,97 +199,3 @@ def test_joint_names_skip_existing_after_partial_delete():
     bpy.ops.object.delete()
     _c, names = _skeleton(3)
     assert names == ["joint4", "joint5", "joint6"], names   # Maya (step 208): one past the highest, no gap filling
-
-
-# --- #72 Gravity / Newton --------------------------------------------------------------------------------------------
-
-def _scene(cm=True):
-    if bpy.context.active_object is not None and bpy.context.mode != 'OBJECT':
-        bpy.ops.object.mode_set(mode='OBJECT')
-    for ob in list(bpy.data.objects):
-        bpy.data.objects.remove(ob)
-    for ps in list(bpy.data.particles):
-        bpy.data.particles.remove(ps)
-    sc = bpy.context.scene
-    us = sc.unit_settings
-    us.system, us.scale_length, us.length_unit = 'METRIC', 1.0, 'CENTIMETERS' if cm else 'METERS'
-    sc.frame_start, sc.frame_end, sc.use_preview_range = 1, 120, False
-    sc.render.fps, sc.render.fps_base = 24, 1.0
-    nuc = sc.allset_nucleus
-    nuc["exists"] = False
-    nuc["space_scale"], nuc["gravity"] = 1.0, fx.MAYA_GRAVITY
-    nuc["gravity_direction"] = (0.0, -1.0, 0.0)
-    sc.gravity = (0.0, 0.0, -9.81)
-    sc.frame_set(1)
-    return sc
-
-
-def test_field_strengths_follow_maya():
-    for cm in (True, False):
-        sc = _scene(cm)
-        g = fx.sim_scale(sc)
-        assert abs(g - (0.01 if cm else 1.0)) < 1e-9
-        assert bpy.ops.allset.create(kind='FIELD_GRAVITY') == {'FINISHED'}
-        grav = bpy.data.objects["gravityField1"]
-        assert grav.field.type == 'WIND' and abs(grav.field.strength - 9.8 * g) < 1e-6, grav.field.strength
-        assert grav.field.flow == 0.0, "a constant pull, no drag"
-        assert grav.matrix_world.to_3x3().col[2].z < -0.99, "Maya gravity direction (0, -1, 0) = Blender -Z"
-        assert bpy.ops.allset.create(kind='FIELD_NEWTON') == {'FINISHED'}
-        newton = bpy.data.objects["newtonField1"]
-        assert newton.field.type == 'FORCE' and abs(newton.field.strength + 5.0 * g) < 1e-6, newton.field.strength
-        # Space Scale 0.01 (centimetres at their real size): the field is 100 times stronger, like the nucleus
-        sc.allset_nucleus["space_scale"] = 0.01
-        bpy.ops.allset.create(kind='FIELD_GRAVITY')
-        assert abs(bpy.data.objects["gravityField2"].field.strength - 9.8 * g / 0.01) < 1e-6
-        sc.allset_nucleus["space_scale"] = 1.0
-
-
-def _emit_at(sc, x_units=0.0):
-    assert bpy.ops.allset.fx_emitter() == {'FINISHED'}
-    em = bpy.data.objects["emitter1"]
-    em.location.x = x_units * units.maya_unit()
-    st = em.particle_systems[0].settings
-    st.effector_weights.gravity = 0.0          # the field alone
-    st.normal_factor = st.factor_random = 0.0
-    return em
-
-
-def _alive(sc, em, last=25):
-    for f in range(sc.frame_start, last + 1):
-        sc.frame_set(f)
-    psys = em.evaluated_get(bpy.context.evaluated_depsgraph_get()).particle_systems[0]
-    k = units.maya_unit()
-    return [p.location / k for p in psys.particles if p.alive_state == 'ALIVE']
-
-
-def test_gravity_field_drops_particles_like_maya():
-    """A Maya gravity field (9.8 down) drops particles like the nucleus gravity 9.8 (step 68), in a cm scene and in a
-    m scene alike."""
-    out = []
-    for cm in (True, False):
-        sc = _scene(cm)
-        em = _emit_at(sc)
-        em.particle_systems[0].settings.effector_weights.gravity = 1.0      # reference: the nucleus gravity
-        ref = min(p.z for p in _alive(sc, em))
-        sc = _scene(cm)
-        em = _emit_at(sc)
-        bpy.ops.allset.create(kind='FIELD_GRAVITY')
-        pts = _alive(sc, em)
-        assert len(pts) > 50, len(pts)
-        got = min(p.z for p in pts)
-        print("gravity field fall", cm, got, "nucleus", ref)
-        assert max(abs(p.x) + abs(p.y) for p in pts) < 0.05, "straight down"
-        assert abs(got - ref) < 0.03 * abs(ref), (cm, got, ref)
-        out.append(got)
-    assert abs(out[0] - out[1]) < 0.02 * abs(out[1]), out
-
-
-def test_newton_field_attracts():
-    sc = _scene(True)
-    em = _emit_at(sc, x_units=5.0)
-    bpy.ops.allset.create(kind='FIELD_NEWTON')
-    pts = _alive(sc, em)
-    assert len(pts) > 50
-    # pulled in towards the field at the origin: 5 units/s² for one second ~ 2.5 units
-    moved = 5.0 - min(p.x for p in pts)
-    assert 1.8 < moved < 3.2, moved

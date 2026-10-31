@@ -17,7 +17,6 @@ skin = import_module(kit.MODULE + ".operators.skin")
 c199 = import_module(kit.MODULE + ".operators.constrain_199")
 by_type = import_module(kit.MODULE + ".operators.by_type")
 history = import_module(kit.MODULE + ".operators.history")
-fx = import_module(kit.MODULE + ".operators.fx")
 menu_map = import_module(kit.MODULE + ".ui.menu_map")
 
 
@@ -247,12 +246,10 @@ def _fx_scene():
     rigid = _cube("pRigid1", 2.0, (5, 0, 0))
     legacy = _cube("pLegacy1", 2.0, (10, 0, 0))
     legacy.modifiers.new("particles1", 'PARTICLE_SYSTEM')
-    _select(cloth)
-    assert bpy.ops.allset.fx_ncloth() == {'FINISHED'}
-    _select(rigid)
-    assert bpy.ops.allset.fx_passive() == {'FINISHED'}
-    assert bpy.ops.allset.fx_emitter() == {'FINISHED'}
-    emitter = bpy.context.view_layer.objects.active
+    cloth.modifiers.new("nCloth1", 'CLOTH')
+    rigid.modifiers.new("nRigid1", 'COLLISION')
+    emitter = _cube("emitter1", 1.0, (0, -5, 0))       # an nParticle from an older file: settings nParticleN
+    emitter.modifiers.new("nParticle1", 'PARTICLE_SYSTEM').particle_system.settings.name = "nParticle1"
     target = _cube("pWire1", 4.0, (0, 10, 0))
     curve = _curve("curve1")
     curve.location = (0, 10, 0)
@@ -288,7 +285,7 @@ def test_delete_all_by_type_kit_nodes():
     cloth, rigid, legacy, emitter, target, curve = _fx_scene()
     n_objects = len(bpy.data.objects)
     assert bpy.ops.allset.menu_item(item="Edit/Delete All by Type/nCloths") == {'FINISHED'}
-    assert not [m for m in cloth.modifiers if m.type == 'CLOTH'] and fx.CLOTH_G_PROP not in cloth
+    assert not [m for m in cloth.modifiers if m.type == 'CLOTH']
     assert bpy.ops.allset.menu_item(item="Edit/Delete All by Type/nRigids") == {'FINISHED'}
     assert not [m for m in rigid.modifiers if m.type == 'COLLISION']
     assert bpy.ops.allset.menu_item(item="Edit/Delete All by Type/nParticles") == {'FINISHED'}

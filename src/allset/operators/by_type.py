@@ -59,9 +59,9 @@ def cluster_handles(scene):
 # - wire = a kit wire Geometry Nodes modifier (operators/wire_deformer.py); it has no object, so Select picks the
 #   wire curves that drive one (the curve is what a Maya user grabs to work the wire), Delete removes the
 #   modifiers with their base wires and weights (wire_deformer.remove: the curve stays, step 169);
-# - nCloth = a Cloth modifier, nRigid = a Collision modifier (operators/fx.py ALLSET_OT_fx_ncloth / fx_passive; the
+# - nCloth = a Cloth modifier, nRigid = a Collision modifier (nCloth > Create nCloth / Create Passive Collider; the
 #   same rule as Modify > Evaluate Nodes, operators/modify_maya.py _set_cloth / _set_nrigid): the meshes carrying one;
-# - nParticle = a particle system whose settings are named ``nParticleN`` (fx._particle_name; modify_maya
+# - nParticle = a particle system whose settings are named ``nParticleN`` (files from older versions; modify_maya
 #   _is_nparticle). Maya ``-type particle`` includes nParticles, so Particles keeps finding every particle system.
 
 def _modifiers_of(objects, test):
@@ -105,12 +105,9 @@ def delete_wires(objects):
 
 
 def delete_nclothes(objects):
-    from . import fx
     pairs = _modifiers_of(list(objects), is_ncloth)
     for ob, md in pairs:
         ob.modifiers.remove(md)
-        if fx.CLOTH_G_PROP in ob:
-            del ob[fx.CLOTH_G_PROP]
     return len(pairs)
 
 

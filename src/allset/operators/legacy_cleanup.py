@@ -20,6 +20,17 @@ visibility in the scene, and an Illuminates by Default switch on lights:
 - a kit Ambient / Volume Light becomes a plain kit point light with the same Maya intensity, No Decay;
 - a Light Editor Isolate still on is undone (the other lights' visibility comes back);
 - the Illuminates by Default value is dropped (Blender's light linking collections stay as they are).
+
+Older versions also rescaled FX to the Maya unit: a kit nucleus (``Scene.allset_nucleus``) set the scene gravity to
+9.8 x the Maya unit (0.098 in a centimetre scene) and every kit nCloth's stiffness and damping by the same factor
+(object ID property ``allset_cloth_g``). FX now runs Blender's simulations at real size, so:
+
+- a scene gravity the kit nucleus set (still the value it wrote) goes back to Blender's 9.81 down, and the nucleus
+  values are dropped; a gravity changed by hand afterwards stays;
+- a kit nCloth's stiffness and damping go back to the values before the rescale;
+- ID properties only older FX items read (nConstraint, Curve Flow, rigid body interpenetration and field
+  assignment markers, the stored start shape of Initial State) are dropped; the Blender data they belong to (hooks,
+  constraints, fields, collections) stays.
 """
 
 import bpy
@@ -42,6 +53,25 @@ WORLD_NODES = ("Maya Ambient", "Maya Ambient Ray", "Maya Ambient Not Camera", WO
 WORLD_MADE, WORLD_NODES_ON = "allset_ambient_world", "allset_ambient_world_nodes"
 LIGHT_ISOLATE = "allset_light_isolate"
 ILLUMINATES = "allset_illuminates_by_default"
+# FX: the nucleus values (a registered pointer, so the stored values are only visible while it is registered), the
+# cloth rescale factor and the ID properties of the old FX items
+NUCLEUS = "allset_nucleus"
+CLOTH_G = "allset_cloth_g"
+CLOTH_SCALED = ("tension_stiffness", "compression_stiffness", "shear_stiffness", "bending_stiffness",
+                "tension_damping", "compression_damping", "shear_damping", "bending_damping")
+FX_OBJECT_PROPS = ("allset_nconstraint", "allset_nconstraints", "allset_curve_flow", "allset_no_collide",
+                   "allset_input_matrix")
+FX_COLLECTION_PROPS = ("allset_fields_of",)
+FX_MESH_ATTRIBUTE = ".allset_input_co"
+BLENDER_GRAVITY = (0.0, 0.0, -9.81)
+
+
+# the nucleus values older versions stored on the scene (read once by ``clean``, never shown)
+class ALLSET_PG_old_nucleus(bpy.types.PropertyGroup):
+    exists: bpy.props.BoolProperty()
+    gravity: bpy.props.FloatProperty(default=9.8)
+    gravity_direction: bpy.props.FloatVectorProperty(size=3, default=(0.0, -1.0, 0.0))
+    space_scale: bpy.props.FloatProperty(default=1.0)
 
 
 def _persp_cameras():
@@ -142,10 +172,71 @@ def _undo_isolate(scene):
     return True
 
 
+def _old_gravity(scene, nuc):
+    """The gravity vector the old kit nucleus wrote (Maya Y-up direction, x Maya unit / Space Scale)."""
+    from . import units
+    x, y, z = nuc.gravity_direction
+    d = (x, -z, y)
+    length = sum(c * c for c in d) ** 0.5 or 1.0
+    g = nuc.gravity * units.maya_unit(scene) / max(nuc.space_scale, 1e-4)
+    return tuple(c / length * g for c in d)
+
+
+def _restore_gravity(scene):
+    """True when the scene had an old kit nucleus (its values are dropped either way)."""
+    if not scene.is_property_set(NUCLEUS):
+        return False
+    nuc = getattr(scene, NUCLEUS, None)
+    if nuc is None:
+        return False
+    had = nuc.exists
+    if had and all(abs(a - b) < 1e-5 for a, b in zip(scene.gravity, _old_gravity(scene, nuc))):
+        scene.gravity = BLENDER_GRAVITY
+    scene.property_unset(NUCLEUS)
+    return had
+
+
+def _restore_cloth(ob):
+    """An old kit nCloth: stiffness and damping back to the values before the rescale."""
+    if CLOTH_G not in ob.keys():
+        return False
+    value = ob.get(CLOTH_G)
+    g = float(value) if isinstance(value, (int, float)) else 1.0
+    del ob[CLOTH_G]
+    if g <= 0.0 or abs(g - 1.0) < 1e-12:
+        return False
+    for md in ob.modifiers:
+        if md.type == 'CLOTH':
+            st = md.settings
+            for attr in CLOTH_SCALED:
+                setattr(st, attr, getattr(st, attr) / g)
+    return True
+
+
+def _drop_fx_props():
+    n = 0
+    for ob in bpy.data.objects:
+        for key in FX_OBJECT_PROPS:
+            if key in ob.keys():
+                del ob[key]
+                n += 1
+    for coll in bpy.data.collections:
+        for key in FX_COLLECTION_PROPS:
+            if key in coll.keys():
+                del coll[key]
+                n += 1
+    for me in bpy.data.meshes:
+        at = me.attributes.get(FX_MESH_ATTRIBUTE)
+        if at is not None:
+            me.attributes.remove(at)
+            n += 1
+    return n
+
+
 def clean():
     """Clean the open file; returns what was done ({kind: count})."""
     done = {"scene_camera": 0, "persp": 0, "default_light": 0, "props": 0, "ambient_world": 0, "maya_lights": 0,
-            "isolate": 0}
+            "isolate": 0, "gravity": 0, "cloth": 0}
     for ob in [o for o in bpy.data.objects if o.get(DEFAULT_LIGHT)]:
         _remove_object(ob)
         done["default_light"] += 1
@@ -175,6 +266,13 @@ def clean():
         if ILLUMINATES in ob.keys():
             del ob[ILLUMINATES]
             done["props"] += 1
+    for sc in bpy.data.scenes:
+        if _restore_gravity(sc):
+            done["gravity"] += 1
+    for ob in bpy.data.objects:
+        if _restore_cloth(ob):
+            done["cloth"] += 1
+    done["props"] += _drop_fx_props()
     return done
 
 
@@ -184,11 +282,14 @@ def _on_load(*_args):
         done = clean()
     except (AttributeError, ReferenceError, RuntimeError):
         return
-    if any(done[k] for k in ("scene_camera", "persp", "default_light", "ambient_world", "maya_lights", "isolate")):
+    if any(done[k] for k in ("scene_camera", "persp", "default_light", "ambient_world", "maya_lights", "isolate",
+                             "gravity", "cloth")):
         print(f"Maya Workflow Kit: tidied what an older version left in this file ({done})")
 
 
 def register():
+    bpy.utils.register_class(ALLSET_PG_old_nucleus)
+    setattr(bpy.types.Scene, NUCLEUS, bpy.props.PointerProperty(type=ALLSET_PG_old_nucleus))
     if _on_load not in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.append(_on_load)
 
@@ -196,3 +297,5 @@ def register():
 def unregister():
     if _on_load in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(_on_load)
+    delattr(bpy.types.Scene, NUCLEUS)
+    bpy.utils.unregister_class(ALLSET_PG_old_nucleus)
