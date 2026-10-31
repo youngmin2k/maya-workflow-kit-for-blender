@@ -86,6 +86,9 @@ All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 
   the FX shelf's Emitter follows Create Emitter and 3D Fluid Container with Emitter runs Fluids > 3D Container.
 
 ### Fixed
+- **Project autosave in the Maya layout** (#254): the autosave copy is written in the Maya layout too; before,
+  the Channel Box's own scroll handling counted as a running tool and the copy never got written there. Auto,
+  Clamped and Plateau tangents also keep Maya's shape again after an edit in the Maya layout.
 - **Non-weighted tangents in the Graph Editor** (#267): dragging a tangent handle of a non-weighted curve only turns
   it, like Maya: the tangent stays a third of the way to the next key while you drag (it used to follow the mouse in
   length), and the rule also holds after every other edit. Curves made with Blender's own keying (the I key, Insert

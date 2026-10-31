@@ -27,7 +27,7 @@ that is no longer 'AUTO_CLAMPED', or a Flat side that isn't level any more, is t
 Fixed) and loses its type.
 
 Blender recomputes automatic handles whenever it edits the curve (a Graph Editor drag), so ``watch`` (every 0.25 s
-from ``ui/graph_view``, never while a modal operator runs) writes Maya's handles again on every curve of an Action
+from ``ui/graph_view``, never while a modal tool runs) writes Maya's handles again on every curve of an Action
 that carries the property.
 """
 
@@ -398,10 +398,9 @@ def _signature(fc):
 
 
 def _busy():
-    for window in bpy.context.window_manager.windows:
-        if len(window.modal_operators):
-            return True
-    return False
+    # the kit's click listeners stay up all session in the Maya layout: they don't count
+    from ..modal_listeners import tool_running
+    return tool_running()
 
 
 def watch(context=None):

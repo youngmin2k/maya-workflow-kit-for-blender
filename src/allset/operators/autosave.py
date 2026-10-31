@@ -26,9 +26,6 @@ RETRY = 5.0             # wait after a check that was blocked by a modal tool / 
 UNTITLED = "untitled"
 EXT = ".blend"
 JOBS = ('RENDER', 'RENDER_PREVIEW', 'OBJECT_BAKE', 'COMPOSITE')
-# Kit modals that only watch clicks and stay running for the whole session: they don't hold scene edits, so they
-# don't block an autosave (any other modal operator does).
-WATCHERS = {"ALLSET_OT_pose_empty_click", "ALLSET_OT_joint_outliner_select", "ALLSET_OT_cb_channel_drag"}
 
 _state = {"last": None, "changed": False, "saving": False, "last_path": ""}
 
@@ -107,12 +104,10 @@ def busy(context=None):
     """True while a modal operator (a tool drag, a file browser ...) or a render / bake job runs."""
     context = context or bpy.context
     wm = context.window_manager
-    for window in wm.windows if wm else ():
-        try:
-            if any(op.bl_idname not in WATCHERS for op in window.modal_operators):
-                return True
-        except (AttributeError, ReferenceError):
-            pass
+    # the kit's click listeners hold no scene edits and stay up all session: they don't count
+    from ..modal_listeners import tool_running
+    if wm and tool_running(wm):
+        return True
     for job in JOBS:
         try:
             if bpy.app.is_job_running(job):
