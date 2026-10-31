@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 111–124 and Maya Kit before step 111). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
+All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
@@ -503,7 +503,7 @@ A small update to 0.6.0. Blender 4.5 LTS through 5.2.x.
 
 ## [0.6.0] — 2026-10-28
 
-The rigging release (steps 230–270): joints, IK, skinning and constraints follow Maya 2026, a
+The rigging release: joints, IK, skinning and constraints follow Maya 2026, a
 rig made in the kit reaches a game engine and Maya 2026 the way a Maya rig does, and the reports that came in after
 0.5.0 are fixed. Reference data (hotkeys, shelves, editor menus) now follows Maya 2026. Blender 4.5 LTS through 5.2.x.
 
@@ -610,7 +610,7 @@ rig made in the kit reaches a game engine and Maya 2026 the way a Maya rig does,
 
 ## [0.5.0] — 2026-10-27
 
-The release after audits 14–16 and the animation chain (steps 192–228). Blender 4.5 LTS through 5.2.x.
+The animation release. Blender 4.5 LTS through 5.2.x.
 
 ### Added
 - **Joints feel like Maya objects** (PR #125 by @cnzim): clicking a joint selects that joint (Shift toggles,
@@ -701,7 +701,7 @@ The release after audits 14–16 and the animation chain (steps 192–228). Blen
 
 ## [0.4.1] — 2026-10-25
 
-The release after audits 12 and 13 (steps 173–190). Blender 4.5 LTS through 5.2.x. Quad Draw leftovers (#89) stay in
+A Maya parity release. Blender 4.5 LTS through 5.2.x. Quad Draw leftovers (#89) stay in
 0.5.0.
 
 ### Added
@@ -739,7 +739,7 @@ The release after audits 12 and 13 (steps 173–190). Blender 4.5 LTS through 5.
 
 ## [0.4.0] — 2026-10-25
 
-The release after audits 10 and 11 (steps 144–171). Blender 4.5 LTS through 5.2.x. Quad Draw leftovers (#89) move to
+A Maya parity release. Blender 4.5 LTS through 5.2.x. Quad Draw leftovers (#89) move to
 0.5.0.
 
 ### Added
@@ -791,7 +791,7 @@ The release after audits 10 and 11 (steps 144–171). Blender 4.5 LTS through 5.
 
 ## [0.3.0] — 2026-10-24
 
-The Maya parity release after the eighth audit (steps 133–143). Blender 4.5 LTS through 5.2.x. Quad Draw, the
+A Maya parity release. Blender 4.5 LTS through 5.2.x. Quad Draw, the
 edge-loop tools and the Deform menu move to 0.4.0 (#30 #31 #34).
 
 ### Changed
@@ -832,7 +832,7 @@ edge-loop tools and the Deform menu move to 0.4.0 (#30 #31 #34).
 
 ## [0.2.1] — 2026-10-21
 
-A bug-fix and store-compliance release (steps 125–132). Blender 4.5 LTS through 5.2.x.
+A bug-fix and store-compliance release. Blender 4.5 LTS through 5.2.x.
 
 **Thank you** to everyone who used the kit in real work and reported what felt wrong — most fixes below come from
 those reports (labelled `user-report` on GitHub).
@@ -846,7 +846,7 @@ those reports (labelled `user-report` on GitHub).
 - Alt+RMB dolly works without Blender's zoom preference (#51); Maya menu items that used to write preferences open
   Blender's Preferences instead (#43).
 - Store tags: User Interface only.
-- **Renamed to Maya Workflow Kit** (step 125): store / display
+- **Renamed to Maya Workflow Kit**: store / display
   name "Maya Workflow Kit" (no "Blender" in the store name), repository "Maya Workflow Kit for Blender"
   (`maya-workflow-kit-for-blender`), release zip `maya-workflow-kit-<version>.zip`, default project folder
   `Documents/Maya Workflow Kit/projects/default`. Unchanged: extension id `allset` (updates keep working), package
@@ -889,14 +889,14 @@ those reports (labelled `user-report` on GitHub).
 - Select / Lasso / Paint Selection Tool Settings have Maya's sections (#29).
 - Viewport background / selection colours without the kit theme (#45), Hypershade opening (#47), top-bar test and
   dogfood session after the store changes (#48, #49, #50).
-- Blender 4.5 crashed on quit with the new Tool Box vector icons (fixed before release, step 131).
+- Blender 4.5 crashed on quit with the new Tool Box vector icons (fixed before release).
 - Ctrl+N (New Scene) opens a new scene in the Maya layout again, like File > New Scene (#44).
 - At 125 % UI scale, opening and closing Tool Settings no longer narrows the viewport (#53).
 - The viewport panel toolbar folds the groups that don't fit into a Maya-style » menu, so every button is reachable at 125 % / 150 % (#52).
 
 ## [0.2.0] — 2026-10-19
 
-The first version prepared for extensions.blender.org (steps 14–117). Blender 4.5 LTS (4.5.x).
+The first version prepared for extensions.blender.org. Blender 4.5 LTS (4.5.x).
 
 ### Added
 - **Navigate & Select**: framing in the visible part of the view (17), Maya mesh keys and convert selection (18), edit-mode
@@ -927,7 +927,7 @@ The first version prepared for extensions.blender.org (steps 14–117). Blender 
 - Permission reason: "Layout template, settings backup, shelves, Maya project folders"; tag Rigging added (117).
 - Extension guidelines: no `sys.modules` entries, CC0 assets, no `bl_info` in the extension build (114); the
   moderation ruff command passes on the extension source (117).
-- **Renamed to Allset for Maya Users** (step 111): extension id `allset`, tagline "The whole Maya
+- **Renamed to Allset for Maya Users**: extension id `allset`, tagline "The whole Maya
   workflow in Blender, in one install", Python package `src/allset`, operator / class prefixes `allset.` /
   `ALLSET_`, app template `Allset` (an old `MayaKit` template install is removed), keymap "Maya-style", theme
   "Studio Grey (Maya-inspired)", Help > Blender Extensions; trademark notice in the README and the preferences.
@@ -937,28 +937,28 @@ The first version prepared for extensions.blender.org (steps 14–117). Blender 
 First release (Blender 4.2+, built and tested on Blender 4.5.4 LTS).
 
 ### Added
-- **Packaging** (step 1, 13): Blender extension `maya_kit` plus a legacy add-on zip from the same source
+- **Packaging**: Blender extension `maya_kit` plus a legacy add-on zip from the same source
   (`tools/build.py`); `blender --command extension validate` passes; GPL-3.0-or-later `LICENSE`;
   `tools/release_check.py` (build → validate → clean-config install + enable → screenshot set).
-- **Maya keymap** (step 2): "Maya" keyconfig generated from Industry Compatible data with Maya patches, Maya selection
+- **Maya keymap**: "Maya" keyconfig generated from Industry Compatible data with Maya patches, Maya selection
   modifiers, 4/5/6/7 display modes, Ctrl+G group, keymap mapping document.
-- **Hold / tap keys** (step 3): X/C/V/J snapping while held, D/Insert pivot editing, B soft select, A tap, arrow pick-walk.
-- **Camera and view feel** (step 4): Maya navigation preferences preset with backup/restore, ortho tumble lock,
+- **Hold / tap keys**: X/C/V/J snapping while held, D/Insert pivot editing, B soft select, A tap, arrow pick-walk.
+- **Camera and view feel**: Maya navigation preferences preset with backup/restore, ortho tumble lock,
   Shift+F/Shift+A framing in all views, view undo, Space four views, 1/2/3 smooth preview, F7–F11 component modes.
-- **Layout and theme** (step 5): Maya General layout application template, Maya grey theme.
-- **Channel Box and Layer Editor** (step 6): multi-object editing, viewport MMB virtual slider, Channels menu,
+- **Layout and theme**: Maya General layout application template, Maya grey theme.
+- **Channel Box and Layer Editor**: multi-object editing, viewport MMB virtual slider, Channels menu,
   display layers on collections.
-- **Top UI** (step 7): Maya menu bar and menu sets, Status Line, Python command line with a `cmds` shim, Help Line.
-- **Marking menus** (step 8) and **hotbox / marking menu engine** (step 9): Maya radial layouts, gestures, click mode,
+- **Top UI**: Maya menu bar and menu sets, Status Line, Python command line with a `cmds` shim, Help Line.
+- **Marking menus** and **hotbox / marking menu engine**: Maya radial layouts, gestures, click mode,
   in-place submenus, option boxes; Space-hold hotbox.
-- **Scene concepts** (step 10): Freeze Transformations (pivot kept), Reset Transformations, Center Pivot, Delete History
+- **Scene concepts**: Freeze Transformations (pivot kept), Reset Transformations, Center Pivot, Delete History
   and Delete (All) by Type, Maya-style parenting (P / Shift+P), Duplicate Special / with Transform, Maya creation names
   and defaults, optional Maya units.
-- **Outliner and Attribute Editor** (step 11): sidebar Outliner (DAG, shapes, rename), Attribute Editor node tabs with
+- **Outliner and Attribute Editor**: sidebar Outliner (DAG, shapes, rename), Attribute Editor node tabs with
   Maya template sections, Ctrl+A dock toggle, Ctrl+Shift+A / Alt+D selection keys.
 - **Shelf**: Status Line + Shelf strip, Maya's standard shelves as Blender operators, user Python shelves.
 
-### Fixed (found by the clean-install release check, step 13)
+### Fixed (found by the clean-install release check)
 - Installing and enabling from the command line left the first GUI start on the Blender keymap.
 - Installing the layout in a brand-new config did not run the template's script until a restart, so loading the layout
   dropped the Maya keymap.
