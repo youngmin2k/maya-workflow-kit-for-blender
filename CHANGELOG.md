@@ -85,6 +85,12 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   within 10% of each other), whatever the mesh's vertex numbering.
 
 ### Fixed
+- **Blender's Sculpting tab after Maya mode** (#282): in a Maya Workflow Kit scene, switching to Blender left
+  Maya's Sculpting, UV Editing and Animation workspaces under Blender's names, so the Sculpting tab opened a
+  mix of Maya panels and Blender's sculpt tools. Those Maya workspaces are now called "Sculpting (Maya)" and
+  so on, and the scene gets Blender's own Sculpting, UV Editing and Animation workspaces (from your startup
+  file if it has them). A Maya workspace picked from Windows > Workspaces is no longer left behind when you
+  switch back to Blender either.
 - Opening Preferences or another window with a temporary screen no longer prints a TypeError from the joint overlay and switch timers (#281).
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
   Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the selection.
