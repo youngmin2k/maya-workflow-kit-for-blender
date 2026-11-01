@@ -272,7 +272,7 @@ def test_make_live():
 def test_tools_use_the_maya_manipulator():
     from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active
     from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
-    for mode in ('OBJECT', 'EDIT_MESH'):
+    for mode in ('OBJECT', 'EDIT_MESH', 'EDIT_CURVE', 'EDIT_SURFACE'):
         widgets = {it.idname: it.widget for it, _i in
                    ToolSelectPanelHelper._tools_flatten_with_tool_index(VIEW3D_PT_tools_active._tools[mode])
                    if it is not None}
@@ -280,7 +280,7 @@ def test_tools_use_the_maya_manipulator():
             assert widgets[idname] == manipulator.GROUP, (mode, idname, widgets[idname])
         for idname in ("builtin.rotate", "builtin.transform"):   # Blender's rings already Maya-like
             assert widgets[idname] == "VIEW3D_GGT_xform_gizmo", (mode, idname)
-    for mode in ('POSE', 'EDIT_CURVE'):
+    for mode in ('POSE',):
         widgets = {it.idname: it.widget for it, _i in
                    ToolSelectPanelHelper._tools_flatten_with_tool_index(VIEW3D_PT_tools_active._tools[mode])
                    if it is not None}

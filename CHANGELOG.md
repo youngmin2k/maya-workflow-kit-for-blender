@@ -124,6 +124,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   a corner of the box scales the keys in time or in value only, whichever way the drag starts; a drag inside the
   box moves the selected keys. A click inside the box without dragging, a press on a key that isn't selected and
   Shift+click still select keys as before.
+- **Maya manipulator for curve and surface CVs** (#274): in curve and NURBS surface edit mode the Move and Scale
+  tools show the same Maya-style manipulator as objects, mesh components and lattice points, placed at the
+  selected CVs (Bezier points and handles count by their own selection), instead of Blender's transform gizmo.
 
 ## [0.9.0] — 2026-11-01
 
