@@ -11,6 +11,11 @@ Which keys: the curves Blender lists as visible (``context.visible_fcurves``) wh
 keys usable with the curve's modifiers, and only selected curves when Blender's "Only Show Selected F-Curve
 Keyframes" preference is on. Positions follow the Graph Editor mapping: NLA tweak time, rotation curves in degrees,
 View > Normalize (``ui/graph_layers.py``).
+
+Tangent handles get the same treatment where Blender shows them (View > Show Handles, Bezier segments, only around
+selected keys while "Only Selected Keyframes Handles" is on): a handle point becomes a bold ring (``HANDLE_RATIO`` of
+the key size, open in the middle so it never reads as a key) in the handle colour, a selected one a little wider in
+the selected handle colour.
 """
 
 import math
@@ -21,6 +26,7 @@ import numpy as np
 from gpu_extras.batch import batch_for_shader
 
 SEGMENTS = 16              # rim polygon sides
+HANDLE_RATIO = 0.8         # handle point diameter / key diameter
 # modifier types whose curve keeps editable keys (generators only when additive)
 _USABLE_MODIFIERS = {'CYCLES', 'STEPPED', 'NOISE'}
 
@@ -94,6 +100,62 @@ def key_points(context, space):
     return (np.concatenate(unsel) if unsel else empty), (np.concatenate(sel) if sel else empty)
 
 
+def _handle_sides(ipo):
+    """(left shown, right shown) per key: Blender shows a key's left handle when the segment before it is Bezier
+    (the first key: its own segment), its right handle when its own segment is Bezier."""
+    bez = ipo == 'BEZIER'
+    left = np.empty_like(bez)
+    if len(bez):
+        left[0] = bez[0]
+        left[1:] = bez[:-1]
+    return left, bez
+
+
+def handle_points(context, space):
+    """(unselected, selected) arrays of tangent handle positions in Graph Editor view space (frame, value)."""
+    from .graph_layers import normalization, value_factor
+    empty = np.zeros((0, 2))
+    if not getattr(space, "show_handles", True):
+        return empty, empty
+    curves = list(getattr(context, "visible_fcurves", None) or ())
+    scene = context.scene
+    only_selected = bool(getattr(context.preferences.edit, "show_only_selected_curve_keyframes", False))
+    near_selected = bool(getattr(space, "use_only_selected_keyframe_handles", False))
+    normalize = bool(getattr(space, "use_normalization", False))
+    tweak = _owners(scene)
+    unsel, sel = [], []
+    for fc in curves:
+        if not draws_keys(fc, only_selected):
+            continue
+        kps = fc.keyframe_points
+        n = len(kps)
+        flags = {}
+        for name in ("select_control_point", "select_left_handle", "select_right_handle"):
+            a = np.empty(n, dtype=bool)
+            kps.foreach_get(name, a)
+            flags[name] = a
+        ipo = np.array([kp.interpolation for kp in kps])
+        left_on, right_on = _handle_sides(ipo)
+        if near_selected:
+            any_sel = flags["select_control_point"] | flags["select_left_handle"] | flags["select_right_handle"]
+            left_on, right_on = left_on & any_sel, right_on & any_sel
+        off, k = normalization(fc) if normalize else (0.0, value_factor(scene, fc))
+        ad = tweak.get(fc.id_data.as_pointer()) if fc.id_data is not None else None
+        for prop, shown, picked in (("handle_left", left_on, flags["select_left_handle"]),
+                                    ("handle_right", right_on, flags["select_right_handle"])):
+            if not shown.any():
+                continue
+            co = np.empty(n * 2, dtype=np.float64)
+            kps.foreach_get(prop, co)
+            co = co.reshape(n, 2)
+            co[:, 1] = (co[:, 1] + off) * k
+            if ad is not None:
+                co[:, 0] = [ad.nla_tweak_strip_time_to_scene(x) for x in co[:, 0]]
+            unsel.append(co[shown & ~picked])
+            sel.append(co[shown & picked])
+    return (np.concatenate(unsel) if unsel else empty), (np.concatenate(sel) if sel else empty)
+
+
 def to_region(region, pts):
     """View-space points -> region pixels (the view is a linear map of the region)."""
     v2d = region.view2d
@@ -133,6 +195,17 @@ def radii(context, size):
     return max(0.0, blender - 1.0), size * scale / 2.0
 
 
+def handle_radii(context, size):
+    """(ring inner, ring outer, selected ring outer) radius in pixels of the kit handle points (Blender draws a 1.5 px
+    ring of the theme's handle vertex size x 1.4, scaled by the pixel size)."""
+    system = context.preferences.system
+    scale = system.ui_scale or 1.0
+    curves = context.preferences.themes[0].common.curves
+    blender = 1.4 * curves.handle_vertex_size * max(1.0, float(system.pixel_size or 1.0)) / 2.0
+    outer = size * HANDLE_RATIO * scale / 2.0
+    return max(0.0, min(blender - 1.5, outer - 2.0 * scale)), outer, outer + 0.5 * scale
+
+
 def _rgba(c):
     c = tuple(c)
     return c if len(c) == 4 else c + (1.0,)
@@ -158,13 +231,24 @@ def draw():
         unsel, sel = key_points(context, space)
     except (AttributeError, ReferenceError, TypeError, ValueError):
         return
+    try:
+        h_unsel, h_sel = handle_points(context, space)
+        h_in, h_out, h_dot = handle_radii(context, size)
+    except (AttributeError, ReferenceError, TypeError, ValueError):
+        h_unsel = h_sel = np.zeros((0, 2))
+        h_in = h_out = h_dot = 0.0
     theme = context.preferences.themes[0].graph_editor
+    curves = context.preferences.themes[0].common.curves
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     gpu.state.blend_set('ALPHA')
-    for pts, colour, inner in ((unsel, theme.vertex, 0.0), (sel, theme.vertex_select, r_in)):
+    for pts, colour, inner, outer in ((h_unsel, curves.handle_vertex, h_in, h_out),
+                                      (h_sel, curves.handle_vertex_select, h_in, h_dot),
+                                      (unsel, theme.vertex, 0.0, r_out), (sel, theme.vertex_select, r_in, r_out)):
         if not len(pts):
             continue
-        tris = rims(to_region(region, pts), inner, r_out, width=region.width, height=region.height)
+        if outer <= inner:
+            continue
+        tris = rims(to_region(region, pts), inner, outer, width=region.width, height=region.height)
         if not len(tris):
             continue
         batch = batch_for_shader(shader, 'TRIS', {"pos": tris})

@@ -183,3 +183,51 @@ def test_more_menu_lists_the_hidden_buttons():
         chrome._FIRST_HIDDEN.pop(12345, None)
     want = [it[3] for g in groups[-2:] for it in g if isinstance(it, tuple)]
     assert menu.layout.log == want, menu.layout.log
+
+
+def _space(**kw):
+    base = dict(type='GRAPH_EDITOR', mode='FCURVES', use_normalization=False, show_handles=True,
+                use_only_selected_keyframe_handles=False)
+    base.update(kw)
+    return SimpleNamespace(**base)
+
+
+def test_handle_points_follow_blenders_rules():
+    ob = _cube_with_keys()
+    tx = _curve(ob, "location", 0)
+    for kp in tx.keyframe_points:
+        kp.select_left_handle = kp.select_right_handle = False
+    tx.keyframe_points[1].select_right_handle = True
+    tx.keyframe_points[2].interpolation = 'LINEAR'          # last key: its right handle is not shown
+    ctx = _ctx([tx])
+    unsel, sel = gk.handle_points(ctx, _space())
+    assert sel.tolist() == [list(tx.keyframe_points[1].handle_right)], sel
+    # 3 keys x 2 sides, minus the last key's right side, minus the selected one
+    assert len(unsel) == 4, unsel
+    # a linear segment hides the handles on both of its ends
+    tx.keyframe_points[0].interpolation = 'LINEAR'
+    unsel, sel = gk.handle_points(ctx, _space())
+    assert len(unsel) + len(sel) == 2, (unsel, sel)        # key 1 right, key 2 left
+    # only around selected keys (Maya On Active Keys)
+    tx.keyframe_points[0].interpolation = 'BEZIER'
+    unsel, sel = gk.handle_points(ctx, _space(use_only_selected_keyframe_handles=True))
+    assert len(unsel) == 1 and len(sel) == 1, (unsel, sel)        # key 2: left (unselected) + right (selected)
+    # View > Show Handles off: none
+    unsel, sel = gk.handle_points(ctx, _space(show_handles=False))
+    assert not len(unsel) and not len(sel)
+
+
+def test_handle_points_in_degrees_and_sizes():
+    ob = _cube_with_keys()
+    rz = _curve(ob, "rotation_euler", 2)
+    unsel, sel = gk.handle_points(_ctx([rz]), _space())
+    unsel = np.concatenate([unsel, sel])        # new keys come with selected handles
+    if bpy.context.scene.unit_settings.system_rotation == 'DEGREES':
+        ys = sorted(math.degrees(kp.handle_left.y) for kp in rz.keyframe_points)
+        assert any(abs(y - ys[-1]) < 1e-6 for y in unsel[:, 1]), (unsel, ys)
+    size = prefs_mod.get(bpy.context).graph_key_size
+    h_in, h_out, h_dot = gk.handle_radii(bpy.context, size)
+    k_in, k_out = gk.radii(bpy.context, size)
+    curves = bpy.context.preferences.themes[0].common.curves
+    blender = 1.4 * curves.handle_vertex_size / 2
+    assert 0 < h_in < blender < h_out < k_out and h_dot > h_out, (h_in, h_out, h_dot, blender, k_out)

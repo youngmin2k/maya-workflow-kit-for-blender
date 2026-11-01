@@ -145,6 +145,57 @@ def s_check():
     centre = pixel(big, sx, sy)
     check(f"Blender's own key still in the middle {centre}", sum(centre) > 0.3)
     prefs().graph_key_size = 11
+    # tangent handles: key 2 shows both handles, its right handle selected
+    a, _r = graph()
+    a.spaces.active.show_handles = True
+    kp = tx().keyframe_points[1]
+    kp.select_left_handle, kp.select_right_handle = False, True
+    redraw()
+
+
+@step
+def s_wait4():
+    redraw()
+
+
+@step
+def s_handles_big():
+    C["hbig"] = shot("gui_issue277_handles_big.png")
+    prefs().graph_key_size = 0
+    redraw()
+
+
+@step
+def s_wait5():
+    redraw()
+
+
+def handle_win(fc, i, side):
+    _a, r = graph()
+    co = getattr(fc.keyframe_points[i], side)
+    x, y = r.view2d.view_to_region(co.x, co.y, clip=False)
+    return x + r.x, y + r.y
+
+
+@step
+def s_handles_check():
+    small = shot("gui_issue277_handles_blender.png")
+    big = C["hbig"]
+    curves = bpy.context.preferences.themes[0].common.curves
+    probe = round(11 * 0.8 * bpy.context.preferences.system.ui_scale / 2 - 0.7)    # inside the kit point only
+    lx, ly = handle_win(tx(), 1, "handle_left")
+    rx, ry = handle_win(tx(), 1, "handle_right")
+    sel_ref, un_ref = tuple(curves.handle_vertex_select)[:3], tuple(curves.handle_vertex)[:3]
+    r_big, r_small = pixel(big, rx, ry + probe), pixel(small, rx, ry + probe)
+    l_big, l_small = pixel(big, lx, ly + probe), pixel(small, lx, ly + probe)
+    check(f"selected handle: kit ring in the selected handle colour {r_big} ~ {sel_ref}", near(r_big, sel_ref))
+    check(f"selected handle with Key Size 0: Blender's small point only {r_small}", not near(r_small, sel_ref))
+    check(f"unselected handle: kit ring in the handle colour {l_big} ~ {un_ref}", near(l_big, un_ref))
+    check(f"unselected handle with Key Size 0: Blender's small point only {l_small}", not near(l_small, un_ref))
+    centre = pixel(big, rx, ry)
+    check(f"selected handle ring is open in the middle {centre} (a key is a filled dot)",
+          not near(centre, sel_ref, 0.03))
+    prefs().graph_key_size = 11
 
 
 run()

@@ -33,6 +33,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Graph Editor / Dope Sheet toolbar fits narrow editors** (#277): when the editor is too narrow for every
   toolbar button, the button groups that fit stay in Maya's order and the rest move into a » menu at the
   right end of the row (with their Maya names), instead of being cut off.
+- **Bigger tangent handles in the Graph Editor** (#277): tangent handle points are drawn as bold rings that
+  grow with the Key Size preference, black when unselected and in the selected colour when selected, so
+  they are easier to see and to grab and never look like keys. Key Size 0 shows Blender's own handles.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
