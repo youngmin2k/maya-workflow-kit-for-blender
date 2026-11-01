@@ -760,11 +760,24 @@ def key_frames(nodes):
                 # the shown layer's keys + BaseAnimation keys of channels not in that layer (Maya)
                 from ..operators import anim_layers
                 curves = list(curves) + anim_layers.hidden_base_curves(node, bpy.context.scene)
+                curves += blend_weight_curves(node)
         for fc in curves:
             for kp in fc.keyframe_points:
                 f = round(kp.co.x, 3)
                 frames[f] = frames.get(f, True) and kp.type == 'BREAKDOWN'
     return sorted(frames.items())
+
+
+def blend_weight_curves(ob):
+    """Curves of the mesh's blendShape target weights (they live on its Key datablock, which the Channel Box lists
+    under INPUTS): their keys are part of the object's ticks."""
+    from . import channel_box
+    from .. import compat
+    bs = channel_box.blend_shape_key(ob)
+    if bs is None:
+        return []
+    paths = {channel_box.blend_path(kb.name) for kb in channel_box.blend_shape_targets(bs)}
+    return [fc for fc in compat.id_fcurves(bs) if fc.data_path in paths]
 
 
 def key_x(region, frame, maya):

@@ -96,6 +96,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   too, like the kit's keys. A key set again on a frame that already had one keeps its tangents.
 - **Hotkeys imported with Maya mode off wait for it** (#275): Import Settings with Maya mode off now keeps the
   file's kit hotkeys and gives them the next time Maya mode starts, instead of leaving them out.
+- **Time Slider ticks for blendShape keys** (#271): keys on a mesh's blendShape target weights now show as ticks
+  in the Time Slider when the mesh is selected, with the rest of its keys.
 
 ## [0.9.0] — 2026-11-01
 
