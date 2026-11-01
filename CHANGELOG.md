@@ -5,6 +5,14 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 
 ## [Unreleased]
 
+### Added
+- **Save your own workspaces** (#277): Windows > Workspaces > Save Current Workspace As... saves the current
+  layout (areas, editors and their sizes) under a name. Your saved workspaces are listed after Maya's in
+  Windows > Workspaces and the Status Line workspace menu, in every scene; choosing one brings that layout into
+  the open scene without changing its contents. Reset Current Workspace returns it to its saved state and
+  Delete Current Workspace removes it. Only the layout is saved, in the extension's user folder; new scenes
+  still start in Maya Classic.
+
 ### Changed
 - **IPR opens its own render window** (#277): Render > IPR Render Current Frame, Redo Previous IPR Render and the
   Status Line IPR button now open a separate window with a 3D View in Rendered shading, like Maya's IPR render

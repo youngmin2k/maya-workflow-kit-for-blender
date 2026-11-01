@@ -14,6 +14,7 @@ import bpy
 from bpy.props import StringProperty
 
 from .. import switch
+from . import user_workspaces
 
 # (template name, label); None = divider
 FACTORY = (("General", "Maya Classic"), None, ("Modeling - Standard", "Modeling - Standard"),
@@ -37,17 +38,14 @@ NOTICES = {
                                   "properties and Shader Editor are its editors."),
     PATH + "MASH": ("Geometry Nodes", "Blender has no MASH: instancing networks are Geometry Nodes."),
     PATH + "Motion Graphics": ("Geometry Nodes", "Blender has no MASH: instancing networks are Geometry Nodes."),
-    PATH + "Save Current Workspace As...": ("Workspace tabs", "Blender saves workspaces with the file: duplicate one "
-                                            "from its tab's menu."),
     PATH + "Import Workspace Files...": ("File > Append", "Blender brings workspaces from other files with File > "
                                          "Append > WorkSpace."),
-    PATH + "Delete Current Workspace": ("Workspace tabs", "Blender deletes a workspace from its tab's menu; Maya's "
-                                        "standard workspaces come back with Reset."),
+    PATH + "Delete Current Workspace": ("Workspace tabs", "Maya's standard workspaces can't be deleted: they come "
+                                        "back with Reset. Workspaces you saved are deleted while they are current."),
     PATH + "Disable Docking/Undocking": ("Area corners", "Blender's areas are split and joined at their corners; "
                                          "there is no docking lock."),
 }
-ACTIONS_GREYED = ("Save Current Workspace As...", "Import Workspace Files...", "Delete Current Workspace",
-                  "Disable Docking/Undocking")
+ACTIONS_GREYED = ("Import Workspace Files...", "Disable Docking/Undocking")
 
 
 def find(template_name):
@@ -108,9 +106,13 @@ _items = {}
 
 
 def entries():
-    """[(template name or None, workspace or None, label)] in dropdown order."""
+    """[(template name / ("user", saved name) / None, workspace or None, label)] in dropdown order: Maya's
+    workspaces, the user's saved ones, then the file's other workspaces."""
     out = [(name, find(name), LABELS[name]) for name in IN_TEMPLATE]
-    out += [(None, ws, ws.name) for ws in bpy.data.workspaces if switch.template_of(ws) is None]
+    saved = user_workspaces.saved_names()
+    out += [(("user", name), user_workspaces.find(name), name) for name in saved]
+    out += [(None, ws, ws.name) for ws in bpy.data.workspaces
+            if switch.template_of(ws) is None and user_workspaces.user_name(ws) not in saved]
     return out
 
 
@@ -154,7 +156,10 @@ def _later(window_ptr, template):
     window = live_refs.window(window_ptr)
     if window is not None:
         with bpy.context.temp_override(window=window):
-            activate(bpy.context, window, template)
+            if isinstance(template, tuple):
+                user_workspaces.activate(bpy.context, window, template[1])
+            else:
+                activate(bpy.context, window, template)
     return None
 
 
@@ -190,6 +195,14 @@ class ALLSET_OT_reset_workspace(bpy.types.Operator):
 
     def execute(self, context):
         window = context.window
+        if window is not None and user_workspaces.user_name(window.workspace) is not None:
+            ws = user_workspaces.reset(window, window.workspace)
+            if ws is None:
+                self.report({'WARNING'}, "The saved file of this workspace is gone: nothing to reset")
+                return {'CANCELLED'}
+            window.workspace = ws
+            apply_settings(context, ws)
+            return {'FINISHED'}
         ws = switch.reset_workspace(window)
         if ws is None:
             self.report({'WARNING'}, "This isn't one of Maya's workspaces: nothing to reset")
@@ -218,11 +231,24 @@ class ALLSET_MT_maya_workspaces(bpy.types.Menu):
                 op.name = name
             else:
                 safe_op(lay, ALLSET_OT_menu_unavailable.bl_idname, text=label, icon='RADIOBUT_OFF').item = PATH + name
-        lay.separator()
         ws = context.window.workspace if context.window else None
+        mine = user_workspaces.user_name(ws)
+        saved = user_workspaces.saved_names()
+        if saved:                       # the user's saved workspaces, after Maya's
+            lay.separator()
+            for name in saved:
+                op = safe_op(lay, user_workspaces.ALLSET_OT_user_workspace.bl_idname, text=name, translate=False,
+                             icon='RADIOBUT_ON' if name == mine else 'RADIOBUT_OFF')
+                op.name = name
+        lay.separator()
         lay.operator(ALLSET_OT_reset_workspace.bl_idname, text=reset_label(ws) if ws else "Reset Current Workspace")
-        for label in ACTIONS_GREYED:
-            safe_op(lay, ALLSET_OT_menu_unavailable.bl_idname, text=label).item = PATH + label
+        safe_op(lay, user_workspaces.ALLSET_OT_save_workspace_as.bl_idname, text="Save Current Workspace As...")
+        safe_op(lay, ALLSET_OT_menu_unavailable.bl_idname, text="Import Workspace Files...").item =             PATH + "Import Workspace Files..."
+        if mine is not None:
+            safe_op(lay, user_workspaces.ALLSET_OT_delete_workspace.bl_idname, text="Delete Current Workspace")
+        else:
+            safe_op(lay, ALLSET_OT_menu_unavailable.bl_idname, text="Delete Current Workspace").item =                 PATH + "Delete Current Workspace"
+        safe_op(lay, ALLSET_OT_menu_unavailable.bl_idname, text="Disable Docking/Undocking").item =             PATH + "Disable Docking/Undocking"
 
 
 classes = (ALLSET_OT_maya_workspace, ALLSET_OT_reset_workspace, ALLSET_MT_maya_workspaces)
@@ -231,6 +257,7 @@ classes = (ALLSET_OT_maya_workspace, ALLSET_OT_reset_workspace, ALLSET_MT_maya_w
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+    user_workspaces.register()
     from . import notices
     notices.PANEL_NOTICES.update(NOTICES)
 
@@ -239,6 +266,7 @@ def unregister():
     from . import notices
     for k in NOTICES:
         notices.PANEL_NOTICES.pop(k, None)
+    user_workspaces.unregister()
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
     _items.clear()

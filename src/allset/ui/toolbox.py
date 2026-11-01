@@ -24,7 +24,7 @@ import math
 import bpy
 from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active as TOOLBAR
 
-from .. import compat
+from .. import compat, switch
 from ..operators import tool_keys, view
 
 # Maya 2022 Tool Box order: Select, Lasso, Paint Select, Move, Rotate, Scale.
@@ -471,6 +471,8 @@ def fit_columns(start_fit=True):
     for window in context.window_manager.windows:
         screen = window.screen
         armed = _armed(screen, scale)
+        if window.workspace is not None and switch.USER_KEY in window.workspace:
+            armed = False        # a workspace the user saved keeps the sizes it was saved with
         needed = False       # an edge of this screen is off its fitted place
         # the Maya shelf row (tab row + icon row, 64 px at scale 1): grow it downwards
         row = shelf_row_area(screen)

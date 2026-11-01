@@ -61,7 +61,7 @@ def is_maya_workspace(ws):
     """A workspace that already is the Maya layout (appended by the switch or a Maya Workflow Kit file)."""
     if ws is None:
         return False
-    if PREV_KEY in ws or TEMPLATE_KEY in ws:     # TEMPLATE_KEY: any Maya workspace of the template
+    if PREV_KEY in ws or TEMPLATE_KEY in ws or USER_KEY in ws:     # TEMPLATE_KEY: any Maya workspace of the template
         return True
     for screen in ws.screens:
         for area in screen.areas:
@@ -72,10 +72,11 @@ def is_maya_workspace(ws):
     return False
 
 
-def _fit_views(ws, scene):
-    """The template views are in cm (Maya unit 0.01 BU): keep them on the same Maya-unit scene."""
+def _fit_views(ws, scene, saved_unit=0.01):
+    """The template views are in cm (Maya unit 0.01 BU; a saved workspace: the Maya unit it was saved with): keep
+    them on the same Maya-unit scene."""
     from .operators import units
-    ratio = units.maya_unit(scene) / 0.01
+    ratio = units.maya_unit(scene) / (saved_unit or 0.01)
     for screen in ws.screens:
         for area in screen.areas:
             for space in area.spaces:
@@ -120,31 +121,54 @@ def enter_layout(window):
 
 
 TEMPLATE_KEY = "allset_template"      # the template workspace a Maya workspace was made from
+USER_KEY = "allset_user_workspace"    # a workspace the user saved (Save Current Workspace As): its name
+USER_UNIT_KEY = "allset_user_unit"    # the Maya unit of the scene it was saved in
 
 
-def append_workspace(window, template_name):
+def append_workspace(window, template_name, filepath=None, idname=None):
     """Append the template workspace ``template_name`` (General, Animation, ... tools/make_startup.MAYA_WORKSPACES) into
-    the open file and show it in ``window``: its Status Line / Shelf masks and cm views are set up (#81)."""
+    the open file and show it in ``window``: its Status Line / Shelf masks and cm views are set up (#81). With
+    ``filepath`` / ``idname``: workspace ``idname`` of that file (a saved workspace, ``template_name`` None)."""
     before = set(bpy.data.workspaces)
+    libs = set(bpy.data.libraries)
     with bpy.context.temp_override(**_window_override(window)):
-        bpy.ops.workspace.append_activate(idname=template_name, filepath=_template_blend())
+        bpy.ops.workspace.append_activate(idname=idname or template_name, filepath=filepath or _template_blend())
+    if filepath is not None:
+        # the appended workspace is local: the saved file's library entry isn't needed
+        def same(path):
+            return os.path.normcase(os.path.normpath(bpy.path.abspath(path))) ==                 os.path.normcase(os.path.normpath(filepath))
+        for lib in [lib for lib in bpy.data.libraries if lib not in libs and same(lib.filepath)]:
+            if not _linked_from(lib):
+                bpy.data.libraries.remove(lib)
     new = [ws for ws in bpy.data.workspaces if ws not in before]
     if not new:
         return None
     ws = new[0]
-    ws[TEMPLATE_KEY] = template_name
+    if template_name is not None:
+        ws[TEMPLATE_KEY] = template_name
     window.workspace = ws
     # region flag writes call ED_area_init, which reads the context window's workspace (None after a file load in
     # -b crashed Blender)
     with bpy.context.temp_override(**_window_override(window)):
         _mark_strips(ws)
-        _fit_views(ws, window.scene)
+        _fit_views(ws, window.scene, ws.get(USER_UNIT_KEY, 0.01))
     return ws
+
+
+def _linked_from(lib):
+    """True when some data of the open file is still linked from library ``lib``."""
+    for attr in dir(bpy.data):
+        coll = getattr(bpy.data, attr, None)
+        if attr == "libraries" or not isinstance(coll, bpy.types.bpy_prop_collection):
+            continue
+        if any(getattr(i, "library", None) == lib for i in coll):
+            return True
+    return False
 
 
 def template_of(ws):
     """The template name of a Maya workspace (None: not one of the kit's Maya workspaces)."""
-    if ws is None:
+    if ws is None or USER_KEY in ws:      # a saved workspace isn't a template's copy
         return None
     name = ws.get(TEMPLATE_KEY)
     if isinstance(name, str) and name:
@@ -341,6 +365,16 @@ def _delete_workspace(window, name, added):
         mask = bpy.data.masks.get(mask_name)
         if mask is not None:
             bpy.data.masks.remove(mask)
+
+
+def drop_workspace(window, ws):
+    """Remove workspace ``ws`` from the open file (once ``window`` no longer shows it)."""
+    name = ws.name + " (old)" if not ws.name.endswith(" (old)") else ws.name
+    ws.name = name
+    if window.workspace == ws:
+        _delete_later(window, ws.name, [])
+    else:
+        _delete_workspace(window, ws.name, [])
 
 
 def _delete_later(window, name, added, tries=40):
