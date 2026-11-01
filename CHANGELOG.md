@@ -14,6 +14,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Shift+drag names what it does** (#277): while you Shift+drag the Move / Rotate / Scale manipulator, an in-view
   message says "Shift Duplicate" (objects are copied) or "Shift Extrude" (components are extruded). A Shift+click
   shows nothing; the add-on preference In-View Messages turns it off.
+- **Other add-ons stay in reach in Maya mode** (#221): menus other add-ons add to Blender's top bar now follow
+  the Maya menus in the menu bar (or sit at the end of the » menu when the bar is full), and tools other add-ons
+  add to the 3D View toolbar stay there after the Maya tools.
 
 ## [0.9.0] — 2026-11-01
 

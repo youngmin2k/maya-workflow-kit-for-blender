@@ -747,6 +747,11 @@ def menu_fit(widths, width, fixed, more):
     fit, the » button (``more`` px) takes its place at the end."""
     if fixed + sum(widths) <= width:
         return len(widths)
+    return fit_beside_more(widths, width, fixed, more)
+
+
+def fit_beside_more(widths, width, fixed, more):
+    """How many leading menus fit in ``width`` px next to the » button."""
     x = fixed + more
     n = 0
     for w in widths:
@@ -789,10 +794,21 @@ def draw_menu_bar_fit(layout, context, menu_set=True):
     names = menu_sets.menus_for_set(prefs.menu_set)
     region = getattr(context, "region", None)
     widths, fixed, more = menu_bar_widths(context, names, menu_set)
-    n = menu_fit(widths, region.width, fixed, more) if region is not None and region.width > 1 else len(names)
+    width = region.width if region is not None and region.width > 1 else None
+    # other add-ons' top-bar menus follow the Maya menus when there is room for them, else they wait behind »
+    addons = len(menu_sets.addon_menu_funcs(context))
+    reserve = 0
+    if addons:
+        from .toolbar_fit import unit
+        system = context.preferences.system
+        reserve = int(addons * menu_sets.ADDON_MENU_UNITS * unit(system.ui_scale or 1.0, system.pixel_size))
+    inline = width is None or fixed + sum(widths) + reserve <= width
+    n = len(names) if inline else menu_fit(widths, width, fixed, more)
+    if not inline and n >= len(names):     # the Maya menus fit: only the add-on menus go behind »
+        n = fit_beside_more(widths, width, fixed, more)
     if context.window is not None:
         _menus_shown[context.window.as_pointer()] = (tuple(names), n)
-    if n >= len(names):
+    if inline:
         menu_sets.draw_menu_bar(layout, context, menu_set=menu_set)
         return
     layout.menu("TOPBAR_MT_blender", text="", icon='BLENDER')
@@ -824,6 +840,10 @@ class ALLSET_MT_menu_more(bpy.types.Menu):
         names, n = shown_menus(context.window)
         for name in names[n:]:
             self.layout.menu(menu_sets.menu_idname(name))
+        if menu_sets.addon_menu_funcs(context):     # other add-ons' top-bar menus, at the end
+            if n < len(names):
+                self.layout.separator()
+            menu_sets.draw_addon_menus(self.layout, context)
 
 
 def draw_left(self, context):

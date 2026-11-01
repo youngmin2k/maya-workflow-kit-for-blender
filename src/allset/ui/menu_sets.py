@@ -1034,6 +1034,56 @@ class ALLSET_MT_ui_elements(bpy.types.Menu):
         layout.prop(prefs, "show_help_line")
 
 
+class ALLSET_MT_addon_menus(bpy.types.Menu):
+    """Menus other add-ons put in Blender's top bar"""
+    bl_idname = "ALLSET_MT_addon_menus"
+    bl_label = "Add-on Menus"
+
+    def draw(self, context):
+        for func in addon_menu_funcs(context):
+            try:     # one broken add-on must not stop the rest, as in Blender's own menus
+                func(self, context)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+
+
+# Other add-ons append their own menus to Blender's top bar menu (TOPBAR_MT_editor_menus), where they follow Help.
+# The Maya menu bar replaces that menu, so those entries follow the Maya menus instead (or sit at the end of the
+# overflow menu when the bar is full). Their width is unknown: each keeps this much room when the bar is fitted.
+ADDON_MENU_UNITS = 5.0
+_KIT = __package__.rpartition(".")[0]
+
+
+def addon_menu_funcs(context=None):
+    """Draw functions other add-ons added to ``TOPBAR_MT_editor_menus`` (not Blender's own, not the kit's), with
+    the workspace's add-on filter applied like Blender does."""
+    draw = getattr(bpy.types, "TOPBAR_MT_editor_menus", None)
+    funcs = getattr(getattr(draw, "draw", None), "_draw_funcs", None) or ()
+    workspace = getattr(context, "workspace", None) if context is not None else None
+    owners = None
+    if workspace is not None and getattr(workspace, "use_filter_by_owner", False):
+        owners = {o.name for o in workspace.owner_ids}
+    out = []
+    for func in funcs:
+        if getattr(func, "__qualname__", "") == "TOPBAR_MT_editor_menus.draw":
+            continue
+        module = getattr(func, "__module__", "") or ""
+        if module == _KIT or module.startswith(_KIT + "."):
+            continue
+        owner = getattr(func, "_owner", None)
+        if owners is not None and owner is not None and owner not in owners:
+            continue
+        out.append(func)
+    return out
+
+
+def draw_addon_menus(layout, context):
+    """Other add-ons' top-bar menus, in line (a header row or a menu)."""
+    if addon_menu_funcs(context):
+        layout.menu_contents(ALLSET_MT_addon_menus.bl_idname)
+
+
 class ALLSET_MT_menu_bar(bpy.types.Menu):
     """The Maya menu bar folded into one menu (header menus collapsed)"""
     bl_idname = "ALLSET_MT_menu_bar"
@@ -1090,6 +1140,7 @@ def draw_menu_bar(layout, context, collapsed=False, menu_set=True):
         sub.prop(prefs, "menu_set", text="")
     for name in _SET_MENUS.get(set_id, ()) + _ALWAYS_MENUS:
         _menu(layout, context, menu_idname(name), collapsed)
+    draw_addon_menus(layout, context)
 
 
 def editor_menu_idname(editor, index):
@@ -1107,7 +1158,7 @@ for _editor, _menus in editor_menu_data.EDITORS.items():
 classes = (ALLSET_OT_menu_unavailable, ALLSET_OT_menu_set_value, ALLSET_OT_menu_item, ALLSET_OT_menu_whole_mesh,
            ALLSET_OT_component_command, ALLSET_MT_option_box, ALLSET_OT_option_box_point,
            ALLSET_OT_menu_option_box, ALLSET_OT_menu_run, ALLSET_OT_menu_tool,
-           ALLSET_MT_ui_elements, ALLSET_MT_menu_bar, *option_click.classes, *_menu_classes)
+           ALLSET_MT_ui_elements, ALLSET_MT_addon_menus, ALLSET_MT_menu_bar, *option_click.classes, *_menu_classes)
 
 
 def register():
