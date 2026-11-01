@@ -44,6 +44,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   the UV Editor are drawn as selected in the 3D View and every other vertex as unselected, like Maya, instead of
   the whole mesh looking selected. Mesh component colours now also follow selection changes after you open or
   start a scene.
+- **Pre-selection for single UVs, edges and faces** (#264): in the UV Editor the UV, UV edge or UV face a click
+  would pick is drawn in the pre-selection red under the mouse, like Maya, not only whole UV shells. The add-on
+  preference UV Pre-selection (formerly UV Shell Pre-selection) turns it off.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object

@@ -1,6 +1,7 @@
 """UV interaction like Maya (#264): after F12 (UV) a click on a UV in the UV Editor shows that UV's vertex as
 selected in the 3D View and the other vertices as unselected (the mesh itself keeps every face selected so the UV
-Editor shows all UVs). Shots: ALLSET_GUI_SHOTS."""
+Editor shows all UVs). In the UV Editor the UV / face under the mouse is pre-selected (drawn red) before a
+click. Shots: ALLSET_GUI_SHOTS."""
 
 import os
 import sys
@@ -183,6 +184,89 @@ def s_pixels():
         else:
             check(f"vertex {v.index} without a picked UV drawn unselected (magenta) {c}",
                   c[0] > 0.6 and c[1] < 0.35 and c[2] > 0.6)
+
+
+def uv_shot(name):
+    w, a, r = uv_win()
+    path = os.path.join(SHOTS or tempfile.mkdtemp(), name)
+    with bpy.context.temp_override(window=w):
+        bpy.ops.screen.screenshot(filepath=path)
+    return path
+
+
+def uv_px(u, v):
+    w, a, r = uv_win()
+    x, y = r.view2d.view_to_region(u, v, clip=False)
+    return r.x + int(round(x)), r.y + int(round(y))
+
+
+def red(c):
+    return c[0] > c[1] + 0.12 and c[0] > c[2] + 0.12
+
+
+def face_centre_uv(f):
+    bm = bmesh.from_edit_mesh(ob().data)
+    uv = bm.loops.layers.uv.active
+    return (sum(l[uv].uv.x for l in f.loops) / len(f.loops), sum(l[uv].uv.y for l in f.loops) / len(f.loops))
+
+
+@step
+def s_hover_uv():
+    bm = bmesh.from_edit_mesh(ob().data)
+    uv = bm.loops.layers.uv.active
+    bm.faces.ensure_lookup_table()
+    lp = bm.faces[3].loops[1]
+    S["hover_uv"] = (lp[uv].uv.x, lp[uv].uv.y)
+    x, y = uv_px(*S["hover_uv"])
+    uv_win()[0].event_simulate(type='MOUSEMOVE', value='NOTHING', x=x + 6, y=y + 5)
+
+
+@step
+def s_hover_uv_wait():
+    pass
+
+
+@step
+def s_hover_uv_shot():
+    S["uv_shot"] = uv_shot("gui_issue264_uv_hover_uv.png")
+
+
+@step
+def s_hover_uv_check():
+    x, y = uv_px(*S["hover_uv"])
+    c = pixel(S["uv_shot"], x, y)
+    check(f"UV mode: the UV near the mouse is pre-selected (red) {c}", red(c))
+
+
+@step
+def s_face_mode():
+    bpy.context.scene.tool_settings.uv_select_mode = 'FACE'
+    bm = bmesh.from_edit_mesh(ob().data)
+    bm.faces.ensure_lookup_table()
+    S["face_uv"] = face_centre_uv(bm.faces[3])
+    S["other_uv"] = face_centre_uv(bm.faces[4])
+    x, y = uv_px(*S["face_uv"])
+    uv_win()[0].event_simulate(type='MOUSEMOVE', value='NOTHING', x=x, y=y)
+
+
+@step
+def s_face_wait():
+    pass
+
+
+@step
+def s_face_shot():
+    S["face_shot"] = uv_shot("gui_issue264_uv_hover_face.png")
+
+
+@step
+def s_face_check():
+    x, y = uv_px(*S["face_uv"])
+    c = pixel(S["face_shot"], x + 12, y + 12)
+    ox, oy = uv_px(*S["other_uv"])
+    o = pixel(S["face_shot"], ox + 12, oy + 12)
+    check(f"UV face mode: the face under the mouse is pre-selected (red tint {c}, other face {o})",
+          red(c) and not red(o))
 
 
 @step

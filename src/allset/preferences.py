@@ -68,8 +68,8 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
                ('SURFACE', "Surface", "Move components along the surface of the mesh")),
         default='NONE', update=_redraw_tools)
     uv_shell_preview: bpy.props.BoolProperty(
-        name="UV Shell Pre-selection",
-        description="In the UV Editor, while clicks pick whole UV shells, fill the shell under the mouse in the "
+        name="UV Pre-selection",
+        description="In the UV Editor, show the UV, edge, face or whole UV shell under the mouse in the "
                     "pre-selection colour before you click",
         default=True)
     # Maya preSelectHilite true.
