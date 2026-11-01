@@ -123,7 +123,7 @@ def save(context, ws, name):
             ws[k] = v
         raise
     for k, v in kept.items():
-        if k != switch.TEMPLATE_KEY:          # no longer the template's copy: Maya Classic stays factory
+        if k != switch.TEMPLATE_KEY:          # no longer the template's copy: Maya Classic stays as shipped
             ws[k] = v
     return path
 

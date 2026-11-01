@@ -64,7 +64,7 @@ def test_save_lists_and_loads_into_another_scene():
     assert uw.saved_names() == ["My Anim"]
     assert ws.name == "My Anim" and uw.user_name(ws) == "My Anim"
     assert sw.template_of(ws) is None and sw.is_maya_workspace(ws)
-    assert ws_mod.find("General") is None, "Maya Classic stays factory: picking it appends a fresh copy"
+    assert ws_mod.find("General") is None, "Maya Classic stays as shipped: picking it appends a fresh copy"
     with bpy.data.libraries.load(path) as (src, _dst):
         assert list(src.workspaces) == ["My Anim"]
         for kind in ("objects", "cameras", "images", "texts", "meshes", "scenes", "masks"):
