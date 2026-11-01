@@ -276,3 +276,34 @@ def test_object_mode_inputs_with_modifier_keep_creation_node():
     nodes = [p.node for p in _draw().ops("allset.cb_node_toggle")]
     node = cb.history_node(creation_inputs.prim_history.node_of(ob)[1]["name"])
     assert nodes == [cb.mod_node(md), node], nodes
+
+
+def test_lattice_points_cvs_table():
+    _fresh()
+    bpy.ops.object.add(type='LATTICE')
+    ob = bpy.context.active_object
+    for o in bpy.context.view_layer.objects:
+        o.select_set(o == ob)
+    bpy.ops.object.mode_set(mode='EDIT')
+    for i, p in enumerate(ob.data.points):
+        p.select = i in (1, 5)
+    assert cb.component_mode(ob)
+    rec = _draw()
+    assert "CVs (click to show)" in _texts(rec), _texts(rec)
+    bpy.ops.allset.cb_points_toggle()
+    texts = _texts(_draw())
+    assert [t for t in texts if t in ("1", "5")] == ["1", "5"], texts
+    props = bpy.context.scene.allset_cb_points
+    p5 = ob.data.points[5].co_deform
+    assert abs(float(props.p1_x) - p5.x) < 1e-6, (props.p1_x, p5.x)      # lattice space, a plain number
+    old_z = p5.z
+    props.p1_z = "+=0.25"
+    z = ob.data.points[5].co_deform.z
+    assert abs(z - (old_z + 0.25)) < 1e-6, (old_z, z)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    assert abs(ob.data.points[5].co_deform.z - z) < 1e-6, "the typed value stays after edit mode"
+    bpy.ops.object.mode_set(mode='EDIT')
+    for p in ob.data.points:
+        p.select = False
+    assert "CVs (click to hide)" not in _texts(_draw()), "nothing selected: no CVs line"
+    bpy.ops.allset.cb_points_toggle()

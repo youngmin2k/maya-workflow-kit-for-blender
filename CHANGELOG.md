@@ -106,6 +106,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Room for other add-ons' top-bar menus** (#221): the Maya menu bar now keeps as much room for other add-ons'
   menus as their names take, instead of a fixed width each, so short ones stay in the bar and long ones no longer
   run past its end.
+- **Lattice points in the Channel Box** (#274): with lattice points selected in lattice edit mode, the Channel Box
+  shows the CVs line like for mesh vertices; click it for a table of the selected points (number, X, Y, Z in the
+  lattice's own space) where you can type new values (`+=0.1` works).
 
 ## [0.9.0] — 2026-11-01
 
