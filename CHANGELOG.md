@@ -92,6 +92,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   A corner where three bevelled edges meet (all three edges of a box corner) now gets Maya's width and puts
   each face's new corner where Maya does when the corner's face angles stay close (their half-angle sines
   within 10% of each other), whatever the mesh's vertex numbering.
+  Still different from Maya: corners where the faces' angles differ strongly (the new corner can sit up to a few
+  percent of the bevel width away), corners next to a bent (non-flat) side face, and three-edge corners whose
+  face angles differ by more than about 10%.
 
 ### Fixed
 - **Assign Existing Material lists the materials in the marking menu** (#283): in the right-click marking
