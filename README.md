@@ -236,7 +236,11 @@ Some Maya behaviour needs Blender's C++ code; the kit does not fork Blender, so 
 - **No theme.** Maya's grey UI and green lead selection come from a theme you install yourself
   ([Recommended setup](#recommended-setup)); extensions.blender.org add-ons may not change themes.
 - **Docking stays inside Blender's areas.** Maya's side tabs and OS-level docking of panels are not imitated.
-- Not every Maya menu item has a Blender counterpart; those items are greyed with a note.
+- Not every Maya menu item has a Blender counterpart; those items are greyed with a note. Today 1,015 of the 1,895
+  main menu items run a kit or Blender command and the other 880 are greyed with a note (none without one). Editor
+  menu bars: UV Editor 85 %, Graph Editor 77 %, Shape Editor 77 %, Script Editor 76 %, Dope Sheet 72 %, Reference
+  Editor 71 %, Hypershade 58 %. What is done and what comes next is tracked in the roadmap issue
+  [#108](https://github.com/5hyuns/maya-workflow-kit-for-blender/issues/108).
 - Blender versions after 5.2 are not offered the extension until they are tested.
 
 ---
