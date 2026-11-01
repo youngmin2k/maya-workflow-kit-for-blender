@@ -98,6 +98,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   file's kit hotkeys and gives them the next time Maya mode starts, instead of leaving them out.
 - **Time Slider ticks for blendShape keys** (#271): keys on a mesh's blendShape target weights now show as ticks
   in the Time Slider when the mesh is selected, with the rest of its keys.
+- **Lasso picks joints with nothing selected** (#276): like the box, the Lasso Select tool drawn around joints in
+  the Maya layout now selects them even when nothing was selected before; one Ctrl+Z undoes the selection.
 
 ## [0.9.0] — 2026-11-01
 

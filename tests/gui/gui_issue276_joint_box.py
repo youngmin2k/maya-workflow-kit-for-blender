@@ -198,4 +198,55 @@ def s_object_undo_done():
     check(f"and nothing before it (frame {scene.frame_current})", scene.frame_current == 9)
 
 
+# the same with the Lasso Select tool: Blender's lasso changes nothing either and keeps its path to itself
+@step
+def s_lasso_tool():
+    area, region = view3d()
+    with bpy.context.temp_override(window=win(), area=area, region=region):
+        bpy.ops.wm.tool_set_by_id(name="builtin.select_lasso")
+        C["tool"] = bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode).idname
+    mark_undo(4)
+    mark_undo(11)
+
+
+def lasso(name, r):
+    import math
+    ring = [(math.cos(2 * math.pi * k / 12) * r, math.sin(2 * math.pi * k / 12) * r) for k in range(13)]
+
+    def at(k):
+        p = tip() + Vector(ring[k])
+        return int(p.x), int(p.y)
+
+    def press():
+        ev('MOUSEMOVE', 'NOTHING', x=at(0)[0], y=at(0)[1])
+        ev('LEFTMOUSE', 'PRESS', x=at(0)[0], y=at(0)[1])
+    fns = [press]
+    for k in range(1, 13):
+        fns.append((lambda k: lambda: ev('MOUSEMOVE', 'NOTHING', x=at(k)[0], y=at(k)[1]))(k))
+    fns.append(lambda: ev('LEFTMOUSE', 'RELEASE', x=at(12)[0], y=at(12)[1]))
+    fns += [lambda: None, lambda: None]
+    for i, fn in enumerate(fns):
+        f = (lambda fn: lambda: fn())(fn)
+        f.__name__ = f"s_{name}_{i}"
+        step(f)
+
+
+lasso("object_lasso", 30)
+
+
+@step
+def s_object_lasso_done():
+    check(f"Object Mode, nothing selected: a lasso around a joint picks it ({C['tool']}, {selected_joints()})",
+          selected_joints() == [C["names"][2]])
+
+
+ctrl_z("lasso_undo")
+
+
+@step
+def s_lasso_undo_done():
+    check(f"one Ctrl+Z takes the lasso pick back ({selected_joints()}, frame {bpy.context.scene.frame_current})",
+          selected_joints() == [] and bpy.context.scene.frame_current == 11)
+
+
 run()

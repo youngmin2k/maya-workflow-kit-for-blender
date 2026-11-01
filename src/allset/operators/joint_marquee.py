@@ -13,7 +13,8 @@ was hit the remembered selection comes back and the joints are applied with the 
 
 A box that changes nothing in Blender's eyes (nothing selected before, no Blender element inside) ends CANCELLED and is
 not registered, so the box is also read from the running operator while it is drawn and used when nothing new was
-registered. Blender pushed no undo step then, so the kit's step stands alone.
+registered. Blender pushed no undo step then, so the kit's step stands alone. A running lasso keeps its path to
+itself until it ends, so the path of such a lasso is the pointer track a draw cursor callback collects while it runs.
 """
 
 import bpy
@@ -25,6 +26,39 @@ SELECT_OPS = {"VIEW3D_OT_select_box", "VIEW3D_OT_select_lasso"}
 _TICK = 0.05
 _GIVE_UP = 1.5
 _pending = []
+_track = {"handle": None, "region": 0, "pts": []}      # pointer track of the running drag (region px)
+
+
+def _track_cursor(*args):
+    """Draw cursor callback: called for the region under the pointer while it redraws (a lasso redraws on every
+    move). Keeps the pointer track of the drag's region."""
+    region = bpy.context.region
+    if region is None or region.as_pointer() != _track["region"] or not args:
+        return
+    xy = args[0] if isinstance(args[0], (tuple, list)) else args[:2]     # Blender passes the pointer first
+    try:
+        x, y = float(xy[0]) - region.x, float(xy[1]) - region.y       # window px -> region px
+    except (TypeError, ValueError, IndexError):
+        return
+    pts = _track["pts"]
+    if not pts or pts[-1] != (x, y):
+        pts.append((x, y))
+
+
+def _track_start(region):
+    _track["region"], _track["pts"] = region.as_pointer(), []
+    if _track["handle"] is None:
+        _track["handle"] = bpy.context.window_manager.draw_cursor_add(_track_cursor, (), 'VIEW_3D', 'WINDOW')
+
+
+def _track_stop():
+    if _track["handle"] is not None:
+        try:
+            bpy.context.window_manager.draw_cursor_remove(_track["handle"])
+        except (ValueError, ReferenceError, AttributeError):
+            pass
+        _track["handle"] = None
+    _track["region"] = 0
 
 
 def begin(context):
@@ -42,6 +76,7 @@ def begin(context):
     })
     if not bpy.app.timers.is_registered(_watch):
         bpy.app.timers.register(_watch, first_interval=_TICK)
+    _track_start(context.region)
     return True
 
 
@@ -159,6 +194,8 @@ def _finish(entry):
         poly, mode = region_of(op), op.properties.mode
     elif entry["box"] is not None:
         poly, mode = entry["box"]
+    elif entry.get("lasso") and len(entry.get("track", ())) >= 3:
+        poly, mode = entry["track"], entry["lasso"]
     else:
         return
     if poly is None:
@@ -170,7 +207,7 @@ def _finish(entry):
     with bpy.context.temp_override(window=window, area=area, region=region):
         picked = apply(bpy.context, poly, mode, entry["snap"])
         if not picked and entry["mode"] in {'POSE', 'EDIT_ARMATURE'}:
-            lasso = op is not None and op.bl_idname == "VIEW3D_OT_select_lasso"
+            lasso = (op.bl_idname == "VIEW3D_OT_select_lasso") if op is not None else bool(entry.get("lasso"))
             objects_instead(bpy.context, poly, mode, lasso)
             picked = True
         if picked:
@@ -193,6 +230,9 @@ def _running(entry):
                 p = op.properties
                 if p.xmin != p.xmax or p.ymin != p.ymax:
                     entry["box"] = (region_of(op), p.mode)
+            else:
+                entry["lasso"] = op.properties.mode
+                entry["track"] = list(_track["pts"])
         return bool(ops)
     except ReferenceError:
         return False
@@ -211,10 +251,13 @@ def _watch():
                 print("allset: joint marquee:", e)
         elif not entry["seen"] and entry["waited"] >= _GIVE_UP:
             _pending.remove(entry)
+    if not _pending:
+        _track_stop()
     return _TICK if _pending else None
 
 
 def cancel_all():
     _pending.clear()
+    _track_stop()
     if bpy.app.timers.is_registered(_watch):
         bpy.app.timers.unregister(_watch)
