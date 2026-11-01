@@ -4633,6 +4633,8 @@ STRINGS = {
     'Scale Keys Manipulator': '缩放关键帧操纵器',
     'With the Scale Keys tool (r) the Graph Editor draws a box around the selected keys: drag a side to scale them in time or value, a corner for both': '使用「缩放关键帧」工具 (r) 时，曲线编辑器会用框围住所选关键帧：拖动边沿时间或数值缩放，拖动角同时缩放两者',
     'Value Lines': '数值线',
+    'Key Size': '关键帧大小',
+    "Diameter of the keys in the Graph Editor, in pixels at interface scale 1 (0 = Blender's theme size)": '曲线图编辑器中关键帧的直径 (界面缩放为 1 时的像素数, 0 = Blender 主题的大小)',
     'What a middle-mouse drag does to the selected keys in the Graph Editor': '在曲线编辑器中中键拖动对所选关键帧执行的操作',
     'Where autosaves go': '自动保存的保存位置',
     'Collapse All': '全部折叠',

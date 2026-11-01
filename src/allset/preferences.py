@@ -178,6 +178,11 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Unconstrained Drag", default=True,
         description="Middle-mouse drags in the Graph Editor move keys in time and value; off, the first move "
                     "picks time or value")
+    # Graph Editor keys drawn bigger than Blender's theme size (ui/graph_keys_draw.py; 0 = Blender's own size)
+    graph_key_size: bpy.props.IntProperty(
+        name="Key Size", default=11, min=0, max=24, subtype='PIXEL',
+        description="Diameter of the keys in the Graph Editor, in pixels at interface scale 1 (0 = Blender's "
+                    "theme size)")
     graph_scale_manipulator: bpy.props.BoolProperty(
         name="Scale Keys Manipulator", default=True,
         description="With the Scale Keys tool (r) the Graph Editor draws a box around the selected keys: drag a "

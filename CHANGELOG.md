@@ -17,6 +17,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Other add-ons stay in reach in Maya mode** (#221): menus other add-ons add to Blender's top bar now follow
   the Maya menus in the menu bar (or sit at the end of the » menu when the bar is full), and tools other add-ons
   add to the 3D View toolbar stay there after the Maya tools.
+- **Bigger keys in the Graph Editor** (#277): keys are drawn as 11 px dots (Blender's theme draws 6 px) in their
+  own colour, so they are easier to see and to grab; a selected key keeps Blender's active-key dot in the middle.
+  The add-on preference Key Size (also in Windows > Settings/Preferences > Preferences > Animation) sets the size;
+  0 shows Blender's own keys. Toolbar buttons that do different things no longer share an icon (Center current
+  time, Auto load, Unconstrained drag, Re-normalize curves).
 
 ## [0.9.0] — 2026-11-01
 

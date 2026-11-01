@@ -4633,6 +4633,8 @@ STRINGS = {
     'Scale Keys Manipulator': 'キーのスケールマニピュレータ',
     'With the Scale Keys tool (r) the Graph Editor draws a box around the selected keys: drag a side to scale them in time or value, a corner for both': '「キーをスケール」ツール (r) のとき、グラフエディタの選択キーをボックスで囲みます。辺をドラッグすると時間か値で、角をドラッグすると両方でスケールします',
     'Value Lines': '値の線',
+    'Key Size': 'キーのサイズ',
+    "Diameter of the keys in the Graph Editor, in pixels at interface scale 1 (0 = Blender's theme size)": 'グラフエディタのキーの直径 (インタフェーススケール 1 でのピクセル数。0 = Blender のテーマのサイズ)',
     'What a middle-mouse drag does to the selected keys in the Graph Editor': 'グラフエディタで中ボタンドラッグが選択キーに対して行う操作',
     'Where autosaves go': '自動保存の保存先',
     'Collapse All': 'すべて折りたたむ',
