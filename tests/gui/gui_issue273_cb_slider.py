@@ -3,6 +3,7 @@ viewport change it; after E (Rotate Tool) the channel stays highlighted but the 
 Translate X stays put; a new click on the channel gives the middle drag back; Ctrl+click on the channel, a click on
 the empty space under the channels and deselecting everything in the viewport deselect it, like Maya."""
 
+import math
 import os
 import sys
 from importlib import import_module
@@ -83,7 +84,7 @@ def click(tag, where, **mods):
     wait(tag, 12)      # a second press soon after on the same spot would be a double click
 
 
-def mmb_drag(tag, dx=100, moves=6):
+def mmb_drag(tag, dx=100, moves=6, dy=0):
     def hover():
         C["tx_before"] = cube().location.x
         x, y = view_point()
@@ -99,7 +100,7 @@ def mmb_drag(tag, dx=100, moves=6):
     for i in range(1, moves + 1):
         def move(i=i):
             x, y = view_point()
-            ev('MOUSEMOVE', 'NOTHING', x=x + round(dx * i / moves), y=y)
+            ev('MOUSEMOVE', 'NOTHING', x=x + round(dx * i / moves), y=y + round(dy * i / moves))
         move.__name__ = f"s_{tag}_move{i}"
         step(move)
 
@@ -181,6 +182,38 @@ def s_slider():
     check(f"a middle drag in the viewport changes Translate X ({C['tx_before']:.4f} -> {cube().location.x:.4f})",
           tx_moved())
     C["loc"] = tuple(cube().location)
+    # the drag follows Translate X as drawn in this view: a straight-up move changes it by the move projected on
+    # the X axis on screen (like dragging the Move manipulator's X arrow)
+    _area, region = view3d()
+    origin, direction = cb().node_axes(cube(), "tx")
+    axis = cb().screen_axis(region, region.data, origin, direction)
+    C["want_up"] = cb().projected_delta((axis.x, axis.y), 0, 60)
+    C["tx_axis"] = (round(axis.x, 1), round(axis.y, 1))
+
+
+mmb_drag("vertical", dx=0, dy=60)
+
+
+@step
+def s_vertical():
+    got = cube().location.x - C["tx_before"]
+    check(f"a straight-up middle drag moves Translate X along its axis on screen ({got:.4f}, want "
+          f"{C['want_up']:.4f}, axis {C['tx_axis']} px per unit)",
+          abs(C["want_up"]) > 1e-3 and abs(got - C["want_up"]) < 0.02 * abs(C["want_up"]) + 1e-4)
+    cube().location = C["loc"]
+    C["rx_before"] = cube().rotation_euler.x
+    cb().set_selected_channels(["rx"])
+
+
+mmb_drag("rotate", dx=50)
+
+
+@step
+def s_rotate():
+    got = math.degrees(cube().rotation_euler.x - C["rx_before"])
+    check(f"a selected Rotate X turns 0.36 degrees per px to the right ({got:.2f} for 50 px)", abs(got - 18.0) < 0.5)
+    cube().rotation_euler.x = C["rx_before"]
+    cb().set_selected_channels(["tx"])
 
 
 key_in_view("e", 'E')

@@ -1375,6 +1375,56 @@ def drag_limit(ob, key, value):
     return max(rna.soft_min, min(rna.soft_max, value))
 
 
+ROT_DEG_PER_PX = 0.36     # a selected rotate channel turns 0.36 degrees per px, right / down = more (like Maya)
+AXIS_MIN_SHARE = 0.15     # an axis seen nearly end-on (shorter than this share of the longest) drags sideways
+
+
+def node_axes(ob, key):
+    """(world origin, world direction moved by one unit of the translate channel ``key``) of an object or pose
+    bone, None for other channels."""
+    path, index, kind = channel_path(key) if key in MAIN_BY_KEY else (None, -1, None)
+    if kind != "LOC" or index < 0:
+        return None
+    from mathutils import Vector
+    if isinstance(ob, bpy.types.PoseBone):
+        arm = ob.id_data
+        world = arm.matrix_world @ ob.matrix
+        basis = ob.matrix_basis
+    else:
+        world, basis = ob.matrix_world, ob.matrix_basis
+    try:
+        parent = world.to_3x3() @ basis.to_3x3().inverted()
+    except ValueError:
+        return None
+    axis = Vector((0.0, 0.0, 0.0))
+    axis[index] = 1.0
+    return world.translation.copy(), parent @ axis
+
+
+def screen_axis(region, rv3d, origin, direction):
+    """Region px moved per unit along ``direction`` at ``origin`` (None when it can't be projected)."""
+    from bpy_extras.view3d_utils import location_3d_to_region_2d
+    eps = 1e-3
+    a = location_3d_to_region_2d(region, rv3d, origin)
+    b = location_3d_to_region_2d(region, rv3d, origin + direction * eps)
+    if a is None or b is None:
+        return None
+    return (b - a) / eps
+
+
+def projected_delta(axis_px, dx, dy):
+    """Units along an axis for a mouse move (dx, dy): the move projected on the axis as drawn, like dragging that
+    axis of the Move manipulator (vertical moves count)."""
+    ax, ay = axis_px
+    n = ax * ax + ay * ay
+    return (dx * ax + dy * ay) / n if n > 0.0 else 0.0
+
+
+def rotate_delta(dx, dy):
+    """Radians for a mouse move on a selected rotate channel: right and down turn it up, left and up down."""
+    return math.radians(ROT_DEG_PER_PX) * (dx - dy)
+
+
 def slider_apply(starts, dx, speed=1.0, ctrl=False, shift=False, hyperbolic=False):
     """starts: {(ob, key): start value}. Sets each to start + delta."""
     for (ob, key), start in starts.items():
@@ -1382,11 +1432,19 @@ def slider_apply(starts, dx, speed=1.0, ctrl=False, shift=False, hyperbolic=Fals
         set_value(ob, key, drag_limit(ob, key, start + slider_delta(dx, kind, speed, ctrl, shift, hyperbolic)))
 
 
+def _unit_dirs(direction):
+    """``direction`` and two directions of the same length square to it (to tell an end-on axis)."""
+    from mathutils import Vector
+    n = direction.normalized()
+    side = n.orthogonal().normalized()
+    return [direction, side * direction.length, n.cross(side) * direction.length]
+
+
 class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
     """MMB-drag in the viewport changes the channels selected in the Channel Box"""
     bl_idname = "allset.cb_virtual_slider"
     bl_label = "Channel Box Virtual Slider"
-    bl_options = {'REGISTER', 'UNDO', 'GRAB_CURSOR_X', 'BLOCKING'}
+    bl_options = {'REGISTER', 'UNDO', 'GRAB_CURSOR', 'BLOCKING'}
 
     def invoke(self, context, event):
         if context.mode not in {'OBJECT', 'POSE'}:
@@ -1397,8 +1455,26 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
         if not pairs:
             return {'PASS_THROUGH'}  # let the tool's MMB drag run
         self._starts = {(ob, key): get_value(ob, key) for ob, key in pairs}
-        self._dx = 0
-        self._last_x = event.mouse_x
+        self._dx = self._dy = 0
+        self._last = (event.mouse_x, event.mouse_y)
+        # translate channels follow their axis as drawn in this view (Maya's channel manipulator); rotate channels
+        # turn with right / down moves; the rest are a sideways slider
+        self._axes = {}
+        region, rv3d = context.region, context.region_data
+        if rv3d is not None and context.area is not None and context.area.type == 'VIEW_3D':
+            for ob, key in pairs:
+                kind = channel_path(key)[2]
+                if kind == "ROT" and not _non_euler_rot(ob, kind):
+                    self._axes[(ob, key)] = "ROT"
+                    continue
+                axes = node_axes(ob, key)
+                if axes is None:
+                    continue
+                px = screen_axis(region, rv3d, *axes)
+                longest = max((v.length for v in (screen_axis(region, rv3d, axes[0], d) for d in
+                                                   _unit_dirs(axes[1])) if v is not None), default=0.0)
+                if px is not None and px.length > AXIS_MIN_SHARE * longest > 0.0:
+                    self._axes[(ob, key)] = (px.x, px.y)
         from .. import preferences
         prefs = preferences.get(context)
         self._speed = SPEED_FACTOR[prefs.cb_speed]
@@ -1412,12 +1488,24 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
 
     def modal(self, context, event):
         if event.type == 'MOUSEMOVE':
-            step = event.mouse_x - self._last_x
-            self._last_x = event.mouse_x
-            if context.region and abs(step) > context.region.width // 2:
-                step = 0  # cursor wrapped by GRAB_CURSOR_X: not a real move
-            self._dx += step
-            slider_apply(self._starts, self._dx, self._speed, event.ctrl, event.shift, self._hyper)
+            sx, sy = event.mouse_x - self._last[0], event.mouse_y - self._last[1]
+            self._last = (event.mouse_x, event.mouse_y)
+            if context.region and abs(sx) > context.region.width // 2:
+                sx = 0  # cursor wrapped by GRAB_CURSOR: not a real move
+            if context.region and abs(sy) > context.region.height // 2:
+                sy = 0
+            self._dx += sx
+            self._dy += sy
+            rest = {}
+            for pair, start in self._starts.items():
+                how = self._axes.get(pair)
+                if how is None:
+                    rest[pair] = start
+                    continue
+                ob, key = pair
+                d = rotate_delta(self._dx, self._dy) if how == "ROT" else projected_delta(how, self._dx, self._dy)
+                set_value(ob, key, start + d)
+            slider_apply(rest, self._dx, self._speed, event.ctrl, event.shift, self._hyper)
             ob, key = next(iter(self._starts))
             self._header(context, f"{channel_label(key)}: {get_value(ob, key):.3f}  "
                                   "(Ctrl slower, Shift faster, Esc cancel)")

@@ -81,3 +81,38 @@ def test_selecting_another_object_keeps_channels():
     bpy.context.view_layer.objects.active = other
     bpy.context.view_layer.update()
     assert cb.selected_channels() == ["tx"], "like Maya, the highlight stays on another object"
+
+
+def test_translate_channels_follow_their_axis_on_screen():
+    """A selected translate channel moves like that axis of the Move manipulator: the mouse move projected on the
+    axis as drawn (px per unit), so vertical moves count; rotate channels turn 0.36 degrees per px (right / down
+    = more)."""
+    import math
+    assert cb.projected_delta((100.0, 0.0), 50, 30) == 0.5
+    assert abs(cb.projected_delta((60.0, -80.0), 0, 40) - (-0.32)) < 1e-9     # up along an axis drawn downwards
+    assert cb.projected_delta((0.0, 0.0), 10, 10) == 0.0
+    assert abs(cb.rotate_delta(120, 0) - math.radians(43.2)) < 1e-9
+    assert abs(cb.rotate_delta(0, 120) + math.radians(43.2)) < 1e-9
+
+
+def test_node_axes_in_parent_space():
+    """Translate X of a child of a turned parent moves along the parent's X in the world."""
+    from mathutils import Vector
+    if bpy.context.mode != 'OBJECT':
+        bpy.ops.object.mode_set(mode='OBJECT')
+    parent = bpy.data.objects.new("axesParent", None)
+    child = bpy.data.objects.new("axesChild", None)
+    for ob in (parent, child):
+        bpy.context.scene.collection.objects.link(ob)
+    parent.rotation_euler.z = 1.5707963267948966      # parent X points along world Y
+    parent.scale = (2.0, 2.0, 2.0)
+    child.parent = parent
+    child.rotation_euler.x = 0.7         # the child's own turn doesn't change where its channel moves it
+    child.location = (1.0, 0.0, 0.0)
+    bpy.context.view_layer.update()
+    origin, direction = cb.node_axes(child, "tx")
+    assert (direction - Vector((0.0, 2.0, 0.0))).length < 1e-5, direction
+    assert (origin - child.matrix_world.translation).length < 1e-6
+    assert cb.node_axes(child, "rx") is None and cb.node_axes(child, "sx") is None
+    for ob in (child, parent):
+        bpy.data.objects.remove(ob)

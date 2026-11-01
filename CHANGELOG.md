@@ -128,6 +128,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Maya manipulator for curve and surface CVs** (#274): in curve and NURBS surface edit mode the Move and Scale
   tools show the same Maya-style manipulator as objects, mesh components and lattice points, placed at the
   selected CVs (Bezier points and handles count by their own selection), instead of Blender's transform gizmo.
+- **Channel Box middle-drag follows the axis** (#273): with Translate X / Y / Z selected in the Channel Box, a
+  middle-mouse drag in the viewport moves the object (or joint) along that axis as it is drawn on screen, like
+  dragging that arrow of the Move manipulator, so up / down drags count too. Selected Rotate channels turn
+  0.36 degrees per pixel (right or down turns up). Other channels stay a sideways slider.
 
 ## [0.9.0] — 2026-11-01
 
