@@ -23,6 +23,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   0 shows Blender's own keys. Toolbar buttons that do different things no longer share an icon (Center current
   time, Auto load, Unconstrained drag, Re-normalize curves).
 
+### Fixed
+- **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
+  Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the selection.
+
 ## [0.9.0] — 2026-11-01
 
 FX, rendering and lighting run Blender's own features from the Maya menus, S keys components, blend shape weights

@@ -4724,6 +4724,7 @@ STRINGS = {
     'Set to Component': 'コンポーネントに設定',
     'Shift Duplicate': 'Shift 複製',
     'Shift Extrude': 'Shift 押し出し',
+    'Write Image': '画像を書き出す',
     'Spherical Map': '球面マッピング',
     'Split mesh with projected curve': '投影したカーブでメッシュを分割',
     'Toggle All Face Centers': 'すべてのフェース中心の切り替え',

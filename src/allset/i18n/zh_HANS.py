@@ -4724,6 +4724,7 @@ STRINGS = {
     'Set to Component': '设置为组件',
     'Shift Duplicate': 'Shift 复制',
     'Shift Extrude': 'Shift 挤出',
+    'Write Image': '写入图像',
     'Spherical Map': '球形映射',
     'Split mesh with projected curve': '使用投影的曲线分割网格',
     'Toggle All Face Centers': '切换所有面中心',
