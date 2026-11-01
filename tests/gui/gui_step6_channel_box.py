@@ -47,13 +47,25 @@ def s_setup():
         bpy.ops.wm.tool_set_by_id(name="builtin.move")
     C["cb"].set_selected_channels(["tx"])
     C["x0"] = cube().location.x
+
+
+@step
+def s_drag():
+    # Translate X follows its axis as drawn in this view (like the Move manipulator's X arrow); read one tick after
+    # the dock split, when the viewport has its new size
+    _area, region = view3d()
+    origin, direction = C["cb"].node_axes(cube(), "tx")
+    axis = C["cb"].screen_axis(region, region.data, origin, direction)
+    C["want"] = C["cb"].projected_delta((axis.x, axis.y), 100, 0)
     mmb_drag(100)
 
 
 @step
 def s_slider():
     dx = cube().location.x - C["x0"]
-    check(f"MMB drag 100 px with Translate X selected -> +1.0 (got {dx:.3f})", abs(dx - 1.0) < 0.05)
+    want = C["want"]
+    check(f"MMB drag 100 px with Translate X selected -> {want:.3f} along the axis on screen (got {dx:.3f})",
+          abs(want) > 1e-3 and abs(dx - want) < 0.02 * abs(want) + 1e-4)
     check("other channels untouched", abs(cube().location.y) < 1e-6 and abs(cube().location.z) < 1e-6)
     C["x1"] = cube().location.x
     mmb_drag(150, cancel=True)
