@@ -4,8 +4,8 @@ borders, UV HUD) walked the edit BMesh on every redraw of a UV drag. Now they ne
 UV modal runs (operators/uv_arrays.editing_now) and read it with numpy otherwise.
 
 The session: Maya layout, kit sphere in edit mode, Windows > Workspaces > UV Editing, face clicks, W-drags of faces,
-UV Shell mode + shell tweak drags, Ctrl+Z. A crash ends the run without results (the runner reports it). Checked: the UVs
-moved, the HUD and borders come back after each drag."""
+UV Shell mode + shell drags on the manipulator (a drag off it draws a marquee, like Maya), Ctrl+Z. A crash ends the
+run without results (the runner reports it). Checked: the UVs moved, the HUD and borders come back after each drag."""
 
 import os
 import sys
@@ -148,7 +148,7 @@ for rnd in range(2):
     drag(f"r{rnd}_wdrag", selected_centre, -40, 25)
     add(lambda: uv_op("allset.uv_component", mode='SHELL'), f"r{rnd}_shell_mode")
     clicks(f"r{rnd}_shell", (100,), shift_rest=False)
-    drag(f"r{rnd}_shelldrag", lambda: face_centre(100), 60, 30)
+    drag(f"r{rnd}_shelldrag", selected_centre, 60, 30)
 
 
 @step
@@ -204,7 +204,7 @@ def s_reopened():
 
 add(lambda: uv_op("allset.uv_component", mode='SHELL'), "re_shell_mode")
 clicks("re_shell", (100,), shift_rest=False)
-drag("re_shelldrag", lambda: face_centre(100), 50, 20)
+drag("re_shelldrag", selected_centre, 50, 20)
 
 
 run()

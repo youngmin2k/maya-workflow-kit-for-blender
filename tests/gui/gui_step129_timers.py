@@ -26,6 +26,11 @@ def new_windows():
 
 def remember():
     C["before"] = {w.as_pointer() for w in bpy.context.window_manager.windows}
+    # kit windows reopen at their last place, which earlier GUI files in the same sandbox may have saved: such a
+    # window opens a few ticks later (its place is carved out first), not in this step -- forget the places
+    wp = mod(".ui.window_places")
+    wp.place("")                      # loads the saved places
+    wp._places.clear()
 
 
 def close_new(label):
