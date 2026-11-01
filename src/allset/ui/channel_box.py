@@ -533,6 +533,10 @@ def keyframe(ob, key, keytype='KEYFRAME'):
         kb = blend_target(ob, key)
         if kb is None:
             return False
+        from ..operators import anim_layers
+        if anim_layers.has_layers(kb.id_data):
+            # the weight's blendShape node is in animation layers: keyed on the selected layer, solved like Translate
+            return anim_layers.key(kb.id_data, path, -1)
         try:
             ok = kb.id_data.keyframe_insert(path, keytype=keytype)
         except (TypeError, RuntimeError):
@@ -700,6 +704,14 @@ def channel_state(ob, key, frame=None):
     if driver(ob, key) is not None:
         return 'DRIVEN'
     fc = fcurve(ob, key)
+    if is_blend_key(key):
+        from ..operators import anim_layers
+        kb = blend_target(ob, key)
+        if kb is not None and anim_layers.has_layers(kb.id_data):
+            path = blend_path(kb.name)
+            if anim_layers.member_of_layer(kb.id_data, path, -1):
+                return 'LAYERED'
+            fc = anim_layers.base_curve(kb.id_data, path, -1)
     if (not is_shape_key(key) and not is_input_key(key) and not is_history_key(key) and not is_blend_key(key)
             and (isinstance(ob, bpy.types.Object) or is_bone(ob))):
         from ..operators import anim_layers

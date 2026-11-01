@@ -16,6 +16,10 @@ Layers are scene-wide (``Scene.allset_anim_layers``, first entry BaseAnimation) 
 member object has one NLA track per layer, named like the layer, playing an action ``<layer>_<object>`` marked with
 the ID property ``allset_anim_layer``.
 
+blendShape weights (a mesh's shape key values) join layers through their own node like Maya's blendShape node: the
+mesh's Key datablock gets the NLA tracks (Channel Box > Channels > Add to Selected Layers with weights selected).
+``layer_ids`` = the objects plus the Key datablocks of their meshes.
+
 Display: Maya's Graph Editor, Dope Sheet and Time Slider show the
 keys of the layers selected in the Anim tab, the Channel Box marks layer members teal. A layered object's active
 action is the selected layer's strip action (BaseAnimation when the object is not in it) at action influence 0: the
@@ -86,6 +90,23 @@ def unique_name(scene, base="AnimLayer"):
 
 # --- per object tracks -------------------------------------------------------------------------------
 
+def layer_ids(scene):
+    """Every datablock that can carry layer tracks: the scene's objects, then their shape-key (blendShape) Keys."""
+    out, keys = [], []
+    for ob in scene.objects:
+        out.append(ob)
+        key = getattr(getattr(ob, "data", None), "shape_keys", None)
+        if key is not None and key not in keys:
+            keys.append(key)
+    return out + keys
+
+
+def blend_node(ob):
+    """The Key datablock (Maya blendShape node) holding ``ob``'s shape key weights, or None."""
+    key = getattr(getattr(ob, "data", None), "shape_keys", None)
+    return key if isinstance(key, bpy.types.Key) else None
+
+
 def tracks(ob):
     ad = ob.animation_data
     if ad is None:
@@ -105,7 +126,7 @@ def _new_action(ob, layer):
     ob.animation_data_create()
     slots = getattr(act, "slots", None)
     if slots is not None:       # 4.4+: an empty action gets no slot by being assigned; make it (the strip needs it)
-        slot = slots.new(id_type='OBJECT', name=ob.name)
+        slot = slots.new(id_type='KEY' if isinstance(ob, bpy.types.Key) else 'OBJECT', name=ob.name)
         act["allset_slot"] = slot.identifier
     return act
 
@@ -250,7 +271,7 @@ def strip_weight(st, frame):
 
 
 def members(scene, layer):
-    return [ob for ob in scene.objects if layer in tracks(ob)]
+    return [ob for ob in layer_ids(scene) if layer in tracks(ob)]
 
 
 def sync(scene):
@@ -260,7 +281,7 @@ def sync(scene):
         return
     solo = {e.name for e in ls if e.solo and e.name != BASE}
     info = {e.name: e for e in ls}
-    for ob in scene.objects:
+    for ob in layer_ids(scene):
         have = tracks(ob)
         if not have:
             continue
@@ -294,7 +315,7 @@ def display_layer(scene, ob):
 def show(scene):
     """Make every layered object's active action its display layer's strip action at influence 0 (module docstring):
     Graph Editor / Dope Sheet / key readers then show that layer, the evaluated result stays the NLA's."""
-    for ob in scene.objects:
+    for ob in layer_ids(scene):
         have = tracks(ob)
         if not have:
             continue
@@ -498,6 +519,9 @@ def _set_attr_record(ob, layer, keys):
 
 
 def channel_key(path, index):
+    if path.startswith('key_blocks["') and path.endswith('"].value'):
+        from ..ui import channel_box as cb       # a blendShape weight on the Key datablock
+        return cb.BLEND_PREFIX + bpy.utils.unescape_identifier(path[12:-8])
     from . import character_sets
     return character_sets.channel_key_of(path, index)
 
@@ -549,6 +573,8 @@ def member_keys(ob, layer):
     if rec is not None:
         return list(rec)
     from ..ui import channel_box as cb
+    if isinstance(ob, bpy.types.Key):          # a whole blendShape node: every target weight
+        return [cb.BLEND_PREFIX + kb.name for kb in ob.key_blocks[1:]] if layer in tracks(ob) else []
     return [k for k in cb._visible_channels(ob) if cb.is_keyable(ob, k)] if layer in tracks(ob) else []
 
 
@@ -925,6 +951,12 @@ class ALLSET_OT_anim_layer_attrs(bpy.types.Operator):
             return {'CANCELLED'}
         for ob in obs:
             mine = [k for k in keys if cb.has_channel(ob, k)]
+            weights = [k for k in mine if cb.is_blend_key(k)]
+            node = blend_node(ob) if weights else None
+            if node is not None:
+                # Maya: blendShape weights join the layer on the blendShape node, not on the mesh's transform
+                (add_attrs if self.add else remove_attrs)(scene, node, e.name, weights)
+            mine = [k for k in mine if not cb.is_blend_key(k)]
             if mine:
                 (add_attrs if self.add else remove_attrs)(scene, ob, e.name, mine)
         sync(scene)

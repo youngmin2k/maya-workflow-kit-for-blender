@@ -10,6 +10,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   already have keys, on the axes that changed, like Maya. Points without keys stay unkeyed. The Channel Box CVs
   table shows keyed point values in the key colour, with the keyed / animated mark at the end of the row.
   Shift+W / E / R set no key on points (they have no Translate / Rotate / Scale), like Maya.
+- **blendShape weights in animation layers** (#271): Channel Box > Channels > Add to Selected Layers with a
+  blendShape weight selected puts that weight into the selected animation layer (on the blendShape node, not the
+  mesh's transform). Keys on the weight then go onto the layer so the weight shows the value you set, the layer
+  weight scales it, and the Channel Box marks the weight as a layer member. Remove From Selected Layers and Delete
+  Layer take it out again.
 - **Save your own workspaces** (#277): Windows > Workspaces > Save Current Workspace As... saves the current
   layout (areas, editors and their sizes) under a name. Your saved workspaces are listed after Maya's in
   Windows > Workspaces and the Status Line workspace menu, in every scene; choosing one brings that layout into
