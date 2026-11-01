@@ -103,6 +103,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **No face centre dots in UV mode** (#264): switching from face mode to UV mode (F12) no longer leaves Blender's
   face centre dots in the 3D View in wireframe or X-ray; the view shows only the UVs as points. F11 goes back to
   face mode.
+- **Room for other add-ons' top-bar menus** (#221): the Maya menu bar now keeps as much room for other add-ons'
+  menus as their names take, instead of a fixed width each, so short ones stay in the bar and long ones no longer
+  run past its end.
 
 ## [0.9.0] — 2026-11-01
 

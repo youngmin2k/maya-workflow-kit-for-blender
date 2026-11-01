@@ -244,3 +244,33 @@ def test_addon_keys_kept():
         assert kmi.active and kmi in list(km.keymap_items)
     finally:
         km.keymap_items.remove(kmi)
+
+
+def test_addon_menu_room_follows_what_they_draw():
+    ctx = bpy.context
+    u = import_module(kit.MODULE + ".ui.toolbar_fit").unit(ctx.preferences.system.ui_scale or 1.0,
+                                                           ctx.preferences.system.pixel_size)
+
+    def one(self, context):
+        self.layout.menu("SAMPLE221_MT_top")
+
+    def three(self, context):
+        row = self.layout.row(align=True)
+        row.menu("SAMPLE221_MT_top")
+        row.menu("SAMPLE221_MT_top", text="A much longer add-on menu name")
+        op = row.operator("sample221.op", text="", icon='PLUGIN')
+        op.anything = 1
+
+    def odd(self, context):
+        self.layout.template_ID(context.scene, "camera")      # not sized: keeps the fixed room
+
+    _sample_on()
+    try:
+        w1 = menu_sets.addon_menus_width(ctx, [one])
+        w3 = menu_sets.addon_menus_width(ctx, [three])
+        wodd = menu_sets.addon_menus_width(ctx, [odd])
+    finally:
+        _sample_off()
+    assert 1.5 * u < w1 < 5 * u, (w1, u)                   # "Sample Top" + padding, less than the old 5 units
+    assert w3 > w1 + 10 * u, (w1, w3, u)                   # a long name takes its room
+    assert wodd == int(menu_sets.ADDON_MENU_UNITS * u), (wodd, u)

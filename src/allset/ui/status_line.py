@@ -796,12 +796,8 @@ def draw_menu_bar_fit(layout, context, menu_set=True):
     widths, fixed, more = menu_bar_widths(context, names, menu_set)
     width = region.width if region is not None and region.width > 1 else None
     # other add-ons' top-bar menus follow the Maya menus when there is room for them, else they wait behind »
-    addons = len(menu_sets.addon_menu_funcs(context))
-    reserve = 0
-    if addons:
-        from .toolbar_fit import unit
-        system = context.preferences.system
-        reserve = int(addons * menu_sets.ADDON_MENU_UNITS * unit(system.ui_scale or 1.0, system.pixel_size))
+    funcs = menu_sets.addon_menu_funcs(context)
+    reserve = menu_sets.addon_menus_width(context, funcs) if funcs else 0
     inline = width is None or fixed + sum(widths) + reserve <= width
     n = len(names) if inline else menu_fit(widths, width, fixed, more)
     if not inline and n >= len(names):     # the Maya menus fit: only the add-on menus go behind »
