@@ -136,6 +136,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   (INPUTS > blendShape) can go into a character set (Create Character Set From Channel Box, Add to / Remove from
   Character Set), and S on the current character keys them. In Set Driven Key, Load Driver / Load Driven with a
   picked weight loads the blendShape node with that weight. Animation layers don't take weights yet.
+- **Time Slider ticks for keyed components** (#272): in component mode (mesh, curve, surface or lattice edit mode)
+  the Time Slider shows the keys of the selected vertices, CVs or lattice points, so keys set with S on them are
+  visible there.
 
 ## [0.9.0] — 2026-11-01
 

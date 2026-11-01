@@ -207,3 +207,28 @@ def test_frame_handler_is_removed_on_disable():
     kit.disable()
     assert not any(getattr(h, "__module__", "").endswith("point_keys") for h in bpy.app.handlers.frame_change_post)
     kit.enable()
+
+
+def test_time_slider_ticks_show_selected_point_keys():
+    """Component mode: the Time Slider ticks include the keys of the selected points (and only those)."""
+    time_slider = import_module(kit.MODULE + ".ui.time_slider")
+    ob = _cube_in_edit((2,))
+    assert _set_key() == {'FINISHED'}
+    bpy.context.scene.frame_set(7)
+    _cube_select(ob, (5,))
+    assert _set_key() == {'FINISHED'}
+    bpy.context.scene.frame_set(1)
+    assert ob in time_slider.tick_nodes(bpy.context)          # what the Time Slider draws ticks for
+    assert [f for f, _b in time_slider.key_frames([ob])] == [7.0]
+    _cube_select(ob, (2, 5))
+    assert [f for f, _b in time_slider.key_frames([ob])] == [1.0, 7.0]
+    _cube_select(ob, (0,))
+    assert time_slider.key_frames([ob]) == []
+
+
+def _cube_select(ob, select):
+    bm = bmesh.from_edit_mesh(ob.data)
+    for v in bm.verts:
+        v.select = v.index in select
+    bm.select_flush_mode()
+    bmesh.update_edit_mesh(ob.data)

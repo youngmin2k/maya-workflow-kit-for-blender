@@ -761,6 +761,9 @@ def key_frames(nodes):
                 from ..operators import anim_layers
                 curves = list(curves) + anim_layers.hidden_base_curves(node, bpy.context.scene)
                 curves += blend_weight_curves(node)
+                # component mode: the keys of the selected points (vertices / CVs / lattice points)
+                from ..operators import point_keys
+                curves += point_keys.selected_point_curves(node)
         for fc in curves:
             for kp in fc.keyframe_points:
                 f = round(kp.co.x, 3)

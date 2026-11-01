@@ -71,6 +71,20 @@ def point_paths(ob):
     return out
 
 
+def selected_point_curves(ob):
+    """F-curves of ``ob``'s selected points (edit mode): the keys the Time Slider shows for selected components."""
+    if ob is None or ob.type not in TYPES or ob.mode != 'EDIT':
+        return []
+    from .. import compat
+    paths = point_paths(ob)
+    if not paths:
+        return []
+    want = {(p, i) for p, i in paths}
+    whole = {p for p, i in paths if i < 0}
+    return [fc for fc in compat.id_fcurves(ob.data)
+            if fc.data_path in whole or (fc.data_path, fc.array_index) in want]
+
+
 def key_points(context, keytype='KEYFRAME'):
     """Key the selected points of every component-mode object at the current frame. Count of curves keyed."""
     from . import graph_key_menu
