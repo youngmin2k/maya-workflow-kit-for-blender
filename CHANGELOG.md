@@ -11,6 +11,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   window, instead of switching your viewport to Rendered. The window shows only the picture (no overlays or
   toolbars), looks where the main view looks and follows it while you tumble, and the IPR button looks pressed
   while it is open. IPR again, or closing the window, stops it; your viewport keeps its own shading throughout.
+- **Shift+drag names what it does** (#277): while you Shift+drag the Move / Rotate / Scale manipulator, an in-view
+  message says "Shift Duplicate" (objects are copied) or "Shift Extrude" (components are extruded). A Shift+click
+  shows nothing; the add-on preference In-View Messages turns it off.
 
 ## [0.9.0] — 2026-11-01
 
