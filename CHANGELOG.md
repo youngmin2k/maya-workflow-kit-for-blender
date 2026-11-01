@@ -76,6 +76,7 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   within 10% of each other), whatever the mesh's vertex numbering.
 
 ### Fixed
+- Opening Preferences or another window with a temporary screen no longer prints a TypeError from the joint overlay and switch timers (#281).
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
   Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the selection.
 - **Help opens the Blender 5.2 manual**: the main Help menu, the Layer Editor and Outliner help, and the Help menus

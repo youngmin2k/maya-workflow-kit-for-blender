@@ -478,7 +478,7 @@ def stop_playback():
         return 0
     for window in _windows():
         screen = window.screen
-        if screen is None or not screen.is_animation_playing:
+        if screen is None or screen.is_temporary or not screen.is_animation_playing:
             continue
         try:
             with bpy.context.temp_override(window=window, screen=screen):

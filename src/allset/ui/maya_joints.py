@@ -61,7 +61,8 @@ def settle(window):
     """Turn Blender's Bones overlay off in the 3D Views of ``window``'s screen once (Maya layout workspaces only)."""
     from . import toolbox
     screen = window.screen
-    if screen is None or screen.get(SETTLED) or not maya_workspace(window.workspace):
+    # temporary screens (Preferences, file browser windows) can't be a context override and hold no 3D View
+    if screen is None or screen.is_temporary or screen.get(SETTLED) or not maya_workspace(window.workspace):
         return False
     changed = False
     with bpy.context.temp_override(window=window, screen=screen):
