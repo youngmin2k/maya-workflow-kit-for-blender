@@ -403,6 +403,11 @@ class ALLSET_OT_graph_key_tool(bpy.types.Operator):
 
     tool: EnumProperty(items=TOOLS, name="Tool", options={'SKIP_SAVE'})
 
+    @classmethod
+    def poll(cls, context):
+        area = context.area
+        return area is None or area.type == 'GRAPH_EDITOR'   # scripts may run it without an editor
+
     def execute(self, context):
         context.window_manager.allset_graph_key_tool = self.tool
         from .. import results

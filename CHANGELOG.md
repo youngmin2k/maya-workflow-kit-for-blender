@@ -87,6 +87,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Lattice points on a bent lattice are picked where you see them** (#274): when a Bend or another deformer
   bends a lattice, a click or a marquee in lattice edit mode now picks the points where they are drawn, not where
   they were before the deformer (Shift toggles, Ctrl removes, Ctrl+Shift adds; one Ctrl+Z undoes a marquee).
+- **w / e / r anywhere in the Graph Editor** (#270): the keys now pick the Move / Rotate / Scale key tool with the
+  mouse over the Graph Editor's outliner, menu bar, toolbar row or sidebar too, not only over the curves.
 
 ## [0.9.0] — 2026-11-01
 

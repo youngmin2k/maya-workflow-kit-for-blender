@@ -1501,7 +1501,22 @@ def patch_emulated_tumble(kd):
              shadows=("Image Paint", "Object Mode", "Pose") if km == "3D View" else (km, "3D View"))
 
 
-PATCHES += (patch_weight_paint_exit, patch_global_set_key, patch_emulated_tumble)
+# --- w / e / r over the whole Graph Editor ------------------------------------------------------------------------
+# The Graph Editor's own keymap covers only its curve area. Over its outliner, menu bar, toolbar row and sidebar the
+# same keys pick the key tool too: one "Screen" item each, whose poll lets the key through outside a Graph Editor.
+# Every editor / mode item with the same key runs before "Screen", so those keep their meaning.
+
+def patch_graph_key_tool_everywhere(kd):
+    for key, tool in (("W", 'MOVE'), ("E", 'ROTATE'), ("R", 'SCALE')):
+        ev = make_event(key)
+        under = tuple(n for n in kd.keymap_names() if n != "Screen" and kd.find(n, type=key))
+        for i, (km, idname, e, props, shadows) in enumerate(ADDED):
+            if km != "Screen" and patch.event_key(e) == patch.event_key(ev) and "Screen" not in shadows:
+                ADDED[i] = (km, idname, e, props, shadows + ("Screen",))
+        _add(kd, "Screen", "allset.graph_key_tool", ev, {"tool": tool}, shadows=under)
+
+
+PATCHES += (patch_weight_paint_exit, patch_global_set_key, patch_graph_key_tool_everywhere, patch_emulated_tumble)
 
 
 # --- Edge slide with the Move tool (#262) ----------------------------------------------------------------------

@@ -284,6 +284,34 @@ _box_case("box_inside", lambda b: ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2 - 3), la
           lambda pts: (pts == [(1.0, 0.0), (10.0, 0.05), (20.0, 0.02)], "a press inside the box scales nothing"))
 
 
+# w / e / r also work over the rest of the Graph Editor: its outliner, its toolbar row and its menu bar
+def _other_region_case(name, kind, key, tool):
+    def press():
+        bpy.context.window_manager.allset_graph_key_tool = 'MOVE' if tool != 'MOVE' else 'SCALE'
+        r = next((r for r in C["area"].regions if r.type == kind and r.width > 1 and r.height > 1), None)
+        C[name] = r is not None
+        if r is None:
+            return
+        x, y = r.x + min(r.width // 2, 40), r.y + r.height // 2
+        ev('MOUSEMOVE', 'NOTHING', x=x, y=y)
+        ev(key, 'PRESS', x=x, y=y)
+        ev(key, 'RELEASE', x=x, y=y)
+    press.__name__ = "s_" + name
+    step(press)
+
+    def verify():
+        tool_now = bpy.context.window_manager.allset_graph_key_tool
+        check(f"{key.lower()} over the Graph Editor {kind.lower()} region picks {tool} ({tool_now})",
+              C[name] and tool_now == tool)
+    verify.__name__ = "s_" + name + "_check"
+    step(verify)
+
+
+_other_region_case("keys_channels", 'CHANNELS', 'E', 'ROTATE')
+_other_region_case("keys_footer", 'FOOTER', 'R', 'SCALE')
+_other_region_case("keys_header", 'HEADER', 'W', 'MOVE')
+
+
 @step
 def s_tool_back():
     bpy.context.window_manager.allset_graph_key_tool = 'MOVE'
