@@ -1321,6 +1321,89 @@ class ALLSET_PG_cb_row(bpy.types.PropertyGroup):
                       description="Select this channel: click, Ctrl toggle, Shift range, drag over the rows")
 
 
+# --- the name line: click to rename (#283) ---------------------------------------------------------------
+
+def rename_lead(ob, text):
+    """Maya Channel Box name field: rename the lead (spaces -> "_", Maya's name rule; a taken name gets the next
+    number of its base, the shape follows like Maya's rename). Returns the new name, None when nothing changed."""
+    from . import input_line
+    name = input_line.clean_name(text)
+    if name is None:
+        input_line._say(f"Rename: \"{text.strip()}\" is not a valid name (letters, digits and _, "
+                        "not starting with a digit).")
+        return None
+    if name == ob.name:
+        return None
+    if is_bone(ob):
+        ob.name = name
+        return ob.name
+    from ..operators import naming
+    taken = {o.name for o in bpy.data.objects if o != ob}
+    if name in taken:       # a taken name: its base with one more than the highest number (pCube1 -> pCube2)
+        base = naming.base_name(name)
+        name = f"{base}{naming.next_number(base, taken)}"
+    new = name
+    ob.name = new
+    data = ob.data
+    if data is not None and data.users == 1 and hasattr(data, "name") and data.library is None:
+        data.name = input_line.shape_name(new)
+    return new
+
+
+def _lead_name_get(_self):
+    ob = lead()
+    return ob.name if ob is not None else ""
+
+
+def _lead_name_set(_self, value):
+    ob = lead()
+    if ob is not None and rename_lead(ob, value) is not None:
+        _redraw_all()
+
+
+def _redraw_all():
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            area.tag_redraw()
+
+
+class ALLSET_PT_cb_name(bpy.types.Panel):
+    """The Channel Box name editor popover (called by allset.cb_rename only)"""
+    bl_space_type = 'TOPBAR'   # dummy, like Blender's TOPBAR_PT_name (F2): only shown through wm.call_panel
+    bl_region_type = 'HEADER'
+    bl_label = "Rename"
+    bl_ui_units_x = 8
+
+    def draw(self, context):
+        ob = lead(context)
+        if ob is None:
+            return
+        row = self.layout.row()
+        row.activate_init = True
+        if component_mode(ob):
+            row.prop(ob.data, "name", text="")
+        else:
+            row.prop(context.scene.allset_cb, "lead_name", text="")
+
+
+class ALLSET_OT_cb_rename(bpy.types.Operator):
+    """Rename this node (click the name, type, Enter)"""
+    bl_idname = "allset.cb_rename"
+    bl_label = "Rename"
+    bl_options = {'INTERNAL'}
+
+    @classmethod
+    def poll(cls, context):
+        return lead(context) is not None
+
+    def invoke(self, context, event):
+        bpy.ops.wm.call_panel(name=ALLSET_PT_cb_name.__name__, keep_open=False)
+        return {'FINISHED'}
+
+    def execute(self, context):
+        return self.invoke(context, None)
+
+
 def _make_proxy_annotations():
     ann = {}
     for key, label, _path, _idx, kind in MAIN:
@@ -1339,6 +1422,8 @@ def _make_proxy_annotations():
         ann[key + "_sel"] = BoolProperty(name=label, get=_sel_get(key), set=_sel_set(key),
                                          description="Select this channel: click, Ctrl toggle, Shift range, "
                                                      "drag over the rows")
+    ann["lead_name"] = StringProperty(name="Name", get=_lead_name_get, set=_lead_name_set,
+                                      description="The lead's name: Enter renames it")
     ann["rows"] = CollectionProperty(type=ALLSET_PG_cb_row)
     ann["rows_sig"] = StringProperty(options={'HIDDEN'})
     return ann
@@ -3274,14 +3359,18 @@ class ALLSET_PT_channel_box(bpy.types.Panel):
         cb = context.scene.allset_cb
         sel = set(selected_channels(context))
         head = layout.row(align=True)
+        # Maya: the lead's name as plain text; a click edits it (a borderless Blender text field would need a
+        # double-click)
+        name = head.row(align=True)
+        name.alignment = 'LEFT'
         if comp:
             # Maya component mode: the shape node, then INPUTS — no transform channels, no SHAPES header
             # (as Maya)
-            head.prop(ob.data, "name", text="", emboss=False)
+            name.operator(ALLSET_OT_cb_rename.bl_idname, text=ob.data.name, emboss=False, translate=False)
             args = (context, ob)
             draw = _draw_component_lines
         else:
-            head.prop(ob, "name", text="", emboss=False)   # Maya: the lead's name as plain text
+            name.operator(ALLSET_OT_cb_rename.bl_idname, text=ob.name, emboss=False, translate=False)
             args = (context, ob, cb, sel, constrained_keys(ob))
             draw = _draw_lines
         n = len(targets(context))
@@ -3371,7 +3460,7 @@ class ALLSET_PT_dock_modeling_toolkit(bpy.types.Panel):
 
 classes = (ALLSET_PG_cb_row, ALLSET_PG_channel_box, ALLSET_OT_cb_virtual_slider, ALLSET_OT_cb_select_channel,
            ALLSET_OT_cb_deselect_channels, ALLSET_OT_cb_hover, ALLSET_OT_cb_channel_drag, ALLSET_OT_cb_field_drag,
-           ALLSET_PT_cb_field, ALLSET_OT_cb_node_toggle, ALLSET_OT_cb_scroll, ALLSET_OT_cb_wheel, *CHANNEL_OPS,
+           ALLSET_PT_cb_field, ALLSET_PT_cb_name, ALLSET_OT_cb_rename, ALLSET_OT_cb_node_toggle, ALLSET_OT_cb_scroll, ALLSET_OT_cb_wheel, *CHANNEL_OPS,
            ALLSET_OT_cb_show_all,
            ALLSET_MT_cb_channels, ALLSET_MT_cb_freeze, ALLSET_MT_cb_settings, ALLSET_OT_cb_make_lead,
            ALLSET_OT_cb_rotate_order, ALLSET_MT_cb_edit, ALLSET_MT_cb_interp,

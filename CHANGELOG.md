@@ -6,6 +6,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [Unreleased]
 
 ### Added
+- **Rename from the Channel Box** (#283): click the object's name at the top of the Channel Box, type a new
+  name and press Enter, like Maya's name field. Spaces become "_", a name already in use gets the next free
+  number, and the shape is renamed with it (box -> boxShape). In component mode the name is the shape's.
 - **Numpad digits work like the top row** (#283): as on a Maya keyboard, numpad 1 / 2 / 3 set the smooth
   preview, numpad 4 / 5 / 6 / 7 the display mode and numpad 0 the rough display; in the UV Editor and Graph
   Editor the numpad digits do what the top-row digits do there.
