@@ -946,6 +946,13 @@ def patch_uv(kd):
     _add(kd, UV_KM, "allset.uv_sew", make_event("S", shift=True))
     _add(kd, UV_KM, "allset.uv_unfold", make_event("U", ctrl=True))
     _add(kd, UV_KM, "allset.uv_layout", make_event("L", ctrl=True))
+    # double-click = UV edge loop (Ctrl: edge ring), on a UV / UV face its shell; Shift adds (operators/uv_loop_pick.py).
+    # IC's own double-click loop picks give way
+    for shift in (False, True):
+        kd.remove(UV_KM, "uv.select_loop", type="LEFTMOUSE", value="DOUBLE_CLICK", shift=shift)
+        for ctrl in (False, True):
+            _add(kd, UV_KM, "allset.uv_loop_pick", make_event("LEFTMOUSE", value="DOUBLE_CLICK", shift=shift, ctrl=ctrl),
+                 {"extend": shift, "ring": ctrl}, shadows=("Screen",))
     for km in ("Object Mode", "Mesh"):
         _add(kd, km, "allset.uv_component", make_event("F12"), {"mode": 'UV'},
              shadows=("Screen",))      # Screen F12 = Blender render, Maya's F12 wins in the 3D View

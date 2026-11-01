@@ -857,8 +857,14 @@ COMPONENTS = (('VERTEX', "Vertex", "Mesh vertices (UV Sync Selection on)"),
               ('EDGE', "Edge", "Mesh edges (UV Sync Selection on)"),
               ('FACE', "Face", "Mesh faces (UV Sync Selection on)"),
               ('UV', "UV", "UVs picked apart from the mesh (UV Sync Selection off)"),
+              ('UV_EDGE', "UV Edge", "UV edges picked apart from the mesh (UV Sync Selection off)"),
+              ('UV_FACE', "UV Face", "UV faces picked apart from the mesh (UV Sync Selection off)"),
               ('SHELL', "UV Shell", "Maya UV Shell mask: a click / box picks whole UV shells (faces), 3D View and UV Editor"),
               ('OPEN', "Open", "Only open the UV Editor"))
+
+# UV-only components: Blender's UV select mode with UV Sync Selection off
+UV_SELECT_MODES = {'UV': 'VERTEX', 'UV_EDGE': 'EDGE', 'UV_FACE': 'FACE'}
+
 
 
 def find_uv_editor(context):
@@ -947,9 +953,11 @@ def set_component(context, mode):
     if mode in ('VERTEX', 'EDGE', 'FACE'):
         leave_uv_mode(context)
         ts.mesh_select_mode = (mode == 'VERTEX', mode == 'EDGE', mode == 'FACE')
-    elif mode in ('UV', 'ISLAND'):
+    elif mode in ('UV', 'UV_EDGE', 'UV_FACE', 'ISLAND'):
         ts.use_uv_select_sync = False
         compat.set_uv_island_mode(ts, mode == 'ISLAND')
+        if mode in UV_SELECT_MODES:
+            ts.uv_select_mode = UV_SELECT_MODES[mode]
         # without sync Blender draws only the selected faces' UVs: Maya shows them all
         for ob in _edit_meshes(context):
             bm = bmesh.from_edit_mesh(ob.data)
@@ -991,7 +999,7 @@ class ALLSET_OT_uv_component(bpy.types.Operator):
                 ts.mesh_select_mode = (self.mode == 'VERTEX', self.mode == 'EDGE', self.mode == 'FACE')
             return {'FINISHED'}
         # coming from a mesh component mode (or object mode): keep its selection for F9 / F10 / F11 (#80)
-        remember = self.mode == 'UV' and (context.mode != 'EDIT_MESH' or ts.use_uv_select_sync)
+        remember = self.mode in ('UV', 'UV_EDGE', 'UV_FACE') and (context.mode != 'EDIT_MESH' or ts.use_uv_select_sync)
         if self.mode in ('VERTEX', 'EDGE', 'FACE') and context.mode == 'EDIT_MESH':
             leave_uv_mode(context)     # before prepare() turns UV Sync Selection on
         if not prepare(context):

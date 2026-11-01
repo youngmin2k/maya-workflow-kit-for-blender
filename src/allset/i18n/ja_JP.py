@@ -5764,4 +5764,9 @@ STRINGS = {
     "Save the current workspace under a name (Maya Windows > Workspaces > Save Current Workspace As): it is listed\nunder Windows > Workspaces in every scene. Only the layout is saved, in the extension's user folder": '現在のワークスペースに名前を付けて保存します (Maya ウィンドウ > ワークスペース > 現在のワークスペースに名前を付けて保存)。どのシーンでもウィンドウ > ワークスペースに表示されます。保存されるのはレイアウトだけで、保存先は拡張機能のユーザーフォルダーです',
     'Delete the current saved workspace (Maya Windows > Workspaces > Delete Current Workspace): its file is removed\nand the window shows Maya Classic': '現在の保存済みワークスペースを削除します (Maya ウィンドウ > ワークスペース > 現在のワークスペースを削除)。そのファイルが削除され、ウィンドウには Maya Classic が表示されます',
     'Switch to this saved workspace (Maya Windows > Workspaces)': 'この保存済みワークスペースに切り替え (Maya ウィンドウ > ワークスペース)',
+    'Add to the selection': '選択に追加',
+    'Picked point in UV space': 'UV 空間で選んだ点',
+    'Select UV Loop (Double-Click)': 'UV ループの選択 (ダブルクリック)',
+    'Select the UV edge ring instead of the loop': 'ループの代わりに UV エッジリングを選択',
+    'UV Editor double-click: a UV edge selects its UV edge loop (Ctrl: its edge ring), a UV or a UV face its\nUV shell; Shift adds to the selection': 'UV エディタのダブルクリック: UV エッジでその UV エッジループ (Ctrl: エッジリング)、UV または UV フェースでその\nUV シェルを選択します。Shift で選択に追加',
 }

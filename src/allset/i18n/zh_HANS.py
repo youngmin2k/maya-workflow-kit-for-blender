@@ -5764,4 +5764,9 @@ STRINGS = {
     "Save the current workspace under a name (Maya Windows > Workspaces > Save Current Workspace As): it is listed\nunder Windows > Workspaces in every scene. Only the layout is saved, in the extension's user folder": '以一个名称保存当前工作区 (Maya 窗口 > 工作区 > 将当前工作区另存为)：它会在每个场景的窗口 > 工作区中列出。只保存布局，保存在扩展的用户文件夹中',
     'Delete the current saved workspace (Maya Windows > Workspaces > Delete Current Workspace): its file is removed\nand the window shows Maya Classic': '删除当前已保存的工作区 (Maya 窗口 > 工作区 > 删除当前工作区)：删除其文件，窗口显示 Maya Classic',
     'Switch to this saved workspace (Maya Windows > Workspaces)': '切换到此已保存的工作区 (Maya 窗口 > 工作区)',
+    'Add to the selection': '添加到选择',
+    'Picked point in UV space': '在 UV 空间中拾取的点',
+    'Select UV Loop (Double-Click)': '选择 UV 循环 (双击)',
+    'Select the UV edge ring instead of the loop': '选择 UV 边环而不是循环',
+    'UV Editor double-click: a UV edge selects its UV edge loop (Ctrl: its edge ring), a UV or a UV face its\nUV shell; Shift adds to the selection': 'UV 编辑器双击：UV 边选择其 UV 边循环 (Ctrl：其边环)，UV 或 UV 面选择其\nUV 壳；Shift 添加到选择',
 }

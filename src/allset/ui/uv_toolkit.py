@@ -51,7 +51,9 @@ def current_component(context):
     ts = context.scene.tool_settings
     if not ts.use_uv_select_sync:
         from .. import compat
-        return 'SHELL' if compat.uv_island_mode(ts) else 'UV'
+        if compat.uv_island_mode(ts):
+            return 'SHELL'
+        return {'EDGE': 'UV_EDGE', 'FACE': 'UV_FACE'}.get(ts.uv_select_mode, 'UV')
     v, e, f = ts.mesh_select_mode
     return 'FACE' if f and not (v or e) else 'EDGE' if e and not v else 'VERTEX'
 
@@ -89,7 +91,8 @@ class ALLSET_PT_uv_toolkit(bpy.types.Panel):
         for mode, icon, label in COMPONENTS:
             row.operator("allset.uv_component", text="", icon=icon, depress=comp == mode).mode = mode
         row.separator()
-        row.operator("allset.uv_component", text="", icon='UV_VERTEXSEL', depress=comp == 'UV').mode = 'UV'
+        for mode, icon in (('UV', 'UV_VERTEXSEL'), ('UV_EDGE', 'UV_EDGESEL'), ('UV_FACE', 'UV_FACESEL')):
+            row.operator("allset.uv_component", text="", icon=icon, depress=comp == mode).mode = mode
         row.operator("allset.uv_component", text="", icon='UV_ISLANDSEL', depress=comp == 'SHELL').mode = 'SHELL'
         n = len([o for o in getattr(context, "objects_in_mode_unique_data", ()) if o.type == 'MESH'])
         layout.label(text=f"{n} object{'s' if n != 1 else ''} selected" if editing else "No mesh in edit mode")
