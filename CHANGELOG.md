@@ -94,6 +94,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   within 10% of each other), whatever the mesh's vertex numbering.
 
 ### Fixed
+- **Assign Existing Material lists the materials in the marking menu** (#283): in the right-click marking
+  menu, moving onto Assign Existing Material now opens a submenu with the scene's materials, like Maya;
+  pick one to assign it. Before, the list only came up as a separate popup after a click.
 - **Blender's Sculpting tab after Maya mode** (#282): in a Maya Workflow Kit scene, switching to Blender left
   Maya's Sculpting, UV Editing and Animation workspaces under Blender's names, so the Sculpting tab opened a
   mix of Maya panels and Blender's sculpt tools. Those Maya workspaces are now called "Sculpting (Maya)" and

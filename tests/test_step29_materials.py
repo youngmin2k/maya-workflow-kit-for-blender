@@ -203,7 +203,13 @@ def test_rmb_menu_lists_material_items():
         items = dict(e for e in menu.items if e != mm.DIVIDER)
         assert items["Assign New Material"].items == [("New Material...", ("allset.assign_new_material",
                                                                            {"rmb": True}))]
-        assert items["Assign Existing Material"] == ("menu", "ALLSET_MT_assign_existing_material_rmb")
+        # the scene's materials, filled when the menu opens (a submenu like Maya's, #283)
+        assert isinstance(items["Assign Existing Material"], mm.MaterialList)
+        assert not mm.is_unavailable(items["Assign Existing Material"])
+        filled = dict(e for e in mm.with_materials(menu, ["blinn1", "lambert1"]).items if e != mm.DIVIDER)
+        assert filled["Assign Existing Material"].items == [
+            ("blinn1", ("allset.assign_material", {"material": "blinn1", "rmb": True})),
+            ("lambert1", ("allset.assign_material", {"material": "lambert1", "rmb": True}))]
         fav = items["Assign Favorite Material"]
         assert isinstance(fav, mm.Sub) and [k[1][1]["kind"] for k in fav.items] == [
             'LAMBERT', 'BLINN', 'PHONG', 'STANDARD_SURFACE']

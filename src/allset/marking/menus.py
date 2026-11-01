@@ -130,7 +130,7 @@ def _material_items():
         DIVIDER,
         ("Assign New Material", Sub(items=[("New Material...", ("allset.assign_new_material", {"rmb": True}))])),
         ("Assign Favorite Material", Sub(items=favorites)),
-        ("Assign Existing Material", ("menu", "ALLSET_MT_assign_existing_material_rmb")),
+        ("Assign Existing Material", MaterialList()),
     ]
 
 
@@ -157,6 +157,34 @@ class NodeList(Sub):
     def __init__(self, kind):
         super().__init__()
         self.kind = kind        # TRAVERSAL / INPUTS / OUTPUTS
+
+
+class MaterialList(NodeList):
+    """Assign Existing Material: the scene's materials as a submenu, filled when the menu opens (``with_materials``),
+    like Maya's cascade (a Blender popup after the click showed nothing while dragging through the menu)."""
+
+    def __init__(self):
+        super().__init__("MATERIALS")
+
+
+def material_sub(names):
+    """The filled Assign Existing Material submenu: one row per material, assigned to the selection (or the object
+    under the RMB menu)."""
+    return Sub(items=[(name, ("allset.assign_material", {"material": name, "rmb": True})) for name in names])
+
+
+def scene_material_names():
+    import bpy
+    return sorted((m.name for m in bpy.data.materials if not m.is_grease_pencil), key=str.lower)
+
+
+def with_materials(menu, names):
+    """A copy of ``menu`` with its MaterialList submenus filled from ``names``."""
+    if not any(e != DIVIDER and isinstance(e[1], MaterialList) for e in menu.items):
+        return menu
+    items = [(e[0], material_sub(names)) if e != DIVIDER and isinstance(e[1], MaterialList) else e
+             for e in menu.items]
+    return MarkingMenu(menu.name, menu.label, menu.source, menu.radial, items, menu.options)
 
 
 def is_unavailable(action):
@@ -322,7 +350,7 @@ def with_nodes(menu, nodes):
     items = []
     changed = False
     for e in menu.items:
-        if e != DIVIDER and isinstance(e[1], NodeList):
+        if e != DIVIDER and isinstance(e[1], NodeList) and not isinstance(e[1], MaterialList):
             items.append((e[0], fill(e[1].kind, nodes)))
             changed = True
         else:

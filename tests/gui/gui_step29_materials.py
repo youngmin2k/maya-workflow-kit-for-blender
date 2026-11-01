@@ -1,5 +1,5 @@
 """In a real UI: material items of the RMB marking menu (Favorite submenu, Existing
-popup), Lighting/Shading menu, Material Attributes in the Attribute Editor, Shift+T; screenshots."""
+submenu), Lighting/Shading menu, Material Attributes in the Attribute Editor, Shift+T; screenshots."""
 
 import os
 import sys
@@ -103,32 +103,35 @@ def s_favorite_done():
 @step
 def s_existing_open():
     x, y = item_xy("Assign Existing Material")
+    ev('MOUSEMOVE', 'NOTHING', x=x - 10, y=y)
     ev('MOUSEMOVE', 'NOTHING', x=x, y=y)
-    C["existing"] = (x, y)
 
 
 @step
-def s_existing_click():
-    click(*C["existing"])
-
-
-@step
-def s_existing_popup():
-    check("engine closed after picking Assign Existing Material", not C["draw"].ACTIVE)
+def s_existing_list():
+    # Maya: the submenu lists the scene's materials as you move onto it (#283)
+    s = session()
+    check("hovering Assign Existing Material opens its submenu", s is not None and len(s.stack) == 2)
+    labels = [i.label for i in s.layout.items] if s is not None else []
+    want = sorted((m.name for m in bpy.data.materials if not m.is_grease_pencil), key=str.lower)
+    check(f"it lists the scene's materials ({labels})", labels == want and "blinn5" in labels)
+    C["existing"] = item_xy("blinn5")
+    ev('MOUSEMOVE', 'NOTHING', x=C["existing"][0], y=C["existing"][1])
 
 
 @step
 def s_existing_shot():
     shot("gui_step29_rmb_existing.png")
-    ops = bpy.context.window_manager.operators
-    check("the click's release did not pick a row of the popup",
-          not ops or ops[-1].bl_idname != "ALLSET_OT_assign_material")
-    tap('ESC')
+    click(*C["existing"])
 
 
 @step
-def s_existing_closed():
-    check("Escape leaves the cube's material alone", cube().active_material.name == "blinn6")
+def s_existing_done():
+    mat = cube().active_material
+    check(f"Assign Existing Material > blinn5 assigned it to the cube under the menu ({mat.name if mat else None})",
+          mat is not None and mat.name == "blinn5")
+    check("menu closed", not C["draw"].ACTIVE)
+    cube().active_material = bpy.data.materials["blinn6"]
 
 
 @step
