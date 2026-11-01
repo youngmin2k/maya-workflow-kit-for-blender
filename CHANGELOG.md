@@ -3,6 +3,12 @@
 All notable changes to Maya Workflow Kit (called Allset for Maya Users in steps 111–124 and Maya Kit before step 111). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
+  ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
+
 ## [0.8.0] — 2026-10-31
 
 Maya 2026 marking menus, Hypershade and shelves, the Marking Menu Editor from @TMouraille, Quad Draw from
