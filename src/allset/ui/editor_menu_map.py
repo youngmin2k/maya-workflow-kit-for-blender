@@ -5,14 +5,14 @@ Keys are ``editor_menu_data`` paths ("Graph Editor/Keys/Insert Key Tool"); value
 ``("prop", "<context path>")`` = a Maya check item drawn as Blender's own check box (``{"value": v}`` = one choice
 of a radio collection). ``menu_map`` merges ``MAP`` into its own, so the menu rules (every leaf mapped or greyed
 with a notice) cover these menus too. Menu structure: Maya 2026's editor menus
-; Blender counterparts checked in 4.5.
+; Blender counterparts checked in 5.2.
 """
 
 import math
 
-_MANUAL = "https://docs.blender.org/manual/en/4.5/"
-_API = "https://docs.blender.org/api/4.5/"
-_NOTES = "https://developer.blender.org/docs/release_notes/4.5/"
+_MANUAL = "https://docs.blender.org/manual/en/5.2/"
+_API = "https://docs.blender.org/api/5.2/"
+_NOTES = "https://developer.blender.org/docs/release_notes/5.2/"
 _PKG = __package__.rpartition(".")[0]
 
 
@@ -374,10 +374,10 @@ MAP = {
     f"{UV}/View/Wireframe": _prop("window_manager.allset_uv_face_colors", False),
     f"{UV}/View/Isolate Select/View Selected": "allset.uv_isolate",
     f"{UV}/Image/Display": ("allset.uv_display", {"mode": 'IMAGE'}),
-    f"{UV}/Modify/Randomize Shells": "uv.randomize_uv_transform",
+    f"{UV}/Modify/Randomize Shells": "allset.uv_randomize",     # operators/uv_toolkit_ops.py
     f"{UV}/Modify/Optimize": "uv.minimize_stretch",
     f"{UV}/Modify/Straighten Shell": "uv.follow_active_quads",
-    f"{UV}/Modify/Straighten UVs": ("uv.align", {"axis": 'ALIGN_S'}),
+    f"{UV}/Modify/Straighten UVs": "allset.uv_straighten_uvs",
     f"{UV}/Modify/Unfold": "allset.uv_unfold",
     # Maya-style UV commands (operators/uv_modify.py)
     f"{UV}/Modify/Map Border": "allset.uv_map_border",
@@ -681,7 +681,7 @@ MAP.update({
     f"{CE}/Options/Hide Zero Columns": _prop("window_manager.allset_ce_hide_zero"),
     f"{CE}/Layout/Load Selected Components": "allset.ce_load",
     f"{CE}/Layout/Show All Columns": _prop("window_manager.allset_ce_hide_zero", False),
-    **_help_menu(CE, "modeling/meshes/editing/mesh/vertex.html"),
+    **_help_menu(CE, "modeling/meshes/editing/vertex/index.html"),
 
     f"{CN}/Options/Auto-connect": _prop("window_manager.allset_cn_auto"),
     f"{CN}/Options/Channel Names/Nice": _prop("window_manager.allset_cn_names", "NICE"),

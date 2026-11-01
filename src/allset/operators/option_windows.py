@@ -499,6 +499,8 @@ def _extend():
     WINDOWS.extend(option_windows_curves207.WINDOWS)    # Bend / Curl / Scale Curvature
     from . import motion_path_228
     WINDOWS.extend(motion_path_228.windows())    # Attach to Motion Path
+    from . import option_windows_uv
+    WINDOWS.extend(option_windows_uv.WINDOWS)    # UV Editor Straighten UVs / Randomize Shells
 
 
 _extend()

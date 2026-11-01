@@ -19,6 +19,17 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   selection. Loops stop at UV seams. The Vertex / Edge / Face buttons still pick mesh components.
 - **Checker density** (#264): in the UV Editor Ctrl+Up / Ctrl+Down make the checker map finer or coarser, one
   step at a time (never below 1); the density stays with the checker when you turn it off and on.
+- **Fuller UV Toolkit** (#264): every UV Toolkit button now works. Select By Type has Back-Facing, Front-Facing,
+  Overlapping, Non-Overlapping, Texture Borders and Unmapped; Create, Cut and Sew and Arrange and Layout list all
+  of their UV Editor menu commands (Auto Seams, Split, Stitch Together, Merge, Gather Shells, Layout Along,
+  Randomize, Stack Similar, Unitize ...), with the same option boxes as the menus. New: Align Min / Avg / Max U and
+  V (with the UV Shell mask whole shells move), Unfold Along U / Unfold Along V (the other coordinate stays),
+  and Straighten UVs with U / V buttons and an angle tolerance (30 degrees). Stack Similar lays shells of the same
+  shape onto each other.
+- **Straighten UVs and Randomize Shells work like Maya** (#264): UV Editor > Modify > Straighten UVs lines up the
+  selected UV edges that run within 30 degrees of U or V (each connected run on its own line) instead of putting
+  every selected UV on one line, and Randomize Shells moves, turns and scales each shell within the ranges of its
+  option window (by default it moves shells up to 0.1 along U and V). Both have their option windows.
 
 ### Changed
 - **IPR opens its own render window** (#277): Render > IPR Render Current Frame, Redo Previous IPR Render and the
@@ -62,6 +73,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
   Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the selection.
+- **UV Editor help opens the Blender 5.2 manual**: the Help menus of the UV Editor, UV Toolkit, Graph Editor, Dope
+  Sheet and the other Maya editor windows pointed at the Blender 4.5 manual; the Component Editor's help page link
+  is fixed.
 - **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout and Texel
   Density Get / Set work only on the shells you picked; the other meshes' UVs are left alone (all shells are used
   only when nothing is picked).

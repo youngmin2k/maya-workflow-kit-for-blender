@@ -188,6 +188,9 @@ classes += fx_more.classes + render_more.classes
 from . import render_persp  # noqa: E402  renders without a scene camera go through persp
 classes += render_persp.classes
 
+from . import uv_toolkit_ops  # noqa: E402  UV Toolkit Align / Straighten UVs / Unfold Along / Randomize
+classes += uv_toolkit_ops.classes
+
 _register_classes, _unregister_classes = bpy.utils.register_classes_factory(classes)
 
 
@@ -223,6 +226,7 @@ def register():
     extrude.register_handlers()
     smart_extrude.register_props()
     uv_tools.register_props()
+    uv_toolkit_ops.register_props()
     uv_shell_select.register_props()
     taphold.register_bindings()
     graph_keys.register_bindings()
@@ -345,6 +349,7 @@ def unregister():
     lights.unregister_props()
     material.unregister_props()
     uv_shell_select.unregister_props()
+    uv_toolkit_ops.unregister_props()
     uv_tools.unregister_props()
     extrude.unregister_handlers()
     key_batch3.unregister_handlers()
