@@ -953,6 +953,9 @@ def patch_uv(kd):
         for ctrl in (False, True):
             _add(kd, UV_KM, "allset.uv_loop_pick", make_event("LEFTMOUSE", value="DOUBLE_CLICK", shift=shift, ctrl=ctrl),
                  {"extend": shift, "ring": ctrl}, shadows=("Screen",))
+    # Ctrl+Up / Ctrl+Down = checker density up / down (whole steps, at least 1)
+    _add(kd, UV_KM, "allset.checker_density", make_event("UP_ARROW", ctrl=True), {"step": 1})
+    _add(kd, UV_KM, "allset.checker_density", make_event("DOWN_ARROW", ctrl=True), {"step": -1})
     for km in ("Object Mode", "Mesh"):
         _add(kd, km, "allset.uv_component", make_event("F12"), {"mode": 'UV'},
              shadows=("Screen",))      # Screen F12 = Blender render, Maya's F12 wins in the 3D View

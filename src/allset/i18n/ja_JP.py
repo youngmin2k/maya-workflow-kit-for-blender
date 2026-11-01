@@ -5769,4 +5769,6 @@ STRINGS = {
     'Select UV Loop (Double-Click)': 'UV ループの選択 (ダブルクリック)',
     'Select the UV edge ring instead of the loop': 'ループの代わりに UV エッジリングを選択',
     'UV Editor double-click: a UV edge selects its UV edge loop (Ctrl: its edge ring), a UV or a UV face its\nUV shell; Shift adds to the selection': 'UV エディタのダブルクリック: UV エッジでその UV エッジループ (Ctrl: エッジリング)、UV または UV フェースでその\nUV シェルを選択します。Shift で選択に追加',
+    'Checker Density': 'チェッカーの密度',
+    'Make the UV checker finer or coarser (Maya UV Editor Increase / Decrease Checker Density)': 'UV チェッカーを細かく / 粗くします (Maya UV エディタのチェッカー密度を上げる / 下げる)',
 }

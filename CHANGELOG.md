@@ -17,6 +17,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   shell border picks one side only. In the UV Editor a double-click on a UV edge selects its UV edge loop,
   Ctrl+double-click its edge ring, and a double-click on a UV or a UV face its whole UV shell; Shift adds to the
   selection. Loops stop at UV seams. The Vertex / Edge / Face buttons still pick mesh components.
+- **Checker density** (#264): in the UV Editor Ctrl+Up / Ctrl+Down make the checker map finer or coarser, one
+  step at a time (never below 1); the density stays with the checker when you turn it off and on.
 
 ### Changed
 - **IPR opens its own render window** (#277): Render > IPR Render Current Frame, Redo Previous IPR Render and the
@@ -60,6 +62,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
   Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the selection.
+- **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout and Texel
+  Density Get / Set work only on the shells you picked; the other meshes' UVs are left alone (all shells are used
+  only when nothing is picked).
 
 ## [0.9.0] — 2026-11-01
 

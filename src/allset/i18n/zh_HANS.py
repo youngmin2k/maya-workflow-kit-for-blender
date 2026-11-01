@@ -5769,4 +5769,6 @@ STRINGS = {
     'Select UV Loop (Double-Click)': '选择 UV 循环 (双击)',
     'Select the UV edge ring instead of the loop': '选择 UV 边环而不是循环',
     'UV Editor double-click: a UV edge selects its UV edge loop (Ctrl: its edge ring), a UV or a UV face its\nUV shell; Shift adds to the selection': 'UV 编辑器双击：UV 边选择其 UV 边循环 (Ctrl：其边环)，UV 或 UV 面选择其\nUV 壳；Shift 添加到选择',
+    'Checker Density': '棋盘格密度',
+    'Make the UV checker finer or coarser (Maya UV Editor Increase / Decrease Checker Density)': '让 UV 棋盘格更细或更粗 (Maya UV 编辑器的增加 / 减少棋盘格密度)',
 }

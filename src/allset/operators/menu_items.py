@@ -16,6 +16,7 @@ from bpy_extras.io_utils import ImportHelper
 from mathutils import Vector
 
 from .. import results
+from .. import undo_steps
 
 
 def _hierarchy(objects):
@@ -622,7 +623,51 @@ def _checker_material():
     tree.links.new(node.outputs["Color"], material.color_socket(mat))
     # a display aid, not a Maya shader: the checker shows at full brightness (diffuse 1)
     material.ensure_diffuse(mat, 1.0)
+    _density_node(mat)
     return mat
+
+
+# Checker density (Maya UV Editor Ctrl+Up / Ctrl+Down): a whole number from 1, one step per key; the checker
+# repeats that many times per UV unit (a Mapping node scale in front of the checker image).
+CHECKER_DENSITY = "allset_checker_density"
+DENSITY_NODE = "Checker Density"
+
+
+def _density_node(mat):
+    tree = mat.node_tree
+    node = tree.nodes.get(DENSITY_NODE)
+    if node is not None:
+        return node
+    tex = next((n for n in tree.nodes if n.type == 'TEX_IMAGE'), None)
+    if tex is None:
+        return None
+    coord = tree.nodes.new("ShaderNodeTexCoord")
+    coord.location = tex.location.x - 420, tex.location.y
+    node = tree.nodes.new("ShaderNodeMapping")
+    node.name = node.label = DENSITY_NODE
+    node.location = tex.location.x - 220, tex.location.y
+    tree.links.new(coord.outputs["UV"], node.inputs["Vector"])
+    tree.links.new(node.outputs["Vector"], tex.inputs["Vector"])
+    d = checker_density(mat)
+    node.inputs["Scale"].default_value = (d, d, 1.0)
+    return node
+
+
+def checker_density(mat=None):
+    if mat is None:
+        mat = next((m for m in bpy.data.materials if m.get(CHECKER_MAT)), None)
+    return max(1, int(mat.get(CHECKER_DENSITY, 1))) if mat is not None else 1
+
+
+def set_checker_density(density):
+    """Set the checker density (at least 1) on the checker display material; returns the new value."""
+    mat = _checker_material()
+    d = max(1, int(density))
+    mat[CHECKER_DENSITY] = d
+    node = _density_node(mat)
+    if node is not None:
+        node.inputs["Scale"].default_value = (d, d, 1.0)
+    return d
 
 
 def checker_show(obs):
@@ -674,6 +719,21 @@ class ALLSET_OT_checker_toggle(bpy.types.Operator):
             self.report({'WARNING'}, "Select objects or faces to show the checker on")
             return {'CANCELLED'}
         checker_show(obs)
+        return {'FINISHED'}
+
+
+@undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
+class ALLSET_OT_checker_density(bpy.types.Operator):
+    """Make the UV checker finer or coarser (Maya UV Editor Increase / Decrease Checker Density)"""
+    bl_idname = "allset.checker_density"
+    bl_label = "Checker Density"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    step: IntProperty(name="Step", default=1, options={'SKIP_SAVE'})
+
+    def execute(self, context):
+        d = set_checker_density(checker_density() + self.step)
+        results.result(self, f"Checker density {d}")
         return {'FINISHED'}
 
 
@@ -765,5 +825,5 @@ class ALLSET_OT_menu_note(bpy.types.Operator):
 
 classes = (ALLSET_OT_prefix_hierarchy, ALLSET_OT_search_replace_names, ALLSET_OT_soften_harden,
            ALLSET_OT_detach, ALLSET_OT_edge_flow, ALLSET_OT_wedge, ALLSET_OT_nonlinear,
-           ALLSET_OT_object_display, ALLSET_OT_sculpt_tool, ALLSET_OT_checker_shader, ALLSET_OT_checker_toggle, ALLSET_OT_import_audio,
+           ALLSET_OT_object_display, ALLSET_OT_sculpt_tool, ALLSET_OT_checker_shader, ALLSET_OT_checker_toggle, ALLSET_OT_checker_density, ALLSET_OT_import_audio,
            ALLSET_OT_delete_sounds, ALLSET_OT_stereo_camera, ALLSET_OT_menu_note, ALLSET_OT_paint_hair_follicles)
