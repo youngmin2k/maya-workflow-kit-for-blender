@@ -132,6 +132,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   middle-mouse drag in the viewport moves the object (or joint) along that axis as it is drawn on screen, like
   dragging that arrow of the Move manipulator, so up / down drags count too. Selected Rotate channels turn
   0.36 degrees per pixel (right or down turns up). Other channels stay a sideways slider.
+- **blendShape weights in character sets and Set Driven Key** (#271): weight channels picked in the Channel Box
+  (INPUTS > blendShape) can go into a character set (Create Character Set From Channel Box, Add to / Remove from
+  Character Set), and S on the current character keys them. In Set Driven Key, Load Driver / Load Driven with a
+  picked weight loads the blendShape node with that weight. Animation layers don't take weights yet.
 
 ## [0.9.0] — 2026-11-01
 

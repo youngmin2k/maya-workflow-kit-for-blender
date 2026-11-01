@@ -148,6 +148,11 @@ def node_paths(node, keys):
     """(ID, data path, index) of Channel Box ``keys`` on ``node`` (object or pose bone)."""
     cb = _cb()
     for key in keys:
+        if cb.is_blend_key(key):        # a blendShape weight: its animation lives on the shape Key
+            kb = cb.blend_target(node, key)
+            if kb is not None:
+                yield kb.id_data, cb.blend_path(kb.name), 0       # keying-set paths keep a scalar at 0
+            continue
         path, idx, _kind = cb.channel_path(key)
         full = cb.full_path(node, path)
         if full is not None:
@@ -261,7 +266,13 @@ def key_current(context, keytype='KEYFRAME'):
             if key is not None:
                 n += bool(cb.keyframe(idb, key, keytype))
             else:
-                n += bool(idb.keyframe_insert(p.data_path, index=p.array_index, keytype=keytype))
+                index = p.array_index
+                try:
+                    if not hasattr(idb.path_resolve(p.data_path), "__len__"):
+                        index = -1          # a scalar (a blendShape weight): its path is kept at 0
+                except ValueError:
+                    pass
+                n += bool(idb.keyframe_insert(p.data_path, index=index, keytype=keytype))
         except (TypeError, RuntimeError):
             pass
     return n
