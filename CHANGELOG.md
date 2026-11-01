@@ -40,6 +40,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   shows what it does: tangent buttons draw the curve shape they give around a key (Auto, Spline, Clamped,
   Linear, Flat, Stepped, Plateau ...), key tools draw keys with the tool's motion, the view buttons show how
   curves are laid out and the infinity buttons show the repeated curve. Hover a button for its Maya name.
+- **The 3D View shows the UV selection in UV mode** (#264): after F12 (UV), the vertices of the UVs you pick in
+  the UV Editor are drawn as selected in the 3D View and every other vertex as unselected, like Maya, instead of
+  the whole mesh looking selected. Mesh component colours now also follow selection changes after you open or
+  start a scene.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
