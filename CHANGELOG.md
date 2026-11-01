@@ -6,6 +6,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [Unreleased]
 
 ### Added
+- **Numpad + / - size the manipulator** (#283): in the 3D View the numpad + and - keys make the Move / Scale
+  manipulator bigger and smaller like = and -, as on a Maya keyboard (Blender's numpad zoom is replaced;
+  Shift+numpad + / - still dolly).
 - **Auto Key on points** (#272): with Auto Key on, moving points in component mode keys the points that
   already have keys, on the axes that changed, like Maya. Points without keys stay unkeyed. The Channel Box CVs
   table shows keyed point values in the key colour, with the keyed / animated mark at the end of the row.

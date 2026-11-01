@@ -664,11 +664,15 @@ def patch_component_delete(kd):
 
 
 # --- 23. Manipulator size, smoothing level, default view, wireframe on shaded -------------------
-# Maya hotkeys = Shift++ -, PgUp/PgDn, 0, Home, Alt+5.
+# Maya hotkeys = Shift++ - (numpad + - too), PgUp/PgDn, 0, Home, Alt+5.
 
 def patch_view_keys(kd):
+    # A Maya keyboard's numpad + / - are the same keys (IC: numpad zoom in / out; Shift = dolly stays).
+    for key in ("NUMPAD_PLUS", "NUMPAD_MINUS"):
+        kd.remove("3D View", "view3d.zoom", type=key, repeat=True)
     for ev, factor in ((make_event("EQUAL"), 1.25), (make_event("EQUAL", shift=True), 1.25),
-                       (make_event("MINUS"), 0.8)):
+                       (make_event("MINUS"), 0.8), (make_event("NUMPAD_PLUS"), 1.25),
+                       (make_event("NUMPAD_MINUS"), 0.8)):
         _add(kd, "3D View", "allset.manip_size", ev, {"factor": factor})
     # Text edit mode keeps Home = line start (Font keymap runs first).
     _add(kd, "3D View", "allset.view_home", make_event("HOME"), shadows=("Font",))
