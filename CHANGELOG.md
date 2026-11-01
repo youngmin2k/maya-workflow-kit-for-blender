@@ -123,6 +123,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   face angles differ by more than about 10%.
 
 ### Fixed
+- **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now
+  work with more than two meshes selected, like Maya: the first selected object meets all the others together.
+  Union joins them all into one mesh, Difference (A - B) cuts every other object out of the first, Difference
+  (B - A) cuts the first out of the others, and Intersection keeps the part of the first inside any of the
+  others. Before, three or more objects only printed "select what it works on first".
 - **Assign Existing Material lists the materials in the marking menu** (#283): in the right-click marking
   menu, moving onto Assign Existing Material now opens a submenu with the scene's materials, like Maya;
   pick one to assign it. Before, the list only came up as a separate popup after a click.

@@ -313,34 +313,55 @@ class ALLSET_OT_separate(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def _apply_boolean(context, base, operand, op):
+    """Apply ``base`` ``op`` ``operand`` on ``base`` (exact solver) and delete ``operand``."""
+    if base.data.users > 1:
+        base.data = base.data.copy()
+    mod = base.modifiers.new("Maya Boolean", 'BOOLEAN')
+    mod.operation, mod.object, mod.solver = op, operand, 'EXACT'
+    with context.temp_override(object=base, active_object=base):
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    bpy.data.objects.remove(operand)
+
+
+def _boolean_order(context, objs):
+    """(first selected, the rest) as far as Blender knows the selection order: the active object is the last
+    one picked, the others go by name."""
+    active = context.view_layer.objects.active
+    lead = active if active in objs else objs[-1]
+    rest = sorted((o for o in objs if o is not lead), key=lambda o: o.name)
+    order = rest + [lead]
+    return order[0], order[1:]
+
+
 class ALLSET_OT_boolean(bpy.types.Operator):
-    """Maya Booleans: select the first object, then the second (Difference = first minus second)"""
+    """Maya Booleans: select the first object, then the others. Like Maya, the first object meets all the others
+    together: Difference (A - B) = first minus the rest, Difference (B - A) = the rest minus the first,
+    Intersection = the part of the first inside any of the rest"""
     bl_idname = "allset.boolean"
     bl_label = "Boolean"
     bl_options = {'REGISTER', 'UNDO'}
 
     operation: EnumProperty(items=(('UNION', "Union", ""), ('DIFFERENCE', "Difference (A - B)", ""),
-                                   ('DIFFERENCE_BA', "Difference (B - A)", "Maya 2026: the second minus the first"),
+                                   ('DIFFERENCE_BA', "Difference (B - A)", "Maya 2026: the others minus the first"),
                                    ('INTERSECT', "Intersection", "")), name="Operation", default='UNION')
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'OBJECT' and len(_mesh_selection(context)) == 2
+        return context.mode == 'OBJECT' and len(_mesh_selection(context)) >= 2
 
     def execute(self, context):
-        objs = _mesh_selection(context)
-        operand = context.view_layer.objects.active if context.view_layer.objects.active in objs else objs[-1]
-        base = next(o for o in objs if o is not operand)
-        if self.operation == 'DIFFERENCE_BA':
-            base, operand = operand, base
-        op = 'DIFFERENCE' if self.operation == 'DIFFERENCE_BA' else self.operation
-        if base.data.users > 1:
-            base.data = base.data.copy()
-        mod = base.modifiers.new("Maya Boolean", 'BOOLEAN')
-        mod.operation, mod.object, mod.solver = op, operand, 'EXACT'
-        with context.temp_override(object=base, active_object=base):
-            bpy.ops.object.modifier_apply(modifier=mod.name)
-        bpy.data.objects.remove(operand)
+        first, rest = _boolean_order(context, _mesh_selection(context))
+        others = rest[0]
+        for ob in rest[1:]:                  # Maya: the first object against the union of the others
+            _apply_boolean(context, others, ob, 'UNION')
+        if self.operation == 'UNION':
+            base, operand, op = first, others, 'UNION'
+        elif self.operation == 'DIFFERENCE_BA':
+            base, operand, op = others, first, 'DIFFERENCE'
+        else:
+            base, operand, op = first, others, self.operation
+        _apply_boolean(context, base, operand, op)
         base.select_set(True)
         context.view_layer.objects.active = base
         results.result(self, f"Boolean {self.operation.title()}: {base.name}")

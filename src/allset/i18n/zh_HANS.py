@@ -5196,7 +5196,7 @@ STRINGS = {
     'Maya Bind Skin Options question for a mesh that already has a skin': '针对已有蒙皮的网格的 Maya 绑定蒙皮选项询问',
     'Maya Bind Skin: the selected skeleton and meshes, in any order (closest distance weights, no parenting)': 'Maya 绑定蒙皮：选定的骨架和网格，顺序不限 (最近距离权重，不设父级)',
     'Maya Blend Shape: select the target shapes, then the base mesh last (shape keys on the base)': 'Maya 融合变形：先选择目标形状，最后选择基础网格 (形态键位于基础网格上)',
-    'Maya Booleans: select the first object, then the second (Difference = first minus second)': 'Maya 布尔：先选择第一个对象，再选择第二个 (差集 = 第一个减去第二个)',
+    'Maya Booleans: select the first object, then the others. Like Maya, the first object meets all the others together: Difference (A - B) = first minus the rest, Difference (B - A) = the rest minus the first, Intersection = the part of the first inside any of the rest': 'Maya 布尔：先选择第一个对象，再选择其余对象。与 Maya 相同，第一个对象与其余对象的合并体运算：差集 (A - B) = 第一个减去其余，差集 (B - A) = 其余减去第一个，交集 = 第一个位于任一其余对象内部的部分',
     'Maya CV Curve Tool: click to place CVs (drag to move the new one), Enter to finish, Backspace removes the last': 'Maya CV 曲线工具：单击放置 CV (拖动可移动新 CV)，Enter 完成，Backspace 移除最后一个',
     'Maya Channel Box Channels menu (RMB anywhere in the Channel Box)': 'Maya 通道盒通道菜单 (在通道盒中任意位置 RMB)',
     'Maya Channel Box Edit menu': 'Maya 通道盒编辑菜单',

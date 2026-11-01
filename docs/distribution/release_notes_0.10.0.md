@@ -66,6 +66,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
   Animation workspaces (#282).
 - No TypeError from the kit's timers while Preferences or another temporary window is open (#281).
 - Hotkeys imported with Maya mode off are applied when Maya mode starts (#275).
+- Mesh > Booleans work with three or more objects selected: the first object meets all the others, like Maya
+  (#284).
 - Help menus open the Blender 5.2 manual.
 
 ## Known differences
@@ -79,7 +81,7 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 
 Thanks for the reports and ideas: @Fizkefaaz (#270, #271, #272, #273, #274, #283), @LoongVeeng (#264),
 @swarnava05 (#277), @dillanjmurillo (#276), @Marlon90 (#262), @meggaimg70-a11y (#267), @rethink-studios (#275),
-@martin8762 (#221), @GUYVERZERO (#280), @DAI3rd (#281) and @Dark2774 (#282).
+@martin8762 (#221), @GUYVERZERO (#280), @DAI3rd (#281), @Dark2774 (#282) and @slacer (#284).
 Please keep telling us what breaks or feels off in real work.
 
 Maya Workflow Kit is a free, personal open-source project: no paid version, no donations requested, and no commercial

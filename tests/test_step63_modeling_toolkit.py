@@ -163,6 +163,48 @@ def test_boolean_maya_order():
     assert max(xs) <= 0.0 + 1e-4 and min(xs) >= -0.5 - 1e-4, (min(xs), max(xs))
 
 
+def _three_cubes():
+    """Unit cubes A at 0, B at x + 0.5, C at y + 0.5, selected A, B, then C (active)."""
+    _clear()
+    a = _create('CUBE', 0.0)
+    b = _create('CUBE', 0.5)
+    c = _create('CUBE', 0.0)
+    c.location.y = 0.5
+    assert a.name < b.name, (a.name, b.name)
+    _select(a, b, c, active=c)
+    bpy.context.view_layer.update()
+    return a, b, c
+
+
+def _area_bbox(ob):
+    mw = ob.matrix_world
+    area = sum(p.area for p in ob.data.polygons) * abs(mw.determinant()) ** (2 / 3)
+    pts = [mw @ v.co for v in ob.data.vertices]
+    box = tuple(round(f(p[i] for p in pts), 4) for f in (min, max) for i in range(3))
+    return round(area, 4), box
+
+
+def test_boolean_three_objects():
+    """Maya: the first selected object against the union of the others, one result (issue #284)."""
+    cases = {   # operation: (result object index, area, bbox)
+        'UNION': (0, 10.0, (-0.5, -0.5, -0.5, 1.0, 1.0, 0.5)),            # A u B u C
+        'DIFFERENCE': (0, 2.5, (-0.5, -0.5, -0.5, 0.0, 0.0, 0.5)),        # A - (B u C)
+        'DIFFERENCE_BA': (None, 8.0, (-0.5, -0.5, -0.5, 1.0, 1.0, 0.5)),  # (B u C) - A
+        'INTERSECT': (0, 5.5, (-0.5, -0.5, -0.5, 0.5, 0.5, 0.5)),         # A n (B u C)
+    }
+    for operation, (index, area, box) in cases.items():
+        obs = _three_cubes()
+        assert bpy.ops.allset.boolean.poll(), operation
+        assert bpy.ops.allset.boolean(operation=operation) == {'FINISHED'}, operation
+        meshes = [o for o in bpy.context.scene.objects if o.type == 'MESH']
+        assert len(meshes) == 1, (operation, [o.name for o in meshes])
+        if index is not None:
+            assert meshes[0] is obs[index], operation
+        got = _area_bbox(meshes[0])
+        assert abs(got[0] - area) < 1e-3 and got[1] == box, (operation, got)
+        assert bpy.context.view_layer.objects.active is meshes[0] and meshes[0].select_get()
+
+
 def test_soft_select_maya_units():
     _clear()
     _create('CUBE')
