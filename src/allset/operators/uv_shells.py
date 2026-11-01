@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya UV Editor shell commands.
 
-Shell = the step-66 island rule (`uv_tools.islands`, shared UV coordinates); any selected UV / edge / face of a shell picks
+Shell = the kit island rule (`uv_tools.islands`, shared UV coordinates); any selected UV / edge / face of a shell picks
 the whole shell for the shell commands. A "UV" = the loops of one vertex that share
 one coordinate inside one face set (Maya's UV id); UVs are ordered by their first loop index, which is Maya's UV-index order
 for meshes built face by face (the test meshes).
@@ -352,7 +352,7 @@ def move_sew(bm, uv, edges):
 
 def create_shell(bm, uv, faces):
     """Maya Create UV Shell: cut along the border of ``faces`` (edges to unselected faces); uv_tools.cut nudges the
-    smaller side by uv_tools.NUDGE so the step-66 island rule sees two shells."""
+    smaller side by uv_tools.NUDGE so the island rule sees two shells."""
     fs = set(faces)
     border = [e for f in faces for e in f.edges
               if len([g for g in e.link_faces if not g.hide]) == 2 and any(g not in fs for g in e.link_faces)]
