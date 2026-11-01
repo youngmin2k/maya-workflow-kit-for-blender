@@ -56,8 +56,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   preference UV Pre-selection (formerly UV Shell Pre-selection) turns it off.
 - **Bevel at box corners with tilted faces** (#213): Edit Mesh > Bevel on two edges that meet at a corner with one
   more edge now places the new corner, the new vertex on the third edge and both far ends like Maya when the side
-  faces lean in or out, as long as the two edges' face angles differ by less than about 11 degrees. Steeper
-  differences keep the previous result for now.
+  faces lean in or out, as long as the two edges' face angles differ by up to about 10.9 degrees (the same
+  point where Maya changes how it builds the corner). Steeper differences keep the previous result for now.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object

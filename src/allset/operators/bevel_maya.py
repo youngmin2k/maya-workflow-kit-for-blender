@@ -35,7 +35,7 @@ ZERO = 1e-6           # zero-length slide edges (a zero-length extrusion) don't 
 FIT = 0.9999          # bevel width = 0.9999 x the asked width (offset 0.1 -> 0.09999, fraction 0.5 -> 0.49995)
 CHAMFER = 25.0        # Chamfer Vertex: 0.25 of each edge (unit cube and 4 x 1 x 2 box)
 NEAR_LINE = 0.9       # |cos| of a slide edge's angle to the bevelled edge above this: it runs near that line
-CORNER_SPLIT = 10.75  # degrees: two-edge corners whose dihedral angles differ less than this use ``corner_pairs``
+CORNER_SPLIT = 10.93  # degrees: two-edge corners whose dihedral angles differ less than this use ``corner_pairs``
 
 
 def _slides(e, v):
