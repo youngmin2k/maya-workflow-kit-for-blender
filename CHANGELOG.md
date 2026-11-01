@@ -69,6 +69,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   more edge now places the new corner, the new vertex on the third edge and both far ends like Maya when the side
   faces lean in or out, as long as the two edges' face angles differ by up to about 10.9 degrees (the same
   point where Maya changes how it builds the corner). Steeper differences keep the previous result for now.
+  With Offset As Fraction off (an absolute Offset) such corners follow Maya at any face angle when the faces are
+  flat.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object

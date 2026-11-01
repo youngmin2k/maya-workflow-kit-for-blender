@@ -232,6 +232,74 @@ def corner_pairs(edges, ids):
     return out
 
 
+def _flat(f):
+    """Every vertex of face ``f`` lies in its plane."""
+    n, c = f.normal, f.calc_center_median()
+    size = max((v.co - c).length for v in f.verts)
+    return all(abs((v.co - c).dot(n)) <= 1e-6 * max(1.0, size) for v in f.verts)
+
+
+def corner_offsets(edges, ids):
+    """Absolute Offset (Offset As Fraction off): the same box corners as ``corner_pairs`` (any dihedral angles) with
+    flat faces, not almost straight. P, Q, s as there. Like Maya:
+    - the new corner in F lies on the bisector, W c from both edge lines, c = max(1, sqrt(2 / (1 + (s_P / s_Q)^2)));
+    - the new vertex on u3 lies 4 W / (3 max(s_P, s_Q) + min(s_P, s_Q)) from v.
+    Returns {v: {...}} with the keys ``bevel_edges`` moves by."""
+    sel = set(edges)
+    out = {}
+    if ids is None:
+        return out
+    for v in {v for e in edges for v in e.verts}:
+        if len(v.link_edges) != 3 or any(len(e.link_faces) != 2 for e in v.link_edges):
+            continue
+        if any(not _flat(f) for f in v.link_faces):
+            continue
+        mine = [e for e in v.link_edges if e in sel]
+        if len(mine) != 2:
+            continue
+        faces = set(mine[0].link_faces).intersection(mine[1].link_faces)
+        order = vertex_edges(v, ids)
+        if len(faces) != 1 or order is None:
+            continue
+        p, q = [e for e in order if e in sel]
+        rest = [e for e in v.link_edges if e not in sel][0]
+        units = [e.other_vert(v).co - v.co for e in (p, q, rest)]
+        if any(u.length <= ZERO for u in units):
+            continue
+        up, uq, u3 = [u.normalized() for u in units]
+        sp, sq = up.cross(u3).length, uq.cross(u3).length
+        half = math.acos(max(-1.0, min(1.0, up.dot(uq)))) / 2.0
+        ray = up + uq
+        if sp <= ZERO or sq <= ZERO or ray.length <= ZERO or math.sin(half) <= ZERO or up.dot(uq) < -NEAR_LINE:
+            continue       # an almost straight corner is ``corner_moves``' (an n-gon cap rim)
+        c = max(1.0, math.sqrt(2.0 / (1.0 + (sp / sq) ** 2)))
+        out[v] = {"origin": v.co.copy(), "ray": ray.normalized(), "k_ray": c / math.sin(half), "u3": u3,
+                  "k_u3": 4.0 / (3.0 * max(sp, sq) + min(sp, sq)), "ends": _far_ends((p, q), v, sel)}
+    return out
+
+
+def _far_ends(pair, v, sel):
+    """At the other end of each edge of a corner (when it ends only that bevelled edge) Maya keeps both new vertices
+    one width from the edge; Blender's drift with the corner. [(position, unit slide edge, k = 1 / sin)]."""
+    out = []
+    for e in pair:
+        w = e.other_vert(v)
+        if sum(1 for x in w.link_edges if x in sel) != 1:
+            continue
+        d = (v.co - w.co)
+        if d.length <= ZERO:
+            continue
+        d.normalize()
+        for s in _slides(e, w):
+            u = s.other_vert(w).co - w.co
+            if u.length <= ZERO:
+                continue
+            u.normalize()
+            if u.cross(d).length > ZERO:
+                out.append((w.co.copy(), u, 1.0 / u.cross(d).length))
+    return out
+
+
 def strip_limits(edges, ends):
     """A lone bevelled edge whose two ends both have a slide edge near its line, the two running outwards almost
     parallel (|cos| of their angle above 0.9: a rim edge of an n-gon cap with many sides): the width is limited to
@@ -576,7 +644,10 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     moves = [m + (None,) for m in terminal_moves(edges, pairs2)[0]] if int(segments) == 1 and offset_as_fraction else []
     # an end whose slide edge runs near the bevelled edge's line: Maya's offsets there, in both modes
     moves += end_moves(edges, pairs2)[0] if int(segments) == 1 else []
-    pair_moves = [(c["origin"], c["ray"], c["k_ray"], c["u3"], c["k_u3"]) for c in pairs2.values()]
+    offsets = corner_offsets(edges, ids) if int(segments) == 1 and not offset_as_fraction else {}
+    moves += [m + (None,) for c in offsets.values() for m in c["ends"]]
+    pair_moves = [(c["origin"], c["ray"], c["k_ray"], c["u3"], c["k_u3"])
+                  for c in list(pairs2.values()) + list(offsets.values())]
     corners = corner_moves(edges) if int(segments) == 1 else []
     ret = bmesh.ops.bevel(bm, geom=list(edges) + list(verts), offset=w, offset_type='OFFSET',
                           segments=max(1, int(segments)), profile=profile(depth), affect='EDGES',
