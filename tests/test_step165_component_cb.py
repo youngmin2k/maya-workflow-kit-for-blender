@@ -66,8 +66,9 @@ def _texts(rec):
     return [t for k, t, _a, _p in rec.log if k in ("label", "operator")]
 
 
-def _shape_field(rec):
-    return [a for k, _t, a, _p in rec.log if k == "prop" and len(a) > 1 and a[1] == "name"]
+def _name_line(rec):
+    """Texts of the name line (a click renames: allset.cb_rename, labelled with the node's name)."""
+    return [t for k, t, a, _p in rec.log if k == "operator" and a[:1] == ("allset.cb_rename",)]
 
 
 def test_object_mode_keeps_transform_rows():
@@ -76,7 +77,7 @@ def test_object_mode_keeps_transform_rows():
     rec = _draw()
     assert rec.ops("allset.cb_select_channel") or any(t in str(rec.log) for t in TRANSFORM_LABELS)
     assert "SHAPES" in rec.texts("label")
-    assert _shape_field(rec)[0][0] == ob, "object mode: the lead's name"
+    assert _name_line(rec)[:1] == [ob.name], "object mode: the lead's name"
 
 
 def test_vertices_selected_shape_cvs_inputs():
@@ -86,7 +87,7 @@ def test_vertices_selected_shape_cvs_inputs():
     assert cb.component_mode(ob)
     rec = _draw()
     texts = _texts(rec)
-    assert _shape_field(rec)[0][0] == ob.data, "Maya: the shape's name (cb165/cb_vtx_three.png)"
+    assert _name_line(rec)[:1] == [ob.data.name], "the shape's name, like Maya"
     assert "SHAPES" not in texts, "no SHAPES header in component mode"
     assert not rec.ops("allset.cb_select_channel"), "no Translate / Rotate / Scale / Visibility rows"
     assert "CVs (click to show)" in texts, texts
