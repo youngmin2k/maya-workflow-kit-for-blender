@@ -1,7 +1,6 @@
 """Issue #271 follow-up: blendShape weight channels picked in the Channel Box (INPUTS > blendShape1 > target) work
 where other picked channels do — Create Character Set From Channel Box / Add to Character Set (S keys them on the
-blendShape node), Set Driven Key Load Driver / Load Driven (the blendShape node with that weight) and Add to Selected
-Layers of an animation layer."""
+blendShape node) and Set Driven Key Load Driver / Load Driven (the blendShape node with that weight)."""
 from importlib import import_module
 
 import bpy
