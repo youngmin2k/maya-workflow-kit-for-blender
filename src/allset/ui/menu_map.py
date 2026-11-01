@@ -510,7 +510,7 @@ MAP = {
     **{f"Playback/Playback Speed/Play Every Frame, {k}": ("wm.context_set_enum", {"data_path": "scene.sync_mode",
                                                                                   "value": "NONE"})
        for k in ("Free", "Max Real-time")},
-    "Playback/Render Current Frame": "render.render",
+    "Playback/Render Current Frame": "allset.render",
     "Playback/Render Settings": "allset.render_settings",
     # --- Visualize ---
     "Visualize/Motion Trail Editor": "allset.motion_trail_editor",
@@ -566,13 +566,13 @@ MAP = {
     # Render menu: Blender's own render (INVOKE opens Blender's Render window, Maya's Render View) through the scene
     # camera, at the Output properties size; Esc stops it.
     "Render/Render Using": ("menu", "ALLSET_MT_render_using"),
-    "Render/Render Current Frame": "render.render",
-    "Render/Redo Previous Render": "render.render",
+    "Render/Render Current Frame": "allset.render",
+    "Render/Redo Previous Render": "allset.render",
     "Render/IPR Render Current Frame": "allset.ipr_toggle",
     "Render/Redo Previous IPR Render": "allset.ipr_toggle",
-    "Render/Render Sequence": ("render.render", {"animation": True}),
+    "Render/Render Sequence": ("allset.render", {"animation": True}),
     "Render/Test Resolution": ("menu", "ALLSET_MT_test_resolution"),     # Blender's Resolution %
-    "Render/Batch Render": ("render.render", {"animation": True}),
+    "Render/Batch Render": ("allset.render", {"animation": True}),
     "Render/Show Batch Render": "render.view_show",
 }
 

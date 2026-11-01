@@ -1,13 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Tidy files saved by older kit versions when they are opened (temporary — remove in 0.11.0).
 
-Older versions rendered Render > Render Current Frame / Render Sequence through a kit camera ``persp`` (ID property
-``allset_persp``, in no collection, kept by a fake user, made the scene camera) and added a ``defaultLight`` sun
-(ID property ``allset_default_light``) while a scene without lights rendered. Render items now call Blender's
-render, so a file that still has them is cleaned once when it is loaded:
+Older versions added a ``defaultLight`` sun (ID property ``allset_default_light``) while a scene without lights
+rendered. Renders no longer add it, so a file that still has one is cleaned once when it is loaded (the kit
+``persp`` render camera, ID property ``allset_persp``, is still the render camera of scenes without one and stays):
 
-- a kit ``persp`` render camera in no collection stops being the scene camera and is deleted when nothing else
-  uses it (not a parent of another object);
 - every leftover ``defaultLight`` object and its light data are deleted;
 - the stored camera Renderable values of the old Render Sequence option are dropped.
 
@@ -38,7 +35,6 @@ from bpy.app.handlers import persistent
 
 from .. import compat
 
-PERSP = "allset_persp"
 DEFAULT_LIGHT = "allset_default_light"
 RENDERABLE = "allset_renderable_on"
 # Ambient / Volume Light: ID properties on the light data, the volume light's nodes, the World's ambient nodes
@@ -72,19 +68,6 @@ class ALLSET_PG_old_nucleus(bpy.types.PropertyGroup):
     gravity: bpy.props.FloatProperty(default=9.8)
     gravity_direction: bpy.props.FloatVectorProperty(size=3, default=(0.0, -1.0, 0.0))
     space_scale: bpy.props.FloatProperty(default=1.0)
-
-
-def _persp_cameras():
-    """The old kit render cameras still in no collection (one a user linked into the scene is theirs now)."""
-    return [ob for ob in bpy.data.objects if ob.get(PERSP) and ob.type == 'CAMERA' and not ob.users_collection]
-
-
-def _used_elsewhere(ob):
-    if ob.users_collection:
-        return True
-    if any(sc.camera == ob for sc in bpy.data.scenes):
-        return True
-    return any(o.parent == ob for o in bpy.data.objects)
 
 
 def _remove_object(ob):
@@ -235,22 +218,13 @@ def _drop_fx_props():
 
 def clean():
     """Clean the open file; returns what was done ({kind: count})."""
-    done = {"scene_camera": 0, "persp": 0, "default_light": 0, "props": 0, "ambient_world": 0, "maya_lights": 0,
+    done = {"default_light": 0, "props": 0, "ambient_world": 0, "maya_lights": 0,
             "isolate": 0, "gravity": 0, "cloth": 0}
     for ob in [o for o in bpy.data.objects if o.get(DEFAULT_LIGHT)]:
         _remove_object(ob)
         done["default_light"] += 1
     for data in [d for d in bpy.data.lights if d.get(DEFAULT_LIGHT) and d.users == 0]:
         bpy.data.lights.remove(data)
-    persp = _persp_cameras()
-    for sc in bpy.data.scenes:
-        if sc.camera is not None and sc.camera in persp:
-            sc.camera = None
-            done["scene_camera"] += 1
-    for ob in persp:
-        if not _used_elsewhere(ob):
-            _remove_object(ob)
-            done["persp"] += 1
     for cam in bpy.data.cameras:
         if RENDERABLE in cam.keys():
             del cam[RENDERABLE]
@@ -282,7 +256,7 @@ def _on_load(*_args):
         done = clean()
     except (AttributeError, ReferenceError, RuntimeError):
         return
-    if any(done[k] for k in ("scene_camera", "persp", "default_light", "ambient_world", "maya_lights", "isolate",
+    if any(done[k] for k in ("default_light", "ambient_world", "maya_lights", "isolate",
                              "gravity", "cloth")):
         print(f"Maya Workflow Kit: tidied what an older version left in this file ({done})")
 

@@ -64,11 +64,11 @@ NOTICES = {
     # Render menu: Blender's own render (the tooltip says how Blender does it)
     **{f"Render/{item}": (
         "Render Image", "Blender renders through the scene camera (Scene properties > Camera) at the Output "
-        "properties size; a scene without a camera can't render.")
+        "properties size; a scene without a camera renders through persp, placed where the view looks from.")
        for item in ("Render Current Frame", "Redo Previous Render")},
     "Render/Render Sequence": (
-        "Render Animation", "Blender renders the frame range through the scene camera into the Output properties "
-        "folder; Esc stops it."),
+        "Render Animation", "Blender renders the frame range through the scene camera (without one: persp, placed "
+        "where the view looks from) into the Output properties folder; Esc stops it."),
     "Render/Batch Render": (
         "Render Animation", "Blender has no batch render queue: the frame range renders in this session (Esc stops "
         "it); for a background render run blender -b <file> -a."),

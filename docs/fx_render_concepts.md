@@ -85,8 +85,8 @@ it lights only its included objects.
 
 | Maya menu item | Blender feature it runs |
 |---|---|
-| Render > Render Current Frame, Redo Previous Render | Render Image (the scene camera, at the Output properties size) |
-| Render > Render Sequence, Batch Render | Render Animation in this Blender session (Esc stops it) |
+| Render > Render Current Frame, Redo Previous Render | Render Image (the scene camera, at the Output properties size; without one: persp, placed where the view looks from) |
+| Render > Render Sequence, Batch Render | Render Animation in this Blender session (Esc stops it; without a scene camera: persp, placed where the view looks from) |
 | Render > Show Batch Render, Windows > Rendering Editors > Render View | The Render window |
 | Render > IPR Render Current Frame | The viewport in Rendered shading |
 | Render > Test Resolution | Output properties > Resolution % (10 % to 150 %) |

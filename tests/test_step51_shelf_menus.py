@@ -154,7 +154,7 @@ def test_status_line_collapse_handles():
     try:
         log = draw()
         assert not any(e[1] and e[1][0] in ("allset.new_maya_scene", "ed.undo") for e in log), "File group hidden"
-        assert any(e[1] and e[1][0] == "render.render" for e in log)
+        assert any(e[1] and e[1][0] == "allset.render" for e in log)
     finally:
         bpy.ops.allset.status_group(group="FILE")
     # every kit-drawn Status Line / panel toolbar glyph renders (icon ids are 0 in background: no GPU previews)

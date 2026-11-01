@@ -19,8 +19,9 @@ feature (or opens the Blender editor for it). Items Blender has nothing for are 
 use instead. Every item is listed in [Maya FX and Rendering in Blender](../fx_render_concepts.md).
 
 - Render > Render Current Frame / Render Sequence, the Status Line and Render View buttons run Blender's Render Image /
-  Render Animation through the scene camera (a scene needs a camera, like any Blender render). F12 / Ctrl+F12 are
-  Blender's render keys again; F12 over the 3D View and the UV Editor stays Maya's UV selection mask.
+  Render Animation through the scene camera; a scene without a camera renders through persp, placed where the view
+  looks from, like Maya (#277). F12 / Ctrl+F12 are Blender's render keys again; F12 over the 3D View and the UV
+  Editor stays Maya's UV selection mask.
 - Light linking is Blender's light linking (Make = Include, Break = Exclude, on the active light); the Light Editor
   is an Outliner that lists the lights, Render Settings opens Blender's Render properties.
 - nCloth, nParticles, rigid bodies, fields, fluids and effects add Blender's Cloth / Collision / particle / rigid body
@@ -38,11 +39,10 @@ a metre scene (Blender's own startup scene, or the **Maya Units** preference off
 
 ### Files saved with older versions
 
-Opening a file saved with 0.8.0 or earlier tidies it once: the hidden `persp` render camera and a leftover
-`defaultLight` are removed, the World's "Maya Ambient" nodes are taken out, old Ambient / Volume Lights become point
-lights with the same intensity, a Light Editor Isolate left on is undone, a scene gravity the kit had scaled goes back
-to Blender's 9.81 (unless you changed it by hand) and kit nCloth stiffness / damping lose their rescale. Save the file
-to keep the tidied state.
+Opening a file saved with 0.8.0 or earlier tidies it once: a leftover `defaultLight` is removed, the World's "Maya
+Ambient" nodes are taken out, old Ambient / Volume Lights become point lights with the same intensity, a Light Editor
+Isolate left on is undone, a scene gravity the kit had scaled goes back to Blender's 9.81 (unless you changed it by
+hand) and kit nCloth stiffness / damping lose their rescale. Save the file to keep the tidied state.
 
 ## Added
 - Set Key on components: S in component mode keys the selected vertices, CVs, Bezier points and lattice points (#272).

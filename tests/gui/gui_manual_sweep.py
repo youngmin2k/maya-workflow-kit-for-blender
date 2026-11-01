@@ -4422,7 +4422,7 @@ def _m67_4_rendered():
         rv.draw_header(rec, bpy.context)
     got = [(x[0] if kind == "op" else t) for kind, t, x in rec.out]
     check(f"[M67-4] its header starts Render · Keep Image · Remove Image · 'Slot N · k kept' ({got})",
-          got[:3] == ["render.render", "allset.render_keep_image", "allset.render_remove_image"]
+          got[:3] == ["allset.render", "allset.render_keep_image", "allset.render_remove_image"]
           and got[3].startswith("Slot 1") and got[3].endswith("0 kept"))
     C["rv"] = (w, a)
     with bpy.context.temp_override(window=w, area=a, space_data=a.spaces.active):

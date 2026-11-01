@@ -642,7 +642,7 @@ def draw_status_line(layout, context, compact=False):
     if _group(layout, "RENDER"):
         row = layout.row(align=True)
         _flat(row, "render.view_show", "render_view")
-        _flat(row, "render.render", "render")
+        _flat(row, "allset.render", "render")
         _flat(row, ALLSET_OT_ipr_toggle.bl_idname, "ipr", depress=bool(space) and space.shading.type == 'RENDERED')
         _flat(row, ALLSET_OT_render_settings.bl_idname, "render_settings")
         _flat(row, "allset.hypershade", "hypershade")       # ui/hypershade.py

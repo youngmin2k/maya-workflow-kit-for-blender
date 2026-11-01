@@ -1,6 +1,5 @@
-"""Files saved by older versions are tidied when they are opened (operators/legacy_cleanup.py, temporary): the
-kit's old render camera ``persp`` (no collection, fake user, scene camera) stops being the scene camera and goes, a
-leftover ``defaultLight`` goes, the old camera Renderable values are dropped; the file opens without errors and
+"""Files saved by older versions are tidied when they are opened (operators/legacy_cleanup.py, temporary): a
+leftover ``defaultLight`` goes (the kit render camera ``persp`` stays the scene camera: renders still use it), the old camera Renderable values are dropped; the file opens without errors and
 the user's own objects stay. Old Ambient / Volume Lights: the World's "Maya Ambient" nodes go (the World's own
 output linked back), the lights become plain kit point lights with their Maya intensity, a Light Editor Isolate still
 on is undone and the Illuminates by Default value is dropped. Old kit FX: the nucleus gravity (9.8 x the Maya unit)
@@ -31,7 +30,7 @@ def _old_file(name, persp_in_collection=False):
     sc.collection.objects.link(mine)
     mine.data[lc.RENDERABLE] = True
     persp = bpy.data.objects.new("persp", bpy.data.cameras.new("perspShape"))
-    persp[lc.PERSP] = True
+    persp["allset_persp"] = True
     persp.use_fake_user = True
     persp.data[lc.RENDERABLE] = False
     if persp_in_collection:
@@ -53,8 +52,7 @@ def test_old_file_is_cleaned_on_open():
     assert lc._on_load in bpy.app.handlers.load_post
     bpy.ops.wm.open_mainfile(filepath=path)
     sc = bpy.context.scene
-    assert sc.camera is None, sc.camera
-    assert "persp" not in bpy.data.objects and "perspShape" not in bpy.data.cameras
+    assert sc.camera == bpy.data.objects.get("persp"), "the kit render camera stays the scene camera"
     assert not [o for o in bpy.data.objects if o.get(lc.DEFAULT_LIGHT)]
     assert not [d for d in bpy.data.lights if d.get(lc.DEFAULT_LIGHT)]
     assert not [c for c in bpy.data.cameras if lc.RENDERABLE in c.keys()]

@@ -928,7 +928,7 @@ def option_kind(path):
         return "tool"
     if kind in ("menu", "pie"):
         return "menu"
-    if target == "render.render":
+    if target in ("render.render", "allset.render"):
         return "generic"          # Blender's render reads Render Settings; it has no options of its own to adjust
     mod, name = target.split(".")
     try:

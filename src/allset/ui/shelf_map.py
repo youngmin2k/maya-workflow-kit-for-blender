@@ -108,8 +108,8 @@ BY_COMMAND = {
     "CreateSpotLight": (_create('SPOT_LIGHT'), 'LIGHT_SPOT'),
     "CreateAreaLight": (_create('AREA_LIGHT'), 'LIGHT_AREA'),
     "CreateCameraOnly": (_create('CAMERA'), 'OUTLINER_OB_CAMERA'),
-    "BatchRender": (("render.render", {"animation": True}), 'RENDER_ANIMATION'),     # Render > Batch Render
-    "RenderSequence": (("render.render", {"animation": True}), 'RENDER_RESULT'),
+    "BatchRender": (("allset.render", {"animation": True}), 'RENDER_ANIMATION'),     # Render > Batch Render
+    "RenderSequence": (("allset.render", {"animation": True}), 'RENDER_RESULT'),
     "Art3dPaintTool": ("paint.texture_paint_toggle", 'TPAINT_HLT'),
     "ShowShadingGroupAttributeEditor": (_dock('ATTRIBUTE_EDITOR'), 'MATERIAL'),   # Edit Material Attributes
     # --- FX ---

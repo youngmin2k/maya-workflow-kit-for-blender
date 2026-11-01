@@ -183,6 +183,9 @@ from . import sweep_mesh  # noqa: E402  Create > Sweep Mesh: live sweepMeshCreat
 from . import fx_more, render_more  # noqa: E402  Maya FX / Rendering items on Blender systems (#123)
 classes += fx_more.classes + render_more.classes
 
+from . import render_persp  # noqa: E402  renders without a scene camera go through persp
+classes += render_persp.classes
+
 _register_classes, _unregister_classes = bpy.utils.register_classes_factory(classes)
 
 
