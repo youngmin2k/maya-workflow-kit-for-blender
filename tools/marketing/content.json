@@ -28,7 +28,7 @@
   "The whole Maya workflow",
   "in Blender, in one install."
  ],
- "key_visual_footer": "Free, open-source extension for Blender 5.0 – 5.2",
+ "key_visual_footer": "Free, open-source extension for Blender 5.2 LTS",
  "screens": [
   {
    "name": "hotbox",
@@ -295,7 +295,7 @@
   "title_card": "key_visual",
   "title_seconds": 3.0,
   "end_headline": "The tutorial ends. Your Channel Box comes back.",
-  "end_line": "Free and open source · Blender 5.0 – 5.2",
+  "end_line": "Free and open source · Blender 5.2 LTS",
   "download": "Get it on extensions.blender.org/add-ons/allset",
   "download_note": "placeholder until the listing is live (nothing published yet)",
   "end_seconds": 2.5,

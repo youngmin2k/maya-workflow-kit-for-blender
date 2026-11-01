@@ -4,11 +4,12 @@ Text for the GitHub release of v0.9.0. Full list: the 0.9.0 section of `CHANGELO
 
 ---
 
-**0.9.0 — FX and rendering on Blender's own features, keys on components and blend shapes, and the fixes from your reports** (Blender 5.2 LTS, also 5.0 / 5.1)
+**0.9.0 — FX and rendering on Blender's own features, keys on components and blend shapes, and the fixes from your reports** (Blender 5.2 LTS)
 
 Install it over 0.8.0 as usual; shelves, hotkeys, scenes and the kit's settings are kept. (Removing the kit before
 installing deletes them: use the new Export Settings first.)
-For Blender 4.5 LTS keep using 0.6.2.
+Supported: Blender 5.2 LTS. Other versions are not tested: the extension still installs on Blender 5.0 and 5.1,
+but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 
 ## FX and rendering now run Blender's own features
 

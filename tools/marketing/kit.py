@@ -137,7 +137,7 @@ def before_after():
     probe = ImageDraw.Draw(Image.new("RGB", (1, 1)))
     box = lockup(probe, 0, 0, BA_N, one_line=True)
     lockup(d, (W - (box[2] - box[0])) / 2, 880, BA_N, one_line=True)
-    d.text((W // 2, 975), "Free and open-source extension for Blender 5.0 – 5.2", font=font("font-medium", 28),
+    d.text((W // 2, 975), "Free and open-source extension for Blender 5.2 LTS", font=font("font-medium", 28),
            fill=rgb("text-muted"), anchor="mt")
     fine_print(d, CONTENT, ["switch"], W // 2, H - 26, W, anchor="m")
     return save(c, "reddit_before_after.png")
@@ -181,7 +181,7 @@ def main():
              screen_w=1080),
         wide((1280, 640), "social_preview.png", [("The whole Maya workflow", 34, "text"),
                                                  ("in Blender, in one install.", 34, "text"),
-                                                 ("Free · open source · Blender 5.0 – 5.2", 26, "text-muted")],
+                                                 ("Free · open source · Blender 5.2 LTS", 26, "text-muted")],
              SOCIAL_N, screen_w=680, text_scale=1.05),
         wide((1600, 900), "x_card.png", [("The tutorial ends.", 44, "text-strong"),
                                          ("Your Channel Box comes back.", 44, "text-strong"),

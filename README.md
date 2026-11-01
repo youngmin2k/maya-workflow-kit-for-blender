@@ -6,7 +6,7 @@
 
 **The whole Maya workflow in Blender, in one install.**
 
-[![Blender 5.0 – 5.2](https://img.shields.io/badge/Blender-5.0--5.2-5285a6)](#requirements)
+[![Blender 5.2 LTS](https://img.shields.io/badge/Blender-5.2%20LTS-5285a6)](#requirements)
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 
 ![Maya Workflow Kit — for Maya users, in Blender. The whole Maya workflow in Blender, in one install.](docs/distribution/marketing/kit/readme_hero.png)
@@ -245,10 +245,9 @@ Some Maya behaviour needs Blender's C++ code; the kit does not fork Blender, so 
 
 ### Requirements
 
-- **Blender 5.0 – 5.2** (`blender_version_min = "5.0.0"`, `blender_version_max = "5.3.0"` exclusive). Blender 5.2 LTS
-  is the main target and runs every test, so please use it if you can. Each release is also checked on Blender 5.0
-  and 5.1 (install, enable, Maya mode on / off, menus), but the full tests run on 5.2 only — please report anything
-  that looks wrong there. Blender 4.5 LTS is no longer supported: **0.6.2 is the last version for Blender 4.5** —
+- **Supported: Blender 5.2 LTS. Other versions are not tested.** Every test runs on Blender 5.2 LTS. The extension
+  still installs on Blender 5.0 and 5.1 (`blender_version_min = "5.0.0"`), but they are not tested and may have
+  problems; use 5.2 LTS if you can. Blender 4.5 LTS is no longer supported: **0.6.2 is the last version for Blender 4.5** —
   keep using 0.6.2 there.
 - Pure Python, no compiled code, no network access. On Windows, hold keys read the keyboard state with one read-only
   system call; elsewhere Blender's own key-release event is used. Development and testing so far have been on Windows
@@ -392,9 +391,8 @@ unregistered, and nothing else was changed. See
 Yes — switch to Blender, follow along with Blender's own keys, and switch back to Maya.
 
 **Which Blender versions are supported?**
-Blender 5.0 – 5.2. Blender 5.2 LTS is the main target and runs every test; 5.0 and 5.1 get a shorter check (install,
-enable, Maya mode on / off, menus) at each release. 0.6.2 is the last version for Blender 4.5 LTS; versions after 5.2
-are added once they are tested.
+Supported: Blender 5.2 LTS. Other versions are not tested. The extension still installs on 5.0 and 5.1, but they
+may have problems. 0.6.2 is the last version for Blender 4.5 LTS; versions after 5.2 are added once they are tested.
 
 **Does it open Maya `.ma` / `.mb` files?**
 No. Export FBX (or OBJ, Alembic, USD) from Maya; the kit's Import uses Maya presets (cm, Y-up).
@@ -424,7 +422,7 @@ variables `ALLSET_*`); the id stays the same whatever the display name.
 |---|---|
 | `src/allset/` | The extension: `blender_manifest.toml`, `preferences.py`, `switch.py`, `keymap/`, `marking/`, `operators/`, `ui/`, `command_line/` (Command Line, Script Editor, `maya.cmds` look-alike), `i18n/` (translations), `compat.py` (all Blender-version differences) |
 | `tests/` | Headless harness `run.py`, GUI tests `gui/`, helpers `kit.py`, tests `test_*.py`, `integration/` (joint / Channel Box / weight-paint checks) |
-| `tools/` | `build.py` (packages), `release_check.py`, `smoke_matrix.py` (release check on Blender 5.0 / 5.1 / 5.2), `build_repo.py` (static extension repository), `make_startup.py` (layout template) |
+| `tools/` | `build.py` (packages), `release_check.py`, `smoke_matrix.py` (optional smoke check on other Blender versions; not a release check), `build_repo.py` (static extension repository), `make_startup.py` (layout template) |
 | `docs/` | `distribution/` (release notes, store and marketing media), user guides |
 
 ### Build and test
@@ -438,7 +436,7 @@ python tests/run.py -k enable      # only matching test files
 python tests/run.py --no-build     # reuse the zip in dist/
 python tests/gui/run.py -k NAME    # GUI tests with simulated key / mouse events (on Windows they run on a hidden desktop)
 python tools/release_check.py      # build, extension validate, clean-config install + enable, screenshots
-python tools/smoke_matrix.py       # release check on Blender 5.0.1, 5.1.2 and 5.2.3
+python tools/smoke_matrix.py       # optional smoke check on other Blender versions (not part of a release)
 python tools/build_repo.py         # static extension repository in dist/repo/ (zip + index.json + index.html)
 ```
 

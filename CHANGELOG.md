@@ -6,8 +6,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [0.9.0] — 2026-11-01
 
 FX, rendering and lighting run Blender's own features from the Maya menus, S keys components, blend shape weights
-are channels, settings can be exported and imported, and the fixes from your reports. Supported on Blender 5.2 LTS;
-the release smoke test also runs on 5.0 and 5.1. Files saved with older versions are tidied once when they are
+are channels, settings can be exported and imported, and the fixes from your reports. Supported: Blender 5.2 LTS.
+Other versions are not tested (the extension still installs on 5.0 and 5.1). Files saved with older versions are tidied once when they are
 opened (see Changed).
 
 ### Added

@@ -4,7 +4,7 @@ the toolbar tools and the workspace are Blender's again, only the always-on part
 
 First the same with one Maya-mode module failing to register (#198 / #199 on the user's machine): Maya mode stays
 off, nothing half-registered is left, and the next opt-in works. Part of the release smoke matrix
-(``python tools/smoke_matrix.py``, every supported Blender minor).
+(``python tools/smoke_matrix.py``, optional check on other Blender versions).
 """
 
 import os

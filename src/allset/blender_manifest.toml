@@ -14,9 +14,8 @@ tags = ["User Interface"]
 
 # 5.0 since 0.7.0: 0.6.2 is the last version for Blender 4.5.
 blender_version_min = "5.0.0"
-# Exclusive. Main target 5.2; 5.0-5.2 tested (headless, GUI and install
-# round trip on 5.0.1, 5.1.2, 5.2.2; version differences in compat.py). A Blender after 5.2 gets a clear "not
-# compatible" until it is tested the same way.
+# Supported: Blender 5.2 LTS; other versions are not tested (5.0 / 5.1 still install). Exclusive maximum: a
+# Blender after 5.2 gets a clear "not compatible" until it is tested.
 blender_version_max = "5.3.0"
 
 # Code GPL-3.0-or-later; the kit-made images and data files (welcome PNGs, the Maya layout startup.blend)
