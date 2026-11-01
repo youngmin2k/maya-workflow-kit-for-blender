@@ -71,6 +71,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   point where Maya changes how it builds the corner). Steeper differences keep the previous result for now.
   With Offset As Fraction off (an absolute Offset) such corners follow Maya at any face angle when the faces are
   flat.
+  A corner where three bevelled edges meet (all three edges of a box corner) now gets Maya's width and puts
+  each face's new corner where Maya does when the corner's face angles stay close (their half-angle sines
+  within 10% of each other), whatever the mesh's vertex numbering.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
