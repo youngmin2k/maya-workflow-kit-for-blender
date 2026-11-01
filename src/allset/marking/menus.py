@@ -761,7 +761,8 @@ def _constraints():
         return ("allset.xform_constraint", {"mode": mode})
     return [("Selection Constraints", unavailable()),
             ("Transform Constraints", Sub(items=[("Off", tc('NONE')), ("Edge Slide", tc('EDGE')),
-                                                 ("Surface Slide", tc('SURFACE')), ("Along Normals", None)]))]
+                                                 ("Surface Slide", tc('SURFACE')),
+                                                 ("Along Normals", tc('NORMAL'))]))]
 
 
 def _custom_axis(slot):

@@ -62,10 +62,12 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     # Maya Move tool Transform Constraint (default Off)
     transform_constraint: bpy.props.EnumProperty(
         name="Transform Constraint",
-        description="In mesh edit mode the Move tool slides components along their edges or the surface",
+        description="In mesh edit mode the Move tool slides components along their edges or the surface, or moves "
+                    "them along their normals",
         items=(('NONE', "Off", "Move components freely"),
                ('EDGE', "Edge", "Slide components along their edges"),
-               ('SURFACE', "Surface", "Move components along the surface of the mesh")),
+               ('SURFACE', "Surface", "Move components along the surface of the mesh"),
+               ('NORMAL', "Along Normals", "Move each component along its own normal")),
         default='NONE', update=_redraw_tools)
     uv_shell_preview: bpy.props.BoolProperty(
         name="UV Pre-selection",

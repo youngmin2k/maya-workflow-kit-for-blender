@@ -3,14 +3,15 @@
 
 Edge: dragging a Move handle (or MMB anywhere) slides the selection along its edges — vertices with Blender's
 Vertex Slide, edges / faces with Edge Slide (Vertex Slide when Blender finds no edge loop to slide). Surface:
-the drag moves the selection with each point snapped to the nearest surface of the mesh. Off: the Move tool
-as before. Ctrl+Shift+MMB slides along edges whatever the setting (Maya's quick edge slide).
+the drag moves the selection with each point snapped to the nearest surface of the mesh. Along Normals: the drag
+moves each point along its own normal (Blender's Shrink / Fatten). Off: the Move tool as before. Ctrl+Shift+MMB slides along edges whatever the setting (Maya's quick edge slide).
 """
 import bpy
 
 MODES = (('NONE', "Off", "Move components freely"),
          ('EDGE', "Edge Slide", "Slide components along their edges"),
-         ('SURFACE', "Surface Slide", "Move components along the surface of the mesh"))
+         ('SURFACE', "Surface Slide", "Move components along the surface of the mesh"),
+         ('NORMAL', "Along Normals", "Move each component along its own normal"))
 
 
 def mode(context):
@@ -41,6 +42,8 @@ def vertex_only(select_mode):
 
 def slide(context, kind, release_confirm=True):
     """Start the slide drag (INVOKE). Returns the operator result set."""
+    if kind == 'NORMAL':
+        return bpy.ops.transform.shrink_fatten('INVOKE_DEFAULT', release_confirm=release_confirm)
     if kind == 'SURFACE':
         return bpy.ops.transform.translate('INVOKE_DEFAULT', release_confirm=release_confirm, snap=True,
                                            snap_elements={'FACE_NEAREST'}, snap_target='CLOSEST',
@@ -56,7 +59,7 @@ def slide(context, kind, release_confirm=True):
 
 
 class ALLSET_OT_xform_constraint(bpy.types.Operator):
-    """Set the Move tool's Transform Constraint (Off / Edge Slide / Surface Slide)"""
+    """Set the Move tool's Transform Constraint (Off / Edge Slide / Surface Slide / Along Normals)"""
     bl_idname = "allset.xform_constraint"
     bl_label = "Transform Constraint"
     bl_options = {'INTERNAL'}

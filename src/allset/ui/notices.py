@@ -1338,9 +1338,6 @@ MARKING.update({
     **{f"{m}/Selection Constraints": (
         "Select Loops / Linked", "Blender has no selection constraints: use Select > Select Loops or Select Linked "
         "after picking.") for m in _TOOLS},
-    **{f"{m}/Transform Constraints/Along Normals": (
-        "Normal orientation", "The kit's Surface Slide moves along the surface only: move along normals with the "
-        "Normal axis of the Move tool.") for m in _TOOLS},
 })
 
 

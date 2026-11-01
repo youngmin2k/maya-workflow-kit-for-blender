@@ -47,8 +47,10 @@ def test_marking_menu_radio_items():
     labels = [label for label, _action in sub.items]
     assert labels == ["Off", "Edge Slide", "Surface Slide", "Along Normals"]
     p.transform_constraint = 'SURFACE'
-    states = [draw.checked(action) for _label, action in sub.items[:3]]
-    assert states == [False, False, True], states
+    states = [draw.checked(action) for _label, action in sub.items]
+    assert states == [False, False, True, False], states
+    assert bpy.ops.allset.xform_constraint(mode='NORMAL') == {'FINISHED'}
+    assert [draw.checked(action) for _label, action in sub.items] == [False, False, False, True]
     p.transform_constraint = 'NONE'
 
 

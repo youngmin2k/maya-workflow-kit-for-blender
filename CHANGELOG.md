@@ -112,6 +112,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Auto Key keys only values that change** (#276): a channel changed while Auto Key was off is no longer keyed
   later when you turn Auto Key on and only change the selection; like Maya, Auto Key keys a channel when its value
   changes while it is on.
+- **Transform Constraint: Along Normals** (#262): the Move tool's Transform Constraint (Tool Settings and the
+  tool option marking menus' Transform Constraints) has Along Normals: in mesh edit mode a manipulator or middle-mouse drag
+  moves each selected component along its own normal.
 
 ## [0.9.0] — 2026-11-01
 
