@@ -177,7 +177,13 @@ def draw(lines, context, ob):
         cols = split.row(align=True)
         for axis in AXES:
             cols.label(text=axis.upper())
+        r.label(text="", icon='BLANK1')
     props = context.scene.allset_cb_points
+    from . import channel_box
+    from ..operators import point_keys
+    base = "points[{}].co_deform" if edit_lattice(ob) is not None else "vertices[{}].co"
+    states = point_keys.point_states(ob, [(base.format(i), a) for i in _state["points"] for a in range(3)],
+                                     context.scene.frame_current)
     for slot, index in enumerate(_state["points"]):
         r = lines.row()
         if r is None:
@@ -185,8 +191,14 @@ def draw(lines, context, ob):
         split = r.split(factor=0.16, align=True)
         split.label(text=str(index))
         cols = split.row(align=True)
-        for axis in AXES:
-            cols.prop(props, f"p{slot}_{axis}", text="")
+        row_states = [states.get((base.format(index), a)) for a in range(3)]
+        for a, axis in enumerate(AXES):
+            # keyed / animated points draw in the key colour, like channel rows
+            cell = cols.row(align=True)
+            cell.alert = channel_box.state_alert(row_states[a])
+            cell.prop(props, f"p{slot}_{axis}", text="")
+        shown = next((s for s in ('KEYED', 'ANIMATED', 'MUTED') if s in row_states), None)
+        r.label(text="", icon=channel_box._STATE_ICON.get(shown, 'BLANK1'))
     if len(pts) > MAX_POINTS:
         r = lines.row()
         if r is not None:

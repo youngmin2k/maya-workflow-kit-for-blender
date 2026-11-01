@@ -6,6 +6,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [Unreleased]
 
 ### Added
+- **Auto Key on points** (#272): with Auto Key on, moving points in component mode keys the points that
+  already have keys, on the axes that changed, like Maya. Points without keys stay unkeyed. The Channel Box CVs
+  table shows keyed point values in the key colour, with the keyed / animated mark at the end of the row.
+  Shift+W / E / R set no key on points (they have no Translate / Rotate / Scale), like Maya.
 - **Save your own workspaces** (#277): Windows > Workspaces > Save Current Workspace As... saves the current
   layout (areas, editors and their sizes) under a name. Your saved workspaces are listed after Maya's in
   Windows > Workspaces and the Status Line workspace menu, in every scene; choosing one brings that layout into

@@ -142,11 +142,13 @@ def set_key(context, breakdown=False, channels=""):
         # whatever is selected (rule 3)
         from . import character_sets
         return character_sets.key_current(context, keytype)
-    if not channels:
-        from . import point_keys
-        if point_keys.applies(context):
-            # Maya component mode: S keys the selected points' X / Y / Z (edges / faces: their vertices)
-            return point_keys.key_points(context, keytype)
+    from . import point_keys
+    if point_keys.applies(context):
+        if channels:
+            # Maya component mode: points have no translate / rotate / scale, so Shift+W / E / R key nothing
+            return 0
+        # Maya component mode: S keys the selected points' X / Y / Z (edges / faces: their vertices)
+        return point_keys.key_points(context, keytype)
     only = CHANNEL_SETS.get(channels)
     from ..ui import cb_channels
     count = 0
@@ -753,7 +755,9 @@ class ALLSET_OT_set_key(bpy.types.Operator):
     def execute(self, context):
         n = set_key(context, self.breakdown, "" if self.channels == 'ALL' else self.channels)
         if n == 0:
-            self.report({'WARNING'}, "Nothing keyable selected")
+            from . import point_keys
+            if not (self.channels != 'ALL' and point_keys.applies(context)):     # Maya: silent on points
+                self.report({'WARNING'}, "Nothing keyable selected")
             return {'CANCELLED'}
         # Maya prints nothing for a key (#100: Blender's "Successfully added ... keying set" text is gone too)
         _redraw(context)
