@@ -75,9 +75,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
   Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the selection.
-- **UV Editor help opens the Blender 5.2 manual**: the Help menus of the UV Editor, UV Toolkit, Graph Editor, Dope
-  Sheet and the other Maya editor windows pointed at the Blender 4.5 manual; the Component Editor's help page link
-  is fixed.
+- **Help opens the Blender 5.2 manual**: the main Help menu, the Layer Editor and Outliner help, and the Help menus
+  of the UV Editor, UV Toolkit, Graph Editor, Dope Sheet and the other Maya editor windows pointed at the Blender 4.5
+  manual, API and release notes; the Component Editor's help page link is fixed.
 - **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout, Texel
   Density Get / Set, Stack, Orient, Distribute, Unstack, Layout Along and Stack Similar work only on the shells you
   picked; the other meshes' UVs are left alone (all shells are used only when nothing is picked).

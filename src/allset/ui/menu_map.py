@@ -620,9 +620,9 @@ def _sculpt(brush):
 
 
 _PROPORTIONAL = ("wm.context_toggle", {"data_path": "tool_settings.use_proportional_edit"})
-_MANUAL = "https://docs.blender.org/manual/en/4.5/"
-_API = "https://docs.blender.org/api/4.5/"
-_NOTES = "https://developer.blender.org/docs/release_notes/4.5/"
+_MANUAL = "https://docs.blender.org/manual/en/5.2/"
+_API = "https://docs.blender.org/api/5.2/"
+_NOTES = "https://developer.blender.org/docs/release_notes/5.2/"
 _TUTORIALS = "https://www.blender.org/support/tutorials/"
 
 # what Blender does cheaply. Items whose meaning differs carry a

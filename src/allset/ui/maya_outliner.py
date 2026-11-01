@@ -13,7 +13,7 @@ import bpy
 
 from . import chrome, own_draw
 
-HELP_URL = "https://docs.blender.org/manual/en/4.5/editors/outliner/index.html"
+HELP_URL = "https://docs.blender.org/manual/en/5.2/editors/outliner/index.html"
 MENU_BAR = (("Display", "ALLSET_MT_outliner_display"), ("Show", "ALLSET_MT_outliner_show"),
             ("Help", "ALLSET_MT_outliner_help"))
 

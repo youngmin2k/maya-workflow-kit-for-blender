@@ -511,7 +511,7 @@ class ALLSET_MT_le_help(bpy.types.Menu):
         self.layout.operator("wm.url_open", text="Help on Display Layers (Blender collections)").url = HELP_URL
 
 
-HELP_URL = "https://docs.blender.org/manual/en/4.5/scene_layout/collections/collections.html"
+HELP_URL = "https://docs.blender.org/manual/en/5.2/scene_layout/collections/collections.html"
 # Maya Layer Editor: tabs Display / Anim, menu bar Layers / Options / Help,
 # toolbar on the right.
 TABS = (('DISPLAY', "Display", "Display layers"), ('ANIM', "Anim", "Animation layers"))
