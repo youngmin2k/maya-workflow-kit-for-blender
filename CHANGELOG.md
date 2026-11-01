@@ -109,6 +109,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Lattice points in the Channel Box** (#274): with lattice points selected in lattice edit mode, the Channel Box
   shows the CVs line like for mesh vertices; click it for a table of the selected points (number, X, Y, Z in the
   lattice's own space) where you can type new values (`+=0.1` works).
+- **Auto Key keys only values that change** (#276): a channel changed while Auto Key was off is no longer keyed
+  later when you turn Auto Key on and only change the selection; like Maya, Auto Key keys a channel when its value
+  changes while it is on.
 
 ## [0.9.0] — 2026-11-01
 

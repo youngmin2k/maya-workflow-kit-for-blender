@@ -12,6 +12,10 @@ own Auto Keying (``tool_settings.use_keyframe_insert_auto``) is left to the user
 Like Maya, editing the curves themselves (dragging keys in the Graph Editor, tangent changes) is not a channel change:
 an object updated together with one of its Actions is not noted, so no key appears at the current time.
 
+Like Maya, only a value that changes while Auto Key is on is keyed: the kit remembers the keyed channels' values when
+Auto Key is turned on and each time it looks at an object, and keys a channel only when its value moved since then.
+A value changed while Auto Key was off is not keyed by a later update that changes nothing (a selection change).
+
 Blender pushes a transform's undo step when the transform ends, before any Python code runs, so the keys go into a
 step of their own ("Auto Key") right after it. Like Maya, one Undo takes back the change and its keys together and one
 Redo brings both back: the Auto Key step is paired with the change's own step (``undo_pairs``).
@@ -24,6 +28,11 @@ from .. import compat
 
 EPS = 1e-5
 _pending = {}       # object name -> frame the change was seen at
+_seen = {}          # (object name, pointer) -> {(data path, index): value} when Auto Key last looked at it
+
+
+def _id(ob):
+    return ob.name, ob.as_pointer()      # a new object under an old name is a new object
 
 
 def enabled(scene=None):
@@ -138,6 +147,64 @@ def changed_layer_channels(ob, frame, scene=None):
     return out
 
 
+def _channels(ob):
+    """{(data path, index): value} of the channels of ``ob`` that have curves."""
+    from . import anim_layers
+    ad = ob.animation_data
+    if ad is None:
+        return {}
+    curves = list(compat.id_fcurves(ob))
+    if anim_layers.has_layers(ob):
+        for layer in anim_layers.tracks(ob):
+            curves.extend(anim_layers.layer_curves(ob, layer))
+    out = {}
+    for fc in curves:
+        ch = (fc.data_path, fc.array_index)
+        if ch not in out:
+            v = _value(ob, *ch)
+            if v is not None:
+                out[ch] = v
+    return out
+
+
+def remember(ob):
+    """Note ``ob``'s channel values: Auto Key keys a channel only after its value moved from these."""
+    try:
+        _seen[_id(ob)] = _channels(ob)
+    except (ReferenceError, AttributeError):
+        pass
+
+
+def remember_curves(ob, frame):
+    """The curves of ``ob`` changed (keys set or edited): what they give at ``frame`` is what its channels are
+    compared with from now on (a value changed in the same update still counts as moved)."""
+    from . import anim_layers
+    if anim_layers.has_layers(ob):
+        _seen.pop(_id(ob), None)
+        return
+    seen = _seen.setdefault(_id(ob), {})
+    for fc in compat.id_fcurves(ob):
+        if len(fc.keyframe_points):
+            seen[(fc.data_path, fc.array_index)] = fc.evaluate(frame)
+
+
+def remember_all(scene=None):
+    _seen.clear()
+    scene = scene if scene is not None else bpy.context.scene
+    for ob in scene.objects if scene is not None else ():
+        if ob.animation_data is not None:
+            remember(ob)
+
+
+def moved(ob, path, index, value):
+    """The channel's value moved since Auto Key last looked at ``ob`` (unknown objects / channels count as moved)."""
+    seen = _seen.get(_id(ob))
+    if seen is None:
+        return True
+    old = seen.get((path, index))
+    return old is None or abs(old - value) > EPS * max(1.0, abs(value))
+
+
 def key_changed(ob, frame, keyed=None):
     """Key the changed keyed channels of ``ob`` at ``frame``; returns how many keys were set. ``keyed`` (a list)
     gets the (path, index, value) of each keyed channel."""
@@ -146,6 +213,8 @@ def key_changed(ob, frame, keyed=None):
         # Maya animation layers: solved onto the target layer like the kit's S key
         count = 0
         for path, index, value in changed_layer_channels(ob, frame):
+            if not moved(ob, path, index, value):
+                continue
             if anim_layers.key(ob, path, index, frame, value):
                 count += 1
                 if keyed is not None:
@@ -155,6 +224,8 @@ def key_changed(ob, frame, keyed=None):
     for fc, value in changed_curves(ob, frame):
         group = fc.group.name if fc.group is not None else ""
         path, index = fc.data_path, fc.array_index
+        if not moved(ob, path, index, value):
+            continue
         try:
             ob.keyframe_insert(path, index=index, frame=frame, group=group)
             from . import graph_key_menu      # default tangents, like Maya
@@ -186,6 +257,8 @@ def _flush():
             count += key_changed(ob, frame, values)
             if values:
                 keyed[name] = tuple(values)
+        if ob is not None:
+            remember(ob)
     if count:
         _push(scene, keyed)
     return None
@@ -217,6 +290,8 @@ _reloaded = [False]   # an undo / redo just loaded a state: its update is no cha
 
 def _reload_seen():
     _reloaded[0] = False
+    if enabled():
+        remember_all()
     return None
 
 
@@ -247,6 +322,8 @@ def _on_depsgraph(scene, depsgraph):
         if ob.animation_data.action is None and not ob.animation_data.nla_tracks:
             continue
         if edited and _actions(ob.animation_data) & edited:
+            if _id(ob) in _seen:
+                remember_curves(ob, scene.frame_current)
             continue
         _pending[ob.name] = scene.frame_current
         found = True
@@ -254,11 +331,18 @@ def _on_depsgraph(scene, depsgraph):
         bpy.app.timers.register(_flush, first_interval=0.05)
 
 
+def _toggled(scene, _context):
+    if enabled(scene):
+        remember_all(scene)
+    else:
+        _seen.clear()
+
+
 def register_handlers():
     bpy.types.Scene.allset_auto_key = bpy.props.BoolProperty(
         name="Auto Key",
         description="Maya Auto Key: changing a channel that already has keys sets a key at the current frame "
-                    "(channels without keys are not keyed)")
+                    "(channels without keys are not keyed)", update=_toggled)
     for name, fn in _HANDLERS:
         lst = getattr(bpy.app.handlers, name)
         if fn not in lst:
@@ -277,5 +361,6 @@ def unregister_handlers():
         if bpy.app.timers.is_registered(fn):
             bpy.app.timers.unregister(fn)
     _pending.clear()
+    _seen.clear()
     _reloaded[0] = False
     del bpy.types.Scene.allset_auto_key

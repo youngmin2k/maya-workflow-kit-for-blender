@@ -148,7 +148,7 @@ def test_plain_steps_are_not_skipped():
         bpy.ops.ed.undo_push(message="Sphere")
         assert _undo() is None
         assert "Sphere" not in bpy.data.objects
-        assert _state(name) == (2.0, 2)
+        assert _state(name) == (2.0, 2), (_state(name), auto_key._seen)
 
 
 def test_a_pair_without_check_is_one_step():
@@ -179,3 +179,20 @@ def test_an_undo_reload_is_no_channel_change():
         bpy.data.objects[name].location.x = 3.0
         bpy.context.view_layer.update()
         assert name in auto_key._pending            # the next real change is keyed again
+
+
+def test_a_value_changed_with_auto_key_off_is_not_keyed_later():
+    """Maya keys only values that change while Auto Key is on: a selection change after turning it on keys
+    nothing, the next real change is keyed."""
+    name = _keyed_cube()
+    ob = bpy.data.objects[name]
+    ob.location.x = 2.0                              # changed with Auto Key off: no key
+    bpy.context.view_layer.update()
+    with _AutoKey():
+        ob.select_set(not ob.select_get())           # a plain selection change
+        bpy.context.view_layer.update()
+        auto_key._pending[name] = bpy.context.scene.frame_current
+        _flush()
+        assert _state(name) == (2.0, 1), _state(name)
+        _move(name, 3.0)
+        assert _state(name) == (3.0, 2), _state(name)
