@@ -1173,6 +1173,10 @@ def patch_graph_keys_2(kd):
     for button in ("MIDDLEMOUSE", "LEFTMOUSE"):
         _add(kd, "Graph Editor", "allset.graph_move_snap", make_event(button, "CLICK_DRAG"), first=True,
              shadows=("Graph Editor",))
+    # Scale Keys box, Shift on a corner: scale in time or value only (a Shift press off the corners / sides passes
+    # through); added before the Shift press watcher below, which therefore still runs first
+    _add(kd, "Graph Editor", "allset.graph_scale_box", make_event("LEFTMOUSE", shift=True), first=True,
+         shadows=("Graph Editor", "Screen", "View2D"))
     # Blender's Shift+click toggles a selected key off on the press: remember the selection so a Shift+drag from it
     # still moves the keys (PASS_THROUGH, the toggle runs)
     _add(kd, "Graph Editor", "allset.graph_shift_press", make_event("LEFTMOUSE", shift=True), first=True,

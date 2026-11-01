@@ -120,6 +120,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   any handle moved freely). The setting in the Move Tool Settings can be picked in Object Mode too (it was greyed
   there and looked unavailable); it acts on components in mesh edit mode. Edge slides along edges from any handle
   or a middle-mouse drag, like before.
+- **Scale Keys box: Shift and moving keys** (#270): in the Graph Editor with the Scale Keys tool (r), Shift+drag on
+  a corner of the box scales the keys in time or in value only, whichever way the drag starts; a drag inside the
+  box moves the selected keys. A click inside the box without dragging, a press on a key that isn't selected and
+  Shift+click still select keys as before.
 
 ## [0.9.0] — 2026-11-01
 

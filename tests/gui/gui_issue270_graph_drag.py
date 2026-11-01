@@ -238,7 +238,7 @@ def s_r_check():
         screenshot(os.path.join(SHOTS, "issue270_scale_box.png"))
 
 
-def _box_case(name, grab, move, expect):
+def _box_case(name, grab, move, expect, shift=False):
     st = {}
     for _ in range(10):
         step(lambda: None)
@@ -255,14 +255,22 @@ def _box_case(name, grab, move, expect):
         st["move"] = move(st["box"])
     step(before)
     step(lambda: ev('MOUSEMOVE', 'NOTHING', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1]))
-    step(lambda: ev('LEFTMOUSE', 'PRESS', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1]))
+    def press():
+        if shift:       # a real Shift: the key event sets the window state (mouse-only Shift doesn't reach drags)
+            ev('LEFT_SHIFT', 'PRESS', shift=True)
+        ev('LEFTMOUSE', 'PRESS', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1], shift=shift)
+    step(press)
     for i in range(1, 5):
         def mv(i=i):
             x = st["press"][0] + st["move"][0] * i / 4
             y = st["press"][1] + st["move"][1] * i / 4
             ev('MOUSEMOVE', 'NOTHING', x=win_xy(x, y)[0], y=win_xy(x, y)[1])
         step(mv)
-    step(lambda: ev('LEFTMOUSE', 'RELEASE'))
+    def release():
+        ev('LEFTMOUSE', 'RELEASE', shift=shift)
+        if shift:
+            ev('LEFT_SHIFT', 'RELEASE')
+    step(release)
     step(lambda: None)
     step(lambda: None)
 
@@ -305,6 +313,13 @@ _box_case("box_top", lambda b: ((b[0] + b[2]) / 2, b[3]), lambda b: (0, b[3] - b
 # left side pressed inside the box: no scale, Blender's click (the keys don't move)
 _box_case("box_inside", lambda b: ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2 - 3), lambda b: (0, 0),
           lambda pts: (pts == [(1.0, 0.0), (10.0, 0.05), (20.0, 0.02)], "a press inside the box scales nothing"))
+# a drag inside the box (empty space) moves the selected keys: 2 frames right, the key outside the box stays
+_box_case("box_move", lambda b: ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2 + 4), lambda b: (2 * _ppf(), 0),
+          lambda pts: (pts == [(3.0, 0.0), (12.0, 0.05), (20.0, 0.02)], "the selected keys moved 2 frames"))
+# Shift on the top-right corner, dragged mostly right: time x1.5 only, the small upward part doesn't scale values
+_box_case("box_corner_shift", lambda b: (b[2], b[3]), lambda b: (4.5 * _ppf(), 6),
+          lambda pts: (pts[0] == (1.0, 0.0) and pts[1] == (14.0, 0.05) and pts[2] == (20.0, 0.02),
+                       "Shift: the corner scaled time only"), shift=True)
 
 
 # w / e / r also work over the rest of the Graph Editor: its outliner, its toolbar row and its menu bar

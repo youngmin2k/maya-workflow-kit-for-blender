@@ -3,8 +3,11 @@
 
 Like Maya's scale manipulator for keys: dragging a side of the box scales the selected keys (and their tangents)
 in time (left / right side) or value (bottom / top side) about the opposite side; a corner scales both about the
-opposite corner. With time snap on the keys land on whole frames. One drag = one undo step; Esc / right click puts
-the keys back. Clicks inside the box or away from it are the Graph Editor's own (select, drag).
+opposite corner; with Shift a corner drag scales in time or value only, whichever way the drag starts. A drag
+inside the box (from empty space or a selected key) moves the selected keys, with Shift in one direction only. With
+time snap on the keys land on whole frames. One drag = one undo step; Esc / right click puts the keys back. A press
+on a key that isn't selected (or a handle), away from the box, or a click inside it without a drag is the Graph
+Editor's own (select, drag).
 
 The box is drawn in region pixels from the selected keys' control points (display values: degrees, normalized view);
 a side whose keys all sit on one frame / value has no extent and doesn't scale. Add-on pref
@@ -18,6 +21,7 @@ from . import graph_move
 
 HANDLE_PX = 4.0          # half size of a handle square (x UI scale)
 HIT_PX = 6.0             # how close to a side / handle a press must be (x UI scale)
+CLICK_PX = 10.0          # how close to a key a press picks that key (x UI scale), like the Graph Editor
 MIN_EXTENT = 0.5         # px: a side shorter than this doesn't scale
 BOX_RGBA = (1.0, 1.0, 1.0, 0.75)
 HANDLE_RGBA = (1.0, 0.85, 0.2, 1.0)
@@ -84,6 +88,14 @@ def pivot_of(box, name):
     return px, py, ex, ey, time, value
 
 
+def inside(box, x, y, tol=HIT_PX):
+    """A press strictly inside the box, clear of its sides."""
+    if box is None:
+        return False
+    x0, y0, x1, y1 = box
+    return x0 + tol < x < x1 - tol and y0 + tol < y < y1 - tol
+
+
 def factor(edge, pivot, delta, min_span=MIN_EXTENT):
     """Scale that carries ``edge`` by ``delta`` while ``pivot`` stays (1 when the edge sits on the pivot)."""
     span = edge - pivot
@@ -117,6 +129,27 @@ def _selected_points(context):
             if kp.select_control_point:
                 out.append((kp.co.x, (kp.co.y + off) / scale))
     return out
+
+
+def key_under(context, x, y, tol):
+    """What lies under region (x, y): 'OTHER' for a key that isn't selected or a handle of a selected key (the
+    Graph Editor's own click), 'SELECTED' for a selected key, None for empty space."""
+    v2d = context.region.view2d
+    fcs = [fc for fc in (getattr(context, "editable_fcurves", None) or ()) if not fc.hide]
+    found = None
+    for fc, scale in zip(fcs, graph_move._value_scales(context, fcs)):
+        off = graph_move._offset(context, fc)
+        for kp in fc.keyframe_points:
+            pts = [(kp.co, 'SELECTED' if kp.select_control_point else 'OTHER')]
+            if kp.select_control_point:
+                pts += [(h, 'OTHER') for h in (kp.handle_left, kp.handle_right) if (h - kp.co).length > 1e-9]
+            for co, kind in pts:
+                rx, ry = v2d.view_to_region(co.x, (co.y + off) / scale, clip=False)
+                if abs(rx - x) <= tol and abs(ry - y) <= tol:
+                    if kind == 'OTHER':
+                        return 'OTHER'
+                    found = 'SELECTED'
+    return found
 
 
 def current_boxes(context):
@@ -183,30 +216,56 @@ class ALLSET_OT_graph_scale_box(bpy.types.Operator):
             return {'PASS_THROUGH'}
         box, view = boxes
         x, y = event.mouse_x - region.x, event.mouse_y - region.y
-        name = hit(box, x, y, HIT_PX * _ui(context))
+        ui = _ui(context)
+        name = hit(box, x, y, HIT_PX * ui)
+        self._mode, self._on_key = 'SCALE', False
         if name is None:
-            return {'PASS_THROUGH'}
-        time, value = pivot_of(box, name)[4:]
-        if not (time or value):
-            return {'PASS_THROUGH'}
-        # the scaling itself runs in view units (frames, display values): exact pivots whatever the zoom
-        px, py, ex, ey, _t, _v = pivot_of(view, name)
+            if event.shift or not inside(box, x, y, HIT_PX * ui):
+                return {'PASS_THROUGH'}         # Shift+click adds to the selection; outside = Blender's own
+            under = key_under(context, x, y, CLICK_PX * ui)
+            if under == 'OTHER':
+                return {'PASS_THROUGH'}         # a key that isn't selected / a handle: Blender's click
+            self._mode, self._on_key = 'MOVE', under == 'SELECTED'
+            time = value = True
+        else:
+            time, value = pivot_of(box, name)[4:]
+            if not (time or value):
+                return {'PASS_THROUGH'}
         self._keys = graph_move.KeySet(context)
         if not self._keys:
             return {'PASS_THROUGH'}
+        if name is not None:
+            # the scaling itself runs in view units (frames, display values): exact pivots whatever the zoom
+            px, py, ex, ey, _t, _v = pivot_of(view, name)
+            self._edge, self._pivot = (ex, ey), (px, py)
         self._region = region
+        self._press_px = (x, y)
         self._press = region.view2d.region_to_view(x, y)
-        self._edge = (ex, ey)
         self._axes = (time, value)
-        self._pivot = (px, py)
+        # Shift: one direction only, picked by the first move (a corner; a side has one already)
+        self._lock = bool(event.shift) and time and value
+        self._axis = None
         self._snap = graph_move.time_snap_on(context.scene)
         self._moved = False
+        self._drag_px = max(1, context.preferences.inputs.drag_threshold_mouse) * ui
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 
     def _apply(self, x, y):
-        (ex, ey), (time, value) = self._edge, self._axes
+        time, value = self._axes
+        if self._lock:
+            if self._axis is None:
+                self._axis = graph_move.decide(x - self._press_px[0], y - self._press_px[1])
+                if self._axis is None:
+                    return
+            time, value = self._axis == 'TIME', self._axis == 'VALUE'
         mx, my = self._region.view2d.region_to_view(x, y)
+        if self._mode == 'MOVE':
+            dt = mx - self._press[0] if time else 0.0
+            dv = my - self._press[1] if value else 0.0
+            self._keys.apply(dt, dv, self._snap, time_axis=time)
+            return
+        ex, ey = self._edge
         sx = factor(ex, self._pivot[0], mx - self._press[0], 1e-9) if time else 1.0
         sy = factor(ey, self._pivot[1], my - self._press[1], 1e-9) if value else 1.0
         self._keys.apply_scale(self._pivot, sx, sy, self._snap)
@@ -218,12 +277,23 @@ class ALLSET_OT_graph_scale_box(bpy.types.Operator):
             graph_move._redraw(context)
             return {'CANCELLED'}
         if event.type in {'MOUSEMOVE', 'INBETWEEN_MOUSEMOVE'}:
-            self._apply(event.mouse_x - self._region.x, event.mouse_y - self._region.y)
+            x, y = event.mouse_x - self._region.x, event.mouse_y - self._region.y
+            if self._mode == 'MOVE' and not self._moved and \
+                    max(abs(x - self._press_px[0]), abs(y - self._press_px[1])) < self._drag_px:
+                return {'RUNNING_MODAL'}        # not a drag yet: a click stays a click
+            self._apply(x, y)
             self._moved = True
             graph_move._redraw(context)
             return {'RUNNING_MODAL'}
         if event.type == 'LEFTMOUSE' and event.value == 'RELEASE':
             if not self._moved:
+                self._keys.finish()
+                if self._mode == 'MOVE' and not self._on_key:
+                    # a click on empty space inside the box: the Graph Editor's own click (deselects)
+                    try:
+                        bpy.ops.graph.clickselect('INVOKE_DEFAULT', deselect_all=True)
+                    except RuntimeError:
+                        pass
                 return {'CANCELLED'}
             self._keys.finish()
             graph_move._redraw(context)
