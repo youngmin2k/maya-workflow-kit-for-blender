@@ -110,7 +110,7 @@ def _values(st):
     return [(c[0], c[1], sorted(v for _f, v in c[2])) for c in st]
 
 
-def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), every=False):
+def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), every=False, fraction=0.0):
     st = {}
     for _ in range(10):
         step(lambda: None)
@@ -122,6 +122,13 @@ def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), 
         bpy.context.scene.allset_auto_key = auto_key
         bpy.context.scene.frame_set(current)
         select_only(frames, every)
+        if fraction:                                    # the dragged key starts between two frames
+            fc = curve()
+            kp = next(k for k in fc.keyframe_points if k.select_control_point)
+            kp.co.x += fraction
+            kp.handle_left.x += fraction
+            kp.handle_right.x += fraction
+            fc.update()
         bpy.ops.ed.undo_push(message=f"{name} select")
         st["before"] = state()
         st["press"] = key_px(10)
@@ -150,6 +157,8 @@ def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), 
         xs = [kp.co.x for kp in curve().keyframe_points]
         check(f"{name}: no key added or lost ({st['count']} -> {count})", count == st["count"])
         check(f"{name}: the dragged key landed past the last key ({xs})", len(xs) == 3 and xs[2] > 20.5)
+        if fraction:
+            check(f"{name}: time snap left the key on a whole frame ({xs})", abs(xs[2] - round(xs[2])) < 1e-6)
         check(f"{name}: every curve keeps its key values, no two keys on one frame",
               _values(after) == _values(st["before"])
               and all(len({f for f, _v in c[2]}) == len(c[2]) for c in after))
@@ -185,6 +194,20 @@ _drag_case("mmb_auto_key", 'MIDDLEMOUSE', 26, auto_key=True, current=15)
 # several keys on every curve slid past the last key
 _drag_case("lmb_columns_auto", 'LEFTMOUSE', 26, frames=(1, 10), every=True, auto_key=True, current=15)
 _drag_case("mmb_columns_auto", 'MIDDLEMOUSE', 26, frames=(1, 10), every=True, auto_key=True, current=15)
+# a key between two frames: Blender's move + the whole-frame clean-up are one undo step
+_drag_case("lmb_fraction", 'LEFTMOUSE', 26, fraction=0.4)
+
+
+@step
+def s_fraction_back():
+    fc = curve()
+    kp = min(fc.keyframe_points, key=lambda k: abs(k.co.x - 10))
+    d = 10.0 - kp.co.x
+    kp.co.x += d
+    kp.handle_left.x += d
+    kp.handle_right.x += d
+    fc.update()
+    bpy.ops.ed.undo_push(message="key back on frame 10")
 
 
 # r = Scale Keys tool: the box around the selected keys; dragging a side / corner scales about the opposite one

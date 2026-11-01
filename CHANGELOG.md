@@ -89,6 +89,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   they were before the deformer (Shift toggles, Ctrl removes, Ctrl+Shift adds; one Ctrl+Z undoes a marquee).
 - **w / e / r anywhere in the Graph Editor** (#270): the keys now pick the Move / Rotate / Scale key tool with the
   mouse over the Graph Editor's outliner, menu bar, toolbar row or sidebar too, not only over the curves.
+- **One undo for a snapped key move** (#270): with time snap on, moving a key that sat between two frames in the
+  Graph Editor puts it on a whole frame as part of the move, so one Ctrl+Z undoes it (it took two before).
 
 ## [0.9.0] — 2026-11-01
 
