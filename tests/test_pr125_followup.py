@@ -90,7 +90,7 @@ def test_header_extras_off_and_search_under_layouts():
     assert tb.column_width() == round(tb.TOOLBAR_PX * bpy.context.preferences.system.ui_scale)
     log = []
     tb.ALLSET_PT_toolbox_layouts.draw(SimpleNamespace(layout=_Ops(log)), bpy.context)
-    assert log[-1] == "allset.viewport_search" and log[-2] == "allset.open_editor", log
+    assert log[-1] == "allset.viewport_search" and log[-2] == "allset.toggle_outliner", log
     # the header picker draws nothing with the preference off
     log = []
     bpy.ops.object.armature_add()

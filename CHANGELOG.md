@@ -113,6 +113,14 @@ opened (see Changed).
   on made two undo steps (the move, then its key), so the first Ctrl+Z only took the key away and the pose seemed not
   to change. Now, like Maya, one Ctrl+Z takes back the move together with its key and one Shift+Z brings both back —
   for manipulator drags, rotations, Blender's own transforms and Rigify controls alike.
+- **Time Slider keys follow the selection** (#277): after deselecting everything the Time Slider no longer shows
+  the keys of the last selected object; like Maya it shows the keys of the selected objects only.
+- **Smaller current-frame key mark** (#277): a key at the current frame is marked one frame wide (red above and
+  below the current-frame box) instead of a red frame around the whole box, so the keys of nearby frames stay
+  visible.
+- **Tool Box Outliner button** (#277): the button shows and hides the Outliner like Maya's: in the Maya layout it
+  hides the docked Outliner and the next click docks it back beside the Tool Box, instead of opening a second
+  Outliner in a new window. It looks pressed while an Outliner is shown.
 - **Lattice points get the Maya manipulator** (#274): in lattice edit mode the Move (w) and Scale (r) tools show
   the same Maya-style manipulator as objects and mesh components, at the selected points, instead of Blender's
   transform gizmo.

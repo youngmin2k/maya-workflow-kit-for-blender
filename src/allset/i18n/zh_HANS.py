@@ -5440,6 +5440,7 @@ STRINGS = {
     "Open the Reference Editor: the scene's references with load state, Reload / Unload / Replace / Import / Remove\n(Maya File > Reference Editor)": '打开参考编辑器：场景中的参考及其加载状态，重新加载 / 卸载 / 替换 / 导入 / 移除\n(Maya 文件 > 参考编辑器)',
     "Open the Shape Editor: blendShape nodes (shape keys) with their targets' weights, Edit and Key\n(Maya Windows > Animation Editors > Shape Editor)": '打开形状编辑器：blendShape 节点 (形态键) 及其目标的权重、编辑和关键帧\n(Maya 窗口 > 动画编辑器 > 形状编辑器)',
     'Open the welcome dialog once the pointer is in the main window, clear of its menu bar': '当指针位于主窗口内且离开其菜单栏后，打开欢迎对话框',
+    'Show or hide the Outliner': '显示或隐藏大纲视图',
     'Open this editor in a new window (Maya Windows menu)': '在新窗口中打开此编辑器 (Maya 窗口菜单)',
     'Open this submenu (the breadcrumb goes back)': '打开此子菜单 (导航路径可返回)',
     'Option box of a Maya command whose settings Blender has no equivalent for: the window says so and runs\nthe command (Maya: every option box opens a window)': 'Blender 中没有对应设置的 Maya 命令的选项框：窗口会说明这一点并运行\n该命令 (Maya：每个选项框都会打开一个窗口)',

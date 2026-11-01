@@ -5440,6 +5440,7 @@ STRINGS = {
     "Open the Reference Editor: the scene's references with load state, Reload / Unload / Replace / Import / Remove\n(Maya File > Reference Editor)": 'リファレンスエディタを開く: シーンのリファレンスとロード状態、リロード / アンロード / 置き換え / インポート / 除去\n(Maya ファイル > リファレンスエディタ)',
     "Open the Shape Editor: blendShape nodes (shape keys) with their targets' weights, Edit and Key\n(Maya Windows > Animation Editors > Shape Editor)": 'シェイプエディタを開く: blendShape ノード (シェイプキー) とターゲットのウェイト、編集とキー\n(Maya ウィンドウ > アニメーションエディタ > シェイプエディタ)',
     'Open the welcome dialog once the pointer is in the main window, clear of its menu bar': 'ポインタがメインウィンドウ内、メニューバーから離れた位置に来たらウェルカムダイアログを開く',
+    'Show or hide the Outliner': 'アウトライナを表示 / 非表示',
     'Open this editor in a new window (Maya Windows menu)': 'このエディタを新しいウィンドウで開く (Maya ウィンドウメニュー)',
     'Open this submenu (the breadcrumb goes back)': 'このサブメニューを開く (パンくずリストで戻ります)',
     'Option box of a Maya command whose settings Blender has no equivalent for: the window says so and runs\nthe command (Maya: every option box opens a window)': 'Blender に対応する設定がない Maya コマンドのオプションボックス: ウィンドウでその旨を伝え、\nコマンドを実行します (Maya: すべてのオプションボックスがウィンドウを開きます)',

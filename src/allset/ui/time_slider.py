@@ -767,29 +767,32 @@ def key_frames(nodes):
     return sorted(frames.items())
 
 
-def playhead_half_width(context, frame):
-    """Half the width of Blender's current-frame box on the scrub row (time_scrub_ui.cc ``draw_current_frame``:
-    max(text width + 8, 24) x UI scale, the frame number in the widget font)."""
-    import blf
-    s = context.preferences.system.ui_scale or 1.0
-    try:
-        points = context.preferences.ui_styles[0].widget.points
-    except (AttributeError, IndexError):
-        points = 11
-    blf.size(0, points * s)
-    text_w = blf.dimensions(0, str(int(frame)))[0]
-    return max(text_w + 8 * s, 24 * s) / 2
-
-
 def key_x(region, frame, maya):
     """Region x of a key tick: Maya draws it on the frame's tick, the left edge of the frame's cell;
     other timelines keep Blender's frame centre."""
     return region.view2d.view_to_region(frame - 0.5 if maya else frame, 0, clip=False)[0]
 
 
-def _draw_keys(context, region, maya=False):
+def _shows_keys(node):
+    if not isinstance(node, bpy.types.Object):
+        return True     # pose bones: only selected ones are listed
+    if node.mode != 'OBJECT':
+        return True     # edit / paint modes: the object whose components are being worked on
+    try:
+        return node.select_get()
+    except RuntimeError:    # not in the view layer
+        return False
+
+
+def tick_nodes(context):
+    """Nodes whose keys the Time Slider shows: the selected ones, like Maya (nothing selected = no ticks). Blender
+    keeps an active object after it is deselected; its keys are not shown."""
     from . import channel_box
-    keys = key_frames(channel_box.targets(context))
+    return [n for n in channel_box.targets(context) if _shows_keys(n)]
+
+
+def _draw_keys(context, region, maya=False):
+    keys = key_frames(tick_nodes(context))
     if not keys:
         return
     import gpu
@@ -812,13 +815,14 @@ def _draw_keys(context, region, maya=False):
                 continue
             x0, x1 = int(x), int(x) + w
             if abs(f - current) < 0.5:
-                # Blender draws its playhead box over add-on drawing (the region's draw_overlay runs after
+                # Blender draws its current-frame box over add-on drawing (the region's draw_overlay runs after
                 # POST_PIXEL), and in the Maya layout that box fills the Time Slider: a key at the current frame
-                # was invisible (issue #38). Maya shows it through its translucent current-time block; here the
-                # key colour frames the box instead (wider than the box, so its edges stay red).
-                centre = region.view2d.view_to_region(f, 0, clip=False)[0]
-                half = playhead_half_width(context, current) + 2 * w
-                x0, x1 = int(centre - half), int(centre + half)
+                # was invisible (issue #38). Maya shows it through its current-time block, one frame wide. Here the
+                # key fills the current frame's cell: the box hides its middle and the rows above and below the
+                # box stay red, while the ticks of the neighbouring frames stay visible.
+                left, right = (region.view2d.view_to_region(f + d, 0, clip=False)[0] for d in (-0.5, 0.5))
+                x0 = int(left)
+                x1 = max(x0 + w, int(right))
             tris += [(x0, 0), (x1, 0), (x1, h), (x0, 0), (x1, h), (x0, h)]
         if tris:
             shader.uniform_float("color", colour)

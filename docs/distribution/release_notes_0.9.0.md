@@ -68,6 +68,9 @@ to keep the tidied state.
   an edit there.
 - Channel Box middle-drag goes back to the tool after a tool change; click empty space to deselect channels (#273).
 - Lattice points get the Maya manipulator in edit mode (#274).
+- The Time Slider shows the keys of the selected objects only; a key at the current frame is marked one frame wide
+  instead of with a red frame around the current-frame box; the Tool Box Outliner button shows / hides the Outliner
+  instead of opening a second one (#277).
 - Every Scale handle stops at zero in component mode (#261); edit-mode vertices follow the theme Vertex Size and a
   component pivot no longer sticks in Object Mode (#263).
 - The kit's tooltips follow the interface language too (Japanese, Simplified Chinese).
@@ -79,7 +82,7 @@ The known differences listed in `CHANGELOG.md` still apply.
 
 Thanks for the reports and ideas: @Fizkefaaz (#270, #271, #272, #273, #274), @gsvetlin-beep (#258, #259),
 @XeonG (#261), @Marlon90 (#262), @andych56 (#263), @LoongVeeng (#264), @CommonDirt (#265), @zzador (#266),
-@meggaimg70-a11y (#267), @rethink-studios (#275), @dillanjmurillo (#276) and @RIPTIDE-z for spotting the untranslated tooltips (#260).
+@meggaimg70-a11y (#267), @rethink-studios (#275), @dillanjmurillo (#276), @swarnava05 (#277) and @RIPTIDE-z for spotting the untranslated tooltips (#260).
 Please keep telling us what breaks or feels off in real work.
 
 Maya Workflow Kit is a free, personal open-source project: no paid version, no donations requested, and no commercial
