@@ -36,6 +36,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Bigger tangent handles in the Graph Editor** (#277): tangent handle points are drawn as bold rings that
   grow with the Key Size preference, black when unselected and in the selected colour when selected, so
   they are easier to see and to grab and never look like keys. Key Size 0 shows Blender's own handles.
+- **Graph Editor / Dope Sheet toolbar pictures** (#277): every toolbar button now has its own picture that
+  shows what it does: tangent buttons draw the curve shape they give around a key (Auto, Spline, Clamped,
+  Linear, Flat, Stepped, Plateau ...), key tools draw keys with the tool's motion, the view buttons show how
+  curves are laid out and the infinity buttons show the repeated curve. Hover a button for its Maya name.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object

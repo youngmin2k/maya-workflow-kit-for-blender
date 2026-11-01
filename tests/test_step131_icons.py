@@ -96,3 +96,22 @@ def test_status_icon_sizes():
             assert px.shape == (size, size, 4), (name, size, px.shape)
             if name not in CHROME:
                 assert px[..., 3].max() > 0.5, (name, size)
+
+
+def test_graph_toolbar_pictures_unique():
+    """#277: every Graph Editor / Dope Sheet toolbar button has its own kit picture, unlike the rest of its row."""
+    chrome = import_module(kit.MODULE + ".ui.editor_chrome")
+    graph_icons = import_module(kit.MODULE + ".ui.graph_icons")
+    for editor in ("Graph Editor", "Dope Sheet"):
+        keys = [it[0] for it in chrome.ICONS[editor] if isinstance(it, tuple)]
+        missing = [k for k in keys if k not in graph_icons.GLYPHS or graph_icons.name(k) not in status_icons.EXTRA]
+        assert not missing, (editor, missing)
+        bad = _same_pairs({k: status_icons.image(graph_icons.name(k), 32) for k in keys})
+        assert not bad, f"{editor} toolbar buttons share a picture: {bad}"
+        for k in keys:
+            for size in (16, 20, 32):
+                px = status_icons.image(graph_icons.name(k), size)
+                assert px.shape == (size, size, 4) and px[..., 3].max() > 0.5, (editor, k, size)
+    unused = set(graph_icons.GLYPHS) - {it[0] for ed in ("Graph Editor", "Dope Sheet") for it in chrome.ICONS[ed]
+                                         if isinstance(it, tuple)}
+    assert not unused, unused

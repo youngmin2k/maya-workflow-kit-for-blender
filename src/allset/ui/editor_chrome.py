@@ -27,7 +27,7 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 from gpu_extras.batch import batch_for_shader
 
 from .. import live_refs
-from . import editor_menu_data, graph_layers, menu_map, menu_sets
+from . import editor_menu_data, graph_icons, graph_layers, menu_map, menu_sets
 
 GE, DS, UV = "Graph Editor", "Dope Sheet", "UV Editor"
 
@@ -421,8 +421,9 @@ class ALLSET_MT_editor_more(bpy.types.Menu):
 
 
 def _icon_args(editor, key, icon):
-    """Button icon keywords."""
-    return {"icon": icon}
+    """Button icon keywords: the kit-drawn picture of ``key`` when there is one, else Blender's icon."""
+    value = graph_icons.icon_value(editor, key) if editor in (GE, DS) else 0
+    return {"icon_value": value} if value else {"icon": icon}
 
 
 def _draw_icon(row, context, editor, it, text=""):
@@ -2091,6 +2092,7 @@ def register():
     bpy.types.WindowManager.allset_auto_load = BoolProperty(
         name="Auto Load Selected Objects", description="Maya: the list follows the selection (off: Load / Add "
         "Selected Objects keep a fixed list)", get=_auto_get, set=_auto_set, options={'SKIP_SAVE'})
+    graph_icons.register()
     patch_headers()
     _handle.append(bpy.types.SpaceGraphEditor.draw_handler_add(draw_channels, (), 'CHANNELS', 'POST_PIXEL'))
     graph_layers.register()
@@ -2101,6 +2103,7 @@ def unregister():
     while _handle:
         bpy.types.SpaceGraphEditor.draw_handler_remove(_handle.pop(), 'CHANNELS')
     unpatch_headers()
+    graph_icons.unregister()
     del bpy.types.Scene.allset_key_time
     del bpy.types.Scene.allset_key_value
     del bpy.types.WindowManager.allset_show_characters
