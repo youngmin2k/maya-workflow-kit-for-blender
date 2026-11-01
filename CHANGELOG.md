@@ -3,7 +3,7 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.10.0] — 2026-11-02
 
 ### Added
 - **Rename from the Channel Box** (#283): click the object's name at the top of the Channel Box, type a new
@@ -19,11 +19,15 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   already have keys, on the axes that changed, like Maya. Points without keys stay unkeyed. The Channel Box CVs
   table shows keyed point values in the key colour, with the keyed / animated mark at the end of the row.
   Shift+W / E / R set no key on points (they have no Translate / Rotate / Scale), like Maya.
-- **blendShape weights in animation layers** (#271): Channel Box > Channels > Add to Selected Layers with a
-  blendShape weight selected puts that weight into the selected animation layer (on the blendShape node, not the
-  mesh's transform). Keys on the weight then go onto the layer so the weight shows the value you set, the layer
-  weight scales it, and the Channel Box marks the weight as a layer member. Remove From Selected Layers and Delete
-  Layer take it out again.
+- **Time Slider ticks for keyed components** (#272): in component mode (mesh, curve, surface or lattice edit mode)
+  the Time Slider shows the keys of the selected vertices, CVs or lattice points, so keys set with S on them are
+  visible there.
+- **blendShape weights in animation layers, character sets and Set Driven Key** (#271): weight channels picked
+  in the Channel Box (INPUTS > blendShape) can go into the selected animation layers (Channels > Add to Selected
+  Layers; keys on the weight then go onto the layer, the layer weight scales it and the Channel Box marks the weight
+  as a layer member; Remove From Selected Layers and Delete Layer take it out again), into a character set (Create
+  Character Set From Channel Box, Add to / Remove from Character Set; S on the current character keys them), and
+  into Set Driven Key (Load Driver / Load Driven load the blendShape node with that weight).
 - **Save your own workspaces** (#277): Windows > Workspaces > Save Current Workspace As... saves the current
   layout (areas, editors and their sizes) under a name. Your saved workspaces are listed after Maya's in
   Windows > Workspaces and the Status Line workspace menu, in every scene; choosing one brings that layout into
@@ -44,10 +48,15 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   V (with the UV Shell mask whole shells move), Unfold Along U / Unfold Along V (the other coordinate stays),
   and Straighten UVs with U / V buttons and an angle tolerance (30 degrees). Stack Similar lays shells of the same
   shape onto each other.
-- **Straighten UVs and Randomize Shells work like Maya** (#264): UV Editor > Modify > Straighten UVs lines up the
-  selected UV edges that run within 30 degrees of U or V (each connected run on its own line) instead of putting
-  every selected UV on one line, and Randomize Shells moves, turns and scales each shell within the ranges of its
-  option window (by default it moves shells up to 0.1 along U and V). Both have their option windows.
+- **Lattice points in the Channel Box** (#274): with lattice points selected in lattice edit mode, the Channel Box
+  shows the CVs line like for mesh vertices; click it for a table of the selected points (number, X, Y, Z in the
+  lattice's own space) where you can type new values (`+=0.1` works).
+- **Maya manipulator for curve and surface CVs** (#274): in curve and NURBS surface edit mode the Move and Scale
+  tools show the same Maya-style manipulator as objects, mesh components and lattice points, placed at the
+  selected CVs (Bezier points and handles count by their own selection), instead of Blender's transform gizmo.
+- **Transform Constraint: Along Normals** (#262): the Move tool's Transform Constraint (Tool Settings and the
+  tool option marking menus' Transform Constraints) has Along Normals: in mesh edit mode a manipulator or
+  middle-mouse drag moves each selected component along its own normal.
 
 ### Changed
 - **IPR opens its own render window** (#277): Render > IPR Render Current Frame, Redo Previous IPR Render and the
@@ -66,16 +75,29 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   The add-on preference Key Size (also in Windows > Settings/Preferences > Preferences > Animation) sets the size;
   0 shows Blender's own keys. Toolbar buttons that do different things no longer share an icon (Center current
   time, Auto load, Unconstrained drag, Re-normalize curves).
-- **Graph Editor / Dope Sheet toolbar fits narrow editors** (#277): when the editor is too narrow for every
-  toolbar button, the button groups that fit stay in Maya's order and the rest move into a » menu at the
-  right end of the row (with their Maya names), instead of being cut off.
 - **Bigger tangent handles in the Graph Editor** (#277): tangent handle points are drawn as bold rings that
   grow with the Key Size preference, black when unselected and in the selected colour when selected, so
   they are easier to see and to grab and never look like keys. Key Size 0 shows Blender's own handles.
+- **Graph Editor / Dope Sheet toolbar fits narrow editors** (#277): when the editor is too narrow for every
+  toolbar button, the button groups that fit stay in Maya's order and the rest move into a » menu at the
+  right end of the row (with their Maya names), instead of being cut off.
 - **Graph Editor / Dope Sheet toolbar pictures** (#277): every toolbar button now has its own picture that
   shows what it does: tangent buttons draw the curve shape they give around a key (Auto, Spline, Clamped,
   Linear, Flat, Stepped, Plateau ...), key tools draw keys with the tool's motion, the view buttons show how
   curves are laid out and the infinity buttons show the repeated curve. Hover a button for its Maya name.
+- **Scale Keys box: Shift and moving keys** (#270): in the Graph Editor with the Scale Keys tool (r), Shift+drag on
+  a corner of the box scales the keys in time or in value only, whichever way the drag starts; a drag inside the
+  box moves the selected keys. A click inside the box without dragging, a press on a key that isn't selected and
+  Shift+click still select keys as before.
+- **Channel Box middle-drag follows the axis** (#273): with Translate X / Y / Z selected in the Channel Box, a
+  middle-mouse drag in the viewport moves the object (or joint) along that axis as it is drawn on screen, like
+  dragging that arrow of the Move manipulator, so up / down drags count too. Selected Rotate channels turn
+  0.36 degrees per pixel (right or down turns up). Other channels stay a sideways slider.
+- **Transform Constraint from the Move handles** (#280): with Surface set, dragging an arrow or plane handle of
+  the Move manipulator keeps the move to that axis or plane while each point stays on the mesh surface (before,
+  any handle moved freely). The setting in the Move Tool Settings can be picked in Object Mode too (it was greyed
+  there and looked unavailable); it acts on components in mesh edit mode. Edge slides along edges from any handle
+  or a middle-mouse drag, like before.
 - **The 3D View shows the UV selection in UV mode** (#264): after F12 (UV), the vertices of the UVs you pick in
   the UV Editor are drawn as selected in the 3D View and every other vertex as unselected, like Maya, instead of
   the whole mesh looking selected. Mesh component colours now also follow selection changes after you open or
@@ -83,6 +105,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Pre-selection for single UVs, edges and faces** (#264): in the UV Editor the UV, UV edge or UV face a click
   would pick is drawn in the pre-selection red under the mouse, like Maya, not only whole UV shells. The add-on
   preference UV Pre-selection (formerly UV Shell Pre-selection) turns it off.
+- **Straighten UVs and Randomize Shells work like Maya** (#264): UV Editor > Modify > Straighten UVs lines up the
+  selected UV edges that run within 30 degrees of U or V (each connected run on its own line) instead of putting
+  every selected UV on one line, and Randomize Shells moves, turns and scales each shell within the ranges of its
+  option window (by default it moves shells up to 0.1 along U and V). Both have their option windows.
 - **Bevel at box corners with tilted faces** (#213): Edit Mesh > Bevel on two edges that meet at a corner with one
   more edge now places the new corner, the new vertex on the third edge and both far ends like Maya when the side
   faces lean in or out, as long as the two edges' face angles differ by up to about 10.9 degrees (the same
@@ -106,18 +132,23 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   so on, and the scene gets Blender's own Sculpting, UV Editing and Animation workspaces (from your startup
   file if it has them). A Maya workspace picked from Windows > Workspaces is no longer left behind when you
   switch back to Blender either.
-- Opening Preferences or another window with a temporary screen no longer prints a TypeError from the joint overlay and switch timers (#281).
-- **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
-  Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the selection.
-- **Help opens the Blender 5.2 manual**: the main Help menu, the Layer Editor and Outliner help, and the Help menus
-  of the UV Editor, UV Toolkit, Graph Editor, Dope Sheet and the other Maya editor windows pointed at the Blender 4.5
-  manual, API and release notes; the Component Editor's help page link is fixed.
-- **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout, Texel
-  Density Get / Set, Stack, Orient, Distribute, Unstack, Layout Along and Stack Similar work only on the shells you
-  picked; the other meshes' UVs are left alone (all shells are used only when nothing is picked).
+- **No TypeError with Preferences open** (#281): opening Preferences or another window with a temporary screen
+  no longer prints a TypeError from the joint overlay and switch timers.
+- **Box and Lasso select pick joints with nothing selected** (#276): in the Maya layout a box or lasso drawn over
+  joints in Object Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the
+  selection.
+- **Auto Key keys only values that change** (#276): a channel changed while Auto Key was off is no longer keyed
+  later when you turn Auto Key on and only change the selection; like Maya, Auto Key keys a channel when its value
+  changes while it is on.
 - **Lattice points on a bent lattice are picked where you see them** (#274): when a Bend or another deformer
   bends a lattice, a click or a marquee in lattice edit mode now picks the points where they are drawn, not where
   they were before the deformer (Shift toggles, Ctrl removes, Ctrl+Shift adds; one Ctrl+Z undoes a marquee).
+- **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout, Texel
+  Density Get / Set, Stack, Orient, Distribute, Unstack, Layout Along and Stack Similar work only on the shells you
+  picked; the other meshes' UVs are left alone (all shells are used only when nothing is picked).
+- **No face centre dots in UV mode** (#264): switching from face mode to UV mode (F12) no longer leaves Blender's
+  face centre dots in the 3D View in wireframe or X-ray; the view shows only the UVs as points. F11 goes back to
+  face mode.
 - **w / e / r anywhere in the Graph Editor** (#270): the keys now pick the Move / Rotate / Scale key tool with the
   mouse over the Graph Editor's outliner, menu bar, toolbar row or sidebar too, not only over the curves.
 - **One undo for a snapped key move** (#270): with time snap on, moving a key that sat between two frames in the
@@ -125,50 +156,16 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Default In / Out Tangent on Blender's own keys** (#267): keys made with Blender's Insert Keyframe (the I key,
   the Insert Keyframe menu and button, the Graph Editor / Dope Sheet insert) now get the Default In / Out Tangent
   too, like the kit's keys. A key set again on a frame that already had one keeps its tangents.
-- **Hotkeys imported with Maya mode off wait for it** (#275): Import Settings with Maya mode off now keeps the
-  file's kit hotkeys and gives them the next time Maya mode starts, instead of leaving them out.
 - **Time Slider ticks for blendShape keys** (#271): keys on a mesh's blendShape target weights now show as ticks
   in the Time Slider when the mesh is selected, with the rest of its keys.
-- **Lasso picks joints with nothing selected** (#276): like the box, the Lasso Select tool drawn around joints in
-  the Maya layout now selects them even when nothing was selected before; one Ctrl+Z undoes the selection.
-- **No face centre dots in UV mode** (#264): switching from face mode to UV mode (F12) no longer leaves Blender's
-  face centre dots in the 3D View in wireframe or X-ray; the view shows only the UVs as points. F11 goes back to
-  face mode.
+- **Hotkeys imported with Maya mode off wait for it** (#275): Import Settings with Maya mode off now keeps the
+  file's kit hotkeys and gives them the next time Maya mode starts, instead of leaving them out.
 - **Room for other add-ons' top-bar menus** (#221): the Maya menu bar now keeps as much room for other add-ons'
   menus as their names take, instead of a fixed width each, so short ones stay in the bar and long ones no longer
   run past its end.
-- **Lattice points in the Channel Box** (#274): with lattice points selected in lattice edit mode, the Channel Box
-  shows the CVs line like for mesh vertices; click it for a table of the selected points (number, X, Y, Z in the
-  lattice's own space) where you can type new values (`+=0.1` works).
-- **Auto Key keys only values that change** (#276): a channel changed while Auto Key was off is no longer keyed
-  later when you turn Auto Key on and only change the selection; like Maya, Auto Key keys a channel when its value
-  changes while it is on.
-- **Transform Constraint: Along Normals** (#262): the Move tool's Transform Constraint (Tool Settings and the
-  tool option marking menus' Transform Constraints) has Along Normals: in mesh edit mode a manipulator or middle-mouse drag
-  moves each selected component along its own normal.
-- **Transform Constraint from the Move handles** (#280): with Surface set, dragging an arrow or plane handle of
-  the Move manipulator keeps the move to that axis or plane while each point stays on the mesh surface (before,
-  any handle moved freely). The setting in the Move Tool Settings can be picked in Object Mode too (it was greyed
-  there and looked unavailable); it acts on components in mesh edit mode. Edge slides along edges from any handle
-  or a middle-mouse drag, like before.
-- **Scale Keys box: Shift and moving keys** (#270): in the Graph Editor with the Scale Keys tool (r), Shift+drag on
-  a corner of the box scales the keys in time or in value only, whichever way the drag starts; a drag inside the
-  box moves the selected keys. A click inside the box without dragging, a press on a key that isn't selected and
-  Shift+click still select keys as before.
-- **Maya manipulator for curve and surface CVs** (#274): in curve and NURBS surface edit mode the Move and Scale
-  tools show the same Maya-style manipulator as objects, mesh components and lattice points, placed at the
-  selected CVs (Bezier points and handles count by their own selection), instead of Blender's transform gizmo.
-- **Channel Box middle-drag follows the axis** (#273): with Translate X / Y / Z selected in the Channel Box, a
-  middle-mouse drag in the viewport moves the object (or joint) along that axis as it is drawn on screen, like
-  dragging that arrow of the Move manipulator, so up / down drags count too. Selected Rotate channels turn
-  0.36 degrees per pixel (right or down turns up). Other channels stay a sideways slider.
-- **blendShape weights in character sets and Set Driven Key** (#271): weight channels picked in the Channel Box
-  (INPUTS > blendShape) can go into a character set (Create Character Set From Channel Box, Add to / Remove from
-  Character Set), and S on the current character keys them. In Set Driven Key, Load Driver / Load Driven with a
-  picked weight loads the blendShape node with that weight. Animation layers don't take weights yet.
-- **Time Slider ticks for keyed components** (#272): in component mode (mesh, curve, surface or lattice edit mode)
-  the Time Slider shows the keys of the selected vertices, CVs or lattice points, so keys set with S on them are
-  visible there.
+- **Help opens the Blender 5.2 manual**: the main Help menu, the Layer Editor and Outliner help, and the Help menus
+  of the UV Editor, UV Toolkit, Graph Editor, Dope Sheet and the other Maya editor windows pointed at the Blender 4.5
+  manual, API and release notes; the Component Editor's help page link is fixed.
 
 ## [0.9.0] — 2026-11-01
 
