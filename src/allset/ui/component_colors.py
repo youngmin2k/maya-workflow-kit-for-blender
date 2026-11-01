@@ -32,7 +32,7 @@ so the hilite line is 1.5 px x UI scale (2 px at 1.25, nothing of Blender's left
 The lines also failed the depth test on one side of a silhouette edge (bias 0.0005): ``DEPTH_BIAS`` 0.002 for the
 hilite wire, ``EDGE_SEL_BIAS`` 0.003 for selected edges, drawn last and 2 px so they stay on top.
 
-UV mode (UV Sync Selection off, the kit's F12 UV component): like Maya, the 3D View shows the UV selection, not the
+UV mode (the kit's F12 UV component, UV Sync Selection off): like Maya, the 3D View shows the UV selection, not the
 mesh selection (the kit selects every face so the UV Editor shows all UVs). Every vertex is drawn as a point,
 vertices with a selected UV in the selected-vertex colour; no selected edges or face stipple.
 """
@@ -511,9 +511,10 @@ def _remove_handler():
 
 
 def uv_mode(context):
-    """The 3D View shows the UV selection: mesh edit mode with UV Sync Selection off (the kit's UV component)."""
+    """The 3D View shows the UV selection: mesh edit mode in the kit's UV component (F12; UV Sync Selection off)."""
+    from ..operators import uv_tools
     try:
-        return context.mode == 'EDIT_MESH' and not context.scene.tool_settings.use_uv_select_sync
+        return context.mode == 'EDIT_MESH' and uv_tools.in_uv_mode(context.scene)
     except AttributeError:
         return False
 
@@ -597,8 +598,15 @@ def _on_reload(*_args):
     _selection_snapshot.clear()
 
 
+@bpy.app.handlers.persistent
+def _on_load(*_args):
+    from ..operators import uv_tools
+    uv_tools.forget_uv_mode()
+    _on_reload()
+
+
 _HANDLERS = (("depsgraph_update_post", _on_depsgraph), ("undo_post", _on_reload), ("redo_post", _on_reload),
-             ("load_post", _on_reload))
+             ("load_post", _on_load))
 
 
 def register():

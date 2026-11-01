@@ -918,6 +918,21 @@ def prepare(context):
 # from before it is kept here and put back when a mesh component mode comes back (issue #80).
 _MESH_SELECTION = {}     # object name -> ((verts, edges, faces) counts, selected vert / edge / face indices)
 
+# Scenes the kit's UV component (F12, the UV / UV Edge / UV Face / island modes) put in UV mode: the 3D View then
+# shows the UV selection. UV Sync Selection off alone doesn't mean UV mode (the Maya layout scene starts with it off).
+_UV_MODE = set()         # scene pointers
+
+
+def in_uv_mode(scene):
+    """The kit's UV component mode is on in ``scene`` (and UV Sync Selection is still off)."""
+    return (scene is not None and scene.as_pointer() in _UV_MODE
+            and not scene.tool_settings.use_uv_select_sync)
+
+
+def forget_uv_mode():
+    """After a file load: scene pointers may be reused."""
+    _UV_MODE.clear()
+
 
 def _counts(bm):
     return len(bm.verts), len(bm.edges), len(bm.faces)
@@ -939,6 +954,7 @@ def leave_uv_mode(context):
     """Maya F9 / F10 / F11 after F12 / Alt+F12: UV Sync Selection back on and the mesh selection from before UV mode
     back (when the mesh still has the same element counts)."""
     ts = context.scene.tool_settings
+    _UV_MODE.discard(context.scene.as_pointer())
     from . import uv_shell_select
     was_shell = uv_shell_select.flag(context)
     uv_shell_select.set_flag(context, False)      # another component mode ends the UV Shell mask
@@ -968,6 +984,7 @@ def set_component(context, mode):
     from . import uv_shell_select
     ts = context.scene.tool_settings
     if mode == 'SHELL':
+        _UV_MODE.discard(context.scene.as_pointer())
         if not _MESH_SELECTION:       # from a mesh component mode: F9 / F10 / F11 bring its selection back (#80)
             remember_mesh_selection(context)
         uv_shell_select.enter(context)
@@ -978,6 +995,7 @@ def set_component(context, mode):
         ts.mesh_select_mode = (mode == 'VERTEX', mode == 'EDGE', mode == 'FACE')
     elif mode in ('UV', 'UV_EDGE', 'UV_FACE', 'ISLAND'):
         ts.use_uv_select_sync = False
+        _UV_MODE.add(context.scene.as_pointer())
         # the 3D View shows UVs as points now: Blender's face select mode would add its face centre dots (X-ray,
         # wireframe), which Maya's UV mode doesn't show. F9 / F10 / F11 set the mesh mode again on the way out.
         if ts.mesh_select_mode[2] and not ts.mesh_select_mode[0]:

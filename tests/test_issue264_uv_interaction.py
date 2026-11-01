@@ -10,6 +10,7 @@ import kit
 
 cc = import_module(kit.MODULE + ".ui.component_colors")
 compat = import_module(kit.MODULE + ".compat")
+uv_tools = import_module(kit.MODULE + ".operators.uv_tools")
 
 
 def _cube_in_uv_mode():
@@ -21,7 +22,7 @@ def _cube_in_uv_mode():
     ob = bpy.context.view_layer.objects.active
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.select_all(action='SELECT')        # the kit's UV mode: every face shown in the UV Editor
-    bpy.context.scene.tool_settings.use_uv_select_sync = False
+    uv_tools.set_component(bpy.context, 'UV')         # F12: UV Sync off, every face selected
     bm = bmesh.from_edit_mesh(ob.data)
     uv = bm.loops.layers.uv.active
     for f in bm.faces:
@@ -41,6 +42,20 @@ def test_uv_mode_follows_uv_sync():
     ts.use_uv_select_sync = True
     assert not cc.uv_mode(bpy.context), "UV Sync on = mesh components: the mesh selection shows"
     ts.use_uv_select_sync = False
+
+
+def test_uv_sync_off_alone_is_not_uv_mode():
+    """A scene can start with UV Sync Selection off (the Maya layout does): vertex / edge / face editing there still
+    shows the mesh selection; only the kit's UV component (F12) shows the UV selection."""
+    _cube_in_uv_mode()
+    ts = bpy.context.scene.tool_settings
+    uv_tools.set_component(bpy.context, 'VERTEX')         # F9 turns UV Sync back on
+    ts.use_uv_select_sync = False
+    assert not cc.uv_mode(bpy.context), "UV Sync off without F12 = mesh components"
+    uv_tools.set_component(bpy.context, 'UV')
+    assert cc.uv_mode(bpy.context)
+    uv_tools.forget_uv_mode()                           # a file load
+    assert not cc.uv_mode(bpy.context)
 
 
 def test_points_show_the_uv_selection():
