@@ -393,16 +393,34 @@ class ALLSET_OT_light_editor(bpy.types.Operator):
 
 
 class ALLSET_OT_ipr_toggle(bpy.types.Operator):
-    """IPR: interactive render in the main viewport (toggle Rendered shading)"""
+    """IPR: interactive render in its own window, looking where the main view looks; click again to close it"""
     bl_idname = "allset.ipr_toggle"
     bl_label = "IPR Render"
 
     def execute(self, context):
+        from . import ipr_window, window_places
+        if ipr_window.is_open():
+            ipr_window.close()
+            return {'FINISHED'}
         area, _r = main_view3d(context.screen)
         if area is None:
             return {'CANCELLED'}
-        ipr_toggle(area.spaces.active)
+        if context.window is None or bpy.app.background:
+            ipr_toggle(area.spaces.active)       # no window to open: the viewport itself
+            return {'FINISHED'}
+        if ipr_window.open_window(context, area) is None:
+            if not window_places.deferred():     # opens on a later tick
+                self.report({'ERROR'}, "Could not open a new window")
+            return {'CANCELLED'}
         return {'FINISHED'}
+
+
+def _ipr_on(space):
+    """The Status Line IPR button looks pressed while the IPR window is open (no window: the viewport's Rendered)."""
+    from . import ipr_window
+    if ipr_window.is_open():
+        return True
+    return bool(space) and bpy.app.background and space.shading.type == 'RENDERED'
 
 
 def ipr_toggle(space):
@@ -643,7 +661,7 @@ def draw_status_line(layout, context, compact=False):
         row = layout.row(align=True)
         _flat(row, "render.view_show", "render_view")
         _flat(row, "allset.render", "render")
-        _flat(row, ALLSET_OT_ipr_toggle.bl_idname, "ipr", depress=bool(space) and space.shading.type == 'RENDERED')
+        _flat(row, ALLSET_OT_ipr_toggle.bl_idname, "ipr", depress=_ipr_on(space))
         _flat(row, ALLSET_OT_render_settings.bl_idname, "render_settings")
         _flat(row, "allset.hypershade", "hypershade")       # ui/hypershade.py
         _grey(row, "render_setup", "Status Line/Render Setup")

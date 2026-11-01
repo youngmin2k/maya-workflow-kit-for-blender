@@ -3,6 +3,15 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- **IPR opens its own render window** (#277): Render > IPR Render Current Frame, Redo Previous IPR Render and the
+  Status Line IPR button now open a separate window with a 3D View in Rendered shading, like Maya's IPR render
+  window, instead of switching your viewport to Rendered. The window shows only the picture (no overlays or
+  toolbars), looks where the main view looks and follows it while you tumble, and the IPR button looks pressed
+  while it is open. IPR again, or closing the window, stops it; your viewport keeps its own shading throughout.
+
 ## [0.9.0] — 2026-11-01
 
 FX, rendering and lighting run Blender's own features from the Maya menus, S keys components, blend shape weights

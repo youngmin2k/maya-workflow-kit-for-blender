@@ -223,15 +223,14 @@ def s_locked_f():
     sp = view3d()[0].spaces.active
     sp.region_3d.view_perspective = 'PERSP'
     sp.shading.type = 'WIREFRAME'
-    with bpy.context.temp_override(window=win()):
-        bpy.ops.allset.ipr_toggle()
+    # the viewport's own Rendered toggle (IPR itself opens its own window: gui_issue277_ipr)
+    mod("ui.status_line").ipr_toggle(sp)
     C["ipr_on"] = sp.shading.type
 
 
 @step
 def s_ipr_off():
-    with bpy.context.temp_override(window=win()):
-        bpy.ops.allset.ipr_toggle()
+    mod("ui.status_line").ipr_toggle(view3d()[0].spaces.active)
 
 
 @step

@@ -138,7 +138,8 @@ NOTICES = {
         "Hook with falloff", "Blender's soft modification is a Hook modifier on the whole mesh with Maya's falloff "
         "(radius 5, smooth), driven by softModNHandle."),
     "Render/IPR Render Current Frame": (
-        "Viewport Rendered", "Blender's IPR is the viewport in Rendered shading (Render Region: Ctrl+B)."),
+        "Rendered window", "Blender's IPR is a 3D View in Rendered shading: it opens in its own window and looks "
+        "where the main view looks; IPR again closes it (Render Region: Ctrl+B)."),
     # FX
     **{path: ("Emit from Object", "Blender particles come from a mesh: select a mesh and use Emit from Object (a "
               "particle system on it).") for path in ("nParticles/Create Emitter", "nParticles/Create Emitter#2")},
