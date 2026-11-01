@@ -409,6 +409,7 @@ class _ModOp(uv_shells._ShellOp):
     def execute(self, context):
         done = 0
         synced = sync(context)
+        self._fallback = not uv_shells.uv_tools.picked_anywhere(context)
         for ob in _meshes(context):
             bm = bmesh.from_edit_mesh(ob.data)
             uv = bm.loops.layers.uv.verify()
@@ -487,7 +488,7 @@ class ALLSET_OT_uv_layout_along(_ModOp, bpy.types.Operator):
     direction: EnumProperty(items=[('U', "U", ""), ('V', "V", "")], default='U', options={'SKIP_SAVE'})
 
     def run_points(self, context, ob, bm, uv, synced, pts, where):
-        return layout_along(target_shells(bm, uv, synced), uv, self.direction)
+        return layout_along(target_shells(bm, uv, synced, self._fallback), uv, self.direction)
 
 
 @undo_steps.no_redo_panel
@@ -498,7 +499,7 @@ class ALLSET_OT_uv_stack_similar(_ModOp, bpy.types.Operator):
     empty = "No similar UV shells in the selection"
 
     def run_points(self, context, ob, bm, uv, synced, pts, where):
-        return stack_similar(target_shells(bm, uv, synced), uv, pts, where)
+        return stack_similar(target_shells(bm, uv, synced, self._fallback), uv, pts, where)
 
 
 @undo_steps.no_redo_panel

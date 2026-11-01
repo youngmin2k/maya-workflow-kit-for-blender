@@ -78,9 +78,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **UV Editor help opens the Blender 5.2 manual**: the Help menus of the UV Editor, UV Toolkit, Graph Editor, Dope
   Sheet and the other Maya editor windows pointed at the Blender 4.5 manual; the Component Editor's help page link
   is fixed.
-- **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout and Texel
-  Density Get / Set work only on the shells you picked; the other meshes' UVs are left alone (all shells are used
-  only when nothing is picked).
+- **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout, Texel
+  Density Get / Set, Stack, Orient, Distribute, Unstack, Layout Along and Stack Similar work only on the shells you
+  picked; the other meshes' UVs are left alone (all shells are used only when nothing is picked).
 - **Lattice points on a bent lattice are picked where you see them** (#274): when a Bend or another deformer
   bends a lattice, a click or a marquee in lattice edit mode now picks the points where they are drawn, not where
   they were before the deformer (Shift toggles, Ctrl removes, Ctrl+Shift adds; one Ctrl+Z undoes a marquee).
