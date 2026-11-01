@@ -94,6 +94,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Default In / Out Tangent on Blender's own keys** (#267): keys made with Blender's Insert Keyframe (the I key,
   the Insert Keyframe menu and button, the Graph Editor / Dope Sheet insert) now get the Default In / Out Tangent
   too, like the kit's keys. A key set again on a frame that already had one keeps its tangents.
+- **Hotkeys imported with Maya mode off wait for it** (#275): Import Settings with Maya mode off now keeps the
+  file's kit hotkeys and gives them the next time Maya mode starts, instead of leaving them out.
 
 ## [0.9.0] — 2026-11-01
 

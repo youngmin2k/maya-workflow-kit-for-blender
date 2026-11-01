@@ -521,6 +521,7 @@ def set_mode(on, layout=True):
         prefs.maya_mode = True
         from . import keymap
         keymap.activate()
+        _pending_hotkeys()
         if layout and not bpy.app.background:
             for window in _windows()[:1]:
                 enter_layout(window)
@@ -548,6 +549,18 @@ def set_mode(on, layout=True):
 
 
 _registered = [False]
+
+
+def _pending_hotkeys():
+    """Hotkeys a settings import made with Maya mode off wait for Maya mode: give them now."""
+    try:
+        from . import settings_io
+        done = settings_io.apply_pending(bpy.context)
+    except Exception as ex:         # never stop Maya mode for this
+        print("Maya Workflow Kit: kept hotkeys:", ex)
+        return
+    if done:
+        print(f"Maya Workflow Kit: {done} imported hotkey(s) given")
 
 
 def _redraw():

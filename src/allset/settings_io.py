@@ -14,7 +14,8 @@ file carries them over:
 - preferences: only the settings that differ from a fresh install (``maya_mode`` stays out: the Maya / Blender switch
   is not a setting to carry);
 - hotkeys: the kit hotkeys the user changed, by Maya command + context; they need Maya mode on (the kit's keys exist
-  only then);
+  only then): imported with Maya mode off, they wait in the extension's user folder and are given the next time
+  Maya mode starts;
 - shelves / marking_menus: the stored documents as they are.
 
 Importing replaces the parts that are in the file and chosen in the dialog; kit hotkeys the file doesn't name keep
@@ -176,6 +177,34 @@ def _reload_files():
             area.tag_redraw()
 
 
+def _pending_path():
+    return os.path.join(os.path.dirname(_shelf_path()), "pending_hotkeys.json")
+
+
+def has_pending():
+    return os.path.isfile(_pending_path())
+
+
+def apply_pending(context):
+    """Maya mode just started: give the hotkeys an import made with Maya mode off. Returns the number given (None =
+    nothing was waiting)."""
+    path = _pending_path()
+    data = _read(path)
+    if data is None:
+        if os.path.isfile(path):
+            os.remove(path)
+        return None
+    try:
+        context.window_manager.keyconfigs.update()     # the kit's keys were just added: the user items follow
+        items = data.get("hotkeys") if isinstance(data, dict) else None
+        done, skipped = import_hotkeys(context, items) if isinstance(items, list) else (0, [])
+        for name, reason in skipped[:20]:
+            print(f"Settings import: hotkey {name}: {reason}")
+    finally:
+        os.remove(path)
+    return done
+
+
 # --- the file ---------------------------------------------------------------------------------------------------
 
 def collect(context, parts=PARTS):
@@ -221,7 +250,8 @@ def apply(context, data, parts=PARTS):
                 print(f"Settings import: hotkey {name}: {reason}")
             lines.append(f"{done} hotkey(s)" + (f", {len(skipped)} left out" if skipped else ""))
         else:
-            lines.append("hotkeys left out (turn Maya mode on and import again)")
+            _write(_pending_path(), {"hotkeys": data["hotkeys"]})
+            lines.append(f"{len(data['hotkeys'])} hotkey(s) kept for Maya mode (given when Maya mode starts)")
     if "shelves" in parts and isinstance(data.get("shelves"), dict) \
             and isinstance(data["shelves"].get("shelves"), list):
         _write(_shelf_path(), data["shelves"])
