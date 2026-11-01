@@ -143,6 +143,10 @@ opened (see Changed).
   instead of a fixed 3 px.
 - **Pivot after component mode** (#263): a pivot moved or turned with D / Insert in Edit Mode no longer stays on
   the object in Object Mode — Center Pivot and the Move manipulator work on the object pivot again.
+- **F12 UV mode when the UV Editor window reopens at its last place**: F12 in component mode now always ends in
+  Maya's UV mode (UV Sync Selection off), and F9 / F10 / F11 afterwards bring back the vertices / edges / faces
+  selected before. Before, once a UV Editor window had been closed somewhere else, the next F12 opened it there with
+  UV Sync Selection still on and the earlier mesh selection was lost.
 
 ## [0.8.0] — 2026-10-31
 

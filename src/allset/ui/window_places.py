@@ -295,6 +295,12 @@ def deferred():
     return _deferred[0]
 
 
+def reopening(kind):
+    """True while the opening operator runs again to copy the carved piece of ``kind`` (its first run did the rest
+    of its work already)."""
+    return kind in _ready
+
+
 def open_at(context, area, kind):
     """A new window copying ``area``: at the remembered place of ``kind`` when there is one. When that place
     first has to be carved out of ``area``, None is returned (``deferred()`` True) and the calling kit operator

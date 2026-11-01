@@ -1,11 +1,12 @@
 """In a real UI: mesh component keys — Shift+> / Shift+<,
-Ctrl+F9 / Ctrl+F11, Ctrl+E, Ctrl+B, D component pivot hold / tap, Alt+D."""
+Ctrl+F9 / Ctrl+F11, Ctrl+E, Ctrl+B, D component pivot hold (click a vertex) / tap on and off, Alt+D."""
 
 import os
 import sys
 
 import bmesh
 import bpy
+from bpy_extras import view3d_utils
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sim import check, ev, run, setup, step, tap, view3d, win  # noqa: E402
@@ -151,7 +152,16 @@ def s_beveled():
 def s_d_held():
     check(f"D held in edit mode: cursor tool ({tool_id()}) and cursor pivot",
           tool_id() == "builtin.cursor" and ts().transform_pivot_point == 'CURSOR')
-    x, y = C["x"] - 120, C["y"] - 80
+    C["cursor"] = bpy.context.scene.cursor.location.copy()
+    # while editing the pivot a click on a vertex, edge or face places it there (Maya custom pivot editing):
+    # click the cube corner nearest to the viewer
+    area, region = view3d()
+    rv3d = area.spaces.active.region_3d
+    mw = ob().matrix_world
+    eye = rv3d.view_matrix.inverted().translation
+    corner = min((mw @ v.co for v in bm().verts), key=lambda p: (p - eye).length)
+    rx, ry = view3d_utils.location_3d_to_region_2d(region, rv3d, corner)
+    x, y = region.x + int(round(rx)), region.y + int(round(ry))
     ev('MOUSEMOVE', 'NOTHING', x=x, y=y)
     ev('LEFTMOUSE', 'PRESS', x=x, y=y)
     ev('LEFTMOUSE', 'RELEASE', x=x, y=y)
@@ -160,7 +170,7 @@ def s_d_held():
 @step
 def s_d_release():
     moved = (bpy.context.scene.cursor.location - C["cursor"]).length > 1e-6
-    check("LMB with D held places the pivot (3D cursor moved)", moved)
+    check("LMB on a vertex with D held places the pivot (3D cursor moved)", moved)
     centre()
     ev('D', 'RELEASE')
 
@@ -174,7 +184,16 @@ def s_d_released():
 
 @step
 def s_d_tap():
-    check(f"D tap clears the custom pivot ({ts().transform_pivot_point})",
+    # a D tap keeps the pivot edit on (Maya custom pivot editing) ...
+    check(f"D tap: pivot editing stays on ({tool_id()}, {ts().transform_pivot_point})",
+          tool_id() == "builtin.cursor" and ts().transform_pivot_point == 'CURSOR')
+    tap('D')
+
+
+@step
+def s_d_tap_off():
+    # ... and a second tap with nothing placed ends it without a custom pivot
+    check(f"D tap again: pivot edit off, no custom pivot ({ts().transform_pivot_point}, {tool_id()})",
           ts().transform_pivot_point == 'BOUNDING_BOX_CENTER' and tool_id() == C["tool"])
     combo('D', alt=True)
 

@@ -354,6 +354,11 @@ def s_f10_object():
     bm.select_flush_mode()
     bmesh.update_edit_mesh(cube().data)
     C["windows"] = len(bpy.context.window_manager.windows)
+    # a UV Editor window closed earlier left its place: F12 then opens the window there, a few ticks later
+    w = win()
+    big = max(w.screen.areas, key=lambda a: a.width * a.height)
+    mod(".ui.window_places").remember("editor:UV", (w.x + big.x + 200, w.y + big.y + 100,
+                                                    big.width - 400, big.height - 200))
     ev('MOUSEMOVE', 'NOTHING', x=C["x"], y=C["y"])
     tap('F12')
 

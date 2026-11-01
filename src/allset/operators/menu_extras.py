@@ -140,7 +140,11 @@ class ALLSET_OT_open_editor(bpy.types.Operator):
         if self.ui_type == 'UV':
             # Maya UV > UV Editor shows the object's UVs at once: edit mode + UV Sync Selection, one editor
             from . import uv_tools
-            uv_tools.prepare(context)
+            from ..ui import window_places
+            if not window_places.reopening(f"editor:{self.ui_type}"):
+                # the second run (window at its remembered place) must not undo what the first run's caller
+                # set meanwhile, e.g. F12's UV mode (UV Sync Selection off)
+                uv_tools.prepare(context)
             if uv_tools.find_uv_editor(context)[1] is not None:
                 return {'FINISHED'}
         area = max(window.screen.areas, key=lambda a: a.width * a.height, default=None)
