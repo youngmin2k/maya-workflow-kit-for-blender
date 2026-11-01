@@ -5798,4 +5798,5 @@ STRINGS = {
     'Line up the selected UV edges that run nearly along U or V (within the angle tolerance): each connected run\nbecomes straight (Maya Straighten UVs)': 'ほぼ U または V 方向 (角度の許容値以内) の選択 UV エッジを揃えます: つながった各列が\n直線になります (Maya UV の直線化)',
     'Move, turn and scale each selected UV shell by a random amount (Maya Randomize Shells)': '選択した各 UV シェルをランダムな量だけ移動・回転・スケールします (Maya シェルのランダム化)',
     'Unfold the selected UV shells (all when none are selected) along U or V only: the other coordinate of every\nUV stays (Maya UV Toolkit Unfold Along U / V)': '選択した UV シェル (未選択ならすべて) を U または V 方向だけ展開します: 各 UV のもう一方の\n座標はそのまま (Maya UV ツールキットの U / V に沿って展開)',
+    'Marquee on lattice points where they are drawn (Shift toggles, Ctrl removes, Ctrl+Shift adds)': 'ラティスの点を描かれている位置でマーキー選択します (Shift で切り替え、Ctrl で解除、Ctrl+Shift で追加)',
 }

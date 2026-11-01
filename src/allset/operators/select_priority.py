@@ -246,6 +246,11 @@ class ALLSET_OT_select_priority(bpy.types.Operator):
     def invoke(self, context, event):
         from ..ui import toolbox
         space, region = context.space_data, context.region
+        if context.mode == 'EDIT_LATTICE' and space is not None and not toolbox.is_toolbox(space):
+            from . import lattice_pick       # #274: lattice points picked where a deformer draws them
+            if lattice_pick.click(context, event):
+                return self._finish_pick(context, event, True)
+            return {'PASS_THROUGH'}
         if (context.mode not in {'OBJECT', 'POSE', 'EDIT_ARMATURE'} or space is None or space.type != 'VIEW_3D' or region is None
                 or region.type != 'WINDOW' or toolbox.is_toolbox(space)):
             return {'PASS_THROUGH'}

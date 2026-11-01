@@ -24,6 +24,7 @@ from . import xform_constraint
 from . import live
 from . import live_translate
 from . import point_keys  # S on selected points keys their positions
+from . import lattice_pick  # lattice points picked where a deformer draws them
 
 classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pivot_pick.classes,
@@ -32,7 +33,7 @@ classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pickwalk.classes, *view.classes, *freeze.classes, *parenting.classes,
            *duplicate.classes, *history.classes, *create.classes, *visibility.classes,
            *component.classes, *manip.classes, *material.classes,
-           *marquee.classes, *preselect.classes, *select_priority.classes, *menu_extras.classes,
+           *marquee.classes, *lattice_pick.classes, *preselect.classes, *select_priority.classes, *menu_extras.classes,
            *tool_keys.classes, *symmetry.classes, *pivot.classes, *snap_align.classes, *time_keys.classes,
            *joints.classes, *skin.classes, *driven_key.classes, *rig_tools.classes, *mesh_maya.classes,
            *mesh_tools.classes, *extrude.classes, *uv_tools.classes, *uv_shells.classes, *uv_modify.classes, *anim_layers.classes, *uv_select_178.classes, *shading_maps.classes, *fx.classes, *project.classes, *graph_keys.classes, *graph_key_menu.classes, *deformer_weights.classes, *joint_labels.classes, *ik_fk.classes, *playblast.classes, *key_batch.classes, *cut_sew.classes, *multi_cut.classes,
