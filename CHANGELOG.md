@@ -3,6 +3,12 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
+  ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
+
 ## [0.9.0] — 2026-11-01
 
 FX, rendering and lighting run Blender's own features from the Maya menus, S keys components, blend shape weights
