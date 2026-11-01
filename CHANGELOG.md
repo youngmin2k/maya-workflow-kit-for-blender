@@ -115,6 +115,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Transform Constraint: Along Normals** (#262): the Move tool's Transform Constraint (Tool Settings and the
   tool option marking menus' Transform Constraints) has Along Normals: in mesh edit mode a manipulator or middle-mouse drag
   moves each selected component along its own normal.
+- **Transform Constraint from the Move handles** (#280): with Surface set, dragging an arrow or plane handle of
+  the Move manipulator keeps the move to that axis or plane while each point stays on the mesh surface (before,
+  any handle moved freely). The setting in the Move Tool Settings can be picked in Object Mode too (it was greyed
+  there and looked unavailable); it acts on components in mesh edit mode. Edge slides along edges from any handle
+  or a middle-mouse drag, like before.
 
 ## [0.9.0] — 2026-11-01
 

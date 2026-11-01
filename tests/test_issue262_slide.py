@@ -1,5 +1,6 @@
 """Move tool Transform Constraint (Edge / Surface slide) and Ctrl+Shift+MMB edge slide. GUI:
 tests/gui/gui_issue262_slide.py."""
+import types
 from importlib import import_module
 
 import bpy
@@ -68,3 +69,43 @@ def test_ctrl_shift_mmb_in_move_tool():
     k = items[0]
     assert (k.type, k.value, k.ctrl, k.shift, k.alt) == ('MIDDLEMOUSE', 'PRESS', True, True, False)
     assert k.properties.mode == 'EDGE'
+
+
+class _Layout:
+    """Records `prop` calls with whether the row holding them is enabled."""
+
+    def __init__(self, log, enabled=True):
+        self.log, self.enabled = log, enabled
+
+    def prop(self, data, name, **_kw):
+        self.log.append((name, self.enabled))
+
+    def operator(self, *_a, **_kw):
+        return types.SimpleNamespace()
+
+    def __getattr__(self, _name):
+        def sub(*_a, **_kw):
+            return _Layout(self.log, self.enabled)
+        return sub
+
+    def __setattr__(self, name, value):
+        if name == "enabled" and "enabled" in self.__dict__:
+            value = self.__dict__["enabled"] and value
+        object.__setattr__(self, name, value)
+
+
+def test_move_settings_row_live_in_object_mode():
+    """#280: the Move tool's Transform Constraint is a stored setting that can be picked in object mode too (it
+    acts once components are moved), not a greyed row."""
+    if bpy.context.mode != 'OBJECT':
+        bpy.ops.object.mode_set(mode='OBJECT')
+    log = []
+    ts_ui.draw_settings(_Layout(log), bpy.context, 'TRANSLATE')
+    rows = [enabled for name, enabled in log if name == "transform_constraint"]
+    assert rows == [True], log
+
+
+def test_surface_slide_follows_the_handle():
+    """#280: the Move handle's axis reaches the Surface slide (an X arrow drag keeps to X on the surface)."""
+    props = bpy.ops.allset.component_slide.get_rna_type().properties
+    assert {"constraint_axis", "orient_type", "orient_matrix"} <= set(props.keys())

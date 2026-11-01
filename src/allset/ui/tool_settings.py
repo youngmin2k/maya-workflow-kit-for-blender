@@ -391,7 +391,7 @@ def draw_settings(layout, context, kind):
     row = _labelled(layout, "Transform Constraint:")
     if kind == 'TRANSLATE':
         from .. import preferences
-        row.enabled = context.mode == 'EDIT_MESH'
+        # a stored setting like Maya's: it can be picked in any mode and acts on mesh components
         row.prop(preferences.get(context), "transform_constraint", text="")
     else:
         _grey(row, "Transform Constraint", text="Off")

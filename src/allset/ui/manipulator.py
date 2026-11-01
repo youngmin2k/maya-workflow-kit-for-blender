@@ -584,6 +584,12 @@ class ALLSET_GGT_xform(GizmoGroup):
             elif slide and kind == 'TRANSLATE' and not editing and role in ('AXIS', 'PLANE', 'CENTER'):
                 # Maya Transform Constraint Edge / Surface: every Move handle slides the components
                 props = gz.target_set_operator("allset.component_slide")
+                if role in ('AXIS', 'PLANE'):
+                    props.constraint_axis = (tuple(a == data for a in 'XYZ') if role == 'AXIS'
+                                             else PLANES[data][0])
+                    builtin = {'GLOBAL', 'LOCAL', 'NORMAL', 'GIMBAL', 'VIEW', 'CURSOR', 'PARENT'}
+                    props.orient_type = otype if otype in builtin else 'GLOBAL'
+                    props.orient_matrix = Matrix.Identity(3) if otype in builtin else frame
             elif role == 'AXIS':
                 axes = tuple(a == data for a in 'XYZ')
                 props = gz.target_set_operator("allset.component_scale" if clamp and kind == 'RESIZE' else op)
