@@ -295,65 +295,167 @@ def _submenu(editor, sub):
     return menu_sets.SUBMENU_IDS.get(f"{editor}/{sub}")
 
 
-def draw_icons(layout, context, editor):
-    row = layout.row(align=True)
+def icon_groups(editor):
+    """The icon row split at Maya's separators: lists of items (spec tuples, "STATS", "IMAGE", "UVMAP")."""
+    groups, cur = [], []
     for it in ICONS[editor]:
         if it == "|":
-            row.separator()
-            row = layout.row(align=True)
-        elif it == "STATS":
-            scene = context.scene
-            sub = layout.row(align=True)
-            sub.label(text="Stats")
-            col = sub.row(align=True)
-            col.ui_units_x = 3.5
-            col.prop(scene, "allset_key_time", text="")
-            col = sub.row(align=True)
-            col.ui_units_x = 3.5
-            col.prop(scene, "allset_key_value", text="")
-        elif it == "IMAGE":
-            sima = context.space_data
-            layout.template_ID(sima, "image", new="image.new", open="image.open")
-        elif it == "UVMAP":
-            ob = context.edit_object
-            if ob is not None and ob.type == 'MESH' and ob.data.uv_layers.active is not None:
-                sub = layout.row()
-                sub.ui_units_x = 5
-                sub.prop(ob.data.uv_layers.active, "name", text="", icon='GROUP_UVS')
+            if cur:
+                groups.append(cur)
+            cur = []
         else:
-            _draw_icon(row, context, editor, it)
+            cur.append(it)
+    if cur:
+        groups.append(cur)
+    return groups
 
 
-def _draw_icon(row, context, editor, it):
+STATS_UNITS = (2.0, 3.5, 3.5)       # "Stats" label, time field, value field (ui_units_x sub-rows)
+SEP_UNITS = 0.3                     # Blender's separator in a header row
+FOLD = (GE, DS)                     # editors whose toolbar row folds into » when the area is too narrow
+
+
+def group_px(group, u):
+    """Px width of one icon group (aligned row of buttons / the Stats fields), its trailing separator included."""
+    from .toolbar_fit import px
+    w = 0
+    for it in group:
+        if it == "STATS":
+            w += sum(px(k, u) for k in STATS_UNITS)
+        else:
+            w += u
+    return w + px(SEP_UNITS, u)
+
+
+def shown_groups(context, editor):
+    """How many leading icon groups fit the toolbar row; the rest go behind Maya's » button."""
+    groups = icon_groups(editor)
+    region = getattr(context, "region", None)
+    if editor not in FOLD or region is None or getattr(region, "type", None) != 'FOOTER' or region.width <= 1:
+        return len(groups)
+    from . import toolbar_fit
+    system = context.preferences.system
+    scale = system.ui_scale or 1.0
+    u = toolbar_fit.unit(scale, system.pixel_size)
+    return toolbar_fit.fit_widths([group_px(g, u) for g in groups], region.width, scale, system.pixel_size)
+
+
+# area pointer -> (editor, index of the first group behind ») written while the toolbar draws (no ID data written)
+_FIRST_HIDDEN = {}
+
+
+def _draw_stats(layout, context, menu=False):
+    scene = context.scene
+    if menu:
+        layout.prop(scene, "allset_key_time")
+        layout.prop(scene, "allset_key_value")
+        return
+    sub = layout.row(align=True)
+    lab = sub.row(align=True)
+    lab.ui_units_x = STATS_UNITS[0]
+    lab.label(text="Stats")
+    for prop, units in (("allset_key_time", STATS_UNITS[1]), ("allset_key_value", STATS_UNITS[2])):
+        col = sub.row(align=True)
+        col.ui_units_x = units
+        col.prop(scene, prop, text="")
+    sub.separator()
+
+
+def draw_icons(layout, context, editor):
+    groups = icon_groups(editor)
+    n = shown_groups(context, editor)
+    area = getattr(context, "area", None)
+    if area is not None:
+        _FIRST_HIDDEN[area.as_pointer()] = (editor, n)
+    for k, group in enumerate(groups[:n]):
+        row = layout.row(align=True) if any(isinstance(it, tuple) for it in group) else None
+        for it in group:
+            if it == "STATS":
+                _draw_stats(layout, context)
+            elif it == "IMAGE":
+                sima = context.space_data
+                layout.template_ID(sima, "image", new="image.new", open="image.open")
+            elif it == "UVMAP":
+                ob = context.edit_object
+                if ob is not None and ob.type == 'MESH' and ob.data.uv_layers.active is not None:
+                    sub = layout.row()
+                    sub.ui_units_x = 5
+                    sub.prop(ob.data.uv_layers.active, "name", text="", icon='GROUP_UVS')
+            else:
+                _draw_icon(row, context, editor, it)
+        if k < len(groups) - 1 and row is not None:
+            row.separator()
+    if n >= len(groups):
+        return
+    # Maya's overflow arrow at the right end: the groups that don't fit, in a menu (Maya's button order kept)
+    from . import status_icons, toolbar_fit
+    layout.separator_spacer()
+    sub = layout.row(align=True)
+    sub.ui_units_x = toolbar_fit.MORE_UNITS
+    icon = status_icons.icon("pt_more") if "pt_more" in status_icons.EXTRA else 0
+    if icon:
+        sub.menu(ALLSET_MT_editor_more.bl_idname, text="", icon_value=icon)
+    else:
+        sub.menu(ALLSET_MT_editor_more.bl_idname, text="»")
+
+
+class ALLSET_MT_editor_more(bpy.types.Menu):
+    """More toolbar buttons: the ones that don't fit this editor's width"""
+    bl_idname = "ALLSET_MT_editor_more"
+    bl_label = "More Buttons"
+
+    def draw(self, context):
+        area = context.area
+        editor, first = _FIRST_HIDDEN.get(area.as_pointer(), (None, 0)) if area is not None else (None, 0)
+        if editor not in ICONS:
+            return
+        layout = self.layout
+        for k, group in enumerate(icon_groups(editor)[first:]):
+            if k:
+                layout.separator()
+            for it in group:
+                if it == "STATS":
+                    _draw_stats(layout, context, menu=True)
+                elif isinstance(it, tuple):
+                    _draw_icon(layout, context, editor, it, text=it[3])
+
+
+def _icon_args(editor, key, icon):
+    """Button icon keywords."""
+    return {"icon": icon}
+
+
+def _draw_icon(row, context, editor, it, text=""):
     key, icon, action, _tip = it
+    ic = _icon_args(editor, key, icon)
     if action is None:
-        row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text="", icon=icon).key = f"{editor}|{key}"
+        row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text=text, **ic).key = f"{editor}|{key}"
         return
     if action[0] == "submenu":
         idname = _submenu(editor, action[1])
         if idname:
-            row.menu(idname, text="", icon=icon)
+            row.menu(idname, text=text, **ic)
         return
     if action[0] in ("prop", "channels"):
         owner, attr = menu_sets.prop_owner(context, action[1])
         if owner is None:
-            row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text="", icon=icon).key = f"{editor}|{key}"
+            row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text=text, **ic).key = f"{editor}|{key}"
             return
         if action[0] == "channels":
-            row.prop(owner, attr, text="", icon_only=True)
+            row.prop(owner, attr, text=text, icon_only=not text)
             return
         props = action[2]
         if "value" not in props:
-            row.prop(owner, attr, text="", icon=icon, toggle=True)
+            row.prop(owner, attr, text=text, toggle=True, **ic)
             return
         current = getattr(owner, attr)
         value = props["value"]
         on = abs(current - value) < 1e-6 if isinstance(value, float) else current == value
-        op = row.operator(menu_sets.ALLSET_OT_menu_set_value.bl_idname, text="", icon=icon, depress=on)
+        op = row.operator(menu_sets.ALLSET_OT_menu_set_value.bl_idname, text=text, depress=on, **ic)
         op.target, op.value = action[1], repr(value)
         return
     on = _toggle_state(context, key)
-    row.operator(ALLSET_OT_editor_icon.bl_idname, text="", icon=icon, depress=bool(on)).key = f"{editor}|{key}"
+    row.operator(ALLSET_OT_editor_icon.bl_idname, text=text, depress=bool(on), **ic).key = f"{editor}|{key}"
 
 
 def _toggle_state(context, key):
@@ -1964,7 +2066,7 @@ def prepare_later(window, ui_type, tries=60):
 
 # --- registration --------------------------------------------------------------------------------------------------
 
-classes = (ALLSET_OT_editor_icon, ALLSET_OT_editor_icon_unavailable, ALLSET_OT_graph_channel_click,
+classes = (ALLSET_OT_editor_icon, ALLSET_OT_editor_icon_unavailable, ALLSET_MT_editor_more, ALLSET_OT_graph_channel_click,
            ALLSET_OT_graph_channel_scroll, ALLSET_OT_graph_list, ALLSET_OT_graph_pin, ALLSET_OT_graph_attr_clear,
            *_BLENDER.values(), *_BAR.values())
 _handle = []
@@ -2009,6 +2111,7 @@ def unregister():
     _expanded.clear()
     _up_label.clear()
     _scroll.clear()
+    _FIRST_HIDDEN.clear()
     _picked["ids"], _picked["sig"] = set(), None
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

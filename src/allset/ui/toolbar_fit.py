@@ -65,6 +65,27 @@ def fit(groups, width, scale, pixel_size=1.0):
     return n
 
 
+def fit_widths(widths, width, scale, pixel_size=1.0):
+    """Number of leading items (px ``widths``, one header row item each) shown in a row ``width`` px wide when the
+    rest go behind a right-aligned » button."""
+    u, s = unit(scale, pixel_size), spacing(scale)
+    lead = px(0.4, u)
+    right = lead + SLACK
+    more = s + px(MORE_UNITS, u)
+    x = lead
+    ends = []
+    for w in widths:
+        x += w
+        ends.append(x)
+        x += s
+    if not ends or ends[-1] + right <= width:
+        return len(ends)
+    n = 0
+    while n < len(ends) and ends[n] + more + right <= width:
+        n += 1
+    return n
+
+
 def more_x(width, scale, pixel_size=1.0):
     """Region x range of the » button (right-aligned)."""
     u = unit(scale, pixel_size)

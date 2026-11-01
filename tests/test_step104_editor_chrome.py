@@ -97,7 +97,7 @@ def test_header_draw_menus_and_icons():
         def __init__(self):
             self.log = []
 
-        def menu(self, idname, text="", icon='NONE'):
+        def menu(self, idname, text="", icon='NONE', **kw):
             self.log.append(("menu", idname, text))
 
         def operator(self, idname, text="", icon='NONE', **kw):

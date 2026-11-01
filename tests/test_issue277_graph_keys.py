@@ -127,3 +127,59 @@ def test_working_toolbar_buttons_have_their_own_icons():
             seen.setdefault(icon, set()).add(repr(action) if action is not None else key)
         clashes = {icon: acts for icon, acts in seen.items() if len(acts) > 1}
         assert not clashes, (editor, clashes)
+
+
+def _fold_ctx(width, region_type='FOOTER', scale=1.25):
+    region = SimpleNamespace(type=region_type, width=width)
+    system = SimpleNamespace(ui_scale=scale, pixel_size=1.0)
+    return SimpleNamespace(region=region, preferences=SimpleNamespace(system=system))
+
+
+def test_toolbar_folds_into_more_when_narrow():
+    """A toolbar row too narrow for every button shows the leading groups in Maya's order; the rest go behind »."""
+    groups = chrome.icon_groups("Graph Editor")
+    assert len(groups) > 8 and groups[0][0][0] == "directKeyTool" and groups[-1][-1][0] == "getCTEButton"
+    assert chrome.shown_groups(_fold_ctx(4000), "Graph Editor") == len(groups)
+    n = chrome.shown_groups(_fold_ctx(950), "Graph Editor")
+    assert 3 <= n < len(groups), n
+    assert chrome.shown_groups(_fold_ctx(1400), "Graph Editor") > n
+    # the menu-bar header (toolbar not on its own row) and the UV Editor keep every button
+    assert chrome.shown_groups(_fold_ctx(950, 'HEADER'), "Graph Editor") == len(groups)
+    assert chrome.shown_groups(_fold_ctx(300), "UV Editor") == len(chrome.icon_groups("UV Editor"))
+    # every button is in exactly one group, in Maya's order
+    flat = [it for g in groups for it in g]
+    assert flat == [it for it in chrome.GRAPH_ICONS if it != "|"]
+
+
+def test_more_menu_lists_the_hidden_buttons():
+    class Rec:
+        def __init__(self):
+            self.log = []
+
+        def operator(self, idname, text="", **kw):
+            self.log.append(text)
+            return SimpleNamespace()
+
+        def menu(self, idname, text="", **kw):
+            self.log.append(text)
+
+        def prop(self, owner, attr, text="", **kw):
+            self.log.append(text or attr)
+
+        def __getattr__(self, name):
+            return lambda *a, **k: SimpleNamespace()
+
+    area = SimpleNamespace(as_pointer=lambda: 12345)
+    space = SimpleNamespace(type='GRAPH_EDITOR', mode='FCURVES', use_normalization=False, use_auto_normalization=False)
+    ctx = SimpleNamespace(area=area, space_data=space, scene=bpy.context.scene,
+                          tool_settings=bpy.context.scene.tool_settings, preferences=bpy.context.preferences,
+                          window_manager=bpy.context.window_manager)
+    groups = chrome.icon_groups("Graph Editor")
+    chrome._FIRST_HIDDEN[12345] = ("Graph Editor", len(groups) - 2)
+    try:
+        menu = SimpleNamespace(layout=Rec())
+        chrome.ALLSET_MT_editor_more.draw(menu, ctx)
+    finally:
+        chrome._FIRST_HIDDEN.pop(12345, None)
+    want = [it[3] for g in groups[-2:] for it in g if isinstance(it, tuple)]
+    assert menu.layout.log == want, menu.layout.log

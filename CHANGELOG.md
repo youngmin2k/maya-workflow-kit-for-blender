@@ -30,6 +30,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   The add-on preference Key Size (also in Windows > Settings/Preferences > Preferences > Animation) sets the size;
   0 shows Blender's own keys. Toolbar buttons that do different things no longer share an icon (Center current
   time, Auto load, Unconstrained drag, Re-normalize curves).
+- **Graph Editor / Dope Sheet toolbar fits narrow editors** (#277): when the editor is too narrow for every
+  toolbar button, the button groups that fit stay in Maya's order and the rest move into a » menu at the
+  right end of the row (with their Maya names), instead of being cut off.
 
 ### Fixed
 - **Box select picks joints with nothing selected** (#276): in the Maya layout a box drawn over joints in Object
