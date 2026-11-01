@@ -6,6 +6,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [Unreleased]
 
 ### Added
+- **Numpad digits work like the top row** (#283): as on a Maya keyboard, numpad 1 / 2 / 3 set the smooth
+  preview, numpad 4 / 5 / 6 / 7 the display mode and numpad 0 the rough display; in the UV Editor and Graph
+  Editor the numpad digits do what the top-row digits do there.
 - **Numpad + / - size the manipulator** (#283): in the 3D View the numpad + and - keys make the Move / Scale
   manipulator bigger and smaller like = and -, as on a Maya keyboard (Blender's numpad zoom is replaced;
   Shift+numpad + / - still dolly).

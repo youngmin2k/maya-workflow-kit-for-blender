@@ -1550,6 +1550,31 @@ def patch_uv_shell_hover(kd):
 PATCHES += (patch_uv_shell_hover,)
 
 
+# --- Numpad digits = the top row (#283) -----------------------------------------------------------------------
+# On a Maya keyboard the numpad digits are the same keys as the top row: 1 / 2 / 3 smooth preview, 4-7 display,
+# 0 rough display, and every other plain digit key. Each plain digit item the kit adds gets a numpad twin, unless
+# that key map already has an item on the numpad key (then Blender's stays). Runs after every other patch.
+
+DIGITS = ("ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE")
+NUMPAD_DIGITS = {key: f"NUMPAD_{n}" for n, key in enumerate(DIGITS)}
+
+
+def patch_numpad_digits(kd):
+    plain = (0,) * len(patch.MODS)
+    twins = []
+    for km, idname, e, props, shadows in ADDED:
+        numpad = NUMPAD_DIGITS.get(e["type"])
+        if numpad is not None and e.get("value", "PRESS") == "PRESS" and not e.get("any") and                 patch.event_key(e)[2] == plain and e.get("key_modifier", "NONE") == "NONE":
+            twins.append((km, idname, numpad, props, shadows))
+    taken = {(km, numpad) for km, _i, numpad, _p, _s in twins if kd.find(km, type=numpad)}
+    for km, idname, numpad, props, shadows in twins:
+        if (km, numpad) not in taken:
+            _add(kd, km, idname, make_event(numpad), props, shadows=shadows)
+
+
+PATCHES += (patch_numpad_digits,)
+
+
 def apply(data):
     """Apply all patches to IC data in place and return it."""
     ADDED.clear()
