@@ -10,6 +10,10 @@ Ctrl removes, Ctrl+Shift adds, as for objects.
 ``allset.select_through`` (first in the select tools' drag keymaps) calls ``begin``: the selection is remembered and,
 once Blender's box / lasso modal has ended, the region it registered is checked against the drawn joints. When a joint
 was hit the remembered selection comes back and the joints are applied with the drag's mode.
+
+A box that changes nothing in Blender's eyes (nothing selected before, no Blender element inside) ends CANCELLED and is
+not registered, so the box is also read from the running operator while it is drawn and used when nothing new was
+registered. Blender pushed no undo step then, so the kit's step stands alone.
 """
 
 import bpy
@@ -34,7 +38,7 @@ def begin(context):
     _pending.append({
         "window": live_refs.pointer(context.window), "area": context.area.as_pointer(),
         "region": context.region.as_pointer(), "last": last, "snap": snapshot(context),
-        "seen": False, "waited": 0.0, "mode": context.mode,
+        "seen": False, "waited": 0.0, "mode": context.mode, "box": None,
     })
     if not bpy.app.timers.is_registered(_watch):
         bpy.app.timers.register(_watch, first_interval=_TICK)
@@ -99,16 +103,16 @@ def modifiers(mode):
     return {'XOR': (True, False), 'SUB': (False, True), 'ADD': (True, True)}.get(mode, (False, False))
 
 
-def objects_instead(context, op, mode):
+def objects_instead(context, poly, mode, lasso):
     """A drag in Pose / joint Edit mode that hit no joint: Maya selects the objects in it (Blender's box there only
-    looks at bones). Leave the mode and run the same box / lasso on objects."""
+    looks at bones). Leave the mode and run the same box / lasso (``poly`` from ``region_of``) on objects."""
     from . import joint_selection
     joint_selection.leave(context, clear_selection=(mode == 'SET'))
-    p = op.properties
-    if op.bl_idname == "VIEW3D_OT_select_box":
-        bpy.ops.view3d.select_box(xmin=p.xmin, xmax=p.xmax, ymin=p.ymin, ymax=p.ymax, mode=mode, wait_for_input=False)
+    if not lasso:
+        (x0, y0), _b, (x1, y1), _d = poly
+        bpy.ops.view3d.select_box(xmin=x0, xmax=x1, ymin=y0, ymax=y1, mode=mode, wait_for_input=False)
     else:
-        bpy.ops.view3d.select_lasso(path=[{"name": "", "loc": tuple(q.loc), "time": 0.0} for q in p.path], mode=mode)
+        bpy.ops.view3d.select_lasso(path=[{"name": "", "loc": q, "time": 0.0} for q in poly], mode=mode)
 
 
 def apply(context, poly, mode, snap):
@@ -135,17 +139,28 @@ def apply(context, poly, mode, snap):
     return [n for _o, n in picks]
 
 
+def _registered(entry):
+    """The box / lasso Blender registered for this drag, or None (it ended CANCELLED)."""
+    wm = bpy.context.window_manager
+    if not len(wm.operators):
+        return None
+    op = wm.operators[-1]
+    if op.as_pointer() == entry["last"] or op.bl_idname not in SELECT_OPS:
+        return None
+    return op
+
+
 def _finish(entry):
     window = live_refs.window(entry["window"])
     if window is None:
         return
-    wm = bpy.context.window_manager
-    if not len(wm.operators):
+    op = _registered(entry)
+    if op is not None:
+        poly, mode = region_of(op), op.properties.mode
+    elif entry["box"] is not None:
+        poly, mode = entry["box"]
+    else:
         return
-    op = wm.operators[-1]
-    if op.as_pointer() == entry["last"] or op.bl_idname not in SELECT_OPS:
-        return
-    poly = region_of(op)
     if poly is None:
         return
     area = next((a for a in window.screen.areas if a.as_pointer() == entry["area"]), None)
@@ -153,28 +168,39 @@ def _finish(entry):
     if region is None:
         return
     with bpy.context.temp_override(window=window, area=area, region=region):
-        picked = apply(bpy.context, poly, op.properties.mode, entry["snap"])
+        picked = apply(bpy.context, poly, mode, entry["snap"])
         if not picked and entry["mode"] in {'POSE', 'EDIT_ARMATURE'}:
-            objects_instead(bpy.context, op, op.properties.mode)
+            lasso = op is not None and op.bl_idname == "VIEW3D_OT_select_lasso"
+            objects_instead(bpy.context, poly, mode, lasso)
             picked = True
         if picked:
-            from . import undo_pairs           # one undo with Blender's box select step before it
-            undo_pairs.push(bpy.context.scene, "Select")
+            if op is not None:
+                from . import undo_pairs       # one undo with Blender's box select step before it
+                undo_pairs.push(bpy.context.scene, "Select")
+            else:
+                bpy.ops.ed.undo_push(message="Select")
             for a in window.screen.areas:
                 a.tag_redraw()
 
 
-def _running(win_ptr):
-    window = live_refs.window(win_ptr)
+def _running(entry):
+    """Blender's box / lasso modal of this drag is still running; keeps the box drawn so far in ``entry``."""
+    window = live_refs.window(entry["window"])
     try:
-        return window is not None and any(op.bl_idname in SELECT_OPS for op in window.modal_operators)
+        ops = [op for op in window.modal_operators if op.bl_idname in SELECT_OPS] if window is not None else []
+        for op in ops:
+            if op.bl_idname == "VIEW3D_OT_select_box":
+                p = op.properties
+                if p.xmin != p.xmax or p.ymin != p.ymax:
+                    entry["box"] = (region_of(op), p.mode)
+        return bool(ops)
     except ReferenceError:
         return False
 
 
 def _watch():
     for entry in list(_pending):
-        running = _running(entry["window"])
+        running = _running(entry)
         entry["seen"] = entry["seen"] or running
         entry["waited"] += _TICK
         if entry["seen"] and not running:
