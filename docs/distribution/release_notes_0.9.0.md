@@ -69,6 +69,7 @@ to keep the tidied state.
 - Every Scale handle stops at zero in component mode (#261); edit-mode vertices follow the theme Vertex Size and a
   component pivot no longer sticks in Object Mode (#263).
 - The kit's tooltips follow the interface language too (Japanese, Simplified Chinese).
+- F12 keeps Maya's UV mode when the UV Editor window reopens at its last place.
 
 The known differences listed in `CHANGELOG.md` still apply.
 
