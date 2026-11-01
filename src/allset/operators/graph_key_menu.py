@@ -382,6 +382,94 @@ def after_insert(owner, path, index, frame):
     return n
 
 
+# --- Blender's own keys: the default in / out tangent too ----------------------------------------------------------
+# Blender's insert operators (I key, Insert Keyframe menu and button, the Graph Editor / Dope Sheet insert) make keys
+# with Blender's own handles. Right after one of them finished, the keys it added get the Default In / Out Tangent like
+# the kit's keys. A key that replaced one already on that frame keeps its tangents.
+
+BLENDER_KEY_OPS = frozenset(("ANIM_OT_keyframe_insert", "ANIM_OT_keyframe_insert_menu",
+                             "ANIM_OT_keyframe_insert_by_name", "ANIM_OT_keyframe_insert_button",
+                             "GRAPH_OT_keyframe_insert", "GRAPH_OT_click_insert", "ACTION_OT_keyframe_insert"))
+_frames = {}                # Action name -> {curve key: frozenset of key frames} as last seen
+_insert = {"op": 0}
+
+
+def _curve_frames(action):
+    from .. import compat
+    return {f"{fc.data_path}|{fc.array_index}": frozenset(round(kp.co.x, 3) for kp in fc.keyframe_points)
+            for fc in compat.action_fcurves(action)}
+
+
+@bpy.app.handlers.persistent
+def remember_all_keys(*_args):
+    """Note every Action's key frames (new keys are told apart from these)."""
+    _frames.clear()
+    try:
+        actions = list(bpy.data.actions)
+        _insert["op"] = _last_op_pointer()
+    except AttributeError:          # restricted data while Blender starts
+        return
+    for action in actions:
+        _frames[action.name] = _curve_frames(action)
+
+
+def _last_op_pointer():
+    ops = bpy.context.window_manager.operators
+    return ops[-1].as_pointer() if len(ops) else 0
+
+
+def blender_new_keys(action):
+    """(curve, key) pairs of ``action`` that are not in its remembered frames."""
+    from .. import compat
+    seen = _frames.get(action.name, {})
+    out = []
+    for fc in compat.action_fcurves(action):
+        old = seen.get(f"{fc.data_path}|{fc.array_index}", frozenset())
+        out.extend((fc, kp) for kp in fc.keyframe_points if round(kp.co.x, 3) not in old)
+    return out
+
+
+def tangent_blender_keys(action):
+    """Default In / Out Tangent on the keys a Blender insert just added to ``action``; returns how many."""
+    from . import maya_tangents
+    n = 0
+    curves = []
+    for fc, kp in blender_new_keys(action):
+        if apply_default(fc, kp):
+            n += 1
+            if fc not in curves:
+                curves.append(fc)
+    for fc in curves:
+        maya_tangents.apply(fc)
+    return n
+
+
+@bpy.app.handlers.persistent
+def _keys_depsgraph(scene, depsgraph):
+    try:
+        if not depsgraph.id_type_updated('ACTION'):
+            return
+        ops = bpy.context.window_manager.operators
+        op = ops[-1] if len(ops) else None
+        fresh = op is not None and op.as_pointer() != _insert["op"] and op.bl_idname in BLENDER_KEY_OPS
+        if op is not None and fresh:
+            _insert["op"] = op.as_pointer()
+        for update in depsgraph.updates:
+            idd = update.id
+            if not isinstance(idd, bpy.types.Action):
+                continue
+            action = idd.original
+            if fresh and action.library is None and action.override_library is None:
+                tangent_blender_keys(action)
+            _frames[action.name] = _curve_frames(action)
+    except Exception as exc:        # a handler must never raise
+        print("allset graph_key_menu:", exc)
+
+
+_KEY_HANDLERS = (("depsgraph_update_post", _keys_depsgraph), ("load_post", remember_all_keys),
+                 ("undo_post", remember_all_keys), ("redo_post", remember_all_keys))
+
+
 # --- Select masks -------------------------------------------------------------------------------------------
 
 MASKS = ("graph_select_curve", "graph_select_key", "graph_select_in", "graph_select_out")
@@ -637,6 +725,11 @@ classes = (ALLSET_OT_mute_key, ALLSET_OT_graph_inbetween, ALLSET_OT_graph_select
 
 def register_bindings():
     bpy.app.handlers.load_post.append(_mask_reset)
+    remember_all_keys()
+    for name, fn in _KEY_HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
+        if fn not in handlers:
+            handlers.append(fn)
     if not bpy.app.timers.is_registered(_mask_tick):
         bpy.app.timers.register(_mask_tick, first_interval=MASK_POLL, persistent=True)
 
@@ -646,4 +739,9 @@ def unregister_bindings():
         bpy.app.timers.unregister(_mask_tick)
     if _mask_reset in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(_mask_reset)
+    for name, fn in _KEY_HANDLERS:
+        handlers = getattr(bpy.app.handlers, name)
+        if fn in handlers:
+            handlers.remove(fn)
+    _frames.clear()
     _mask["last"] = None

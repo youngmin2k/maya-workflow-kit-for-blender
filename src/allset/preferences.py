@@ -270,14 +270,14 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         items=(('AUTO', "Auto", "Maya Auto: Blender Auto Clamped"), ('SPLINE', "Spline", "Blender Auto"),
                ('LINEAR', "Linear", ""), ('CLAMPED', "Clamped", "Blender Auto Clamped"),
                ('FLAT', "Flat", "Level handles"), ('PLATEAU', "Plateau", "Blender Auto Clamped")),
-        description="In tangent of the keys the kit sets (Maya Tangents > Default In Tangent)")
+        description="In tangent of new keys (Maya Tangents > Default In Tangent)")
     default_out_tangent: bpy.props.EnumProperty(
         name="Default Out Tangent", default='AUTO',
         items=(('AUTO', "Auto", "Maya Auto: Blender Auto Clamped"), ('SPLINE', "Spline", "Blender Auto"),
                ('LINEAR', "Linear", ""), ('CLAMPED', "Clamped", "Blender Auto Clamped"),
                ('FLAT', "Flat", "Level handles"), ('PLATEAU', "Plateau", "Blender Auto Clamped"),
                ('STEPPED', "Stepped", "Blender Constant")),
-        description="Out tangent of the keys the kit sets (Maya Tangents > Default Out Tangent)")
+        description="Out tangent of new keys (Maya Tangents > Default Out Tangent)")
 
     # Top UI (Maya Windows > UI Elements).
     maya_top_bar: bpy.props.BoolProperty(

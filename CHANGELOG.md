@@ -91,6 +91,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   mouse over the Graph Editor's outliner, menu bar, toolbar row or sidebar too, not only over the curves.
 - **One undo for a snapped key move** (#270): with time snap on, moving a key that sat between two frames in the
   Graph Editor puts it on a whole frame as part of the move, so one Ctrl+Z undoes it (it took two before).
+- **Default In / Out Tangent on Blender's own keys** (#267): keys made with Blender's Insert Keyframe (the I key,
+  the Insert Keyframe menu and button, the Graph Editor / Dope Sheet insert) now get the Default In / Out Tangent
+  too, like the kit's keys. A key set again on a frame that already had one keeps its tangents.
 
 ## [0.9.0] — 2026-11-01
 

@@ -226,4 +226,33 @@ def s_blender_keying_check():
           len(fcs) >= 3 and all(not gw.is_weighted(fc) for fc in fcs))
 
 
+@step
+def s_blender_key_tangents():
+    """Blender's Insert Keyframe (registered like a key press) on a new frame: the key gets the Default In / Out
+    Tangent (Flat / Stepped)."""
+    prefs = import_module(MODULE + ".preferences").get()
+    C["tangents"] = (prefs.default_in_tangent, prefs.default_out_tangent)
+    prefs.default_in_tangent, prefs.default_out_tangent = 'FLAT', 'STEPPED'
+    bpy.context.scene.frame_set(10)
+    area, reg = view3d()
+    with bpy.context.temp_override(window=win(), area=area, region=reg):
+        C["insert"] = bpy.ops.anim.keyframe_insert('EXEC_DEFAULT', True, type='Location')
+
+
+@step
+def s_blender_key_tangents_check():
+    ob = bpy.data.objects[C["sphere"]]
+    fcs = list(import_module(MODULE + ".compat").id_fcurves(ob))
+    keys = [next((k for k in fc.keyframe_points if abs(k.co.x - 10) < 1e-3), None) for fc in fcs]
+    firsts = [fc.keyframe_points[0] for fc in fcs]
+    check(f"Blender's Insert Keyframe gets the Default In / Out Tangent ({C['insert']}, "
+          f"{[(k.interpolation, k.handle_left_type) if k else None for k in keys]})",
+          keys and all(k is not None and k.interpolation == 'CONSTANT' and k.handle_left_type == 'FREE' for k in keys))
+    check(f"the earlier keys keep Blender's tangents ({[(k.interpolation, k.handle_left_type) for k in firsts]})",
+          all(k.interpolation == 'BEZIER' and k.handle_left_type == 'AUTO_CLAMPED' for k in firsts))
+    prefs = import_module(MODULE + ".preferences").get()
+    prefs.default_in_tangent, prefs.default_out_tangent = C["tangents"]
+    bpy.context.scene.frame_set(1)
+
+
 run()
