@@ -335,9 +335,9 @@ def _boolean_order(context, objs):
 
 
 class ALLSET_OT_boolean(bpy.types.Operator):
-    """Maya Booleans: select the first object, then the others. Like Maya, the first object meets all the others
-    together: Difference (A - B) = first minus the rest, Difference (B - A) = the rest minus the first,
-    Intersection = the part of the first inside any of the rest"""
+    """Maya Booleans: select the first object, then the others; the first meets all the others together"""
+    # Difference (A - B) = first minus the rest, Difference (B - A) = the rest minus the first,
+    # Intersection = the part of the first inside any of the rest.
     bl_idname = "allset.boolean"
     bl_label = "Boolean"
     bl_options = {'REGISTER', 'UNDO'}

@@ -5196,7 +5196,7 @@ STRINGS = {
     'Maya Bind Skin Options question for a mesh that already has a skin': '既にスキンを持つメッシュに対する Maya スキンのバインドオプションの確認',
     'Maya Bind Skin: the selected skeleton and meshes, in any order (closest distance weights, no parenting)': 'Maya スキンのバインド: 選択したスケルトンとメッシュ、順序は任意 (最近接距離のウェイト、ペアレントなし)',
     'Maya Blend Shape: select the target shapes, then the base mesh last (shape keys on the base)': 'Maya ブレンドシェイプ: ターゲットシェイプを選択し、最後にベースメッシュを選択 (ベースのシェイプキー)',
-    'Maya Booleans: select the first object, then the others. Like Maya, the first object meets all the others together: Difference (A - B) = first minus the rest, Difference (B - A) = the rest minus the first, Intersection = the part of the first inside any of the rest': 'Maya ブーリアン: 1 つ目のオブジェクト、次に残りを選択。Maya と同じく 1 つ目は残りすべてをまとめた形と演算します: 差分 (A - B) = 1 つ目から残りを引く、差分 (B - A) = 残りから 1 つ目を引く、交差 = 1 つ目のうち残りのいずれかの内側にある部分',
+    'Maya Booleans: select the first object, then the others; the first meets all the others together': 'Maya ブーリアン: 1 つ目のオブジェクト、次に残りを選択。1 つ目は残りすべてをまとめた形と演算します',
     'Maya CV Curve Tool: click to place CVs (drag to move the new one), Enter to finish, Backspace removes the last': 'Maya CV カーブツール: クリックで CV を配置 (ドラッグで新しい CV を移動)、Enter で終了、Backspace で最後を削除',
     'Maya Channel Box Channels menu (RMB anywhere in the Channel Box)': 'Maya チャンネルボックスのチャンネルメニュー (チャンネルボックスのどこでも RMB)',
     'Maya Channel Box Edit menu': 'Maya チャンネルボックスの編集メニュー',
