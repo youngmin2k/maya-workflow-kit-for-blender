@@ -8,7 +8,7 @@ Operator ids use the ``allset.`` prefix. Each module lists its classes in
 
 import bpy
 
-from . import (auto_key, bookmarks, ik_fk, component, create, curve_tools, curves_maya, cut_sew, display, driven_key, duplicate, extrude, file_io, freeze, option_windows, fx, global_keys4, graph_keys, graph_key_menu, deformer_weights, joint_labels, group, history, hold, joints, pivot_menu, key_batch, key_batch3, key_insert, loop_pick, manip, marquee,
+from . import (auto_key, undo_pairs, bookmarks, ik_fk, component, create, curve_tools, curves_maya, cut_sew, display, driven_key, duplicate, extrude, file_io, freeze, option_windows, fx, global_keys4, graph_keys, graph_key_menu, deformer_weights, joint_labels, group, history, hold, joints, pivot_menu, key_batch, key_batch3, key_insert, loop_pick, manip, marquee,
                anim_layers, lights, material, menu_extras, menu_items, mesh_maya, multi_cut, poly_maya, rig_maya, mesh_tools, outliner_drag, parenting, pickwalk, pivot, playblast, preselect, project, rig_tools, select_convert, select_priority, sets, shading_maps, skin, snap_align, soft_select, symmetry, taphold,
                time_keys, tool_keys, units, uv_shells, uv_tools, uv_modify, uv_select_178, view, view_keys3, visibility)
 from . import poly_draw, quad_draw  # Create Polygon / Append to Polygon / Quad Draw (#30)
@@ -241,6 +241,7 @@ def register():
     quad_draw.register_handlers()
     outliner_drag.register_handlers()
     material.register_handlers()
+    undo_pairs.register()
     auto_key.register_handlers()
     dag.register_handlers()
     modify_maya.register_props()
@@ -310,6 +311,7 @@ def unregister():
     curve_draw.unregister_handlers()
     joint_preview.unregister_handlers()
     auto_key.unregister_handlers()
+    undo_pairs.unregister()
     material.unregister_handlers()
     outliner_drag.unregister_handlers()
     quad_draw.unregister_handlers()

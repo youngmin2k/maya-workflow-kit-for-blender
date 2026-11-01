@@ -58,6 +58,8 @@ to keep the tidied state.
   computer (Preferences > Add-ons > Maya Workflow Kit, the kit's Preferences window, the Hotkey Editor) (#275).
 
 ## Fixed
+- With Auto Key on, one Ctrl+Z takes back a move or rotation together with its key, and one Shift+Z brings both
+  back, like Maya (#276).
 - Dragging keys in the Graph Editor with Auto Key on no longer adds a stray key; one undo takes the drag back (#270).
 - Non-weighted tangents only turn while you drag them, like Maya (#267).
 - Joints and bones inside a mesh show again in wireframe and X-Ray views (#266).
@@ -77,7 +79,7 @@ The known differences listed in `CHANGELOG.md` still apply.
 
 Thanks for the reports and ideas: @Fizkefaaz (#270, #271, #272, #273, #274), @gsvetlin-beep (#258, #259),
 @XeonG (#261), @Marlon90 (#262), @andych56 (#263), @LoongVeeng (#264), @CommonDirt (#265), @zzador (#266),
-@meggaimg70-a11y (#267), @rethink-studios (#275) and @RIPTIDE-z for spotting the untranslated tooltips (#260).
+@meggaimg70-a11y (#267), @rethink-studios (#275), @dillanjmurillo (#276) and @RIPTIDE-z for spotting the untranslated tooltips (#260).
 Please keep telling us what breaks or feels off in real work.
 
 Maya Workflow Kit is a free, personal open-source project: no paid version, no donations requested, and no commercial

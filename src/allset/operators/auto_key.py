@@ -11,6 +11,10 @@ own Auto Keying (``tool_settings.use_keyframe_insert_auto``) is left to the user
 
 Like Maya, editing the curves themselves (dragging keys in the Graph Editor, tangent changes) is not a channel change:
 an object updated together with one of its Actions is not noted, so no key appears at the current time.
+
+Blender pushes a transform's undo step when the transform ends, before any Python code runs, so the keys go into a
+step of their own ("Auto Key") right after it. Like Maya, one Undo takes back the change and its keys together and one
+Redo brings both back: the Auto Key step is paired with the change's own step (``undo_pairs``).
 """
 
 import bpy
@@ -134,21 +138,30 @@ def changed_layer_channels(ob, frame, scene=None):
     return out
 
 
-def key_changed(ob, frame):
-    """Key the changed keyed channels of ``ob`` at ``frame``; returns how many keys were set."""
+def key_changed(ob, frame, keyed=None):
+    """Key the changed keyed channels of ``ob`` at ``frame``; returns how many keys were set. ``keyed`` (a list)
+    gets the (path, index, value) of each keyed channel."""
     from . import anim_layers
     if anim_layers.has_layers(ob):
         # Maya animation layers: solved onto the target layer like the kit's S key
-        return sum(bool(anim_layers.key(ob, path, index, frame, value))
-                   for path, index, value in changed_layer_channels(ob, frame))
+        count = 0
+        for path, index, value in changed_layer_channels(ob, frame):
+            if anim_layers.key(ob, path, index, frame, value):
+                count += 1
+                if keyed is not None:
+                    keyed.append((path, index, value))
+        return count
     count = 0
-    for fc, _value in changed_curves(ob, frame):
+    for fc, value in changed_curves(ob, frame):
         group = fc.group.name if fc.group is not None else ""
+        path, index = fc.data_path, fc.array_index
         try:
-            ob.keyframe_insert(fc.data_path, index=fc.array_index, frame=frame, group=group)
+            ob.keyframe_insert(path, index=index, frame=frame, group=group)
             from . import graph_key_menu      # default tangents, like Maya
-            graph_key_menu.after_insert(ob, fc.data_path, fc.array_index, frame)
+            graph_key_menu.after_insert(ob, path, index, frame)
             count += 1
+            if keyed is not None:
+                keyed.append((path, index, value))
         except (RuntimeError, TypeError):
             pass
     return count
@@ -158,27 +171,69 @@ def _flush():
     if not _pending:
         return None
     if _transforming():
-        return 0.1                       # keyed when the transform ends (Blender keys on confirm too)
+        return 0.02                      # keyed when the transform ends (Blender keys on confirm too)
     items = list(_pending.items())
     _pending.clear()
     scene = bpy.context.scene
     if not enabled(scene) or _playing():
         return None
     count = 0
+    keyed = {}
     for name, frame in items:
         ob = scene.objects.get(name)
         if ob is not None and frame == scene.frame_current:
-            count += key_changed(ob, frame)
+            values = []
+            count += key_changed(ob, frame, values)
+            if values:
+                keyed[name] = tuple(values)
     if count:
-        try:
-            bpy.ops.ed.undo_push(message="Auto Key")
-        except RuntimeError:
-            pass
+        _push(scene, keyed)
+    return None
+
+
+def _push(scene, keyed):
+    """Push the Auto Key step, paired with the step before it (``undo_pairs``). Undo / redo take the two together
+    only while that step holds the keyed values, i.e. when the change pushed a step of its own (a transform, a
+    button, Clear Transform...)."""
+    from . import undo_pairs
+    undo_pairs.push(scene, "Auto Key", lambda sc: _matches(sc, keyed))
+
+
+def _matches(scene, keyed):
+    """The scene's channels hold the values that were keyed (the change's own step, with or without its keys)."""
+    for name, values in keyed.items():
+        ob = scene.objects.get(name)
+        if ob is None:
+            return False
+        for path, index, value in values:
+            v = _value(ob, path, index)
+            if v is None or abs(v - value) > 1e-4 * max(1.0, abs(value)):
+                return False
+    return True
+
+
+_reloaded = [False]   # an undo / redo just loaded a state: its update is no channel change
+
+
+def _reload_seen():
+    _reloaded[0] = False
     return None
 
 
 @persistent
+def _on_undo_redo(*_args):
+    """An undo / redo puts back a stored state (a moved pose without its key on the way to the Auto Key step, say):
+    keying it would push a step and cut off the redo history. The update it causes runs before the next timer."""
+    _pending.clear()
+    _reloaded[0] = True
+    if not bpy.app.timers.is_registered(_reload_seen):
+        bpy.app.timers.register(_reload_seen, first_interval=0.0)
+
+
+@persistent
 def _on_depsgraph(scene, depsgraph):
+    if _reloaded[0]:
+        return
     if not enabled(scene) or _playing():
         return
     found = False
@@ -204,13 +259,23 @@ def register_handlers():
         name="Auto Key",
         description="Maya Auto Key: changing a channel that already has keys sets a key at the current frame "
                     "(channels without keys are not keyed)")
-    bpy.app.handlers.depsgraph_update_post.append(_on_depsgraph)
+    for name, fn in _HANDLERS:
+        lst = getattr(bpy.app.handlers, name)
+        if fn not in lst:
+            lst.append(fn)
+
+
+_HANDLERS = (("depsgraph_update_post", _on_depsgraph), ("undo_post", _on_undo_redo), ("redo_post", _on_undo_redo))
 
 
 def unregister_handlers():
-    if _on_depsgraph in bpy.app.handlers.depsgraph_update_post:
-        bpy.app.handlers.depsgraph_update_post.remove(_on_depsgraph)
-    if bpy.app.timers.is_registered(_flush):
-        bpy.app.timers.unregister(_flush)
+    for name, fn in _HANDLERS:
+        lst = getattr(bpy.app.handlers, name)
+        while fn in lst:
+            lst.remove(fn)
+    for fn in (_flush, _reload_seen):
+        if bpy.app.timers.is_registered(fn):
+            bpy.app.timers.unregister(fn)
     _pending.clear()
+    _reloaded[0] = False
     del bpy.types.Scene.allset_auto_key

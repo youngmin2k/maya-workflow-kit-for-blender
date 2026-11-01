@@ -109,6 +109,10 @@ opened (see Changed).
   the FX shelf's Emitter follows Create Emitter and 3D Fluid Container with Emitter runs Fluids > 3D Container.
 
 ### Fixed
+- **One undo per move with Auto Key on** (#276): moving or rotating a keyed control with the Time Slider's Auto Key
+  on made two undo steps (the move, then its key), so the first Ctrl+Z only took the key away and the pose seemed not
+  to change. Now, like Maya, one Ctrl+Z takes back the move together with its key and one Shift+Z brings both back —
+  for manipulator drags, rotations, Blender's own transforms and Rigify controls alike.
 - **Lattice points get the Maya manipulator** (#274): in lattice edit mode the Move (w) and Scale (r) tools show
   the same Maya-style manipulator as objects and mesh components, at the selected points, instead of Blender's
   transform gizmo.

@@ -145,14 +145,24 @@ def text_for_redo():
     return f"Redo: {name}"
 
 
+def _kit_extra():
+    """The kit takes one more undo / redo step with a paired one (Auto Key...): one press, one text."""
+    from ..operators import undo_pairs
+    return undo_pairs.extra_running()
+
+
 @persistent
 def _on_undo_pre(*_args):
+    if _kit_extra():
+        return
     _before[0] = _current()
     _pending[0] = text_for_undo()
 
 
 @persistent
 def _on_redo_pre(*_args):
+    if _kit_extra():
+        return
     _before[0] = _current()
     _pending[0] = text_for_redo()
 
@@ -170,6 +180,8 @@ def _check_rerun():
 
 @persistent
 def _on_post(*_args):
+    if _kit_extra():
+        return
     _seen.clear()                         # Blender emptied wm.operators
     _claimed.clear()
     text, _pending[0] = _pending[0], None

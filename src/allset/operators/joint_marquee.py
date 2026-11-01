@@ -158,7 +158,8 @@ def _finish(entry):
             objects_instead(bpy.context, op, op.properties.mode)
             picked = True
         if picked:
-            bpy.ops.ed.undo_push(message="Select")
+            from . import undo_pairs           # one undo with Blender's box select step before it
+            undo_pairs.push(bpy.context.scene, "Select")
             for a in window.screen.areas:
                 a.tag_redraw()
 
