@@ -100,6 +100,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   in the Time Slider when the mesh is selected, with the rest of its keys.
 - **Lasso picks joints with nothing selected** (#276): like the box, the Lasso Select tool drawn around joints in
   the Maya layout now selects them even when nothing was selected before; one Ctrl+Z undoes the selection.
+- **No face centre dots in UV mode** (#264): switching from face mode to UV mode (F12) no longer leaves Blender's
+  face centre dots in the 3D View in wireframe or X-ray; the view shows only the UVs as points. F11 goes back to
+  face mode.
 
 ## [0.9.0] — 2026-11-01
 

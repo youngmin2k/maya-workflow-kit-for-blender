@@ -978,6 +978,10 @@ def set_component(context, mode):
         ts.mesh_select_mode = (mode == 'VERTEX', mode == 'EDGE', mode == 'FACE')
     elif mode in ('UV', 'UV_EDGE', 'UV_FACE', 'ISLAND'):
         ts.use_uv_select_sync = False
+        # the 3D View shows UVs as points now: Blender's face select mode would add its face centre dots (X-ray,
+        # wireframe), which Maya's UV mode doesn't show. F9 / F10 / F11 set the mesh mode again on the way out.
+        if ts.mesh_select_mode[2] and not ts.mesh_select_mode[0]:
+            ts.mesh_select_mode = (True, False, False)
         compat.set_uv_island_mode(ts, mode == 'ISLAND')
         if mode in UV_SELECT_MODES:
             ts.uv_select_mode = UV_SELECT_MODES[mode]
