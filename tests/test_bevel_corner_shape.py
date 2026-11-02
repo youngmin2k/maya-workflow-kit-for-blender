@@ -1,6 +1,7 @@
 """Bevel at a box corner (two or three bevelled edges meeting, square or tilted side faces): the kit's result stays a
 clean closed mesh, cuts only into the box and keeps a symmetric corner symmetric."""
 
+import math
 from importlib import import_module
 
 import bmesh
@@ -106,3 +107,41 @@ def test_offset_corner_next_to_a_bent_side_face():
             assert made, f"{label}: nothing bevelled"
             _check(bm, label, box)
             bm.free()
+
+
+
+def _sheared_box(lean):
+    """The unit box with its upright edges leaning by ``lean`` (x, y per unit drop) and kept 1 long: every face flat."""
+    bm = _box()
+    n = math.sqrt(1.0 + lean[0] ** 2 + lean[1] ** 2)
+    for v in bm.verts:
+        drop = (1.0 - v.co.z) / n
+        v.co = Vector((v.co.x + lean[0] * drop, v.co.y + lean[1] * drop, 1.0 - drop))
+    return bm
+
+
+def test_sheared_corner_uses_the_whole_slide_limit():
+    """The upright edges lean far over (a sheared box): with Fraction the width grows until a new vertex reaches its
+    limit — Fraction x the edge it slides along, or for the new corner in the top face Fraction x the face diagonal
+    it moves along — and none goes past it."""
+    for lean in ((0.96, 0.72), (0.72, 0.96), (0.9, 0.9), (1.2, 0.9)):
+        bm = _sheared_box(lean)
+        old = [(e.verts[0].co.copy(), e.verts[1].co.copy()) for e in bm.edges]
+        old += [(Vector((1.0, 1.0, 1.0)), Vector((0.0, 0.0, 1.0)))]    # the top face's diagonal from the corner
+        box = _bounds(bm)
+        made = bev.bevel_edges(bm, _corner_edges(bm, 2), fraction=0.2)
+        label = f"lean {lean}"
+        assert made, f"{label}: nothing bevelled"
+        _check(bm, label, box)
+        ratios = []
+        for v in made:
+            for a, b in old:
+                for start, end in ((a, b), (b, a)):
+                    d = end - start
+                    t = (v.co - start).dot(d) / d.length_squared
+                    if 0.0 < t < 0.5 and (start + d * t - v.co).length < 1e-6:
+                        ratios.append(t / (0.2 * 0.9999))
+        assert ratios, f"{label}: no new vertex on an old edge"
+        assert max(ratios) <= 1.0 + 1e-6, f"{label}: a vertex slides {max(ratios):.6f} x its limit"
+        assert max(ratios) >= 1.0 - 1e-4, f"{label}: the width stops at {max(ratios):.6f} of the limit"
+        bm.free()

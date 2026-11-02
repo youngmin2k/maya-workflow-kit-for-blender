@@ -234,7 +234,7 @@ def corner_pairs(edges, ids):
         hq_far = _half_sin(q, q.other_vert(v)) or hq
         depth = (kp / (hp * sp) + kq / (hq * sq)) / 2.0 * abs(u3.dot(normal.normalized()))
         hm = min(hp * kp, hq_far, 1.0 / depth if depth > ZERO else hq_far)
-        out[v] = {"P": p, "Q": q, "hm": hm, "origin": v.co.copy(), "ray": ray.normalized(),
+        out[v] = {"P": p, "Q": q, "rest": rest, "hm": hm, "origin": v.co.copy(), "ray": ray.normalized(),
                   "k_ray": hm / (hp * kp) / math.sin(half), "u3": u3,
                   "k_u3": (hm / hp * kp / sp + hm / hq * kq / sq) / 2.0}
     return out
@@ -471,7 +471,8 @@ def slide_limit(edges, corners=None, triples=None):
     """Maya's fraction base (a perpendicular width): the smallest of
     (a) slide edges — an edge at an end of a bevelled edge that lies in one of its faces: length x sin(angle to the
         bevelled edge) / (number of its ends a bevel slides along); at a chain end where a slide edge runs near the
-        bevelled edge's line (``end_moves``) length / k there instead;
+        bevelled edge's line (``end_moves``) length / k there instead; the third edge of a ``corner_pairs`` corner
+        length / k_u3 (where the new vertex on it sits);
     (b) terminal edges at the end of an open chain (``terminal_moves``): length x s_phi / sin(alpha / 2) / (number of
         its ends that are such chain ends);
     (c) corners where two bevelled edges of one face meet (``_corner``): the new corner slides along the bisector
@@ -497,7 +498,11 @@ def slide_limit(edges, corners=None, triples=None):
                 if s is e or s in sel or not faces.intersection(s.link_faces):
                     continue
                 t = (s.other_vert(v).co - v.co)
-                sin = t.normalized().cross(d).length / scaled.get(v, 1.0) if t.length > ZERO else 0.0
+                if corners and v in corners and s is corners[v]["rest"]:
+                    # the new vertex on the third edge of a paired corner sits k_u3 widths along it
+                    sin = 1.0 / corners[v]["k_u3"]
+                else:
+                    sin = t.normalized().cross(d).length / scaled.get(v, 1.0) if t.length > ZERO else 0.0
                 ent = used.setdefault(s, [set(), math.inf])
                 ent[0].add(v)
                 ent[1] = min(ent[1], sin)

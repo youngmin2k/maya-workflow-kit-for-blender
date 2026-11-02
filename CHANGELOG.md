@@ -134,8 +134,12 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   A corner where three bevelled edges meet (all three edges of a box corner) now gets Maya's width and puts
   each face's new corner where Maya does when the corner's face angles stay close (their half-angle sines
   within 10% of each other), whatever the mesh's vertex numbering, also next to a bent side face.
+  When the third edge leans far over, the width now grows until a far-end vertex reaches the limit of the edge it
+  slides along, like Maya (it used to stop early, leaving the whole bevel narrower).
   Still different from Maya: corners where the faces' angles differ strongly (the new corner can sit up to a few
-  percent of the bevel width away) and three-edge corners whose face angles differ by more than about 10%.
+  percent of the bevel width away), corners whose third edge leans far over (Maya can switch to its other corner
+  shape there even when the face angles differ less, and the new corner can sit about 1% of the width away) and
+  three-edge corners whose face angles differ by more than about 10%.
 
 ### Fixed
 - **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now

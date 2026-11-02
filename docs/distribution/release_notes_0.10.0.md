@@ -77,7 +77,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 ## Known differences
 
 - Bevel: corners where the faces' angles differ strongly (the new corner can sit up to a few percent of the bevel
-  width away) and three-edge corners whose face angles differ by more than about 10% still differ from Maya (#213).
+  width away), corners whose third edge leans far over and three-edge corners whose face angles differ by more than
+  about 10% still differ from Maya (#213).
 - The known differences listed in `CHANGELOG.md` still apply.
 
 ## Thank you
