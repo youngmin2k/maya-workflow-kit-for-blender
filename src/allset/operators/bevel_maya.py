@@ -1420,7 +1420,15 @@ def _build(bm, params, unit, ob=None):
     params = dict(params)
     if params.pop("world_space", False) and not params.get("offset_as_fraction", True):
         unit = unit / world_scale(ob)
-    return bevel_edges(bm, [e for e in bm.edges if e.select], unit=unit, **params)
+    made = bevel_edges(bm, [e for e in bm.edges if e.select], unit=unit, **params)
+    if made and getattr(ob, "type", None) == 'MESH' and _soft(bm):
+        from . import display
+        display.ensure_maya_normals(ob)      # Maya's smooth normals on the soft edges the bevel made
+    return made
+
+
+def _soft(bm):
+    return any(e.smooth and len(e.link_faces) == 2 and all(f.smooth for f in e.link_faces) for e in bm.edges)
 
 
 BEVEL = extrude.add_spec(extrude.Spec(

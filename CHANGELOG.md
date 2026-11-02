@@ -156,9 +156,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   a bevelled cap rim edge is closed with one polygon through the profile and the fan's spoke point, like Maya
   (it was split into triangles). The points the bevel makes in the old faces get each face's own UVs at their
   place, and the bevel's strip shares the UVs of the two faces next to the edge, so Segments 1 bevels keep
-  Maya's UVs. Still different from Maya: the UVs of the profile points inside a rounded bevel (Segments 2 or
-  more) and of the polygon closing a corner, smooth normals (Maya weights each face by its area and corner
-  angle, Blender by the corner angle only, so soft bevels shade a little differently), corners where two
+  Maya's UVs. A bevel that leaves soft edges gives the object Maya's smooth normals (each face weighted by its
+  area and its corner angle; Blender weights by the corner angle only): a "Maya Normals" Weighted Normal
+  modifier that is display only like Smooth Mesh Preview (Delete History keeps it, the Channel Box INPUTS don't
+  list it). Still different from Maya: the UVs of the profile points inside a rounded bevel (Segments 2 or
+  more) and of the polygon closing a corner, corners where two
   bevelled edges meet beside two or more unbevelled ones (Maya merges those into one vertex), Offset As
   Fraction where three bevelled edges meet at other angles than 90 degrees (Maya's widths differ per edge
   there), and edges whose faces meet at exactly the Smoothing angle.
