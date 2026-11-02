@@ -138,7 +138,7 @@ def _fold_ctx(width, region_type='FOOTER', scale=1.25):
 def test_toolbar_folds_into_more_when_narrow():
     """A toolbar row too narrow for every button shows the leading groups in Maya's order; the rest go behind »."""
     groups = chrome.icon_groups("Graph Editor")
-    assert len(groups) > 8 and groups[0][0][0] == "directKeyTool" and groups[-1][-1][0] == "getCTEButton"
+    assert len(groups) > 8 and groups[0][0][0] == "key_nearest_tool" and groups[-1][-1][0] == "open_time_editor"
     assert chrome.shown_groups(_fold_ctx(4000), "Graph Editor") == len(groups)
     n = chrome.shown_groups(_fold_ctx(950), "Graph Editor")
     assert 3 <= n < len(groups), n

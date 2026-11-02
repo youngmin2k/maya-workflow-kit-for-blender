@@ -478,11 +478,11 @@ def test_menu_items_mapped_without_notices():
 
 def test_icon_row_buttons_work():
     for editor in (chrome.GE, chrome.DS):
-        spec = chrome._icon_spec(editor, "OutlineEdreloadButton")
+        spec = chrome._icon_spec(editor, "list_load")
         assert spec[2] == ("allset.graph_list", {"action": "LOAD"})
-        assert chrome._icon_spec(editor, "OutlineEdloadToggleButton")[2][1] == "window_manager.allset_auto_load"
-    assert chrome._icon_spec(chrome.DS, "hierButton")[2][1] == "window_manager.allset_hierarchy_below"
-    assert "OutlineEdreloadButton" not in chrome.NOTICES and "hierButton" not in chrome.NOTICES
+        assert chrome._icon_spec(editor, "list_auto_load")[2][1] == "window_manager.allset_auto_load"
+    assert chrome._icon_spec(chrome.DS, "hierarchy_below")[2][1] == "window_manager.allset_hierarchy_below"
+    assert "list_load" not in chrome.NOTICES and "hierarchy_below" not in chrome.NOTICES
 
 
 def test_release_all_on_disable():

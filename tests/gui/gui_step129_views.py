@@ -242,7 +242,7 @@ def s_ipr_check():
     mi = mod("operators.menu_items")
     states = [mi.checker_on(bpy.context)]
     for _i in range(2):
-        ov(bpy.ops.allset.editor_icon, key="UV Editor|checkeredButton")
+        ov(bpy.ops.allset.editor_icon, key="UV Editor|checker_tiles")
         states.append(mi.checker_on(bpy.context))
     check(f"#13 UV Editor checker button: off -> on -> off ({states})", states == [False, True, False])
 

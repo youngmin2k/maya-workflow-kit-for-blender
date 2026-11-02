@@ -102,7 +102,7 @@ def test_pane_content():
 
 def test_graph_toolbar_and_menu_targets():
     keys = [it[0] for it in editor_chrome.ICONS["Hypershade"] if isinstance(it, tuple)]
-    assert keys[:3] == ["showUpstreamButton", "showUpAndDownstreamButton", "showDownstreamButton"]
+    assert keys[:3] == ["show_inputs", "show_inputs_outputs", "show_outputs"]
     for it in editor_chrome.ICONS["Hypershade"]:
         if isinstance(it, tuple) and it[2] is None:
             assert it[0] in editor_chrome.NOTICES, it[0]

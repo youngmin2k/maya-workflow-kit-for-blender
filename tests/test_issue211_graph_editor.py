@@ -209,7 +209,7 @@ def test_toolbar_and_menu_entries():
     emm = import_module(kit.MODULE + ".ui.editor_menu_map")
     keys = {it[0]: it for it in ec.GRAPH_ICONS if isinstance(it, tuple)}
     # Maya's drag constraint button; the w / e / r key tools live in Edit > Transformation Tools (not the toolbar)
-    assert keys["switchConstrainedDragStateButton"][2] == ("prop", "addon_prefs.graph_unconstrained_drag", {})
+    assert keys["constrained_drag"][2] == ("prop", "addon_prefs.graph_unconstrained_drag", {})
     assert not {"moveKeysTool", "rotateKeysTool", "scaleKeysTool"} & set(keys)
     m = emm.MAP if hasattr(emm, "MAP") else None
     if m is not None:

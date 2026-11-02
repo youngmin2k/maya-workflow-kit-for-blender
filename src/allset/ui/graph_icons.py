@@ -103,14 +103,14 @@ def magnet_small(cv, colour=GREY):
 
 # --- key tools -------------------------------------------------------------------------------------------------------
 
-def g_directKeyTool(cv):
+def g_key_nearest_tool(cv):
     """Move the nearest picked key: a curve, the key and the pointer on it."""
     cv.polyline(bez((0.04, 0.80), (0.20, 0.20), (0.40, 0.20), (0.56, 0.50)), W, GREY)
     key(cv, 0.30, 0.34)
     status_icons.arrow_cursor(cv, 0.44, 0.40, 0.52)
 
 
-def g_insertKeyTool(cv):
+def g_key_insert_tool(cv):
     """Insert keys: a curve with a new key and a plus."""
     cv.polyline(bez((0.04, 0.88), (0.30, 0.20), (0.62, 0.95), (0.96, 0.62)), W, GREY)
     key(cv, 0.42, 0.60, TEAL, 0.12)
@@ -118,7 +118,7 @@ def g_insertKeyTool(cv):
     cv.rect(0.49, 0.19, 0.83, 0.27, LIGHT)
 
 
-def g_latticeDeformKeyTool(cv):
+def g_key_lattice_tool(cv):
     """Lattice over keys: a 3 x 3 cage around a curve."""
     for t in (0.08, 0.50, 0.92):
         cv.line(t, 0.08, t, 0.92, 0.05, GREY)
@@ -129,7 +129,7 @@ def g_latticeDeformKeyTool(cv):
     cv.polyline(bez((0.10, 0.80), (0.35, 0.10), (0.65, 0.90), (0.90, 0.22)), W, TEAL)
 
 
-def g_regionSelectKeyTool(cv):
+def g_key_region_tool(cv):
     """Region tool: a box around keys with scale handles on its sides."""
     for i in range(4):
         x = 0.16 + i * 0.19
@@ -145,7 +145,7 @@ def g_regionSelectKeyTool(cv):
     key(cv, 0.62, 0.40)
 
 
-def g_retimeKeyTool(cv):
+def g_key_retime_tool(cv):
     """Retime: two time markers and the span between them stretched."""
     cv.line(0.20, 0.06, 0.20, 0.94, W, TEAL)
     cv.line(0.80, 0.06, 0.80, 0.94, W, TEAL)
@@ -154,7 +154,7 @@ def g_retimeKeyTool(cv):
     harrow(cv, 0.28, 0.72, 0.56, GREY)
 
 
-def g_sculptKeyGrabTool(cv):
+def g_key_grab_tool(cv):
     """Grab brush: a brush ring lifting the curve."""
     cv.polyline(bez((0.04, 0.88), (0.36, 0.88), (0.40, 0.40), (0.50, 0.40)) +
                 bez((0.50, 0.40), (0.60, 0.40), (0.64, 0.88), (0.96, 0.88))[1:], W, GREY)
@@ -162,21 +162,21 @@ def g_sculptKeyGrabTool(cv):
     varrow(cv, 0.50, 0.30, 0.02, LIGHT, 0.12)
 
 
-def g_sculptKeySmoothTool(cv):
+def g_key_smooth(cv):
     """Smooth: a jagged curve becoming a calm one."""
     cv.polyline([(0.04, 0.50), (0.12, 0.20), (0.20, 0.78), (0.28, 0.24), (0.36, 0.70), (0.44, 0.46)], W, DIM)
     wave(cv, 0.44, 0.96, 0.46, 0.14, GREY, periods=0.5)
     cv.ring(0.70, 0.46, 0.24, 0.06, TEAL)
 
 
-def g_sculptKeySmearTool(cv):
+def g_key_smear_tool(cv):
     """Smear: a brush ring dragging streaks behind it."""
     cv.ring(0.66, 0.50, 0.22, 0.06, TEAL)
     for y, x0 in ((0.32, 0.18), (0.50, 0.04), (0.68, 0.18)):
         cv.line(x0, y, 0.42, y, 0.06, GREY)
 
 
-def g_sculptKeyReduceTool(cv):
+def g_key_reduce(cv):
     """Reduce: many keys becoming a few."""
     for i in range(5):
         cv.circle(0.10 + i * 0.20, 0.18, 0.07, DIM)
@@ -188,13 +188,13 @@ def g_sculptKeyReduceTool(cv):
 
 # --- framing ---------------------------------------------------------------------------------------------------------
 
-def g_frameAllButton(cv):
+def g_frame_all(cv):
     """Frame all: corner marks around a curve."""
     brackets(cv, 0.06, 0.06, 0.94, 0.94, 0.26, GREY)
     cv.polyline(bez((0.22, 0.72), (0.38, 0.12), (0.58, 0.90), (0.78, 0.30)), W, TEAL)
 
 
-def g_frameRangeButton(cv):
+def g_frame_range(cv):
     """Frame playback range: the range's two ends pulled out to the sides."""
     cv.line(0.06, 0.14, 0.06, 0.86, W, GREY)
     cv.line(0.94, 0.14, 0.94, 0.86, W, GREY)
@@ -203,7 +203,7 @@ def g_frameRangeButton(cv):
     arrow_head(cv, 0.88, 0.50, 1, 0, 0.10, LIGHT)
 
 
-def g_centerCurrentTimeButton(cv):
+def g_center_time(cv):
     """Center current time: the time line in the middle, arrows moving the view to it."""
     cv.line(0.50, 0.04, 0.50, 0.96, W, ORANGE)
     cv.rect(0.40, 0.04, 0.60, 0.20, ORANGE)
@@ -215,7 +215,7 @@ def g_centerCurrentTimeButton(cv):
 
 # --- tangents (curve shape around a teal key) ------------------------------------------------------------------------
 
-def g_autoTanButton(cv):
+def g_tan_auto(cv):
     """Auto: a smooth hump whose top sits on the key."""
     cv.polyline(bez((0.04, 0.86), (0.24, 0.30), (0.34, 0.30), (0.50, 0.30)) +
                 bez((0.50, 0.30), (0.66, 0.30), (0.76, 0.30), (0.96, 0.86))[1:], W, GREY)
@@ -223,7 +223,7 @@ def g_autoTanButton(cv):
     cv.rect(0.28, 0.06, 0.72, 0.12, TEAL_LIGHT)
 
 
-def g_autoeaseTanButton(cv):
+def g_tan_auto_ease(cv):
     """Auto ease: the curve eases out of one key and into the next."""
     cv.polyline(bez((0.14, 0.82), (0.50, 0.82), (0.50, 0.22), (0.86, 0.22)), W, GREY)
     key(cv, 0.14, 0.82)
@@ -232,7 +232,7 @@ def g_autoeaseTanButton(cv):
     cv.line(0.86, 0.22, 0.96, 0.22, 0.05, LIGHT)
 
 
-def g_automixTanButton(cv):
+def g_tan_auto_mix(cv):
     """Auto mix: a straight part blending into a rounded part."""
     cv.polyline([(0.04, 0.86), (0.44, 0.40)], W, GREY)
     cv.polyline(bez((0.44, 0.40), (0.58, 0.24), (0.80, 0.24), (0.96, 0.50)), W, GREY)
@@ -241,7 +241,7 @@ def g_automixTanButton(cv):
     cv.rect(0.66, 0.76, 0.88, 0.88, DARK)
 
 
-def g_autocustomTanButton(cv):
+def g_tan_auto_custom(cv):
     """Auto custom: a smooth curve with a weight slider under the key."""
     cv.polyline(bez((0.04, 0.60), (0.24, 0.12), (0.62, 0.12), (0.96, 0.46)), W, GREY)
     key(cv, 0.40, 0.22)
@@ -249,7 +249,7 @@ def g_autocustomTanButton(cv):
     cv.rect(0.56, 0.72, 0.68, 0.96, TEAL_LIGHT)
 
 
-def g_splineTanButton(cv):
+def g_tan_spline(cv):
     """Spline: a flowing S through three keys."""
     pts = bez((0.06, 0.70), (0.20, 0.10), (0.36, 0.10), (0.50, 0.50))
     pts += bez((0.50, 0.50), (0.64, 0.90), (0.80, 0.90), (0.94, 0.30))[1:]
@@ -259,7 +259,7 @@ def g_splineTanButton(cv):
     key(cv, 0.94, 0.30)
 
 
-def g_clampedTanButton(cv):
+def g_tan_clamped(cv):
     """Clamped: the curve stops at the key's value, no overshoot past the limit line."""
     for x in (0.06, 0.26, 0.46, 0.66, 0.86):
         cv.line(x, 0.20, x + 0.10, 0.20, 0.05, DIM)
@@ -269,7 +269,7 @@ def g_clampedTanButton(cv):
     key(cv, 0.06, 0.88)
 
 
-def g_linearTanButton(cv):
+def g_tan_linear(cv):
     """Linear: straight lines from key to key."""
     pts = [(0.06, 0.84), (0.40, 0.18), (0.66, 0.66), (0.94, 0.30)]
     cv.polyline(pts, W, GREY)
@@ -277,7 +277,7 @@ def g_linearTanButton(cv):
         key(cv, x, y, TEAL, 0.09)
 
 
-def g_flatTanButton(cv):
+def g_tan_flat(cv):
     """Flat: level handles on both keys, the curve between them."""
     cv.polyline(bez((0.24, 0.78), (0.52, 0.78), (0.48, 0.22), (0.76, 0.22)), W, GREY)
     cv.line(0.04, 0.78, 0.44, 0.78, 0.05, LIGHT)
@@ -286,7 +286,7 @@ def g_flatTanButton(cv):
     key(cv, 0.76, 0.22)
 
 
-def g_stepTanButton(cv):
+def g_tan_stepped(cv):
     """Stepped: the value holds, then jumps."""
     cv.polyline([(0.04, 0.84), (0.36, 0.84), (0.36, 0.50), (0.66, 0.50), (0.66, 0.16), (0.96, 0.16)], W, GREY)
     key(cv, 0.06, 0.84)
@@ -294,7 +294,7 @@ def g_stepTanButton(cv):
     key(cv, 0.66, 0.16)
 
 
-def g_plateauTanButton(cv):
+def g_tan_plateau(cv):
     """Plateau: a rise that stays level across the top keys."""
     cv.polyline(bez((0.04, 0.88), (0.20, 0.88), (0.18, 0.30), (0.34, 0.30)), W, GREY)
     cv.line(0.34, 0.30, 0.66, 0.30, W, GREY)
@@ -303,7 +303,7 @@ def g_plateauTanButton(cv):
     key(cv, 0.66, 0.30)
 
 
-def g_graphEdDefaultTanInButton(cv):
+def g_tan_default_in(cv):
     """Default in tangent: the curve coming into the key, the in side marked."""
     cv.polyline(bez((0.04, 0.88), (0.20, 0.60), (0.36, 0.40), (0.62, 0.40)), W, TEAL)
     cv.line(0.62, 0.40, 0.96, 0.40, 0.05, DIM)
@@ -312,7 +312,7 @@ def g_graphEdDefaultTanInButton(cv):
     cv.line(0.06, 0.78, 0.26, 0.78, W, GREY)
 
 
-def g_graphEdDefaultTanOutButton(cv):
+def g_tan_default_out(cv):
     """Default out tangent: the curve leaving the key, the out side marked."""
     cv.line(0.04, 0.40, 0.38, 0.40, 0.05, DIM)
     cv.polyline(bez((0.38, 0.40), (0.64, 0.40), (0.80, 0.60), (0.96, 0.88)), W, TEAL)
@@ -323,7 +323,7 @@ def g_graphEdDefaultTanOutButton(cv):
 
 # --- buffer curves ---------------------------------------------------------------------------------------------------
 
-def g_bufferSnapButton(cv):
+def g_buffer_snapshot(cv):
     """Buffer snapshot: the curve and a grey copy kept beside it."""
     cv.polyline(bez((0.04, 0.84), (0.28, 0.20), (0.56, 0.20), (0.80, 0.70)), 0.06, DIM)
     cv.polyline(bez((0.20, 0.70), (0.44, 0.06), (0.72, 0.06), (0.96, 0.56)), W, TEAL)
@@ -331,7 +331,7 @@ def g_bufferSnapButton(cv):
     cv.circle(0.76, 0.83, 0.07, DARK)
 
 
-def g_bufferSwapButton(cv):
+def g_buffer_swap(cv):
     """Swap buffer curves: two curves trading places."""
     cv.polyline(bez((0.04, 0.34), (0.30, 0.04), (0.60, 0.04), (0.96, 0.30)), W, TEAL)
     cv.polyline(bez((0.04, 0.66), (0.30, 0.96), (0.60, 0.96), (0.96, 0.70)), 0.06, DIM)
@@ -341,7 +341,7 @@ def g_bufferSwapButton(cv):
 
 # --- tangent handles -------------------------------------------------------------------------------------------------
 
-def g_breakTanButton(cv):
+def g_tan_break(cv):
     """Break tangents: the two handles of a key bent apart."""
     handle(cv, 0.50, 0.66, -0.40, -0.48, GREY)
     handle(cv, 0.50, 0.66, 0.40, -0.20, TEAL_LIGHT)
@@ -349,14 +349,14 @@ def g_breakTanButton(cv):
     cv.rect(0.40, 0.86, 0.60, 0.96, ORANGE)
 
 
-def g_unifyTanButton(cv):
+def g_tan_unify(cv):
     """Unify tangents: both handles on one straight line through the key."""
     handle(cv, 0.50, 0.50, -0.40, 0.30, GREY)
     handle(cv, 0.50, 0.50, 0.40, -0.30, GREY)
     key(cv, 0.50, 0.50, TEAL, 0.12)
 
 
-def g_freeTanButton(cv):
+def g_tan_free_length(cv):
     """Free tangent length: a handle that can stretch."""
     cv.line(0.10, 0.70, 0.62, 0.70, 0.05, GREY)
     key(cv, 0.14, 0.70)
@@ -364,7 +364,7 @@ def g_freeTanButton(cv):
     padlock(cv, 0.34, 0.24, 0.30, GREY, open_=True)
 
 
-def g_lockTanButton(cv):
+def g_tan_lock_length(cv):
     """Lock tangent length: a handle with a closed lock."""
     cv.line(0.10, 0.70, 0.90, 0.70, 0.05, GREY)
     key(cv, 0.14, 0.70)
@@ -374,14 +374,14 @@ def g_lockTanButton(cv):
 
 # --- outliner list -------------------------------------------------------------------------------------------------
 
-def g_OutlineEdloadToggleButton(cv):
+def g_list_auto_load(cv):
     """Auto load: the list follows the selection by itself (list rows + a turning arrow)."""
     rows(cv, 0.06, 0.48, (0.24, 0.50, 0.76))
     cv.ring(0.72, 0.50, 0.20, 0.08, TEAL, 30, 330)
     arrow_head(cv, 0.90, 0.40, 0.2, -1, 0.14, TEAL)
 
 
-def g_OutlineEdreloadButton(cv):
+def g_list_load(cv):
     """Load the selected objects: an arrow into the list."""
     rows(cv, 0.44, 0.94, (0.24, 0.50, 0.76))
     harrow(cv, 0.04, 0.40, 0.50, TEAL, both=False, s=0.16)
@@ -390,7 +390,7 @@ def g_OutlineEdreloadButton(cv):
 
 # --- drag / snap -----------------------------------------------------------------------------------------------------
 
-def g_switchConstrainedDragStateButton(cv):
+def g_constrained_drag(cv):
     """Unconstrained drag: free four-way arrows."""
     cv.line(0.50, 0.14, 0.50, 0.86, W, GREY)
     cv.line(0.14, 0.50, 0.86, 0.50, W, GREY)
@@ -399,7 +399,7 @@ def g_switchConstrainedDragStateButton(cv):
     cv.circle(0.50, 0.50, 0.11, TEAL)
 
 
-def g_timeSnapButton(cv):
+def g_time_snap(cv):
     """Time snap: a magnet over whole-frame ticks."""
     magnet_small(cv)
     for i in range(4):
@@ -408,7 +408,7 @@ def g_timeSnapButton(cv):
     cv.line(0.06, 0.96, 0.94, 0.96, 0.05, GREY)
 
 
-def g_valueSnapButton(cv):
+def g_value_snap(cv):
     """Value snap: a magnet beside whole-value ticks."""
     magnet_small(cv)
     for i in range(4):
@@ -419,13 +419,13 @@ def g_valueSnapButton(cv):
 
 # --- curve views -----------------------------------------------------------------------------------------------------
 
-def g_graphEditorAbsoluteViewIconButton(cv):
+def g_view_absolute(cv):
     """Absolute view: curves of different sizes on one shared scale."""
     wave(cv, 0.04, 0.96, 0.50, 0.40, GREY)
     wave(cv, 0.04, 0.96, 0.50, 0.12, TEAL, periods=2.0)
 
 
-def g_graphEditorStackedViewIconButton(cv):
+def g_view_stacked(cv):
     """Stacked view: each curve in its own band."""
     wave(cv, 0.06, 0.94, 0.20, 0.10, GREY)
     cv.line(0.04, 0.37, 0.96, 0.37, 0.04, DIM)
@@ -434,7 +434,7 @@ def g_graphEditorStackedViewIconButton(cv):
     wave(cv, 0.06, 0.94, 0.85, 0.10, GREY, periods=1.5)
 
 
-def g_graphEditorNormalizedViewIconButton(cv):
+def g_view_normalized(cv):
     """Normalized view: every curve scaled between the same two limits."""
     for y in (0.12, 0.88):
         for x in (0.04, 0.30, 0.56, 0.82):
@@ -443,7 +443,7 @@ def g_graphEditorNormalizedViewIconButton(cv):
     wave(cv, 0.06, 0.94, 0.50, 0.36, TEAL, periods=0.5)
 
 
-def g_renormalizeCurvesButton(cv):
+def g_renormalize(cv):
     """Re-normalize: the limits fitted again (two limit marks and a turning arrow)."""
     cv.line(0.04, 0.12, 0.44, 0.12, 0.06, DIM)
     cv.line(0.04, 0.88, 0.44, 0.88, 0.06, DIM)
@@ -476,41 +476,41 @@ def _infinity(cv, pre, offset):
         cv.line(0.60, 0.10, 0.88, 0.10, 0.06, LIGHT)
 
 
-def g_curvesPreInfinityCycleButton(cv):
+def g_pre_cycle(cv):
     """Pre-infinity cycle: the curve repeated before its first key."""
     _infinity(cv, True, False)
 
 
-def g_curvesPreInfinityCycleOffsetButton(cv):
+def g_pre_cycle_offset(cv):
     """Pre-infinity cycle with offset: the repeat before the first key ends where the curve starts."""
     _infinity(cv, True, True)
 
 
-def g_curvesPostInfinityCycleButton(cv):
+def g_post_cycle(cv):
     """Post-infinity cycle: the curve repeated after its last key."""
     _infinity(cv, False, False)
 
 
-def g_curvesPostInfinityCycleOffsetButton(cv):
+def g_post_cycle_offset(cv):
     """Post-infinity cycle with offset: the repeat after the last key starts where the curve ends."""
     _infinity(cv, False, True)
 
 
 # --- editors ---------------------------------------------------------------------------------------------------------
 
-def g_getGraphEditorButton(cv):
+def g_open_graph_editor(cv):
     window(cv)
     cv.polyline(bez((0.14, 0.80), (0.34, 0.30), (0.62, 0.92), (0.86, 0.36)), 0.07, TEAL)
 
 
-def g_getDopeSheetButton(cv):
+def g_open_dope_sheet(cv):
     window(cv)
     for y, xs in ((0.44, (0.22, 0.52)), (0.70, (0.36, 0.76))):
         for x in xs:
             diamond(cv, x, y, 0.09, TEAL)
 
 
-def g_getCTEButton(cv):
+def g_open_time_editor(cv):
     window(cv)
     cv.rect(0.12, 0.36, 0.58, 0.52, TEAL)
     cv.rect(0.38, 0.62, 0.88, 0.78, TEAL_LIGHT)
@@ -518,20 +518,20 @@ def g_getCTEButton(cv):
 
 # --- Dope Sheet tools ------------------------------------------------------------------------------------------------
 
-def g_selectTool(cv):
+def g_key_select_tool(cv):
     """Select keys: the pointer on a key."""
     diamond(cv, 0.30, 0.30, 0.20, TEAL)
     status_icons.arrow_cursor(cv, 0.42, 0.40, 0.54)
 
 
-def g_moveTool(cv):
+def g_key_move_tool(cv):
     """Move keys in time: keys with a left-right arrow."""
     diamond(cv, 0.30, 0.30, 0.14, TEAL)
     diamond(cv, 0.70, 0.30, 0.14, TEAL)
     harrow(cv, 0.04, 0.96, 0.74, GREY)
 
 
-def g_scaleTool(cv):
+def g_key_scale_tool(cv):
     """Scale keys in time: keys pushed apart from a pivot line."""
     cv.line(0.50, 0.06, 0.50, 0.94, 0.05, LIGHT)
     diamond(cv, 0.30, 0.34, 0.12, TEAL)
@@ -541,7 +541,7 @@ def g_scaleTool(cv):
     cv.line(0.16, 0.74, 0.42, 0.74, W, GREY)
 
 
-def g_hierButton(cv):
+def g_hierarchy_below(cv):
     """Hierarchy below: a parent with its children."""
     cv.rect(0.06, 0.06, 0.34, 0.30, TEAL)
     cv.line(0.20, 0.30, 0.20, 0.82, 0.07, GREY)
@@ -550,8 +550,8 @@ def g_hierButton(cv):
         cv.rect(0.50, y - 0.11, 0.94, y + 0.11, GREY)
 
 
-def g_dopeSheetTimeSnapButton(cv):
-    g_timeSnapButton(cv)
+def g_dope_time_snap(cv):
+    g_time_snap(cv)
 
 
 GLYPHS = {name[2:]: fn for name, fn in globals().items() if name.startswith("g_")}

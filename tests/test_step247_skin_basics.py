@@ -1,8 +1,6 @@
 """Issue #164: skin basics with Maya's meaning.
 
-Expected numbers: tests/maya2026_rig_data.py SKINNING["skin"] (prune_and_max, unbind_and_bind_pose, copy_mirror_weights)
-and further results written here as literals:
-prune with a locked joint, Set Max Influences (recomputed by distance), Go to Bind Pose, Mirror Skin Weights barycentric,
+Checks: prune with a locked joint, Set Max Influences (recomputed by distance), Go to Bind Pose, Mirror Skin Weights barycentric,
 Closest in hierarchy rows (the weights of three vertices).
 Kit: operators/skin_basics.py, skin.py (bind options, mirror, closest_distance_weights).
 """
