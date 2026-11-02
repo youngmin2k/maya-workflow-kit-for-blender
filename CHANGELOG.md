@@ -154,6 +154,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   over the corner to the other in equal steps. With an absolute Offset longer than an edge the bevel slides
   along, the new vertex goes on past that edge's end like Maya (it used to stop there and merge), and on the
   edges of a cap's centre fan it always sits one width from the corner.
+  Merge Vertices joins every group of new vertices that lie within 0.0001 of each other, also through each
+  other, like Maya (Fraction 1 on a zero-length extrusion's cap now meets in one vertex in the middle).
 
 ### Fixed
 - **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now

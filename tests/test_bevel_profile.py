@@ -161,3 +161,19 @@ def test_absolute_offset_slides_past_a_short_side_edge():
     assert any(abs(v.co.z - (2.0 - w)) < 1e-5 and abs(v.co.y - 1.5) < TOL for v in bm.verts)
     assert len(bm.verts) == 10
     bm.free()
+
+
+def test_fraction_one_on_a_zero_length_extrusion_meets_in_one_vertex():
+    """Bevel the cap of a zero-length face extrusion with Fraction 1: the four inner corners come within the merge
+    tolerance (0.0001) of each other and become one vertex in the middle of the cap (a unit cube: the corners stop
+    0.0001 short of the middle)."""
+    ex = import_module(kit.MODULE + ".operators.extrude")
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    top = max(bm.faces, key=lambda f: f.calc_center_median().z)
+    caps, _moved = ex.extrude(bm, [top])
+    bev.bevel_edges(bm, list(caps[0].edges), fraction=1.0)
+    centre = [v for v in bm.verts if abs(v.co.x) < 1e-3 and abs(v.co.y) < 1e-3 and abs(v.co.z - 0.5) < 1e-3]
+    assert len(centre) == 1, len(centre)
+    assert (len(bm.verts), len(bm.faces)) == (9, 9), (len(bm.verts), len(bm.faces))
+    bm.free()

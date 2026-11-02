@@ -833,15 +833,11 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     near = set(made)
     for v in made:
         near.update(e.other_vert(v) for e in v.link_edges)
-    # Maya merges what the bevel made onto coincident vertices (a zero-length extrusion's sides, Fraction 1), at
-    # their midpoint (Fraction 1: 0.49995 between 0.5 and 0.4999)
-    pairs = bmesh.ops.find_doubles(bm, verts=list(near), dist=MERGE * 1.001)["targetmap"]
+    # Maya merges what the bevel made onto coincident vertices (a zero-length extrusion's sides, Fraction 1): every
+    # group of vertices linked by gaps within the tolerance becomes one vertex at the group's mean (Fraction 1:
+    # 0.49995 between 0.5 and 0.4999; four inner corners 0.0001 apart meet in the middle)
     made_set = set(made)
-    # a new vertex merged onto an old one leaves the old one (and its number), like Maya
-    pairs = {(t if v not in made_set and t in made_set else v): (v if v not in made_set and t in made_set else t)
-             for v, t in pairs.items()}
-    for v, target in pairs.items():
-        target.co = (v.co + target.co) / 2
+    pairs = merge_groups(list(near), made_set, MERGE * 1.001)
     if pairs:
         bmesh.ops.weld_verts(bm, targetmap=pairs)
     for v in near:
@@ -1091,6 +1087,40 @@ def _three_planes(a, b, c):
     if abs(den) <= 1e-12:
         return None
     return (nb.cross(nc) * da + nc.cross(na) * db + na.cross(nb) * dc) / den
+
+
+def merge_groups(verts, made_set, dist):
+    """{vertex: target} for weld_verts: vertices linked by gaps <= ``dist`` (through each other) form one group,
+    moved to the group's mean; the target is an old vertex when the group has one (it keeps its number)."""
+    verts = [v for v in verts if v.is_valid]
+    parent = {v: v for v in verts}
+
+    def root(v):
+        while parent[v] is not v:
+            parent[v] = parent[parent[v]]
+            v = parent[v]
+        return v
+
+    for i, a in enumerate(verts):
+        for b in verts[i + 1:]:
+            if (a.co - b.co).length <= dist:
+                ra, rb = root(a), root(b)
+                if ra is not rb:
+                    parent[rb] = ra
+    groups = {}
+    for v in verts:
+        groups.setdefault(root(v), []).append(v)
+    out = {}
+    for group in groups.values():
+        if len(group) < 2:
+            continue
+        mean = sum((v.co for v in group), group[0].co * 0.0) / len(group)
+        target = next((v for v in group if v not in made_set), group[0])
+        for v in group:
+            v.co = mean
+            if v is not target:
+                out[v] = target
+    return out
 
 
 def flat_corners(bm, made, hubs):
