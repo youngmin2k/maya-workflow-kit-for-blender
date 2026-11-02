@@ -127,10 +127,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   the top face; with an absolute Offset, the width along each edge follows the bent face's average slope.
   A corner where three bevelled edges meet (all three edges of a box corner) now gets Maya's width and puts
   each face's new corner where Maya does when the corner's face angles stay close (their half-angle sines
-  within 10% of each other), whatever the mesh's vertex numbering.
+  within 10% of each other), whatever the mesh's vertex numbering, also next to a bent side face.
   Still different from Maya: corners where the faces' angles differ strongly (the new corner can sit up to a few
-  percent of the bevel width away), corners with three bevelled edges next to a bent (non-flat)
-  side face, and three-edge corners whose face angles differ by more than about 10%.
+  percent of the bevel width away) and three-edge corners whose face angles differ by more than about 10%.
 
 ### Fixed
 - **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now
