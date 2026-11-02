@@ -571,6 +571,12 @@ def _on_load(*_args):
     _armed[0] = any(ob.type == 'FONT' and modifier(ob) is not None for ob in bpy.data.objects)
 
 
+def _on_load_later():
+    """``_on_load`` for the file that is open when the kit starts (bpy.data can't be read while registering)."""
+    _on_load()
+    return None
+
+
 # --- operators ---------------------------------------------------------------------------------------------------
 
 def _type_object(context):
@@ -710,7 +716,7 @@ def register_handlers():
     bpy.app.handlers.depsgraph_update_post.append(_on_depsgraph)
     bpy.app.handlers.load_post.append(_on_load)
     _draw_handle[0] = bpy.types.SpaceView3D.draw_handler_add(_draw, (), 'WINDOW', 'POST_VIEW')
-    _on_load()
+    bpy.app.timers.register(_on_load_later, first_interval=0.0)
 
 
 def unregister_handlers():
@@ -720,5 +726,7 @@ def unregister_handlers():
     for lst, fn in ((bpy.app.handlers.depsgraph_update_post, _on_depsgraph), (bpy.app.handlers.load_post, _on_load)):
         if fn in lst:
             lst.remove(fn)
+    if bpy.app.timers.is_registered(_on_load_later):
+        bpy.app.timers.unregister(_on_load_later)
     _signatures.clear()
     _written.clear()
