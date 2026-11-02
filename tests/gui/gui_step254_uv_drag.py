@@ -137,7 +137,8 @@ def selected_centre():
     pts = [l[uv].uv for f in bm.faces if f.select for l in f.loops if compat.uv_vert_selected(l, uv)]
     if not pts:
         return uv_px(0.5, 0.5)
-    return uv_px(sum(p.x for p in pts) / len(pts), sum(p.y for p in pts) / len(pts))
+    # the manipulator sits at the centre of the selected UVs' box
+    return uv_px((min(p.x for p in pts) + max(p.x for p in pts)) / 2, (min(p.y for p in pts) + max(p.y for p in pts)) / 2)
 
 
 for rnd in range(2):

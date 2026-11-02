@@ -309,6 +309,10 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     maya_camera_names: bpy.props.BoolProperty(
         name="Camera Names", description="Maya camera name (persp, top -Y, ...) at the bottom of the view",
         default=True)
+    def _update_uv_manipulator(self, context):
+        from .ui import uv_manipulator
+        uv_manipulator.follow_preference()
+
     @_quiet
     def _update_selection_wire(self, context):
         for window in context.window_manager.windows:
@@ -334,6 +338,11 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Component Colors", description="Mesh edit mode shows Maya's component colors: light blue edges, "
                                               "purple / yellow vertices, orange edges and stippled faces",
         default=True, update=_update_selection_wire)
+    # Maya-style Move / Rotate / Scale handles in the UV Editor (off = Blender's own UV gizmos)
+    maya_uv_manipulator: bpy.props.BoolProperty(
+        name="UV Manipulator", description="The UV Editor's Move / Rotate / Scale tools show Maya-style handles: "
+                                           "U / V arrows, a rotate ring, U / V scale boxes",
+        default=True, update=_update_uv_manipulator)
     # Maya grey docks: the dock areas are lifted from the theme's Properties grey to #444444
     maya_dock_colors: bpy.props.BoolProperty(
         name="Dock Colors", description="The Channel Box / Attribute Editor / Modeling Toolkit docks are drawn "
@@ -553,7 +562,9 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         row.prop(self, "maya_view_axis")
         row.prop(self, "maya_selection_wire")
         row.prop(self, "maya_component_colors")
-        box.prop(self, "maya_dock_colors")
+        row = box.row()
+        row.prop(self, "maya_dock_colors")
+        row.prop(self, "maya_uv_manipulator")
         box.prop(self, "in_view_messages")
 
 

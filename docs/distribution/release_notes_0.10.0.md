@@ -21,6 +21,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
   Ctrl+double-click an edge ring, a double-click on a UV or UV face its shell (#264).
 - Pre-selection for single UVs, UV edges and UV faces, not only whole shells; in UV mode the 3D View shows only
   the vertices of the picked UVs as selected; no face centre dots in UV mode (#264).
+- Maya-style Move / Rotate / Scale handles in the UV Editor: U / V arrows, a rotate ring, U / V scale boxes at the
+  centre of the selected UVs (#264).
 - Ctrl+Up / Ctrl+Down change the checker density (#264).
 - Straighten UVs and Randomize Shells work like Maya; with several meshes in edit mode the UV commands keep to the
   shells you picked (#264).

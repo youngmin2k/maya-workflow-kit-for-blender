@@ -75,6 +75,7 @@ PAGES = (
             ("pref", "maya_selection_wire", "Selection wireframe (lead green, others white)"),
             ("pref", "maya_component_colors", "Component colours"),
             ("pref", "maya_dock_colors", "Panel colours"),
+            ("pref", "maya_uv_manipulator", "UV Editor manipulator"),
             ("pref", "lock_ortho_tumble", "Lock tumble in orthographic views"),
         ]),
     ]),

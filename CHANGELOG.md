@@ -39,6 +39,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   shell border picks one side only. In the UV Editor a double-click on a UV edge selects its UV edge loop,
   Ctrl+double-click its edge ring, and a double-click on a UV or a UV face its whole UV shell; Shift adds to the
   selection. Loops stop at UV seams. The Vertex / Edge / Face buttons still pick mesh components.
+- **Maya-style UV manipulator** (#264): in the UV Editor the Move, Rotate and Scale tools (W / E / R) show
+  Maya-style handles at the centre of the selected UVs' box: U and V arrows and a centre square for free moves, one
+  ring that turns the UVs about that centre, U and V scale boxes and a centre box for uniform scaling. Dragging a
+  handle acts along it; a drag off the handles still draws a marquee. Preferences > Maya Workflow Kit > UV
+  Manipulator turns them off and gives back Blender's UV gizmos.
 - **Checker density** (#264): in the UV Editor Ctrl+Up / Ctrl+Down make the checker map finer or coarser, one
   step at a time (never below 1); the density stays with the checker when you turn it off and on.
 - **Fuller UV Toolkit** (#264): every UV Toolkit button now works. Select By Type has Back-Facing, Front-Facing,
