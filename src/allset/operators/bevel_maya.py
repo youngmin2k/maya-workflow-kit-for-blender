@@ -293,9 +293,12 @@ def _flat(f):
 
 def corner_offsets(edges, ids):
     """Absolute Offset (Offset As Fraction off): the same box corners as ``corner_pairs`` (any dihedral angles) with
-    flat faces, not almost straight. P, Q, s as there. Like Maya:
-    - the new corner in F lies on the bisector, W c from both edge lines, c = max(1, sqrt(2 / (1 + (s_P / s_Q)^2)));
-    - the new vertex on u3 lies 4 W / (3 max(s_P, s_Q) + min(s_P, s_Q)) from v.
+    a flat F, not almost straight. P, Q, s as there; a side face may be bent: each edge's width at an end is
+    W n_e / h there, n_e = sin(dihedral / 2) between the face normals of F and e's side face (1 for flat faces).
+    Like Maya:
+    - the new corner in F lies on the bisector, W c n_P / h_P from both edge lines,
+      c = max(1, sqrt(2 / (1 + (s_P / s_Q)^2)));
+    - the new vertex on u3 lies 4 W / (3 max(s_P, s_Q) + min(s_P, s_Q)) from v, times the mean of n / h of P and Q.
     Returns {v: {...}} with the keys ``bevel_edges`` moves by."""
     sel = set(edges)
     out = {}
@@ -304,16 +307,19 @@ def corner_offsets(edges, ids):
     for v in {v for e in edges for v in e.verts}:
         if len(v.link_edges) != 3 or any(len(e.link_faces) != 2 for e in v.link_edges):
             continue
-        if any(not _flat(f) for f in v.link_faces):
-            continue
         mine = [e for e in v.link_edges if e in sel]
         if len(mine) != 2:
             continue
         faces = set(mine[0].link_faces).intersection(mine[1].link_faces)
         order = vertex_edges(v, ids)
-        if len(faces) != 1 or order is None:
+        if len(faces) != 1 or order is None or not _flat(next(iter(faces))):
             continue
         p, q = [e for e in order if e in sel]
+        top = next(iter(faces))
+        scales = [_face_half_sin(e, top) for e in (p, q)]
+        heres = [_half_sin(e, v) for e in (p, q)]
+        if None in scales or None in heres:
+            continue
         rest = [e for e in v.link_edges if e not in sel][0]
         units = [e.other_vert(v).co - v.co for e in (p, q, rest)]
         if any(u.length <= ZERO for u in units):
@@ -325,17 +331,42 @@ def corner_offsets(edges, ids):
         if sp <= ZERO or sq <= ZERO or ray.length <= ZERO or math.sin(half) <= ZERO or up.dot(uq) < -NEAR_LINE:
             continue       # an almost straight corner is ``corner_moves``' (an n-gon cap rim)
         c = max(1.0, math.sqrt(2.0 / (1.0 + (sp / sq) ** 2)))
-        out[v] = {"origin": v.co.copy(), "ray": ray.normalized(), "k_ray": c / math.sin(half), "u3": u3,
-                  "k_u3": 4.0 / (3.0 * max(sp, sq) + min(sp, sq)), "ends": _far_ends((p, q), v, sel)}
+        wp, wq = scales[0] / heres[0], scales[1] / heres[1]
+        out[v] = {"origin": v.co.copy(), "ray": ray.normalized(), "k_ray": c * wp / math.sin(half), "u3": u3,
+                  "k_u3": 4.0 / (3.0 * max(sp, sq) + min(sp, sq)) * (wp + wq) / 2.0,
+                  "ends": _far_ends((p, q), v, sel, scales)}
     return out
 
 
-def _far_ends(pair, v, sel):
+def _newell(f):
+    """The face's normal from all its vertices (a bent face's average plane)."""
+    n = f.verts[0].co * 0.0
+    loops = [x.vert.co for x in f.loops]
+    for a, b in zip(loops, loops[1:] + loops[:1]):
+        n += a.cross(b)
+    return n.normalized() if n.length > ZERO else None
+
+
+def _face_half_sin(e, top):
+    """sin(dihedral / 2) of edge ``e`` from the normals of face ``top`` and e's other face."""
+    other = [f for f in e.link_faces if f is not top]
+    if len(other) != 1:
+        return None
+    a, b = _newell(top), _newell(other[0])
+    if a is None or b is None:
+        return None
+    return math.cos(math.acos(max(-1.0, min(1.0, a.dot(b)))) / 2.0)
+
+
+def _far_ends(pair, v, sel, scales=None):
     """At the other end of each edge of a corner (when it ends only that bevelled edge) Maya keeps both new vertices
-    one width from the edge; Blender's drift with the corner. [(position, unit slide edge, k = 1 / sin)]."""
+    one width from the edge (times n / h there for a bent side face, ``scales`` = n per edge); Blender's drift with
+    the corner. [(position, unit slide edge, k = 1 / sin)]."""
     out = []
-    for e in pair:
+    for i, e in enumerate(pair):
         w = e.other_vert(v)
+        here = _half_sin(e, w) if scales else None
+        f = scales[i] / here if here else 1.0
         if sum(1 for x in w.link_edges if x in sel) != 1:
             continue
         d = (v.co - w.co)
@@ -348,7 +379,7 @@ def _far_ends(pair, v, sel):
                 continue
             u.normalize()
             if u.cross(d).length > ZERO:
-                out.append((w.co.copy(), u, 1.0 / u.cross(d).length))
+                out.append((w.co.copy(), u, f / u.cross(d).length))
     return out
 
 

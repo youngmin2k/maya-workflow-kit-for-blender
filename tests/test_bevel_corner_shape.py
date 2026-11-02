@@ -91,3 +91,18 @@ def test_corner_next_to_a_bent_side_face():
             depth = max(1.0 - v.co.z for v in made if v.co.z > 0.5)
             assert depth <= w + EPS, f"{label}: a new vertex {depth:.6f} below the top face, width {w:.6f}"
             bm.free()
+
+
+def test_offset_corner_next_to_a_bent_side_face():
+    """The same bent corner with an absolute Offset: the result stays clean and inside the box."""
+    for axis in (0, 1):
+        for lean in (-0.1, 0.1):
+            bm = _box()
+            low = min(bm.verts, key=lambda v: (v.co - Vector((1.0, 1.0, 0.0))).length)
+            low.co[axis] += lean
+            box = _bounds(bm)
+            made = bev.bevel_edges(bm, _corner_edges(bm, 2), offset_as_fraction=False, offset=0.1)
+            label = f"axis {axis}, lean {lean}"
+            assert made, f"{label}: nothing bevelled"
+            _check(bm, label, box)
+            bm.free()
