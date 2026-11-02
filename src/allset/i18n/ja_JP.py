@@ -5811,4 +5811,10 @@ STRINGS = {
     'Turn the Type Manipulator on or off: click a character of the type, then move, rotate or scale it': 'タイプマニピュレータのオン / オフ: タイプの文字をクリックして、移動・回転・スケールします',
     'Pick a character of a type whose Type Manipulator is on': 'タイプマニピュレータがオンのタイプの文字を選択します',
     'Put the picked character back (all characters with Reset All)': '選択した文字を元に戻します (すべてリセットで全文字)',
+    'Chamfer': '面取り',
+    'Cut the edge off (off: keep the old corner, the new points run along the two faces)': 'エッジを切り落とします (オフ: 元の角を残し、新しい点は 2 つの面に沿って並びます)',
+    'New edges whose faces meet at more than this angle (degrees) are hard, the others soft': '面がこの角度 (度) より大きく交わる新しいエッジはハード、それ以外はソフトになります',
+    "Offset in world units, ignoring the object's scale (off: in the object's own units)": 'オフセットをワールド単位で指定し、オブジェクトのスケールを無視します (オフ: オブジェクト自身の単位)',
+    'World (Ignore scaling on object)': 'ワールド (オブジェクトのスケールを無視)',
+    'World Space': 'ワールド空間',
 }

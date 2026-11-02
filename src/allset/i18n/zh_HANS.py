@@ -5811,4 +5811,10 @@ STRINGS = {
     'Turn the Type Manipulator on or off: click a character of the type, then move, rotate or scale it': '打开或关闭类型操纵器：单击类型的字符，然后移动、旋转或缩放它',
     'Pick a character of a type whose Type Manipulator is on': '选取已打开类型操纵器的类型中的字符',
     'Put the picked character back (all characters with Reset All)': '将选取的字符恢复原状（全部重置则恢复所有字符）',
+    'Chamfer': '倒角',
+    'Cut the edge off (off: keep the old corner, the new points run along the two faces)': '切掉边 (关闭: 保留原来的角, 新的点沿两个面排列)',
+    'New edges whose faces meet at more than this angle (degrees) are hard, the others soft': '两个面相交角度 (度) 大于此值的新边为硬边, 其余为软边',
+    "Offset in world units, ignoring the object's scale (off: in the object's own units)": '以世界单位计算偏移, 忽略对象的缩放 (关闭: 使用对象自身的单位)',
+    'World (Ignore scaling on object)': '世界 (忽略对象的缩放)',
+    'World Space': '世界空间',
 }
