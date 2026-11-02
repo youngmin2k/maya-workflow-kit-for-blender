@@ -965,10 +965,47 @@ def _side_normal(rail, strip):
     return f.normal.copy() if f is not None else None
 
 
+def frame_points(v, e0, e1, segments, depth=1.0):
+    """Maya's profile at an edge end with one or two bevelled edges: the arc for the angle e0-v-e1 taken in the
+    plane (v, e0, e1), as point = v + a (e0 - v) + b (e1 - v) with (a, b) from the unit profile (a circle touching
+    both unit legs at their ends, equal angle steps), Depth toward the chord. Also the join where two bevelled
+    edges meet. Returns the ``segments - 1`` inner points or None."""
+    u0, u1 = e0 - v, e1 - v
+    if u0.length <= ZERO or u1.length <= ZERO:
+        return None
+    c = max(-1.0, min(1.0, u0.normalized().dot(u1.normalized())))
+    theta = math.acos(c)
+    if theta <= 1e-6 or theta >= math.pi - 1e-6:
+        return None
+    # unit legs l0 = (1, 0), l1 = (cos t, sin t); the circle touching both at their ends has its centre at
+    # (1, tan(t / 2)); its radius turns from l0's end to l1's end through pi - t
+    r = math.tan(theta / 2.0)
+    sweep = math.pi - theta
+    depth = max(-1.0, min(1.0, depth))
+    out = []
+    for k in range(1, segments):
+        ang = sweep * k / segments
+        px = 1.0 - r * math.sin(ang)
+        py = r - r * math.cos(ang)
+        # chord point (depth): foot on the chord from (1, 0) to (cos t, sin t)
+        ax, ay = 1.0, 0.0
+        bx, by = c, math.sin(theta)
+        dx, dy = bx - ax, by - ay
+        dl = math.hypot(dx, dy)
+        t = ((px - ax) * dx + (py - ay) * dy) / (dl * dl)
+        qx, qy = ax + dx * t, ay + dy * t
+        px, py = qx + (px - qx) * depth, qy + (py - qy) * depth
+        # back to leg coordinates: p = a l0 + b l1
+        b = py / math.sin(theta)
+        a = px - b * c
+        out.append(v + u0 * a + u1 * b)
+    return out
+
+
 def true_arcs(bm, elay, strip, segments, depth, hubs):
-    """Segments > 1: put every profile on Maya's circle (``arc_points``); Blender's superellipse is a circle only
-    between faces at 90 degrees, with Depth 1. Where exactly two bevelled edges meet, the shared profile is the
-    profile at the strip's other end carried along the edge into the plane between the two edges."""
+    """Segments > 1: Maya's profiles. At an end with one or two bevelled edges ``frame_points`` (the arc in the
+    plane of the old vertex and the profile's ends); where three or more meet, the circle touching both faces
+    (``arc_points``)."""
     rails = {}
     for e in bm.edges:
         if e[elay]:
@@ -976,14 +1013,12 @@ def true_arcs(bm, elay, strip, segments, depth, hubs):
     for f in bm.faces:
         f.normal_update()
 
-    def joint(chain):
+    def end_of(chain):
         if not hubs:
             return None
         mid = chain[len(chain) // 2].co
-        h = min(hubs, key=lambda x: (mid - x[0]).length_squared)
-        return h[0] if h[1] == 2 else None
+        return min(hubs, key=lambda x: (mid - x[0]).length_squared)
 
-    joints = []
     for tag, rs in rails.items():
         if len(rs) != 2:
             continue
@@ -994,26 +1029,18 @@ def true_arcs(bm, elay, strip, segments, depth, hubs):
         if len(chain_a) != segments + 1:
             continue
         n0, n1 = _side_normal(first, strip), _side_normal(last, strip)
-        if n0 is None or n1 is None:
-            continue
-        for chain, other in ((chain_a, chain_b), (chain_b, chain_a)):
-            corner = joint(chain)
-            if corner is not None:
-                if joint(other) is None:
-                    joints.append((chain, other, corner))
-                continue
-            pts = arc_points(chain[0].co.copy(), chain[-1].co.copy(), n0, n1, segments, depth)
+        for chain in (chain_a, chain_b):
+            p0, p1 = chain[0].co.copy(), chain[-1].co.copy()
+            hub = end_of(chain)
+            if hub is not None and hub[1] <= 2:
+                pts = frame_points(hub[0], p0, p1, segments, depth)
+            elif n0 is not None and n1 is not None:
+                pts = arc_points(p0, p1, n0, n1, segments, depth)
+            else:
+                pts = None
             if pts is not None:
                 for v, p in zip(chain[1:-1], pts):
                     v.co = p
-    for chain, other, corner in joints:
-        normal = (chain[0].co - corner).cross(chain[-1].co - corner)
-        along = chain[0].co - other[0].co
-        if normal.length <= ZERO or along.length <= ZERO or abs(normal.dot(along)) <= 1e-9:
-            continue
-        for v, o in zip(chain[1:-1], other[1:-1]):
-            t = normal.dot(corner - o.co) / normal.dot(along)
-            v.co = o.co + along * t
 
 
 def corner_kept(bm, elay, strip, segments, hubs):
