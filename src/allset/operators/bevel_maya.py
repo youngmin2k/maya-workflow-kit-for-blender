@@ -713,7 +713,7 @@ def _renumber(bm, plan, old_verts, flay, made, new_verts, merged=False):
 
 
 def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, segments=1, depth=1.0, unit=1.0,
-                edge_ids=None, **_unused):
+                edge_ids=None, chamfer=True, **_unused):
     """polyBevel3 on ``edges`` (bmesh). Returns the vertices the bevel made (empty: nothing done). ``edge_ids``
     ({BMEdge: Maya edge id}) replaces ``maya_edge_ids`` for a mesh whose Maya edge numbering the caller knows."""
     edges = [e for e in edges if e.is_valid and len(e.link_faces) == 2]      # like Maya: border edges stay
@@ -723,7 +723,9 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     w = width(edges, fraction, offset_as_fraction, offset, unit, pairs2, triples)
     if not edges or w <= 0.0:
         return []
-    plan = _plan(bm, edges, ids) if ids is not None and int(segments) == 1 else None
+    # Chamfer off: Maya keeps the old corner as one more profile point (Segments + 1 steps along the two faces)
+    bseg = max(1, int(segments)) + (0 if chamfer else 1)
+    plan = _plan(bm, edges, ids) if ids is not None and int(segments) == 1 and chamfer else None
     bm.edges.index_update()
     picked = [e.index for e in edges]
     # face source indices ride along as custom data (bevel copies them onto what it makes); added before elements are
@@ -733,7 +735,7 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     # Segments > 1: an edge layer finds each edge's strip afterwards (an edge layer invalidates edge references, so
     # the Maya edge ids are carried over by index)
     elay = None
-    if int(segments) > 1:
+    if bseg > 1:
         by_index = {e.index: i for e, i in ids.items()} if ids is not None else None
         elay = bm.edges.layers.int.new(".allset_bevel_edge")
         bm.edges.ensure_lookup_table()
@@ -751,6 +753,7 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     verts = {v for e in edges for v in e.verts}
     # old positions of the bevelled vertices with the number of bevelled edges there
     hubs = [(v.co.copy(), sum(1 for e in v.link_edges if e in edges)) for v in verts]
+    overs = [] if offset_as_fraction else past_ends(edges, w, spokes=True)
     # Offset As Fraction only: with an absolute Offset Maya leaves that vertex at W along the edge, as Blender does
     pairs2 = corner_pairs(edges, ids) if pairs2 else {}      # the elements were collected again
     triples = corner_triples(edges, ids) if triples else {}
@@ -763,7 +766,7 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
                   for c in list(pairs2.values()) + list(offsets.values())]
     corners = corner_moves(edges) if int(segments) == 1 else []
     ret = bmesh.ops.bevel(bm, geom=list(edges) + list(verts), offset=w, offset_type='OFFSET',
-                          segments=max(1, int(segments)), profile=profile(depth), affect='EDGES',
+                          segments=bseg, profile=profile(depth), affect='EDGES',
                           clamp_overlap=False, loop_slide=True)
     made = [v for v in ret["verts"] if v.is_valid]
     # Blender puts a chain end's new vertex on a terminal edge at W along it; Maya (Fraction) at W x k. The
@@ -813,8 +816,19 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
             best = min(made, key=gap, default=None)
             if best is not None and gap(best) < 0.5 * w:
                 best.co = origin + ray * (w * k_ray)
-    if int(segments) > 1:
-        true_arcs(bm, elay, {f for f in ret["faces"] if f.is_valid}, int(segments), depth, hubs)
+    for far, origin, unit_dir, slide in overs:
+        # the made vertex on that edge's line, at or near its far vertex
+        def off_line(x, origin=origin, unit_dir=unit_dir):
+            o = x.co - origin
+            t = o.dot(unit_dir)
+            return (o - unit_dir * t).length if t > 1e-6 else math.inf
+        hit = min(made, key=lambda x: (off_line(x), (x.co - far).length_squared), default=None)
+        if hit is not None and off_line(hit) < 1e-5:
+            hit.co = origin + unit_dir * slide
+    if not chamfer:
+        corner_kept(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg, hubs)
+    elif bseg > 1:
+        true_arcs(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg, depth, hubs)
         made = flat_corners(bm, made, hubs)
     near = set(made)
     for v in made:
@@ -847,6 +861,42 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     bm.select_flush_mode()
     bm.normal_update()
     return [bm.verts[i] for i in tracked]
+
+
+def past_ends(edges, w, spokes=False):
+    """Absolute Offset, slides longer than their side edge: Blender stops the new vertex at the side edge's far vertex, Maya goes on
+    along that edge's line by width / sin(angle to the bevelled edge), past the mesh. With ``spokes`` (an absolute
+    Offset) the new vertex on an edge in neither of the bevelled edge's faces (a cap fan's spoke) is always put at the
+    width along it. Only at an
+    end with one bevelled edge. Returns [(far vertex position, origin, unit direction, slide)]."""
+    sel = set(edges)
+    out = []
+    for e in edges:
+        for v in e.verts:
+            if sum(1 for x in v.link_edges if x in sel) != 1:
+                continue
+            d = (e.other_vert(v).co - v.co)
+            if d.length <= ZERO:
+                continue
+            d.normalize()
+            sides = _slides(e, v)
+            others = [x for x in v.link_edges if x is not e and x not in sides] if spokes else []
+            for s in sides + others:
+                if s in sel:
+                    continue
+                u = s.other_vert(v).co - v.co
+                length = u.length
+                if length <= ZERO:
+                    continue
+                u.normalize()
+                if s in sides and abs(u.dot(d)) > NEAR_LINE:
+                    continue      # a side edge near the bevelled edge's line: end_moves places that vertex
+                sin = math.sqrt(max(0.0, 1.0 - u.dot(d) ** 2)) if s in sides else 1.0
+                slide = w / sin
+                # a spoke's vertex is always at the width (Blender moves it with a negative Depth)
+                if slide > length * (1.0 + 1e-6) or s not in sides:
+                    out.append((s.other_vert(v).co.copy(), v.co.copy(), u, slide))
+    return out
 
 
 def arc_points(p0, p1, n0, n1, segments, depth=1.0):
@@ -917,8 +967,59 @@ def _side_normal(rail, strip):
 
 def true_arcs(bm, elay, strip, segments, depth, hubs):
     """Segments > 1: put every profile on Maya's circle (``arc_points``); Blender's superellipse is a circle only
-    between faces at 90 degrees, with Depth 1. Where exactly two bevelled edges meet, the shared profile lies in the
-    plane between them (Blender's own one, kept)."""
+    between faces at 90 degrees, with Depth 1. Where exactly two bevelled edges meet, the shared profile is the
+    profile at the strip's other end carried along the edge into the plane between the two edges."""
+    rails = {}
+    for e in bm.edges:
+        if e[elay]:
+            rails.setdefault(e[elay], []).append(e)
+    for f in bm.faces:
+        f.normal_update()
+
+    def joint(chain):
+        if not hubs:
+            return None
+        mid = chain[len(chain) // 2].co
+        h = min(hubs, key=lambda x: (mid - x[0]).length_squared)
+        return h[0] if h[1] == 2 else None
+
+    joints = []
+    for tag, rs in rails.items():
+        if len(rs) != 2:
+            continue
+        walk = _strip_chains(rs[0], tag, elay, strip, segments)
+        if walk is None:
+            continue
+        chain_a, chain_b, first, last = walk
+        if len(chain_a) != segments + 1:
+            continue
+        n0, n1 = _side_normal(first, strip), _side_normal(last, strip)
+        if n0 is None or n1 is None:
+            continue
+        for chain, other in ((chain_a, chain_b), (chain_b, chain_a)):
+            corner = joint(chain)
+            if corner is not None:
+                if joint(other) is None:
+                    joints.append((chain, other, corner))
+                continue
+            pts = arc_points(chain[0].co.copy(), chain[-1].co.copy(), n0, n1, segments, depth)
+            if pts is not None:
+                for v, p in zip(chain[1:-1], pts):
+                    v.co = p
+    for chain, other, corner in joints:
+        normal = (chain[0].co - corner).cross(chain[-1].co - corner)
+        along = chain[0].co - other[0].co
+        if normal.length <= ZERO or along.length <= ZERO or abs(normal.dot(along)) <= 1e-9:
+            continue
+        for v, o in zip(chain[1:-1], other[1:-1]):
+            t = normal.dot(corner - o.co) / normal.dot(along)
+            v.co = o.co + along * t
+
+
+def corner_kept(bm, elay, strip, segments, hubs):
+    """Chamfer off: each profile runs from its first end over the old corner to its other end (the line where the
+    two faces meet), its points in equal steps along that path. ``segments`` = Blender's (Maya's + 1). Ends where
+    two or more bevelled edges meet keep Blender's points."""
     rails = {}
     for e in bm.edges:
         if e[elay]:
@@ -933,16 +1034,36 @@ def true_arcs(bm, elay, strip, segments, depth, hubs):
             continue
         chain_a, chain_b, first, last = walk
         n0, n1 = _side_normal(first, strip), _side_normal(last, strip)
-        if n0 is None or n1 is None:
+        if n0 is None or n1 is None or len(chain_a) != segments + 1:
             continue
+        along = n0.cross(n1)
+        if along.length <= ZERO:
+            continue
+        along.normalize()
         for chain in (chain_a, chain_b):
             mid = chain[len(chain) // 2].co
-            if hubs and min(hubs, key=lambda h: (mid - h[0]).length_squared)[1] == 2:
+            if hubs and min(hubs, key=lambda h: (mid - h[0]).length_squared)[1] >= 2:
                 continue
-            pts = arc_points(chain[0].co.copy(), chain[-1].co.copy(), n0, n1, segments, depth)
-            if pts is not None and len(chain) == segments + 1:
-                for v, p in zip(chain[1:-1], pts):
-                    v.co = p
+            p0, p1 = chain[0].co.copy(), chain[-1].co.copy()
+            corner = _three_planes((n0, n0.dot(p0)), (n1, n1.dot(p1)), (along, along.dot((p0 + p1) / 2)))
+            if corner is None:
+                continue
+            legs = (corner - p0).length, (p1 - corner).length
+            total = legs[0] + legs[1]
+            if total <= ZERO:
+                continue
+            for k, v in enumerate(chain[1:-1], 1):
+                d = total * k / segments
+                v.co = p0.lerp(corner, d / legs[0]) if d <= legs[0] else corner.lerp(p1, (d - legs[0]) / legs[1])
+
+
+def _three_planes(a, b, c):
+    """The point on three planes (normal, n . x) or None."""
+    (na, da), (nb, db), (nc, dc) = a, b, c
+    den = na.dot(nb.cross(nc))
+    if abs(den) <= 1e-12:
+        return None
+    return (nb.cross(nc) * da + nc.cross(na) * db + na.cross(nb) * dc) / den
 
 
 def flat_corners(bm, made, hubs):
@@ -979,14 +1100,28 @@ def chamfer_vertices(bm, verts):
     return list(ret["verts"])
 
 
-def _build(bm, params, unit):
+def world_scale(ob):
+    """Object scale for World Space (Maya: the Offset in world units): the mean axis scale of the object."""
+    if ob is None:
+        return 1.0
+    m = ob.matrix_world.to_3x3()
+    s = abs(m.determinant()) ** (1.0 / 3.0)
+    return s if s > ZERO else 1.0
+
+
+def _build(bm, params, unit, ob=None):
+    params = dict(params)
+    if params.pop("world_space", False) and not params.get("offset_as_fraction", True):
+        unit = unit / world_scale(ob)
     return bevel_edges(bm, [e for e in bm.edges if e.select], unit=unit, **params)
 
 
 BEVEL = extrude.add_spec(extrude.Spec(
-    'BEVEL', "polyBevel", ("fraction", "offset_as_fraction", "offset", "segments", "depth"),
+    'BEVEL', "polyBevel", ("fraction", "offset_as_fraction", "offset", "segments", "depth", "chamfer"),
     {"fraction": "Fraction", "offset_as_fraction": "Offset As Fraction", "offset": "Offset", "segments": "Segments",
-     "depth": "Depth"},
-    {"fraction": 0.5, "offset_as_fraction": True, "offset": 0.2, "segments": 1, "depth": 1.0},
-    {"fraction": "NONE", "offset_as_fraction": "BOOL", "offset": "NONE", "segments": "INT", "depth": "NONE"},
-    None, "bevel_edit", _build, node_type="polyBevel3"))
+     "depth": "Depth", "chamfer": "Chamfer"},
+    {"fraction": 0.5, "offset_as_fraction": True, "offset": 0.2, "segments": 1, "depth": 1.0, "chamfer": True,
+     "world_space": True},
+    {"fraction": "NONE", "offset_as_fraction": "BOOL", "offset": "NONE", "segments": "INT", "depth": "NONE",
+     "chamfer": "BOOL"},
+    None, "bevel_edit", _build, node_type="polyBevel3", hidden=("world_space",), with_object=True))

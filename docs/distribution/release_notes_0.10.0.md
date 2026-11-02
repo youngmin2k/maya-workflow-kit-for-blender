@@ -55,6 +55,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 - Bevel at box corners with tilted faces and at three-edge corners follows Maya in more cases (#213).
 - Bevel with Segments 2 or more: round profiles at any face angle, Depth like Maya, and box corners closed with one
   polygon (#213).
+- Bevel options: Offset space (World) and Chamfer, like Maya's Bevel Options; long absolute offsets slide past
+  short edges like Maya (#213).
 - Type Manipulator: pick single characters of a type and move, rotate or scale them (#258).
 
 ## Layout, keys and rendering

@@ -107,3 +107,57 @@ def test_depth_moves_points_toward_the_chord():
         for a, g in zip(arc[1:-1], got[1:-1]):
             q = p0 + d * (a - p0).dot(d)
             assert (g - (q + (a - q) * depth)).length < 1e-4, (depth, tuple(g))
+
+
+def _box_edge():
+    """A 2 x 3 x 4 box and its top front edge along X (side edges 3 and 4 long)."""
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    bmesh.ops.scale(bm, vec=(2.0, 3.0, 4.0), verts=bm.verts)
+    e = next(e for e in bm.edges if all(v.co.y > 1.0 and v.co.z > 1.9 for v in e.verts))
+    return bm, e
+
+
+def test_chamfer_off_keeps_the_corner():
+    for segments in (1, 3):
+        bm, e = _box_edge()
+        corner = [v.co.copy() for v in e.verts]
+        bev.bevel_edges(bm, [e], offset_as_fraction=False, offset=0.5, segments=segments, chamfer=False)
+        w = 0.5 * bev.FIT
+        for c in corner:
+            ends = sorted((v.co.copy() for v in bm.verts if abs(v.co.x - c.x) < TOL and (v.co - c).length < 1.0),
+                          key=lambda p: (p.z, -p.y))
+            # Segments + 2 points from one face over the old corner to the other face, in equal steps
+            assert len(ends) == segments + 2, (segments, len(ends))
+            assert any((p - c).length < TOL for p in ends), "corner not kept"
+            # distance along the two faces from the first end: equal steps of 2w / (Segments + 1)
+            along = sorted(abs(p.z - c.z) if abs(p.y - c.y) < TOL else w + abs(p.y - c.y) for p in ends)
+            steps = [b - a for a, b in zip(along, along[1:])]
+            assert max(abs(s - 2 * w / (segments + 1)) for s in steps) < 1e-4, steps
+        bm.free()
+
+
+def test_world_space_ignores_object_scale():
+    class Ob:
+        def __init__(self, s):
+            from mathutils import Matrix
+            self.matrix_world = Matrix.Diagonal((s, s, s, 1.0))
+    bm, e = _box_edge()
+    for f in bm.edges:
+        f.select = f is e
+    bev.BEVEL.build(bm, {"fraction": 0.5, "offset_as_fraction": False, "offset": 0.5, "segments": 1, "depth": 1.0,
+                         "chamfer": True, "world_space": True}, 1.0, ob=Ob(2.0))
+    ys = sorted({round(v.co.y, 5) for v in bm.verts if abs(v.co.z - 2.0) < TOL})
+    assert abs(ys[-1] - (1.5 - 0.25 * bev.FIT)) < 1e-5, ys       # half the width on an object scaled 2
+    bm.free()
+
+
+def test_absolute_offset_slides_past_a_short_side_edge():
+    bm, e = _box_edge()
+    bev.bevel_edges(bm, [e], offset_as_fraction=False, offset=3.5)
+    w = 3.5 * bev.FIT
+    # the vertical side edge is 3 long: the new vertex goes on past the bottom, like the 4 long one goes w along
+    assert any(abs(v.co.y - (1.5 - w)) < 1e-5 and abs(v.co.z - 2.0) < TOL for v in bm.verts)
+    assert any(abs(v.co.z - (2.0 - w)) < 1e-5 and abs(v.co.y - 1.5) < TOL for v in bm.verts)
+    assert len(bm.verts) == 10
+    bm.free()

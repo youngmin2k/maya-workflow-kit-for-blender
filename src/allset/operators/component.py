@@ -56,6 +56,12 @@ def _bevel_props():
                                 description="Faces across the bevel"),
         "depth": FloatProperty(name="Depth", default=1.0, min=-1.0, max=1.0, options={'SKIP_SAVE'},
                                description="Roundness of the bevel: 1 round, 0 flat, -1 inverted"),
+        "chamfer": BoolProperty(name="Chamfer", default=True, options={'SKIP_SAVE'},
+                                description="Cut the edge off (off: keep the old corner, the new points run along "
+                                            "the two faces)"),
+        "world_space": BoolProperty(name="World Space", default=True, options={'SKIP_SAVE'},
+                                    description="Offset in world units, ignoring the object's scale (off: in the "
+                                                "object's own units)"),
     }
 
 
@@ -65,7 +71,7 @@ class _BevelProps:
 
 def _bevel_params(op):
     from .bevel_maya import BEVEL
-    return {k: getattr(op, k) for k in BEVEL.fields}
+    return {k: getattr(op, k) for k in BEVEL.fields + BEVEL.hidden}
 
 
 @undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)

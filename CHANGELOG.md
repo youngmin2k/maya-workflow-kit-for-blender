@@ -145,9 +145,15 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   edge) and on inner (concave) edges, where the circle becomes a fillet. Depth moves each point straight toward
   the line between the profile's ends (0 = on that line, -1 = mirrored), as in Maya, with any number of
   segments. A corner where three or more bevelled edges meet (all edges of a box) is closed with one polygon
-  through the profiles' ends (a hexagon with 2 segments) instead of a rounded patch. Still different from Maya:
-  the inner profile points at such corners when their faces don't meet at 90 degrees (a pyramid tip), and the
-  point on a cap's centre edge with a negative Depth.
+  through the profiles' ends (a hexagon with 2 segments) instead of a rounded patch. Where two bevelled edges
+  meet, their profiles join in the plane between them with any Depth. Still different from Maya: the inner
+  profile points at corners of three or more bevelled edges whose faces don't meet at 90 degrees (a pyramid tip).
+- **Bevel Chamfer and Offset space** (#213): the Bevel option window has Maya's Offset space (World, ignoring
+  the object's scale, on by default) and Chamfer settings, and Chamfer is a row of the polyBevel node in the
+  Channel Box and the In-View Editor. With Chamfer off the old corner stays: the new points run from one face
+  over the corner to the other in equal steps. With an absolute Offset longer than an edge the bevel slides
+  along, the new vertex goes on past that edge's end like Maya (it used to stop there and merge), and on the
+  edges of a cap's centre fan it always sits one width from the corner.
 
 ### Fixed
 - **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now

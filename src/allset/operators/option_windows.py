@@ -231,7 +231,8 @@ def _run_smooth(context, v):
 def _run_bevel(context, v):
     # Maya polyBevel3 with the window's values (allset.bevel, editable afterwards like Ctrl+B)
     fraction = v["offset_type"].startswith("Fractional")
-    kw = dict(segments=v["segments"], depth=max(-1.0, min(1.0, v["depth"])), offset_as_fraction=fraction)
+    kw = dict(segments=v["segments"], depth=max(-1.0, min(1.0, v["depth"])), offset_as_fraction=fraction,
+              chamfer=v.get("chamfer", True), world_space=v.get("offset_space", True))
     if fraction:
         kw["fraction"] = max(0.0, min(1.0, v["width"]))
     else:
@@ -410,9 +411,11 @@ WINDOWS = [
     Window("bevel", "Bevel Options", "Bevel", None, [
         F("offset_type", "Offset type:", "enum", "Fractional (prevents inside out bevels)",
           items=("Fractional (prevents inside out bevels)", "Absolute")),
+        F("offset_space", "Offset space:", "bool", True, text="World (Ignore scaling on object)"),
         F("width", "Width:", "float", 0.5, lo=0.0, hi=1.0), F("segments", "Segments:", "int", 1, lo=1, hi=50),
-        F("depth", "Depth:", "float", 1.0, lo=-1.0, hi=1.0)], _run_bevel,
-        paths=("Edit Mesh/Bevel",), missing=("Offset space", "Mitering / Miter Along", "Chamfer", "Smoothing Angle",
+        F("depth", "Depth:", "float", 1.0, lo=-1.0, hi=1.0), F("chamfer", "Chamfer:", "bool", True, text="Chamfer")],
+        _run_bevel,
+        paths=("Edit Mesh/Bevel",), missing=("Mitering / Miter Along", "Smoothing Angle",
                                             "Automatically fit bevel to object")),
     Window("bridge", "Bridge Options", "Bridge", None, [
         F("divisions", "Divisions:", "int", 5, lo=0, hi=100), F("twist", "Twist:", "int", 0, lo=-100, hi=100)],
