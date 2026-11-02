@@ -53,6 +53,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 - Box and Lasso select pick joints with nothing selected (#276); points of a bent lattice are picked where you see
   them (#274).
 - Bevel at box corners with tilted faces and at three-edge corners follows Maya in more cases (#213).
+- Bevel with Segments 2 or more: round profiles at any face angle, Depth like Maya, and box corners closed with one
+  polygon (#213).
 - Type Manipulator: pick single characters of a type and move, rotate or scale them (#258).
 
 ## Layout, keys and rendering
@@ -78,7 +80,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 
 - Bevel: corners where the faces' angles differ strongly (the new corner can sit up to a few percent of the bevel
   width away), corners whose third edge leans far over and three-edge corners whose face angles differ by more than
-  about 10% still differ from Maya (#213).
+  about 10% still differ from Maya (#213). With Segments 2 or more, the inner profile points at corners of three or
+  more bevelled edges whose faces don't meet at 90 degrees (a pyramid tip) differ too.
 - The known differences listed in `CHANGELOG.md` still apply.
 
 ## Thank you

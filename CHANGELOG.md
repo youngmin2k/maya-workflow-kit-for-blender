@@ -140,6 +140,14 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   percent of the bevel width away), corners whose third edge leans far over (Maya can switch to its other corner
   shape there even when the face angles differ less, and the new corner can sit about 1% of the width away) and
   three-edge corners whose face angles differ by more than about 10%.
+- **Bevel with Segments 2 or more** (#213): every profile is now a circle that touches both faces, cut in equal
+  angle steps, like Maya, also where the faces meet at other angles than 90 degrees (a triangle prism's side
+  edge) and on inner (concave) edges, where the circle becomes a fillet. Depth moves each point straight toward
+  the line between the profile's ends (0 = on that line, -1 = mirrored), as in Maya, with any number of
+  segments. A corner where three or more bevelled edges meet (all edges of a box) is closed with one polygon
+  through the profiles' ends (a hexagon with 2 segments) instead of a rounded patch. Still different from Maya:
+  the inner profile points at such corners when their faces don't meet at 90 degrees (a pyramid tip), and the
+  point on a cap's centre edge with a negative Depth.
 
 ### Fixed
 - **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now

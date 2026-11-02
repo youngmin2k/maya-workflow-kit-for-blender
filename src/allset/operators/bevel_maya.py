@@ -6,8 +6,11 @@
 - Fraction is relative to one length for the whole selection: the shortest "slide" edge (an edge touching an end of a
   beveled edge), halved when both of its ends are used (two shells of different size get the same width). The width
   applied is 0.9999 x that (both modes).
-- The profile is Blender's superellipse with ``profile = t^2``, t = 0.5 + Depth x (sqrt(1/2) - 1/2): Depth 1 = the
-  round arc (0.5), 0 = straight, -1 = the arc mirrored over the chord (exact for 2 segments).
+- The profile: the circle touching both faces at the profile's ends, in equal angle steps; Depth moves each point
+  toward the chord between the ends (1 = the arc, 0 = on the chord, -1 = mirrored), also on concave edges
+  (``arc_points``). Blender's superellipse (``profile = t^2``, t = 0.5 + Depth x (sqrt(1/2) - 1/2)) stays where
+  the profile runs at a slant to its edge, where two bevelled edges meet, and for Segments 1.
+- Three or more bevelled edges at a corner: one polygon through the profiles' ends (``flat_corners``).
 - Zero-length slide edges don't count, and what the bevel makes is merged within 0.0001 (Merge Vertices): the
   cap of a zero-length extrusion bevels into an inset (12/20/10, cap at 0.25), Fraction 1 merges (6/9/5).
 - Faces bevel their edges; Maya leaves nothing selected afterwards. Vertex mode = Chamfer Vertex (Maya's Bevel
@@ -727,13 +730,27 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     # collected again, since adding a layer can invalidate element references
     tlay = bm.verts.layers.int.new(".allset_bevel_made")
     flay = bm.faces.layers.int.new(".allset_bevel_src")
+    # Segments > 1: an edge layer finds each edge's strip afterwards (an edge layer invalidates edge references, so
+    # the Maya edge ids are carried over by index)
+    elay = None
+    if int(segments) > 1:
+        by_index = {e.index: i for e, i in ids.items()} if ids is not None else None
+        elay = bm.edges.layers.int.new(".allset_bevel_edge")
+        bm.edges.ensure_lookup_table()
+        if by_index is not None:
+            ids = {bm.edges[k]: i for k, i in by_index.items()}
     bm.verts.index_update()
     old_verts = {v: v.index for v in bm.verts}
     for f in bm.faces:
         f[flay] = f.index + 1
     bm.edges.ensure_lookup_table()
     edges = [bm.edges[i] for i in picked]
+    if elay is not None:
+        for i, e in enumerate(edges):
+            e[elay] = i + 1      # bevel copies it onto the two outer edges of the edge's strip
     verts = {v for e in edges for v in e.verts}
+    # old positions of the bevelled vertices with the number of bevelled edges there
+    hubs = [(v.co.copy(), sum(1 for e in v.link_edges if e in edges)) for v in verts]
     # Offset As Fraction only: with an absolute Offset Maya leaves that vertex at W along the edge, as Blender does
     pairs2 = corner_pairs(edges, ids) if pairs2 else {}      # the elements were collected again
     triples = corner_triples(edges, ids) if triples else {}
@@ -796,6 +813,9 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
             best = min(made, key=gap, default=None)
             if best is not None and gap(best) < 0.5 * w:
                 best.co = origin + ray * (w * k_ray)
+    if int(segments) > 1:
+        true_arcs(bm, elay, {f for f in ret["faces"] if f.is_valid}, int(segments), depth, hubs)
+        made = flat_corners(bm, made, hubs)
     near = set(made)
     for v in made:
         near.update(e.other_vert(v) for e in v.link_edges)
@@ -820,11 +840,130 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     tracked = [v.index for v in bm.verts if v[tlay]]
     bm.verts.layers.int.remove(tlay)
     bm.faces.layers.int.remove(flay)
+    if elay is not None:
+        bm.edges.layers.int.remove(elay)
     bm.verts.ensure_lookup_table()
     extrude.deselect_all(bm)
     bm.select_flush_mode()
     bm.normal_update()
     return [bm.verts[i] for i in tracked]
+
+
+def arc_points(p0, p1, n0, n1, segments, depth=1.0):
+    """Maya's profile between the two width points ``p0`` / ``p1``: the circle touching face normal ``n0`` at p0
+    and ``n1`` at p1, cut in equal angle steps; Depth d moves each arc point A from its foot Q on the chord p0-p1:
+    Q + d (A - Q) (0 = on the chord, -1 = mirrored). Returns the ``segments - 1`` inner points."""
+    chord = p1 - p0
+    n0, n1 = n0.normalized(), n1.normalized()
+    # the centre = where the lines p0 - t n0 and p1 - s n1 meet; None when they miss each other (a profile at a
+    # slant to its edge: Blender's own profile is Maya's there) or the faces are parallel
+    b = n0.dot(n1)
+    den = 1.0 - b * b
+    if den <= 1e-9 or chord.length <= ZERO:
+        return None
+    w0 = p0 - p1
+    t = (w0.dot(n0) - b * w0.dot(n1)) / den
+    s = (b * w0.dot(n0) - w0.dot(n1)) / den
+    c0, c1 = p0 - n0 * t, p1 - n1 * s
+    # a concave edge has its centre on the empty side (t, s < 0): the same circle, a fillet
+    if t * s <= 0.0 or (c0 - c1).length > 1e-5 * chord.length:
+        return None
+    centre = (c0 + c1) / 2
+    u0, u1 = p0 - centre, p1 - centre
+    angle = u0.angle(u1, 0.0)
+    d = chord.normalized()
+    depth = max(-1.0, min(1.0, depth))
+    out = []
+    for k in range(1, segments):
+        f = k / segments
+        if angle <= 1e-9:
+            a = p0.lerp(p1, f)
+        else:
+            sa = math.sin(angle)
+            a = centre + u0 * (math.sin((1 - f) * angle) / sa) + u1 * (math.sin(f * angle) / sa)
+        q = p0 + d * (a - p0).dot(d)
+        out.append(q + (a - q) * depth)
+    return out
+
+
+def _strip_chains(rail, tag, elay, strip, segments):
+    """Walk an edge's strip of bevel quads from its outer edge ``rail`` to the other outer edge (same ``tag``).
+    Returns (chain at one end, chain at the other end, first outer edge, last outer edge) or None."""
+    va, vb = rail.verts
+    chain_a, chain_b = [va], [vb]
+    cur, prev = rail, None
+    for _ in range(segments):
+        f = next((x for x in cur.link_faces if x in strip and x is not prev and len(x.verts) == 4), None)
+        if f is None:
+            return None
+        a2 = next((e.other_vert(va) for e in f.edges if e is not cur and va in e.verts), None)
+        b2 = next((e.other_vert(vb) for e in f.edges if e is not cur and vb in e.verts), None)
+        nxt = next((e for e in f.edges if a2 in e.verts and b2 in e.verts), None) if a2 and b2 else None
+        if nxt is None:
+            return None
+        va, vb, prev, cur = a2, b2, f, nxt
+        chain_a.append(va)
+        chain_b.append(vb)
+        if cur[elay] == tag:
+            return chain_a, chain_b, rail, cur
+    return None
+
+
+def _side_normal(rail, strip):
+    """Normal of the old face next to an outer strip edge."""
+    f = next((x for x in rail.link_faces if x not in strip), None)
+    return f.normal.copy() if f is not None else None
+
+
+def true_arcs(bm, elay, strip, segments, depth, hubs):
+    """Segments > 1: put every profile on Maya's circle (``arc_points``); Blender's superellipse is a circle only
+    between faces at 90 degrees, with Depth 1. Where exactly two bevelled edges meet, the shared profile lies in the
+    plane between them (Blender's own one, kept)."""
+    rails = {}
+    for e in bm.edges:
+        if e[elay]:
+            rails.setdefault(e[elay], []).append(e)
+    for f in bm.faces:
+        f.normal_update()
+    for tag, rs in rails.items():
+        if len(rs) != 2:
+            continue
+        walk = _strip_chains(rs[0], tag, elay, strip, segments)
+        if walk is None:
+            continue
+        chain_a, chain_b, first, last = walk
+        n0, n1 = _side_normal(first, strip), _side_normal(last, strip)
+        if n0 is None or n1 is None:
+            continue
+        for chain in (chain_a, chain_b):
+            mid = chain[len(chain) // 2].co
+            if hubs and min(hubs, key=lambda h: (mid - h[0]).length_squared)[1] == 2:
+                continue
+            pts = arc_points(chain[0].co.copy(), chain[-1].co.copy(), n0, n1, segments, depth)
+            if pts is not None and len(chain) == segments + 1:
+                for v, p in zip(chain[1:-1], pts):
+                    v.co = p
+
+
+def flat_corners(bm, made, hubs):
+    """Where three or more bevelled edges meet, Maya closes the corner with one flat polygon through the ends of the
+    edges' profiles (Segments 2 = a hexagon at a box corner, 3 = a 9-gon). Blender fills it with a patch of quads
+    around inner vertices: those are dissolved. Returns ``made`` without them."""
+    if not made or not any(n >= 3 for _co, n in hubs):
+        return made
+    made_set = set(made)
+    # each new vertex belongs to the bevelled vertex it was made from: the nearest old position
+    at = {v: min(range(len(hubs)), key=lambda i: (v.co - hubs[i][0]).length_squared) for v in made}
+    inner = []
+    for v in made:
+        h = at[v]
+        faces = list(v.link_faces)
+        if hubs[h][1] >= 3 and len(faces) >= 3 and all(x in made_set and at[x] == h for f in faces for x in f.verts):
+            inner.append(v)
+    if not inner:
+        return made
+    bmesh.ops.dissolve_verts(bm, verts=inner)
+    return [v for v in made if v.is_valid]
 
 
 def chamfer_vertices(bm, verts):
