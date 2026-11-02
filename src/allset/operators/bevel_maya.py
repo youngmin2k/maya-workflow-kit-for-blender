@@ -1003,7 +1003,8 @@ def hub_profile_frames(edges, verts):
     """{(rounded old vertex position, edge tag): (vertex, unit edge direction, mean sine)} where three or more
     bevelled edges meet. There the profile of a bevelled edge lies in the plane through its two ends and the point
     of the edge at width / s from the vertex, s = the mean of sin(angle between the edge and the other edge of the
-    face at the vertex) over its two faces (the harmonic mean of where the neighbouring width lines cross it).
+    face at the vertex) over its two faces (the harmonic mean of where the neighbouring width lines cross it). The
+    profile's corner is where the lines from each end along that face's other edge (seen in the plane) meet.
     Tags = index in ``edges`` + 1, as ``true_arcs`` sees them."""
     index = {e: i + 1 for i, e in enumerate(edges)}
     out = {}
@@ -1017,16 +1018,39 @@ def hub_profile_frames(edges, verts):
             if d.length <= ZERO or len(e.link_faces) != 2:
                 continue
             d.normalize()
-            sines = []
+            sines, sides = [], []
             for f in e.link_faces:
+                f.normal_update()
                 other = next((x for x in v.link_edges if x is not e and f in x.link_faces), None)
                 if other is None:
                     break
                 u = (other.other_vert(v).co - v.co).normalized()
                 sines.append(math.sqrt(max(0.0, 1.0 - u.dot(d) ** 2)))
+                sides.append((f.normal.copy(), u))
             if len(sines) == 2 and min(sines) > 1e-6:
-                out[(_key(v.co), index[e])] = (v.co.copy(), d, (sines[0] + sines[1]) / 2.0)
+                out[(_key(v.co), index[e])] = (v.co.copy(), d, (sines[0] + sines[1]) / 2.0, sides)
     return out
+
+
+def _corner_in_plane(p0, p1, plane, n0, n1, sides):
+    """Where the lines from p0 and p1 along their face's other vertex edge (projected into ``plane``) meet. The face
+    of each end is the side whose normal is closest to ``n0`` / ``n1``."""
+    def along(n):
+        u = max(sides, key=lambda s: s[0].dot(n))[1]
+        u = u - plane * u.dot(plane)
+        return u if u.length > ZERO else None
+    u0, u1 = along(n0), along(n1)
+    if u0 is None or u1 is None:
+        return None
+    # p0 + a u0 = p1 + b u1 (least squares in the plane)
+    m00, m01, m11 = u0.dot(u0), -u0.dot(u1), u1.dot(u1)
+    r = p1 - p0
+    r0, r1 = u0.dot(r), -u1.dot(r)
+    det = m00 * m11 - m01 * m01
+    if abs(det) <= 1e-12:
+        return None
+    a = (r0 * m11 - m01 * r1) / det
+    return p0 + u0 * a
 
 
 def _key(co):
@@ -1066,12 +1090,12 @@ def true_arcs(bm, elay, strip, segments, depth, hubs, hub_frames=None, w=0.0):
             frame = (hub_frames or {}).get((_key(hub[0]), tag)) if hub is not None and hub[1] >= 3 else None
             corner = None
             if frame is not None and n0 is not None and n1 is not None and w > 0.0:
-                v0, d, sine = frame
+                v0, d, sine, sides = frame
                 t_pt = v0 + d * (w / sine)
                 plane = (p1 - p0).cross(t_pt - p0)
                 if plane.length > ZERO:
                     plane.normalize()
-                    corner = _three_planes((n0, n0.dot(p0)), (n1, n1.dot(p1)), (plane, plane.dot(p0)))
+                    corner = _corner_in_plane(p0, p1, plane, n0, n1, sides)
             if hub is not None and hub[1] <= 2:
                 pts = frame_points(hub[0], p0, p1, segments, depth)
             elif corner is not None:

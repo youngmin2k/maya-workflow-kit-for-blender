@@ -192,7 +192,7 @@ def test_square_pyramid_tip_profiles_stand_upright():
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
     planes = [(f.normal.copy(), f.verts[0].co.copy()) for f in bm.faces if len(f.verts) == 3]
     frames = bev.hub_profile_frames(list(tip.link_edges), {tip} | {e.other_vert(tip) for e in tip.link_edges})
-    assert len(frames) == 4 and all(abs(s - math.sin(math.radians(60))) < 1e-6 for _v, _d, s in frames.values())
+    assert len(frames) == 4 and all(abs(s - math.sin(math.radians(60))) < 1e-6 for _v, _d, s, _sides in frames.values())
     bev.bevel_edges(bm, list(tip.link_edges), offset_as_fraction=False, offset=0.2, segments=3)
     corner = next(f for f in bm.faces if len(f.verts) == 12)
     ring = [v.co.copy() for v in corner.verts]
