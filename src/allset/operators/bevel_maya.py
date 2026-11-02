@@ -25,6 +25,10 @@
   unless the caller passes them. A new vertex that Merge Vertices joins to an old one keeps the old one's number.
   Not renumbered: Segments > 1.
 - Border edges (one face) are left out, like Maya.
+- Hard edges: new edges, and edges of faces holding profile points between a profile's ends, are hard when their
+  faces meet at more than the Smoothing angle (30 degrees); the rest keep their hardness (``set_hardness``).
+- UVs: the new points in old faces get that face's UV map at their place, the strip's outer rows the UVs of the
+  faces next to the edge (``set_uvs``).
 """
 
 import math
@@ -36,6 +40,7 @@ from . import extrude
 MERGE = 1e-4          # polyBevel3 Merge Vertices on, tolerance 0.0001 (default)
 ZERO = 1e-6           # zero-length slide edges (a zero-length extrusion) don't limit the fraction
 FIT = 0.9999          # bevel width = 0.9999 x the asked width (offset 0.1 -> 0.09999, fraction 0.5 -> 0.49995)
+SMOOTHING_ANGLE = 30.0  # Edit Mesh > Bevel: new edges whose faces meet at more than this many degrees are hard
 CHAMFER = 25.0        # Chamfer Vertex: 0.25 of each edge (unit cube and 4 x 1 x 2 box)
 NEAR_LINE = 0.9       # |cos| of a slide edge's angle to the bevelled edge above this: it runs near that line
 CORNER_SPLIT = 10.93  # degrees: two-edge corners whose dihedral angles differ less than this use ``corner_pairs``
@@ -713,9 +718,10 @@ def _renumber(bm, plan, old_verts, flay, made, new_verts, merged=False):
 
 
 def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, segments=1, depth=1.0, unit=1.0,
-                edge_ids=None, chamfer=True, **_unused):
+                edge_ids=None, chamfer=True, smoothing_angle=SMOOTHING_ANGLE, **_unused):
     """polyBevel3 on ``edges`` (bmesh). Returns the vertices the bevel made (empty: nothing done). ``edge_ids``
-    ({BMEdge: Maya edge id}) replaces ``maya_edge_ids`` for a mesh whose Maya edge numbering the caller knows."""
+    ({BMEdge: Maya edge id}) replaces ``maya_edge_ids`` for a mesh whose Maya edge numbering the caller knows.
+    ``smoothing_angle`` (degrees) decides which new edges are hard (``set_hardness``)."""
     edges = [e for e in edges if e.is_valid and len(e.link_faces) == 2]      # like Maya: border edges stay
     ids = edge_ids if edge_ids is not None else maya_edge_ids(bm)
     pairs2 = corner_pairs(edges, ids) if int(segments) == 1 and offset_as_fraction else {}
@@ -723,6 +729,9 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     w = width(edges, fraction, offset_as_fraction, offset, unit, pairs2, triples)
     if not edges or w <= 0.0:
         return []
+    hard_in = input_hardness(bm, edges)
+    uv_maps = face_uv_maps(bm, {f for e in edges for v in e.verts for f in v.link_faces})
+    uv_maps["beside"] = {f.index for e in edges for f in e.link_faces}
     # Chamfer off: Maya keeps the old corner as one more profile point (Segments + 1 steps along the two faces)
     bseg = max(1, int(segments)) + (0 if chamfer else 1)
     plan = _plan(bm, edges, ids) if ids is not None and int(segments) == 1 and chamfer else None
@@ -731,6 +740,8 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     # face source indices ride along as custom data (bevel copies them onto what it makes); added before elements are
     # collected again, since adding a layer can invalidate element references
     tlay = bm.verts.layers.int.new(".allset_bevel_made")
+    ilay = bm.verts.layers.int.new(".allset_bevel_inner")       # profile points between a profile's two ends
+    mlay = bm.faces.layers.int.new(".allset_bevel_new")         # faces the bevel made (strips, corners)
     flay = bm.faces.layers.int.new(".allset_bevel_src")
     # Segments > 1: an edge layer finds each edge's strip afterwards (an edge layer invalidates edge references, so
     # the Maya edge ids are carried over by index)
@@ -770,6 +781,9 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
                           segments=bseg, profile=profile(depth), affect='EDGES',
                           clamp_overlap=False, loop_slide=True)
     made = [v for v in ret["verts"] if v.is_valid]
+    for f in ret["faces"]:
+        if f.is_valid:
+            f[mlay] = 1
     # Blender puts a chain end's new vertex on a terminal edge at W along it; Maya (Fraction) at W x k. The
     # new vertex is the one on that edge's line next to its far vertex (Blender doesn't put it on the edge when the
     # edge runs almost along the bevelled one), else the nearest made vertex on the line
@@ -830,6 +844,10 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
         corner_kept(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg, hubs)
     elif bseg > 1:
         true_arcs(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg, depth, hubs, hub_frames, w)
+    if bseg > 1:
+        for v in profile_interior(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg):
+            v[ilay] = 1
+    if chamfer and bseg > 1:
         made = flat_corners(bm, made, hubs)
     near = set(made)
     for v in made:
@@ -848,9 +866,13 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
         _renumber(bm, plan, old_verts, flay, {f for f in ret["faces"] if f.is_valid}, {v for v in made if v.is_valid},
                   merged=bool(pairs))
     bm.verts.index_update()
+    set_hardness(bm, hard_in, {v for v in bm.verts if v[ilay]}, {v for v in bm.verts if v[tlay]}, smoothing_angle)
+    set_uvs(bm, uv_maps, flay, mlay, ilay, tlay)
     tracked = [v.index for v in bm.verts if v[tlay]]
     bm.verts.layers.int.remove(tlay)
+    bm.verts.layers.int.remove(ilay)
     bm.faces.layers.int.remove(flay)
+    bm.faces.layers.int.remove(mlay)
     if elay is not None:
         bm.edges.layers.int.remove(elay)
     bm.verts.ensure_lookup_table()
@@ -858,6 +880,149 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     bm.select_flush_mode()
     bm.normal_update()
     return [bm.verts[i] for i in tracked]
+
+
+def _ekey(a, b):
+    return frozenset((tuple(round(x, 7) for x in a), tuple(round(x, 7) for x in b)))
+
+
+def is_hard(e):
+    """Maya hardness of a Blender edge: marked sharp, or next to a flat-shaded face."""
+    return not e.smooth or not all(f.smooth for f in e.link_faces)
+
+
+def input_hardness(bm, edges):
+    """Before the bevel: {"keys": {position pair: hard}, "segments": [(a, b, hard)] for the edges around the bevelled
+    vertices and their neighbours, "smooth": any face shaded smooth}."""
+    keys = {_ekey(e.verts[0].co, e.verts[1].co): is_hard(e) for e in bm.edges}
+    ring = {v for e in edges for v in e.verts}
+    ring |= {e.other_vert(v) for v in list(ring) for e in v.link_edges}
+    segs = {e for v in ring for e in v.link_edges}
+    return {"keys": keys, "segments": [(e.verts[0].co.copy(), e.verts[1].co.copy(), is_hard(e)) for e in segs],
+            "smooth": any(f.smooth for f in bm.faces)}
+
+
+def _on_segment(a, b, segments):
+    """Hardness of the old edge that the edge a-b lies on (a piece of it), else None."""
+    for p, q, hard in segments:
+        d = q - p
+        length = d.length
+        if length <= ZERO:
+            continue
+        d = d / length
+        if all(((x - p) - d * (x - p).dot(d)).length < 1e-6 * max(1.0, length) for x in (a, b)):
+            ta, tb = sorted(((a - p).dot(d), (b - p).dot(d)))
+            if min(tb, length) - max(ta, 0.0) > 1e-7:
+                return hard
+    return None
+
+
+def profile_interior(bm, elay, strip, segments):
+    """Segments > 1: the points between the two ends of every profile (both ends of each edge's strip)."""
+    rails = {}
+    for e in bm.edges:
+        if e[elay]:
+            rails.setdefault(e[elay], []).append(e)
+    out = []
+    for tag, rs in rails.items():
+        if len(rs) != 2:
+            continue
+        walk = _strip_chains(rs[0], tag, elay, strip, segments)
+        if walk is not None:
+            out.extend(walk[0][1:-1] + walk[1][1:-1])
+    return out
+
+
+def set_hardness(bm, hard_in, inner, touched, smoothing_angle):
+    """Maya's hard edges after a bevel: an edge is decided again (hard when its two faces meet at more than
+    ``smoothing_angle`` degrees) when it is new (on no old edge) or one of its faces holds a profile point between a
+    profile's ends; every other edge, pieces of cut old edges too, keeps its old hardness. Written as Blender sharp
+    edges on smooth-shaded faces (a mesh with no smooth face before and no soft edge after stays flat)."""
+    bm.normal_update()
+    limit = math.radians(smoothing_angle) + 1e-9
+    hard = {}
+    for e in bm.edges:
+        a, b = e.verts
+        if len(e.link_faces) != 2:
+            hard[e] = is_hard(e)
+            continue
+        redo = any(v in inner for f in e.link_faces for v in f.verts)
+        old = None
+        if not redo:
+            old = hard_in["keys"].get(_ekey(a.co, b.co)) if not (a in touched or b in touched) else None
+            if old is None:
+                old = _on_segment(a.co, b.co, hard_in["segments"])
+        if old is not None:
+            hard[e] = old
+        else:
+            f0, f1 = e.link_faces
+            hard[e] = f0.normal.angle(f1.normal, 0.0) > limit
+    if not hard_in["smooth"] and all(hard.values()):
+        return
+    for f in bm.faces:
+        f.smooth = True
+    for e, h in hard.items():
+        e.smooth = not h
+
+
+def face_uv_maps(bm, faces):
+    """Before the bevel: {(face index, UV layer name): (origin, axis x, axis y, 3 x 3 matrix)} mapping a point in the
+    face's plane to that face's UV (least squares over its corners), for the faces around the bevelled vertices."""
+    import numpy as np
+    out = {}
+    for layer in bm.loops.layers.uv.values():
+        for f in faces:
+            n = f.normal.copy()
+            if n.length <= ZERO:
+                continue
+            o = f.verts[0].co.copy()
+            ax = n.orthogonal().normalized()
+            ay = n.cross(ax).normalized()
+            rows = [[(lp.vert.co - o).dot(ax), (lp.vert.co - o).dot(ay), 1.0] for lp in f.loops]
+            uvs = [list(lp[layer].uv) for lp in f.loops]
+            m = np.linalg.lstsq(np.array(rows), np.array(uvs), rcond=None)[0]
+            out[(f.index, layer.name)] = (o, ax, ay, m)
+    return out
+
+
+def _uv_at(fit, co):
+    o, ax, ay, m = fit
+    x, y = (co - o).dot(ax), (co - o).dot(ay)
+    return (x * m[0][0] + y * m[1][0] + m[2][0], x * m[0][1] + y * m[1][1] + m[2][1])
+
+
+def set_uvs(bm, uv_maps, flay, mlay, ilay, tlay):
+    """Maya's UVs after a bevel, where they are known: in an old face every point the bevel made (slide and corner
+    points) gets that face's own UV map at its position; a strip's outer rows take the UVs of the old faces next to
+    them. Profile points between a profile's ends keep Blender's interpolation."""
+    beside = uv_maps.get("beside", set())
+    for layer in bm.loops.layers.uv.values():
+        name = layer.name
+        for f in bm.faces:
+            if f[mlay]:
+                continue
+            fit = uv_maps.get((f[flay] - 1, name))
+            if fit is None:
+                continue
+            for lp in f.loops:
+                if lp.vert[tlay] and not lp.vert[ilay]:
+                    lp[layer].uv = _uv_at(fit, lp.vert.co)
+        for f in bm.faces:
+            if not f[mlay]:
+                continue
+            for lp in f.loops:
+                v = lp.vert
+                if v[ilay]:
+                    continue
+                # the old face across one of this corner's two edges, a face next to a bevelled edge first (the
+                # strip's side, not the far face at its end)
+                olds = [g for e in (lp.edge, lp.link_loop_prev.edge) for g in e.link_faces if g is not f and not g[mlay]]
+                olds.sort(key=lambda g: (g[flay] - 1) not in beside)
+                for other in olds:
+                    src = next((x for x in other.loops if x.vert is v), None)
+                    if src is not None:
+                        lp[layer].uv = src[layer].uv
+                        break
 
 
 def past_ends(edges, w, spokes=False):
@@ -1194,24 +1359,39 @@ def merge_groups(verts, made_set, dist):
 
 
 def flat_corners(bm, made, hubs):
-    """Where three or more bevelled edges meet, Maya closes the corner with one flat polygon through the ends of the
-    edges' profiles (Segments 2 = a hexagon at a box corner, 3 = a 9-gon). Blender fills it with a patch of quads
-    around inner vertices: those are dissolved. Returns ``made`` without them."""
-    if not made or not any(n >= 3 for _co, n in hubs):
+    """Where three or more bevelled edges meet, or one bevelled edge ends at a vertex with more edges (a cap's fan
+    spokes), Maya closes the corner with one polygon through the ends of the edges' profiles and the spoke points
+    (Segments 2 = a hexagon at a box corner, 3 = a 9-gon). Blender fills it with a patch of quads around inner
+    vertices, or with triangles: the inner vertices and the edges inside the patch are dissolved. Returns ``made``
+    without the dissolved vertices."""
+    if not made or not any(n != 2 for _co, n in hubs):
         return made
     made_set = set(made)
     # each new vertex belongs to the bevelled vertex it was made from: the nearest old position
     at = {v: min(range(len(hubs)), key=lambda i: (v.co - hubs[i][0]).length_squared) for v in made}
+
+    def patch_face(f, h):
+        return all(x in made_set and at[x] == h for x in f.verts)
+
     inner = []
     for v in made:
         h = at[v]
         faces = list(v.link_faces)
-        if hubs[h][1] >= 3 and len(faces) >= 3 and all(x in made_set and at[x] == h for f in faces for x in f.verts):
+        if hubs[h][1] != 2 and len(faces) >= 3 and all(patch_face(f, h) for f in faces):
             inner.append(v)
-    if not inner:
-        return made
-    bmesh.ops.dissolve_verts(bm, verts=inner)
-    return [v for v in made if v.is_valid]
+    if inner:
+        bmesh.ops.dissolve_verts(bm, verts=inner)
+    made = [v for v in made if v.is_valid]
+    inside = []
+    for e in {e for v in made for e in v.link_edges}:
+        a, b = e.verts
+        if a not in at or b not in at or at[a] != at[b] or hubs[at[a]][1] == 2 or len(e.link_faces) != 2:
+            continue
+        if all(patch_face(f, at[a]) for f in e.link_faces):
+            inside.append(e)
+    if inside:
+        bmesh.ops.dissolve_edges(bm, edges=inside, use_verts=False)
+    return made
 
 
 def chamfer_vertices(bm, verts):
@@ -1248,7 +1428,7 @@ BEVEL = extrude.add_spec(extrude.Spec(
     {"fraction": "Fraction", "offset_as_fraction": "Offset As Fraction", "offset": "Offset", "segments": "Segments",
      "depth": "Depth", "chamfer": "Chamfer"},
     {"fraction": 0.5, "offset_as_fraction": True, "offset": 0.2, "segments": 1, "depth": 1.0, "chamfer": True,
-     "world_space": True},
+     "world_space": True, "smoothing_angle": SMOOTHING_ANGLE},
     {"fraction": "NONE", "offset_as_fraction": "BOOL", "offset": "NONE", "segments": "INT", "depth": "NONE",
      "chamfer": "BOOL"},
-    None, "bevel_edit", _build, node_type="polyBevel3", hidden=("world_space",), with_object=True))
+    None, "bevel_edit", _build, node_type="polyBevel3", hidden=("world_space", "smoothing_angle"), with_object=True))

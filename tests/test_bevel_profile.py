@@ -205,3 +205,100 @@ def test_square_pyramid_tip_profiles_stand_upright():
         n = (d - a).cross(up)
         assert abs((b - a).dot(n.normalized())) < 1e-5 and abs((c - a).dot(n.normalized())) < 1e-5
     bm.free()
+
+
+def _new_edges(bm, old):
+    """Edges of the bevel result that lie on no old edge (old = [(a, b)] positions)."""
+    out = []
+    for e in bm.edges:
+        a, b = (v.co for v in e.verts)
+        on = False
+        for p, q in old:
+            d = (q - p).normalized()
+            if all(((x - p) - d * (x - p).dot(d)).length < 1e-6 for x in (a, b)):
+                on = True
+        if not on:
+            out.append(e)
+    return out
+
+
+def _hard(e):
+    return not e.smooth or not all(f.smooth for f in e.link_faces)
+
+
+def test_new_edges_hard_or_soft_by_smoothing_angle():
+    # one box edge: Segments 1 turns the edge by 45 degrees per new edge, Segments 4 by 22.5
+    for segments, angle, want_hard in ((1, 30.0, True), (1, 60.0, False), (4, 30.0, False), (4, 10.0, True)):
+        bm = _box()
+        old = [(e.verts[0].co.copy(), e.verts[1].co.copy()) for e in bm.edges]
+        e = max(bm.edges, key=lambda x: sum(v.co.y + v.co.z for v in x.verts))
+        along = (e.verts[1].co - e.verts[0].co).normalized()
+        bev.bevel_edges(bm, [e], offset_as_fraction=False, offset=0.4, segments=segments, smoothing_angle=angle)
+        # the edges along the bevel (between its faces and the two faces next to it)
+        new = [x for x in _new_edges(bm, old) if len(x.link_faces) == 2
+               and abs((x.verts[1].co - x.verts[0].co).normalized().dot(along)) > 0.999]
+        assert new
+        assert all(_hard(x) == want_hard for x in new), (segments, angle)
+        # the box's own edges stay hard
+        kept = [x for x in bm.edges if x not in _new_edges(bm, old)]
+        assert kept and all(_hard(x) for x in kept), (segments, angle)
+        bm.free()
+
+
+def test_fan_corner_is_one_polygon():
+    # a cap with a centre fan: bevelling one rim edge closes each end with one polygon (profile + spoke point)
+    bm = _prism()
+    top = max(bm.faces, key=lambda f: f.calc_center_median().y)
+    bmesh.ops.poke(bm, faces=[top])
+    rim = [e for e in bm.edges if all(abs(v.co.y - 1.0) < 1e-6 for v in e.verts) and len(e.link_faces) == 2
+           and all(len(f.verts) == 3 for f in e.link_faces) is False]
+    e = rim[0]
+    ends = [v.co.copy() for v in e.verts]
+    bev.bevel_edges(bm, [e], offset_as_fraction=False, offset=0.2, segments=2)
+    for end in ends:
+        near = [f for f in bm.faces if all((v.co - end).length < 0.5 for v in f.verts)]
+        assert len(near) == 1 and len(near[0].verts) == 4, [len(f.verts) for f in near]
+    bm.free()
+
+
+def test_uvs_of_new_points_follow_their_face():
+    bm = bmesh.new()
+    uv = bm.loops.layers.uv.new("UVMap")
+    bmesh.ops.create_cube(bm, size=2.0, calc_uvs=True)
+    e = max(bm.edges, key=lambda x: sum(v.co.y + v.co.z for v in x.verts))
+    old_faces = {f.normal.copy().freeze() for f in e.link_faces}
+    old_normals = [f.normal.copy() for f in bm.faces]
+    bev.bevel_edges(bm, [e], offset_as_fraction=False, offset=0.3, segments=1)
+    for f in bm.faces:
+        if not any(f.normal.dot(n) > 0.9999 for n in old_normals):
+            continue
+        # every old face keeps one linear UV map: its UVs, new points too, fit an affine map of the 3D points
+        pts = [lp.vert.co for lp in f.loops]
+        n = f.normal
+        ax = n.orthogonal().normalized()
+        ay = n.cross(ax)
+        rows = [((p - pts[0]).dot(ax), (p - pts[0]).dot(ay)) for p in pts]
+        uvs = [lp[uv].uv for lp in f.loops]
+        if len(rows) < 4:
+            continue
+        # solve the map from the first three corners, check the rest
+        (x1, y1), (x2, y2) = rows[1], rows[2]
+        det = x1 * y2 - x2 * y1
+        if abs(det) < 1e-9:
+            continue
+        for (x, y), w in zip(rows[3:], uvs[3:]):
+            a = (x * y2 - x2 * y) / det
+            b = (x1 * y - x * y1) / det
+            want = uvs[0] + (uvs[1] - uvs[0]) * a + (uvs[2] - uvs[0]) * b
+            assert (w - want).length < 1e-5, (f.index, tuple(w), tuple(want))
+    # the strip's rows share the UVs of the two faces next to the bevelled edge (no seam along them)
+    strip = [f for f in bm.faces if f.normal.copy().freeze() not in old_faces and abs(f.normal.y) > 0.1
+             and abs(f.normal.z) > 0.1]
+    assert len(strip) == 1
+    for lp in strip[0].loops:
+        for e2 in (lp.edge, lp.link_loop_prev.edge):
+            for g in e2.link_faces:
+                if g is not strip[0] and (g.normal.y > 0.99 or g.normal.z > 0.99):
+                    other = next(x for x in g.loops if x.vert is lp.vert)
+                    assert (other[uv].uv - lp[uv].uv).length < 1e-6
+    bm.free()

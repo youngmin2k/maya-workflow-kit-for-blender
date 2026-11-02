@@ -57,6 +57,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
   polygon (#213).
 - Bevel options: Offset space (World) and Chamfer, like Maya's Bevel Options; long absolute offsets slide past
   short edges like Maya (#213).
+- Bevel hard edges and UVs like Maya: new edges are hard above the Smoothing angle (new option, default 30
+  degrees), the old faces keep their UVs at the new points, and a cap rim edge's end is one polygon (#213).
 - Type Manipulator: pick single characters of a type and move, rotate or scale them (#258).
 
 ## Layout, keys and rendering
@@ -83,7 +85,8 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 - Bevel: corners where the faces' angles differ strongly (the new corner can sit up to a few percent of the bevel
   width away), corners whose third edge leans far over and three-edge corners whose face angles differ by more than
   about 10% still differ from Maya (#213). With Segments 2 or more, corners of three or more bevelled edges where a
-  face holds an unbevelled edge at a sharp tip differ too.
+  face holds an unbevelled edge at a sharp tip differ too. The UVs inside rounded bevels and corner polygons, and
+  the shading of soft bevels (Blender weights smooth normals differently), are not Maya's yet.
 - The known differences listed in `CHANGELOG.md` still apply.
 
 ## Thank you

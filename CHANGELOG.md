@@ -150,6 +150,18 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   (a pyramid tip, a prism's corner), each profile now stands in Maya's plane through its ends and bends toward
   the corner along the faces' other edges, like Maya. Still different from Maya: such a corner where a face
   holds an unbevelled edge at a sharp tip.
+- **Bevel hard edges, UVs and fan corners** (#213): the new edges of a bevel are hard or soft like Maya: an edge
+  is hard when its two faces meet at more than the Smoothing angle (default 30 degrees, a new field of the Bevel
+  option window), and the edges the bevel only shortens keep their hardness. With Segments 2 or more the end of
+  a bevelled cap rim edge is closed with one polygon through the profile and the fan's spoke point, like Maya
+  (it was split into triangles). The points the bevel makes in the old faces get each face's own UVs at their
+  place, and the bevel's strip shares the UVs of the two faces next to the edge, so Segments 1 bevels keep
+  Maya's UVs. Still different from Maya: the UVs of the profile points inside a rounded bevel (Segments 2 or
+  more) and of the polygon closing a corner, smooth normals (Maya weights each face by its area and corner
+  angle, Blender by the corner angle only, so soft bevels shade a little differently), corners where two
+  bevelled edges meet beside two or more unbevelled ones (Maya merges those into one vertex), Offset As
+  Fraction where three bevelled edges meet at other angles than 90 degrees (Maya's widths differ per edge
+  there), and edges whose faces meet at exactly the Smoothing angle.
 - **Bevel Chamfer and Offset space** (#213): the Bevel option window has Maya's Offset space (World, ignoring
   the object's scale, on by default) and Chamfer settings, and Chamfer is a row of the polyBevel node in the
   Channel Box and the In-View Editor. With Chamfer off the old corner stays: the new points run from one face

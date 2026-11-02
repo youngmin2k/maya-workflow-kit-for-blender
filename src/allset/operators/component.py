@@ -62,6 +62,10 @@ def _bevel_props():
         "world_space": BoolProperty(name="World Space", default=True, options={'SKIP_SAVE'},
                                     description="Offset in world units, ignoring the object's scale (off: in the "
                                                 "object's own units)"),
+        "smoothing_angle": FloatProperty(name="Smoothing Angle", default=30.0, min=0.0, max=180.0,
+                                         options={'SKIP_SAVE'},
+                                         description="New edges whose faces meet at more than this angle (degrees) "
+                                                     "are hard, the others soft"),
     }
 
 
