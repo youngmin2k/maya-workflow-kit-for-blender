@@ -85,7 +85,7 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 
 Thanks for the reports and ideas: @Fizkefaaz (#270, #271, #272, #273, #274, #283), @LoongVeeng (#264),
 @swarnava05 (#277), @dillanjmurillo (#276), @Marlon90 (#262), @meggaimg70-a11y (#267), @rethink-studios (#275),
-@martin8762 (#221), @GUYVERZERO (#280), @DAI3rd (#281), @Dark2774 (#282) and @slacer (#284).
+@martin8762 (#221), @GUYVERZERO (#280), @DAI3rd (#281), @Dark2774 (#282), @slacer (#284) and @gsvetlin-beep (#258).
 Please keep telling us what breaks or feels off in real work.
 
 Maya Workflow Kit is a free, personal open-source project: no paid version, no donations requested, and no commercial
