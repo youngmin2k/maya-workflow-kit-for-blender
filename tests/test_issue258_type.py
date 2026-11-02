@@ -49,4 +49,4 @@ def test_type_tab_draws():
     bpy.context.view_layer.objects.active = ob
     key = ae.tabs(ob)[1][0]
     sections, _layout = ae.sections_for(ob, key)
-    assert all(row[0] in ("prop", "missing") for row in _rows(sections))
+    assert all(row[0] in ("prop", "missing", "draw") for row in _rows(sections))

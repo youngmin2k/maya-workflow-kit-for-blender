@@ -626,8 +626,6 @@ CATEGORIES = {
                      "data-blocks as assets, expose values with library overrides or custom properties."),
     "Modify/Convert": ("Object > Convert", "Blender converts curves, text, meshes and Grease Pencil; subdiv surfaces, "
                        "Paint Effects, displacement and fluids aren't separate types."),
-    "Modify/Transformation Tools": ("Toolbar transform tools", "Blender's manipulator is the active tool's gizmo: "
-                                    "there is no Type Manipulator."),
     "Edit": ("Edit menu", "Blender has no LOD groups, fur or attribute-value transfer: Object > Link/Transfer Data "
              "copies data between objects."),
     **{f"Edit/{sub}": ("Outliner / Purge", "Blender has no node of this type: delete it in the Outliner, or File > "

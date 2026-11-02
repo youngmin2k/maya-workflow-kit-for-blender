@@ -192,6 +192,9 @@ classes += render_persp.classes
 from . import uv_toolkit_ops  # noqa: E402  UV Toolkit Align / Straighten UVs / Unfold Along / Randomize
 classes += uv_toolkit_ops.classes
 
+from . import type_manip  # noqa: E402  Type Manipulator: per-character move / rotate / scale (#258)
+classes += type_manip.classes
+
 _register_classes, _unregister_classes = bpy.utils.register_classes_factory(classes)
 
 
@@ -274,9 +277,11 @@ def register():
     curves_207.register_handlers()
     sweep_mesh.register()
     point_keys.register_handlers()
+    type_manip.register_handlers()
 
 
 def unregister():
+    type_manip.unregister_handlers()
     point_keys.unregister_handlers()
     autosave.unregister()
     sweep_mesh.unregister()

@@ -21,7 +21,7 @@ ADDED = []
 # Operators that return PASS_THROUGH when they don't apply, so they may sit in
 # front of another item with the same event in the same keymap.
 PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.uv_shell_hover", "allset.emulated_tumble", "allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_release", "allset.manip_press",
-                      "allset.select_priority", "allset.select_through", "allset.toolbox_guard", "allset.time_scrub",
+                      "allset.select_priority", "allset.type_char_pick", "allset.select_through", "allset.toolbox_guard", "allset.time_scrub",
                       "allset.time_slider_menu", "allset.outliner_set_click", "allset.outliner_set_menu",
                       "allset.graph_channel_click", "allset.graph_channel_scroll", "allset.script_run",
                       "allset.dock_strip_click",
@@ -801,6 +801,13 @@ def patch_select_priority(kd):
                  first=True, shadows=(km,))   # in front of view3d.select on purpose (PASS_THROUGH)
 
 
+# Type Manipulator: a click on a character of a type whose manipulator is on picks that character (right behind the
+# selection priority item, in front of the selection items; passes through anywhere else, operators/type_manip.py).
+def patch_type_char_pick(kd):
+    for km, value in SELECT_PRIORITY_ITEMS:
+        _add(kd, km, "allset.type_char_pick", make_event("LEFTMOUSE", value), first=True, shadows=(km,))
+
+
 # --- 27. Maya key batch --------------------------------------------------------------
 # Ctrl+Alt+LMB box zoom, Ctrl+T Universal Manipulator, Y last non-sacred
 # tool, Ctrl+Shift+X Multi-Cut / Ctrl+Shift+Q Quad Draw, F2-F6 menu sets
@@ -1463,7 +1470,7 @@ PATCHES = (patch_tweak_fallback, patch_selection, patch_display, patch_group, pa
            patch_mesh_components, patch_key_stepping, patch_manip_duplicate,
            patch_component_delete, patch_view_keys, patch_active_handle, patch_materials,
            patch_uv_shell_select, patch_select_through, patch_key_batch, patch_component_pick_walk,
-           patch_toolbox_guard, patch_select_priority, patch_pose_joints, patch_time_slider, patch_joints, patch_uv,
+           patch_toolbox_guard, patch_type_char_pick, patch_select_priority, patch_pose_joints, patch_time_slider, patch_joints, patch_uv,
            patch_scene_files, patch_graph_keys, patch_key_batch_2, patch_outliner_drag,
            patch_key_insert, patch_time_range, patch_manip_ctrl, patch_view_keys_3,
            patch_global_keys_4, patch_graph_keys_2, patch_outliner_sets, patch_render_slots,

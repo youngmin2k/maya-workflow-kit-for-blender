@@ -976,9 +976,9 @@ def _text_set(key):
 def _inputs(ob):
     # + the kit deformers a lattice / handle drives: Maya shows ffd1 / bend1 in the INPUTS of ffd1Lattice /
     # bend1Handle
-    from ..operators import deformers, skin_method, skin_tools_199
+    from ..operators import deformers, skin_method, skin_tools_199, type_manip
     return [m for m in getattr(ob, "modifiers", ()) if not display.is_preview(m) and not deformers.is_base(m)
-            and not skin_tools_199.is_part(m) and not skin_method.is_part(m)] \
+            and not skin_tools_199.is_part(m) and not skin_method.is_part(m) and not type_manip.is_part(m)] \
         + deformers.driven_modifiers(ob)
 
 

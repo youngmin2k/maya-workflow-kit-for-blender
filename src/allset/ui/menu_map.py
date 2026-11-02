@@ -673,6 +673,7 @@ MAP.update({
     **{f"Modify/Transformation Tools/Default Object Manipulator/{label}": ("allset.default_manip", {"value": i})
        for i, label in enumerate(("None", "Move", "Rotate", "Scale", "Transform"))},
     "Modify/Transformation Tools/Show Manipulator Tool": ("v3d", "allset.show_manipulator", {}),
+    "Modify/Transformation Tools/Type Manipulator": ("v3d", "allset.type_manipulator", {}),
     "Modify/Align Tool": "allset.align_tool",
     "Modify/Snap Align Objects/Position Along Curve": "allset.position_along_curve",
     "Modify/Convert/Geometry to Bounding Box": "allset.geometry_to_bbox",

@@ -152,6 +152,9 @@ def tabs(ob):
         from ..operators import skin_method
         if skin_method.is_part(md):      # Weight Blended's DQ half belongs to the skinCluster too
             continue
+        from ..operators import type_manip
+        if type_manip.is_part(md):       # the type node's own per-character transforms
+            continue
         name, mtype = modifier_node(ob, md)
         out.append((f"M:{md.name}", name, mtype))
     from ..operators import prim_history
@@ -394,10 +397,24 @@ def draw_light_decay(layout, context, ob):
     notices.tip(row, lights.decay_notice(light))
 
 
+def draw_type_manipulator(layout, context, ob):
+    """Type Manipulator on / off for this type, and putting characters back (operators/type_manip.py)."""
+    from ..operators import type_manip
+    if ob is None or ob.type != 'FONT':
+        return
+    on = type_manip.handle_of(ob) is not None
+    row = layout.row(align=True)
+    row.operator("allset.type_manipulator", text="Type Manipulator", depress=on)
+    sub = row.row(align=True)
+    sub.enabled = type_manip.modifier(ob) is not None
+    sub.operator("allset.type_reset", text="Reset Character").all = False
+    sub.operator("allset.type_reset", text="Reset All").all = True
+
+
 DRAWERS = {"transform_channels": draw_transform_channels, "world_pivot": draw_world_pivot,
            "visibility": draw_visibility, "shading": draw_shading, "smooth_mesh": draw_smooth_mesh,
            "joint_orient": draw_joint_orient, "joint_stiffness": draw_joint_stiffness,
-           "light_decay": draw_light_decay}
+           "light_decay": draw_light_decay, "type_manipulator": draw_type_manipulator}
 
 
 def attr_label(context, label, ident):

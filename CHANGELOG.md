@@ -62,6 +62,12 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Transform Constraint: Along Normals** (#262): the Move tool's Transform Constraint (Tool Settings and the
   tool option marking menus' Transform Constraints) has Along Normals: in mesh edit mode a manipulator or
   middle-mouse drag moves each selected component along its own normal.
+- **Type Manipulator** (#258): Modify > Transformation Tools > Type Manipulator, or the Type Manipulator button in
+  the type's Attribute Editor tab (Text section), lets you move, rotate and scale single characters of a type, like
+  Maya. Click a character to pick it, then use the Move / Rotate / Scale tools or the Channel Box; each character
+  turns and scales about its own middle. Editing the text, font, spacing, extrude or bevel afterwards keeps the
+  character transforms. Reset Character / Reset All put characters back; clicking another object turns the
+  manipulator off.
 
 ### Changed
 - **IPR opens its own render window** (#277): Render > IPR Render Current Frame, Redo Previous IPR Render and the
