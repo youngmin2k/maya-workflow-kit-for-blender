@@ -191,7 +191,8 @@ def corner_pairs(edges, ids):
     """Corners like a box corner: vertex v has three edges, two of them bevelled (sharing face F) and one not (u3),
     and the dihedral angles of the two bevelled edges differ by less than ``CORNER_SPLIT``. P = the first bevelled
     edge in Maya's vertex -> edge order at v, Q the other; h = sin(dihedral / 2), s = sin(angle to u3);
-    k_P = min(1, sqrt(s_P / s_Q)), k_Q = min(1, sqrt(s_Q / s_P)), hm = min(h_P k_P, h_Q). Like Maya:
+    k_P = min(1, sqrt(s_P / s_Q)), k_Q = min(1, sqrt(s_Q / s_P)), hm = the smallest of h_P k_P, h_Q at Q's far end
+    and the value that puts the new vertex on u3 exactly W below F. Like Maya:
     - each edge's width at its far end = W hm / h (``edge_half_sin`` gives hm);
     - the new corner in F lies on the bisector, W hm / (h_P k_P) from both edge lines;
     - the new vertex on u3 = the mean of where the two side faces' offset lines (W hm k / h from the edge) cross u3.
@@ -223,11 +224,16 @@ def corner_pairs(edges, ids):
         if abs(math.degrees(2.0 * (math.asin(min(1.0, hp)) - math.asin(min(1.0, hq))))) >= CORNER_SPLIT:
             continue
         kp, kq = min(1.0, math.sqrt(sp / sq)), min(1.0, math.sqrt(sq / sp))
-        hm = min(hp * kp, hq)
         half = math.acos(max(-1.0, min(1.0, up.dot(uq)))) / 2.0
         ray = up + uq
-        if ray.length <= ZERO or math.sin(half) <= ZERO:
+        normal = up.cross(uq)
+        if ray.length <= ZERO or math.sin(half) <= ZERO or normal.length <= ZERO:
             continue
+        # Q's angle at its far end (differs from v's when Q's side face is bent), and the new vertex on u3 never
+        # goes deeper than W below F
+        hq_far = _half_sin(q, q.other_vert(v)) or hq
+        depth = (kp / (hp * sp) + kq / (hq * sq)) / 2.0 * abs(u3.dot(normal.normalized()))
+        hm = min(hp * kp, hq_far, 1.0 / depth if depth > ZERO else hq_far)
         out[v] = {"P": p, "Q": q, "hm": hm, "origin": v.co.copy(), "ray": ray.normalized(),
                   "k_ray": hm / (hp * kp) / math.sin(half), "u3": u3,
                   "k_u3": (hm / hp * kp / sp + hm / hq * kq / sq) / 2.0}

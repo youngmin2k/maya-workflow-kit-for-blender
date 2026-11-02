@@ -70,3 +70,24 @@ def test_square_corner_is_symmetric():
     for p in pts:
         q = Vector((p.y, p.x, p.z))
         assert min((q - r).length for r in pts) < 1e-5, f"no mirror point for {tuple(p)}"
+
+
+def test_corner_next_to_a_bent_side_face():
+    """The upright edge at the corner leans along one bevelled edge, so one side face is no longer flat: the result
+    stays clean and inside the box, and no new vertex goes deeper below the top face than the bevel width."""
+    for axis in (0, 1):
+        for lean in (-0.1, 0.1):
+            bm = _box()
+            low = min(bm.verts, key=lambda v: (v.co - Vector((1.0, 1.0, 0.0))).length)
+            low.co[axis] += lean
+            box = _bounds(bm)
+            edges = _corner_edges(bm, 2)
+            ids = bev.maya_edge_ids(bm)
+            w = bev.width(edges, 0.3, corners=bev.corner_pairs(edges, ids), triples=bev.corner_triples(edges, ids))
+            made = bev.bevel_edges(bm, edges, fraction=0.3)
+            label = f"axis {axis}, lean {lean}"
+            assert made, f"{label}: nothing bevelled"
+            _check(bm, label, box)
+            depth = max(1.0 - v.co.z for v in made if v.co.z > 0.5)
+            assert depth <= w + EPS, f"{label}: a new vertex {depth:.6f} below the top face, width {w:.6f}"
+            bm.free()

@@ -119,13 +119,14 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   faces lean in or out, as long as the two edges' face angles differ by up to about 10.9 degrees (the same
   point where Maya changes how it builds the corner). Steeper differences keep the previous result for now.
   With Offset As Fraction off (an absolute Offset) such corners follow Maya at any face angle when the faces are
-  flat.
+  flat. With Offset As Fraction on, a side face that is not flat (the third edge leaning along a bevelled edge)
+  now gives Maya's result too: the new vertex on the third edge goes at most one bevel width below the top face.
   A corner where three bevelled edges meet (all three edges of a box corner) now gets Maya's width and puts
   each face's new corner where Maya does when the corner's face angles stay close (their half-angle sines
   within 10% of each other), whatever the mesh's vertex numbering.
   Still different from Maya: corners where the faces' angles differ strongly (the new corner can sit up to a few
-  percent of the bevel width away), corners next to a bent (non-flat) side face, and three-edge corners whose
-  face angles differ by more than about 10%.
+  percent of the bevel width away), corners next to a bent (non-flat) side face with an absolute Offset or with
+  three bevelled edges, and three-edge corners whose face angles differ by more than about 10%.
 
 ### Fixed
 - **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now
