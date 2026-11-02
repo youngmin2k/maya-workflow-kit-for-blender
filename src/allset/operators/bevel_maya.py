@@ -753,6 +753,7 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     verts = {v for e in edges for v in e.verts}
     # old positions of the bevelled vertices with the number of bevelled edges there
     hubs = [(v.co.copy(), sum(1 for e in v.link_edges if e in edges)) for v in verts]
+    hub_frames = hub_profile_frames(edges, verts)
     overs = [] if offset_as_fraction else past_ends(edges, w, spokes=True)
     # Offset As Fraction only: with an absolute Offset Maya leaves that vertex at W along the edge, as Blender does
     pairs2 = corner_pairs(edges, ids) if pairs2 else {}      # the elements were collected again
@@ -828,7 +829,7 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     if not chamfer:
         corner_kept(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg, hubs)
     elif bseg > 1:
-        true_arcs(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg, depth, hubs)
+        true_arcs(bm, elay, {f for f in ret["faces"] if f.is_valid}, bseg, depth, hubs, hub_frames, w)
         made = flat_corners(bm, made, hubs)
     near = set(made)
     for v in made:
@@ -998,7 +999,41 @@ def frame_points(v, e0, e1, segments, depth=1.0):
     return out
 
 
-def true_arcs(bm, elay, strip, segments, depth, hubs):
+def hub_profile_frames(edges, verts):
+    """{(rounded old vertex position, edge tag): (vertex, unit edge direction, mean sine)} where three or more
+    bevelled edges meet. There the profile of a bevelled edge lies in the plane through its two ends and the point
+    of the edge at width / s from the vertex, s = the mean of sin(angle between the edge and the other edge of the
+    face at the vertex) over its two faces (the harmonic mean of where the neighbouring width lines cross it).
+    Tags = index in ``edges`` + 1, as ``true_arcs`` sees them."""
+    index = {e: i + 1 for i, e in enumerate(edges)}
+    out = {}
+    for v in verts:
+        if sum(1 for e in v.link_edges if e in index) < 3:
+            continue
+        for e in v.link_edges:
+            if e not in index:
+                continue
+            d = e.other_vert(v).co - v.co
+            if d.length <= ZERO or len(e.link_faces) != 2:
+                continue
+            d.normalize()
+            sines = []
+            for f in e.link_faces:
+                other = next((x for x in v.link_edges if x is not e and f in x.link_faces), None)
+                if other is None:
+                    break
+                u = (other.other_vert(v).co - v.co).normalized()
+                sines.append(math.sqrt(max(0.0, 1.0 - u.dot(d) ** 2)))
+            if len(sines) == 2 and min(sines) > 1e-6:
+                out[(_key(v.co), index[e])] = (v.co.copy(), d, (sines[0] + sines[1]) / 2.0)
+    return out
+
+
+def _key(co):
+    return tuple(round(c, 5) for c in co)
+
+
+def true_arcs(bm, elay, strip, segments, depth, hubs, hub_frames=None, w=0.0):
     """Segments > 1: Maya's profiles. At an end with one or two bevelled edges ``frame_points`` (the arc in the
     plane of the old vertex and the profile's ends); where three or more meet, the circle touching both faces
     (``arc_points``)."""
@@ -1028,8 +1063,19 @@ def true_arcs(bm, elay, strip, segments, depth, hubs):
         for chain in (chain_a, chain_b):
             p0, p1 = chain[0].co.copy(), chain[-1].co.copy()
             hub = end_of(chain)
+            frame = (hub_frames or {}).get((_key(hub[0]), tag)) if hub is not None and hub[1] >= 3 else None
+            corner = None
+            if frame is not None and n0 is not None and n1 is not None and w > 0.0:
+                v0, d, sine = frame
+                t_pt = v0 + d * (w / sine)
+                plane = (p1 - p0).cross(t_pt - p0)
+                if plane.length > ZERO:
+                    plane.normalize()
+                    corner = _three_planes((n0, n0.dot(p0)), (n1, n1.dot(p1)), (plane, plane.dot(p0)))
             if hub is not None and hub[1] <= 2:
                 pts = frame_points(hub[0], p0, p1, segments, depth)
+            elif corner is not None:
+                pts = frame_points(corner, p0, p1, segments, depth)
             elif n0 is not None and n1 is not None:
                 pts = arc_points(p0, p1, n0, n1, segments, depth)
             else:

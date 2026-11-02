@@ -146,8 +146,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   the line between the profile's ends (0 = on that line, -1 = mirrored), as in Maya, with any number of
   segments. A corner where three or more bevelled edges meet (all edges of a box) is closed with one polygon
   through the profiles' ends (a hexagon with 2 segments) instead of a rounded patch. Where two bevelled edges
-  meet, their profiles join in the plane between them with any Depth. Still different from Maya: the inner
-  profile points at corners of three or more bevelled edges whose faces don't meet at 90 degrees (a pyramid tip).
+  meet, their profiles join in the plane between them with any Depth. Where three or more meet at other angles
+  (a pyramid tip), each profile now stands in Maya's plane through its ends. Still different from Maya: the inner
+  profile points at such corners when the edge's two face angles differ (a triangle prism's corner) or a face
+  holds an unbevelled edge at a sharp tip.
 - **Bevel Chamfer and Offset space** (#213): the Bevel option window has Maya's Offset space (World, ignoring
   the object's scale, on by default) and Chamfer settings, and Chamfer is a row of the polyBevel node in the
   Channel Box and the In-View Editor. With Chamfer off the old corner stays: the new points run from one face

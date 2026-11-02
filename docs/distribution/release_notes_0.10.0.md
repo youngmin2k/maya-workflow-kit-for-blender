@@ -83,7 +83,7 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
 - Bevel: corners where the faces' angles differ strongly (the new corner can sit up to a few percent of the bevel
   width away), corners whose third edge leans far over and three-edge corners whose face angles differ by more than
   about 10% still differ from Maya (#213). With Segments 2 or more, the inner profile points at corners of three or
-  more bevelled edges whose faces don't meet at 90 degrees (a pyramid tip) differ too.
+  more bevelled edges differ when an edge's two face angles differ (a triangle prism's corner).
 - The known differences listed in `CHANGELOG.md` still apply.
 
 ## Thank you

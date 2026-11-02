@@ -177,3 +177,31 @@ def test_fraction_one_on_a_zero_length_extrusion_meets_in_one_vertex():
     assert len(centre) == 1, len(centre)
     assert (len(bm.verts), len(bm.faces)) == (9, 9), (len(bm.verts), len(bm.faces))
     bm.free()
+
+
+def test_square_pyramid_tip_profiles_stand_upright():
+    """Four bevelled edges at a square pyramid's tip (faces at 60 degrees there): each profile's points lie in the
+    upright plane through the profile's two ends (its plane meets the edge at width / sin 60 from the tip)."""
+    bm = bmesh.new()
+    r = math.sqrt(2.0)
+    base = [bm.verts.new((r * math.cos(a), r * math.sin(a), 0.0)) for a in (0.0, math.pi / 2, math.pi, 1.5 * math.pi)]
+    tip = bm.verts.new((0.0, 0.0, math.sqrt(2.0)))       # side 2, equilateral side faces
+    for i in range(4):
+        bm.faces.new((base[i], base[(i + 1) % 4], tip))
+    bm.faces.new(base[::-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    planes = [(f.normal.copy(), f.verts[0].co.copy()) for f in bm.faces if len(f.verts) == 3]
+    frames = bev.hub_profile_frames(list(tip.link_edges), {tip} | {e.other_vert(tip) for e in tip.link_edges})
+    assert len(frames) == 4 and all(abs(s - math.sin(math.radians(60))) < 1e-6 for _v, _d, s in frames.values())
+    bev.bevel_edges(bm, list(tip.link_edges), offset_as_fraction=False, offset=0.2, segments=3)
+    corner = next(f for f in bm.faces if len(f.verts) == 12)
+    ring = [v.co.copy() for v in corner.verts]
+    # profile ends lie on the old side faces; the two points between each pair of ends stand in their vertical plane
+    ends = [k for k, p in enumerate(ring) if any(abs((p - q).dot(n)) < 1e-6 for n, q in planes)]
+    assert len(ends) == 4, ends
+    for k in ends:
+        a, b, c, d = (ring[(k + j) % 12] for j in range(4))
+        up = Vector((0.0, 0.0, 1.0))
+        n = (d - a).cross(up)
+        assert abs((b - a).dot(n.normalized())) < 1e-5 and abs((c - a).dot(n.normalized())) < 1e-5
+    bm.free()
