@@ -98,6 +98,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   middle-mouse drag in the viewport moves the object (or joint) along that axis as it is drawn on screen, like
   dragging that arrow of the Move manipulator, so up / down drags count too. Selected Rotate channels turn
   0.36 degrees per pixel (right or down turns up). Other channels stay a sideways slider.
+- **Custom attributes drag faster in the Channel Box**: a middle-mouse drag on a selected custom attribute (an
+  attribute added with Add Attribute) changes it by 0.1 per pixel at Medium speed, like Maya (it was 0.01). Ctrl /
+  Shift and the Slow / Fast speeds scale it as before.
 - **Transform Constraint from the Move handles** (#280): with Surface set, dragging an arrow or plane handle of
   the Move manipulator keeps the move to that axis or plane while each point stays on the mesh surface (before,
   any handle moved freely). The setting in the Move Tool Settings can be picked in Object Mode too (it was greyed

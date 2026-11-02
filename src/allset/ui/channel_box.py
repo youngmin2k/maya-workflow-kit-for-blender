@@ -76,8 +76,8 @@ INPUT_PREFIX = "in:"     # an INPUTS row as a channel: "in:<modifier type>:<nth 
 SHAPE_PREFIX = "sh:"     # a SHAPES row as a channel: light Intensity / Color, camera Focal Length ...
 BLEND_PREFIX = "bw:"     # a blendShape target weight in INPUTS: "bw:<target name>" (the shape key's value)
 
-# MMB slider: value change per pixel at speed Medium.
-SLIDER_STEP = {"LOC": 0.01, "ROT": math.radians(0.5), "SCALE": 0.01, "CUSTOM": 0.01, "SHAPE": 0.01, "INPUT": 0.01,
+# MMB slider: value change per pixel at speed Medium (a custom attribute moves 0.1 per px, like Maya).
+SLIDER_STEP = {"LOC": 0.01, "ROT": math.radians(0.5), "SCALE": 0.01, "CUSTOM": 0.1, "SHAPE": 0.01, "INPUT": 0.01,
                "HISTORY": 0.01, "BLEND": 0.01}
 SPEEDS = (("SLOWEST", "Slowest", "x0.01", 0.01), ("SLOW", "Slow", "x0.1", 0.1),
           ("MEDIUM", "Medium", "x1", 1.0), ("FAST", "Fast", "x10", 10.0))

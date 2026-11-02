@@ -35,6 +35,7 @@ but they may have problems. For Blender 4.5 LTS keep using 0.6.2.
   Slider (#271).
 - Click the name at the top of the Channel Box to rename the object (#283).
 - Channel Box middle-drag follows the selected Translate axis on screen; Rotate turns 0.36 degrees per pixel (#273).
+- Custom attributes change by 0.1 per pixel when middle-dragged from the Channel Box, like Maya.
 - Lattice points in the Channel Box CVs table, and the Maya manipulator for curve and surface CVs (#274).
 - Auto Key keys only values that change while it is on (#276).
 
