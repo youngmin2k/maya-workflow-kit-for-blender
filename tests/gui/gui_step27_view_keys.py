@@ -18,7 +18,7 @@ def centre():
 
 
 def manip_size():
-    """= / - scale the kit's Move / Scale manipulator for the session (Blender's gizmo_size is a preference)."""
+    """= / - scale the kit's Move / Rotate / Scale manipulator for the session (Blender's gizmo_size is a preference)."""
     from importlib import import_module
     return import_module(MODULE + ".ui.manipulator").SIZE[0]
 

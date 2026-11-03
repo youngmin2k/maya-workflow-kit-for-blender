@@ -7,9 +7,8 @@ circle. Maya's:
 
 - Move: thin axis lines with cones, a hollow centre square (free move), filled
   plane handles (normal-axis colour), the active handle drawn yellow (M2).
-- Rotate: axis rings (front half), a camera ring, a grey trackball — Blender's C rotate gizmo
-  already has this layout, so the Rotate tool keeps it (with the axis colours of the user's theme: the kit never
-  writes a theme). The Move / Scale handles here use Maya's own axis colours (``MAYA_AXIS``).
+- Rotate: axis rings drawn on their front half only, a larger view ring, a grey trackball outline (a drag
+  inside it rotates freely). The handles use Maya's own axis colours (``MAYA_AXIS``).
 - Scale: axis lines with cubes at the ends, a yellow centre cube, plane handles.
 - Pivot edit mode (D / Insert): Move plus small rings to orient the pivot (M7).
 - Constant screen size: 108 px for the Move Y arrow (M3, M4).
@@ -18,11 +17,13 @@ circle. Maya's:
 handle (``target_set_operator``), so snapping, constraints, numeric input, Smart
 Duplicate/Extrude and the active handle keep working. The Scale centre and axis handles run
 ``allset.manip_scale`` (operators/manip_scale.py), Maya's scale drag on top of Blender's resize. It becomes
-the widget of the Move and Scale tools in object mode and mesh / lattice / curve / surface edit mode by swapping their
+the widget of the Move, Rotate and Scale tools in object mode and mesh / lattice / curve / surface edit mode by swapping their
 ToolDefs in ``VIEW3D_PT_tools_active._tools`` for copies with another ``widget`` (same
 idname, so ``wm.tool_set_by_id`` still finds them); tools already active are set up
 again. Everything is put back on unregister.
 """
+
+import math
 
 import bmesh
 import bpy
@@ -31,11 +32,9 @@ from mathutils import Matrix, Vector
 
 GROUP = "ALLSET_GGT_xform"
 GIZMO = "ALLSET_GT_maya_handle"
+RING_GIZMO = "ALLSET_GT_maya_ring"
 MODES = ('OBJECT', 'EDIT_MESH', 'EDIT_LATTICE', 'EDIT_CURVE', 'EDIT_SURFACE')
-# Rotate keeps Blender's C gizmo: its axis rings (front half), camera ring and trackball already
-# have Maya's layout and take the theme's axis colours; a Python dial can't clip the back half
-# the same way.
-TOOLS = {"builtin.move": 'TRANSLATE', "builtin.scale": 'RESIZE'}
+TOOLS = {"builtin.move": 'TRANSLATE', "builtin.rotate": 'ROTATE', "builtin.scale": 'RESIZE'}
 # Orientation slot per tool kind (Blender: 0 default, 1 move, 2 rotate, 3 scale).
 SLOT = {'TRANSLATE': 1, 'ROTATE': 2, 'RESIZE': 3}
 KINDS = {"builtin.move": 'TRANSLATE', "builtin.rotate": 'ROTATE', "builtin.scale": 'RESIZE'}
@@ -54,6 +53,12 @@ PLANE_AT, PLANE_HALF = 0.60, 0.08
 CUBE_AT, CUBE_HALF = 0.85, 0.05
 CENTER_CUBE_HALF = 0.06
 PIVOT_RING_R = 0.32      # pivot orientation rings (M7, offset 50)
+# Rotate rings in arrow units: the axis rings are 75 px in radius at size 1 (the size Blender's own rotate gizmo has
+# at its default gizmo size), the view ring 1.2 times that.
+ROTATE_RING_R = 75.0 / 108.0
+VIEW_RING = 1.2
+ROTATE_LINE = 2.0
+TRACKBALL = (0.55, 0.55, 0.55)   # grey outline of the free-rotate sphere
 PICK_R = 0.05            # half width of the invisible pick shape around a thin line
 YELLOW = (1.0, 1.0, 0.0)  # hovered handle (displayColor manipCurrent #ffff00)
 # Active handle and centre as Maya draws them on screen: #fdff88 for the active handle, the centre
@@ -350,6 +355,29 @@ def _axis_rot(axis):
     return Matrix.Identity(3)
 
 
+def _ring_rot(axes, axis):
+    """Rotation taking local +Z to column ``axis`` of ``axes`` (which need not be orthogonal: Gimbal rings)."""
+    z = axes.col['XYZ'.index(axis)].normalized()
+    return z.to_track_quat('Z', 'Y').to_matrix()
+
+
+def gimbal_axes(ob):
+    """World axes (columns X, Y, Z) of ``ob``'s Euler rotation channels: each axis turned by the rotations applied
+    after it. Quaternion / axis-angle rotations have no gimbal: the object's own axes."""
+    mode = ob.rotation_mode
+    if mode not in ('XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX'):
+        return ob.matrix_world.to_3x3().normalized()
+    parent = (ob.matrix_world @ ob.matrix_basis.inverted_safe()).to_3x3().normalized()
+    e = ob.rotation_euler
+    cols = [None, None, None]
+    m = parent.copy()
+    for axis in reversed(mode):          # the last applied rotation turns the earlier axes
+        i = 'XYZ'.index(axis)
+        cols[i] = m.col[i].copy()
+        m = m @ Matrix.Rotation(e[i], 3, axis)
+    return Matrix((cols[0], cols[1], cols[2])).transposed()
+
+
 # Plane handles: local XY plane -> the frame plane; (constraint axes, colour axis = normal).
 PLANES = {'XY': ((True, True, False), 'Z', Matrix.Identity(3)),
           'YZ': ((False, True, True), 'X', Matrix(((0, 0, 1), (1, 0, 0), (0, 1, 0)))),
@@ -393,9 +421,7 @@ def _has_selection(context):
 
 # #76: kit-fixed Maya-style axis colours instead of the user's theme gizmo axes (Blender's #ff3653 /
 # #8adb00 / #3b64a5): X #e60000, Y #00e600, Z #0000ff. The active and the hovered handle stay yellow #ffff00. Gizmo
-# colours are sRGB like the theme values they replace (the gizmo shaders convert). Rotate keeps Blender's C gizmo, whose
-# rings read the theme's axis colours: Python can't recolour it without writing the theme, so it keeps the user's theme
-# colours.
+# colours are sRGB like the theme values they replace (the gizmo shaders convert).
 MAYA_AXIS = {'X': "#e60000", 'Y': "#00e600", 'Z': "#0000ff"}
 
 
@@ -467,6 +493,81 @@ class ALLSET_GT_maya_handle(Gizmo):
         sh = getattr(self, "pick_shape", None)
         if sh is not None:
             self.draw_custom_shape(sh, select_id=select_id)
+
+
+RING_STEPS = 72
+RING_PICK_PX = 10.0     # a press this close to a drawn ring (x UI scale) grabs it, about as far as Blender's rings
+RING_CLIP_BIAS = 0.02   # in ring radii: a ring facing the view stays whole
+
+
+def front_arcs(matrix, view_z, steps=RING_STEPS):
+    """World polylines of the front half of the unit circle in ``matrix``'s local XY plane: the points on the
+    viewer's side of the plane through the ring centre facing ``view_z`` (the view's +Z, toward the viewer)."""
+    centre = matrix.translation
+    radius = (matrix.to_3x3() @ Vector((1.0, 0.0, 0.0))).length
+    bias = -RING_CLIP_BIAS * radius
+    arcs, run = [], []
+    for i in range(steps + 1):
+        a = 6.283185307179586 * i / steps
+        p = matrix @ Vector((math.cos(a), math.sin(a), 0.0))
+        if (p - centre).dot(view_z) >= bias:
+            run.append(p)
+        elif run:
+            arcs.append(run)
+            run = []
+    if run:
+        if arcs and len(arcs[0]) and (arcs[0][0] - run[-1]).length < 1e-9 * max(radius, 1.0):
+            arcs[0] = run[:-1] + arcs[0]       # the run that wraps past angle 0
+        else:
+            arcs.append(run)
+    return [arc for arc in arcs if len(arc) > 1]
+
+
+class ALLSET_GT_maya_ring(Gizmo):
+    """A Rotate axis ring: only its front half is drawn and picked (picked on screen, ahead of the trackball)."""
+    bl_idname = RING_GIZMO
+
+    __slots__ = ("handle_role", "handle_axis")
+
+    def _arcs(self, context):
+        rv3d = context.region_data
+        if rv3d is None:
+            return []
+        view_z = rv3d.view_matrix.inverted_safe().col[2].xyz.normalized()
+        return front_arcs(self.matrix_world, view_z)
+
+    def draw(self, context):
+        import gpu
+        from gpu_extras.batch import batch_for_shader
+        colour = self.color_highlight if self.is_highlight else self.color
+        alpha = self.alpha_highlight if self.is_highlight else self.alpha
+        shader = gpu.shader.from_builtin('POLYLINE_UNIFORM_COLOR')
+        gpu.state.blend_set('ALPHA')
+        shader.bind()
+        shader.uniform_float("viewportSize", gpu.state.viewport_get()[2:])
+        shader.uniform_float("lineWidth", self.line_width * context.preferences.system.ui_scale)
+        shader.uniform_float("color", (*colour[:3], alpha))
+        for arc in self._arcs(context):
+            batch_for_shader(shader, 'LINE_STRIP', {"pos": [tuple(p) for p in arc]}).draw(shader)
+        gpu.state.blend_set('NONE')
+
+    def test_select(self, context, location):
+        from bpy_extras.view3d_utils import location_3d_to_region_2d
+        region, rv3d = context.region, context.region_data
+        if rv3d is None:
+            return -1
+        limit = RING_PICK_PX * context.preferences.system.ui_scale
+        mouse = Vector((location[0], location[1]))
+        for arc in self._arcs(context):
+            pts = [location_3d_to_region_2d(region, rv3d, p) for p in arc]
+            for a, b in zip(pts, pts[1:]):
+                if a is None or b is None:
+                    continue
+                ab = b - a
+                t = 0.0 if ab.length_squared < 1e-12 else max(0.0, min(1.0, (mouse - a).dot(ab) / ab.length_squared))
+                if (a + ab * t - mouse).length <= limit:
+                    return 0
+        return -1
 
 
 # Maya = / - (operators/manip.ALLSET_OT_manip_size): the kit manipulator's own size factor for this session. Not
@@ -553,12 +654,25 @@ class ALLSET_GGT_xform(GizmoGroup):
         gz.alpha = gz.alpha_highlight = ALPHA
         return gz
 
-    def _dial(self):
+    def _ring(self, axis):
+        gz = self.gizmos.new(RING_GIZMO)
+        gz.handle_role, gz.handle_axis = 'RING', axis
+        gz.use_draw_scale = True
+        gz.use_draw_modal = True
+        gz.use_tooltip = False
+        gz.line_width = ROTATE_LINE
+        gz.color_highlight = YELLOW
+        gz.alpha = gz.alpha_highlight = ALPHA
+        return gz
+
+    def _dial(self, options=None, line_width=1.5):
         gz = self.gizmos.new("GIZMO_GT_dial_3d")
+        if options is not None:
+            gz.draw_options = options
         gz.use_draw_scale = True
         gz.use_draw_modal = True
         gz.use_tooltip = False                           # Maya manipulators show no tooltip (#98)
-        gz.line_width = 1.5
+        gz.line_width = line_width
         gz.color_highlight = YELLOW
         gz.alpha = gz.alpha_highlight = ALPHA
         return gz
@@ -574,6 +688,16 @@ class ALLSET_GGT_xform(GizmoGroup):
             if pivot:
                 for ax in 'XYZ':
                     self.handles.append((self._dial(), 'PIVOT_RING', ax))
+        elif kind == 'ROTATE':
+            # the trackball (outline drawn, whole disc picked where nothing else is), the view ring, then the axis
+            # rings drawn and picked on their front half only. Blender keeps the first hit of its gizmo list,
+            # which runs from the last made gizmo: the rings are made last.
+            ball = self._dial({'FILL_SELECT'}, 1.0)
+            ball.use_select_background = True
+            self.handles.append((ball, 'TRACKBALL', None))
+            self.handles.append((self._dial(set(), ROTATE_LINE), 'VIEW_RING', None))
+            for ax in 'XYZ':
+                self.handles.append((self._ring(ax), 'RING', ax))
         elif kind == 'RESIZE':
             for ax in 'XYZ':
                 self.handles.append((self._new('SCALE_AXIS', 'AXIS', ax), 'AXIS', ax))
@@ -585,7 +709,7 @@ class ALLSET_GGT_xform(GizmoGroup):
 
     def _bind_ops(self, kind, otype, frame=None, clamp=False, live_move=False, slide=False):
         """Point each handle at Blender's transform with its constraint and orientation."""
-        op = {'TRANSLATE': "transform.translate", 'RESIZE': "transform.resize"}[kind]
+        op = {'TRANSLATE': "transform.translate", 'ROTATE': "transform.rotate", 'RESIZE': "transform.resize"}[kind]
         if frame is None:
             frame = Matrix.Identity(3)
         editing = getattr(self, "_built_for", None) == ('TRANSLATE', True)
@@ -630,6 +754,20 @@ class ALLSET_GGT_xform(GizmoGroup):
             elif role == 'PIVOT_RING':
                 props = gz.target_set_operator("allset.pivot_rotate")
                 props.axis = data
+            elif role == 'RING':
+                props = gz.target_set_operator(op)
+                props.constraint_axis = tuple(a == data for a in 'XYZ')
+                props.orient_axis = data
+                ALLSET_GGT_xform._orient(props, otype, frame)
+                props.release_confirm = True
+            elif role == 'VIEW_RING':
+                props = gz.target_set_operator(op)
+                props.orient_type = 'VIEW'      # about the view axis
+                props.orient_axis = 'Z'
+                props.release_confirm = True
+            elif role == 'TRACKBALL':
+                props = gz.target_set_operator("transform.trackball")
+                props.release_confirm = True
         self._ops_for = (kind, otype, tuple(v for row in frame for v in row), clamp, live_move, slide)
 
     @staticmethod
@@ -652,6 +790,9 @@ class ALLSET_GGT_xform(GizmoGroup):
         otype = slot_type(scene, kind)
         rv3d = context.region_data
         frame = axes_of(context, otype, rv3d)
+        rings = frame
+        if kind == 'ROTATE' and otype == 'GIMBAL' and context.view_layer.objects.active is not None:
+            rings = gimbal_axes(context.view_layer.objects.active)
         if pivot and context.active_object is not None:
             from ..operators import pivot as pivot_ops
             frame, otype = pivot_ops.axes_for(context.active_object), pivot_ops.ORIENT_NAME
@@ -691,6 +832,14 @@ class ALLSET_GGT_xform(GizmoGroup):
                 axes, normal, local = PLANES[data]
                 rot = frame @ local
                 gz.color = ACTIVE if _is_active(kind, axes) else colours[normal]
+            elif role == 'RING':
+                rot = _ring_rot(rings, data)
+                gz.color = ACTIVE if _is_active(kind, tuple(a == data for a in 'XYZ')) else colours[data]
+                gz.scale_basis = s * ROTATE_RING_R
+            elif role in ('VIEW_RING', 'TRACKBALL'):
+                rot = view
+                gz.color = CENTER_IDLE if role == 'VIEW_RING' else TRACKBALL
+                gz.scale_basis = s * ROTATE_RING_R * (VIEW_RING if role == 'VIEW_RING' else 1.0)
             elif role == 'CENTER':
                 # Maya: the centre (free move / uniform scale) is the active handle by default, drawn #fdff88;
                 # light blue while an axis or plane is active
@@ -704,7 +853,7 @@ class ALLSET_GGT_xform(GizmoGroup):
         _cache_pivot_rings(context, self.handles, pivot and not hide)
 
 
-classes = (ALLSET_GT_maya_handle, ALLSET_GGT_xform)
+classes = (ALLSET_GT_maya_handle, ALLSET_GT_maya_ring, ALLSET_GGT_xform)
 
 
 # --- Tool Settings: Maya Move / Rotate / Scale Settings --------
@@ -828,10 +977,11 @@ def resetup(tool, mode, widget=None):
 
 
 def refresh_pivot_tool(context):
-    """Rotate uses the pivot edit handles during D / Insert, then its normal rings again."""
+    """Rotate shows the pivot edit handles during D / Insert and its rings again after (``tool_kind``, same gizmo
+    group): only a tool still carrying another group is set up again."""
     tool = active_tool(context)
-    if context.mode == 'OBJECT' and tool is not None and tool.idname == 'builtin.rotate':
-        resetup(tool, context.mode, widget=GROUP if pivot_edit(context) else None)
+    if context.mode == 'OBJECT' and stale(tool, bool(_saved)):
+        resetup(tool, context.mode)
 
 
 def stale(tool, patched):
@@ -850,15 +1000,6 @@ def ensure_tools(patched=True):
             try:
                 tool = ws.tools.from_space_view3d_mode(mode, create=False)
             except (TypeError, RuntimeError):
-                continue
-            if tool is not None and tool.idname == 'builtin.rotate':
-                editing = (patched and mode == 'OBJECT' and ws == bpy.context.workspace
-                           and bpy.context.scene.tool_settings.use_transform_data_origin)
-                if (tool.widget == GROUP) != editing:
-                    try:
-                        done += resetup(tool, mode, widget=GROUP if editing else None)
-                    except (TypeError, RuntimeError, AttributeError) as ex:
-                        print("allset: pivot tool setup failed", tool.idname, ex)
                 continue
             if stale(tool, patched):
                 try:

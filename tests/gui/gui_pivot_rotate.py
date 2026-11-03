@@ -221,7 +221,7 @@ def s_hold_released():
 @step
 def s_disable():
     mod('switch').set_mode(False, layout=False)
-    check('disabling Maya mode restores Rotate tool and origin settings', tool().widget == C['widget']
+    check('disabling Maya mode restores Rotate tool and origin settings', tool().widget == 'VIEW3D_GGT_xform_gizmo'
           and not bpy.context.tool_settings.use_transform_data_origin)
 
 

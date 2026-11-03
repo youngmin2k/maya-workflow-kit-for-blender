@@ -42,7 +42,7 @@ LINE_PX = 2.0
 FACE_FILL = (0.85, 0.26, 0.25, 0.35)  # the #d84240 stipple seen as a fill
 RADIUS_PX = 16.0                    # pre-selection radius
 HANDLE_PX = 12.0                    # keep the hover on a manipulator handle this close
-ROTATE_RING = 1.25                  # Rotate (Blender's gizmo): disc of gizmo_size / 2 x this
+ROTATE_RING = 1.25                  # Transform tool (Blender's gizmo): disc of gizmo_size / 2 x this
 
 _last = []    # the live group (tests read its gizmo)
 _cache = {}   # object pointer -> MeshCache
@@ -353,9 +353,12 @@ def _handles_block(context, region, rv3d, mouse, cs):
         return False
     scale = context.preferences.system.ui_scale or 1.0
     size = context.preferences.view.gizmo_size
-    if kind in ('ROTATE', 'TRANSFORM'):
+    if kind == 'TRANSFORM':
         return math.hypot(mouse[0] - c2.x, mouse[1] - c2.y) <= size / 2.0 * scale * ROTATE_RING
-    length_px = manipulator.ARROW_PX * size / 75.0 * scale
+    length_px = manipulator.ARROW_PX * size / 75.0 * scale * manipulator.SIZE[0]
+    if kind == 'ROTATE':     # the kit's rings: inside the view ring (the trackball and every ring)
+        ring = length_px * manipulator.ROTATE_RING_R * manipulator.VIEW_RING
+        return math.hypot(mouse[0] - c2.x, mouse[1] - c2.y) <= ring + 3.0 * scale
     if context.mode == 'OBJECT' and pivot_picking(context):
         cached = manipulator.PIVOT_RING_CACHE.get(region.as_pointer())
         for xy in cached[1] if cached is not None else ():

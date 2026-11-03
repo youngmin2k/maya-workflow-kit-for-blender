@@ -31,8 +31,9 @@ def _paths(ob):
 
 
 def test_98_manipulator_handles_have_no_tooltip():
-    # every handle and dial the kit Move / Scale manipulator creates turns Blender's gizmo tooltip off
-    for fn in (manipulator.ALLSET_GGT_xform._new, manipulator.ALLSET_GGT_xform._dial):
+    # every handle, ring and dial the kit Move / Rotate / Scale manipulator creates turns Blender's gizmo tooltip off
+    for fn in (manipulator.ALLSET_GGT_xform._new, manipulator.ALLSET_GGT_xform._ring,
+               manipulator.ALLSET_GGT_xform._dial):
         assert "use_tooltip = False" in inspect.getsource(fn), fn.__name__
     assert "use_tooltip" in bpy.types.Gizmo.bl_rna.properties
 

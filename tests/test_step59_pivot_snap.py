@@ -276,10 +276,9 @@ def test_tools_use_the_maya_manipulator():
         widgets = {it.idname: it.widget for it, _i in
                    ToolSelectPanelHelper._tools_flatten_with_tool_index(VIEW3D_PT_tools_active._tools[mode])
                    if it is not None}
-        for idname in ("builtin.move", "builtin.scale"):
+        for idname in ("builtin.move", "builtin.rotate", "builtin.scale"):
             assert widgets[idname] == manipulator.GROUP, (mode, idname, widgets[idname])
-        for idname in ("builtin.rotate", "builtin.transform"):   # Blender's rings already Maya-like
-            assert widgets[idname] == "VIEW3D_GGT_xform_gizmo", (mode, idname)
+        assert widgets["builtin.transform"] == "VIEW3D_GGT_xform_gizmo", mode
     for mode in ('POSE',):
         widgets = {it.idname: it.widget for it, _i in
                    ToolSelectPanelHelper._tools_flatten_with_tool_index(VIEW3D_PT_tools_active._tools[mode])
@@ -302,6 +301,46 @@ def test_shapes_and_centre():
     assert act == pts[2]
     med = manipulator.center_of(pts, None, 'MEDIAN_POINT', Vector())
     assert abs(med.x - 0.3943) < 1e-3
+
+
+def test_rotate_gimbal_rings():
+    """Gimbal rings: the last applied Euler axis stays the parent's, earlier ones turn with the later rotations."""
+    import math
+    ob = bpy.data.objects.new("gimbal_probe", None)
+    bpy.context.scene.collection.objects.link(ob)
+    try:
+        ob.rotation_mode = 'XYZ'
+        ob.rotation_euler = (0.3, math.pi / 2, 0.0)
+        bpy.context.view_layer.update()
+        g = manipulator.gimbal_axes(ob)
+        assert (g.col[2] - Vector((0, 0, 1))).length < 1e-6, g.col[2]       # Z: applied last
+        assert (g.col[1] - Vector((0, 1, 0))).length < 1e-6, g.col[1]       # Y: turned by Z only (0)
+        assert (g.col[0] - Vector((0, 0, -1))).length < 1e-6, g.col[0]      # X: turned by Y 90 deg onto -Z
+        ob.rotation_mode = 'QUATERNION'
+        bpy.context.view_layer.update()
+        q = manipulator.gimbal_axes(ob)
+        own = ob.matrix_world.to_3x3().normalized()
+        assert all((q.col[i] - own.col[i]).length < 1e-6 for i in range(3))
+    finally:
+        bpy.data.objects.remove(ob)
+    assert set(manipulator.TOOLS.values()) == {'TRANSLATE', 'ROTATE', 'RESIZE'}
+
+
+def test_rotate_ring_front_half():
+    """A ring is drawn / picked on the viewer's half only; a ring facing the view stays whole."""
+    from mathutils import Matrix
+    m = Matrix.Translation((1.0, 2.0, 3.0)) @ Matrix.Scale(2.0, 4)
+    arcs = manipulator.front_arcs(m, Vector((0.0, -1.0, 0.0)))
+    assert len(arcs) == 1, len(arcs)
+    pts = arcs[0]
+    assert all(p.y - 2.0 <= 0.02 * 2.0 + 1e-6 for p in pts)
+    assert min(p.y for p in pts) < 2.0 - 1.99                     # reaches the near side
+    assert abs(min(p.x for p in pts) - (1.0 - 2.0)) < 0.05 and abs(max(p.x for p in pts) - 3.0) < 0.05
+    whole = manipulator.front_arcs(m, Vector((0.0, 0.0, 1.0)))
+    assert len(whole) == 1 and len(whole[0]) == manipulator.RING_STEPS + 1
+    # the front half straddles angle 0: one arc, not two
+    wrap = manipulator.front_arcs(m, Vector((1.0, 0.0, 0.0)))
+    assert len(wrap) == 1 and all(p.x >= 1.0 - 0.05 for p in wrap[0])
 
 
 def test_orientation_slots_per_tool():

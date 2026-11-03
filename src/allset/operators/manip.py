@@ -654,8 +654,8 @@ class ALLSET_OT_manip_size(bpy.types.Operator):
 
     # Maya's = / - keys grow / shrink the manipulator; here 1.25x steps within
     # Blender's gizmo size range 10-200 px. This scales the kit's
-    # Move / Scale manipulator only (ui/manipulator.SIZE): Blender's gizmo_size preference is never written, so
-    # Blender's own gizmos (Rotate) keep their size.
+    # Move / Rotate / Scale manipulator (ui/manipulator.SIZE): Blender's gizmo_size preference is never written, so
+    # Blender's own gizmos keep their size.
     factor: bpy.props.FloatProperty(name="Factor", default=1.25, min=0.1, max=10.0,
                                     options={'SKIP_SAVE'})
 

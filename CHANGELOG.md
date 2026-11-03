@@ -6,6 +6,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 ## [Unreleased]
 
 ### Fixed
+- **= / - didn't resize the Rotate manipulator** (#283): the keys (and numpad + / -) changed only the Move and
+  Scale manipulators. The Rotate tool now has the kit's own manipulator too: X / Y / Z rings drawn and grabbed on
+  their front half, a larger view ring and a grey trackball outline (drag inside it to rotate freely), in the
+  same axis colours as Move / Scale, and it follows = / - like them. With Gimbal axes the rings follow the
+  rotation channels.
 - **Joints hidden again after switching workspaces** (#289): each workspace had its own viewport, so wireframe
   set in General was gone in Rigging and the mesh hid the joints inside it. Switching workspaces now keeps the
   main view's display mode (wireframe / shaded, X-Ray, X-Ray Joints, Wireframe on Shaded), like Maya's persp

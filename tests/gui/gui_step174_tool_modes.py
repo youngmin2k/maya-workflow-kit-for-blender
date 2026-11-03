@@ -63,9 +63,9 @@ SEQ = [
     ("W", 'OBJECT', "builtin.move", True),
     ("F9", 'EDIT_MESH', "builtin.move", True),
     ("F8", 'OBJECT', "builtin.move", True),
-    ("E", 'OBJECT', "builtin.rotate", False),
-    ("F10", 'EDIT_MESH', "builtin.rotate", False),
-    ("F8", 'OBJECT', "builtin.rotate", False),
+    ("E", 'OBJECT', "builtin.rotate", True),
+    ("F10", 'EDIT_MESH', "builtin.rotate", True),
+    ("F8", 'OBJECT', "builtin.rotate", True),
     ("R", 'OBJECT', "builtin.scale", True),
     ("F11", 'EDIT_MESH', "builtin.scale", True),
     ("W", 'EDIT_MESH', "builtin.move", True),       # W picked in component mode ...
@@ -90,7 +90,7 @@ def _press(i):
                 check(f"{k}: {mode} with {w} (now {bpy.context.mode} / {idname})",
                       bpy.context.mode == mode and idname == w)
                 if widget:
-                    check(f"{k}: the kit Move / Scale manipulator ({wid})", wid == KIT_WIDGET)
+                    check(f"{k}: the kit Move / Rotate / Scale manipulator ({wid})", wid == KIT_WIDGET)
             if k == "F9" and i == 2 and SHOTS:
                 screenshot(os.path.join(SHOTS, "gui_step174_w_f9.png"))
         if i < len(SEQ):
