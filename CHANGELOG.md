@@ -3,6 +3,11 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- Local bevels preserve untouched edge hardness without building coordinate keys for the entire mesh.
+
 ## [0.10.0] — 2026-11-02
 
 ### Added
