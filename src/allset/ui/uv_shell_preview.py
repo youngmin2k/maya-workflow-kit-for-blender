@@ -231,9 +231,10 @@ def _paint(region, kind, shape, p0, p1, ui):
         line.uniform_float("lineWidth", EDGE_HOVER_PX * ui)
         batch_for_shader(line, 'LINES', {"pos": to_px(shape)}).draw(line)
     else:
+        dots = gpu.shader.from_builtin('POINT_UNIFORM_COLOR')   # sized on Vulkan / Metal too
         gpu.state.point_size_set(max(1.0, round(POINT_PX * ui)))
-        flat.uniform_float("color", EDGE)
-        batch_for_shader(flat, 'POINTS', {"pos": to_px(shape)}).draw(flat)
+        dots.uniform_float("color", EDGE)
+        batch_for_shader(dots, 'POINTS', {"pos": to_px(shape)}).draw(dots)
         gpu.state.point_size_set(1.0)
     gpu.state.blend_set('NONE')
 

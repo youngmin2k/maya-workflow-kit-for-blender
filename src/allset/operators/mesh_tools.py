@@ -378,8 +378,10 @@ class ALLSET_OT_target_weld(bpy.types.Operator):
                 gpu.state.line_width_set(4.0)
                 batch_for_shader(shader, 'LINES', {"pos": [dst[0][:], dst[1][:]]}).draw(shader)
             elif dst:
+                dots = gpu.shader.from_builtin('POINT_UNIFORM_COLOR')   # sized on Vulkan / Metal too
+                dots.uniform_float("color", (1.0, 0.0, 0.0, 1.0))
                 gpu.state.point_size_set(10.0)
-                batch_for_shader(shader, 'POINTS', {"pos": [dst[0][:]]}).draw(shader)
+                batch_for_shader(dots, 'POINTS', {"pos": [dst[0][:]]}).draw(dots)
         gpu.state.line_width_set(1.0)
         gpu.state.point_size_set(1.0)
         gpu.state.blend_set('NONE')
