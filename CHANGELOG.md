@@ -30,6 +30,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   absolute values (Maya's Relative offset is not there), and two clips blend only where they overlap.
 
 ### Fixed
+- **Alt+RMB dolly ignored Invert Zoom Direction** (#295): the kit's Alt+RMB drag zoom in the viewport and the UV /
+  Image Editor now follows Blender's *Preferences > Input > Invert Zoom Direction*, like Blender's own drag zoom.
+  The mouse wheel is Blender's zoom and keeps its own Invert Wheel Zoom Direction setting.
 - **= / - didn't resize the Rotate manipulator** (#283): the keys (and numpad + / -) changed only the Move and
   Scale manipulators. The Rotate tool now has the kit's own manipulator too: X / Y / Z rings drawn and grabbed on
   their front half, a larger view ring and a grey trackball outline (drag inside it to rotate freely), in the

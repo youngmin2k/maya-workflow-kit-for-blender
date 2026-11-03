@@ -79,10 +79,16 @@ class ALLSET_OT_emulated_tumble(bpy.types.Operator):
 DOLLY_PX_PER_DOUBLING = 150.0     # px of drag (at UI scale 1) that halve / double the view distance
 
 
-def dolly_distance(distance0, dx, dy, ui_scale=1.0):
-    """View distance after a dolly drag of (dx, dy) px from ``distance0``: right (or up) = in."""
+def dolly_distance(distance0, dx, dy, ui_scale=1.0, invert=False):
+    """View distance after a dolly drag of (dx, dy) px from ``distance0``: right (or up) = in,
+    left (or down) = in with ``invert`` (Blender's Invert Zoom Direction preference)."""
     step = (dx + dy) / (DOLLY_PX_PER_DOUBLING * max(ui_scale, 0.1))
-    return distance0 * (2.0 ** -step)
+    return distance0 * (2.0 ** (step if invert else -step))
+
+
+def invert_zoom(context):
+    """Blender's Preferences > Input > Invert Zoom Direction (drag zoom), read only (#295)."""
+    return bool(getattr(context.preferences.inputs, "invert_mouse_zoom", False))
 
 
 class ALLSET_OT_dolly(bpy.types.Operator):
@@ -113,7 +119,8 @@ class ALLSET_OT_dolly(bpy.types.Operator):
         if event.type == 'MOUSEMOVE':
             dx = event.mouse_x - self._start[0]
             dy = event.mouse_y - self._start[1]
-            rv3d.view_distance = dolly_distance(self._d0, dx, dy, context.preferences.system.ui_scale or 1.0)
+            rv3d.view_distance = dolly_distance(self._d0, dx, dy, context.preferences.system.ui_scale or 1.0,
+                                                invert_zoom(context))
             context.area.tag_redraw()
         elif event.type == self._button and event.value == 'RELEASE':
             return {'FINISHED'}
@@ -130,9 +137,11 @@ class ALLSET_OT_dolly(bpy.types.Operator):
 # a plain image.view_zoom call with a factor (centred, like Blender's factory "Zoom to Mouse Position" off).
 
 
-def dolly_zoom_factor(dx, dy, ui_scale=1.0):
-    """Zoom factor for a drag step of (dx, dy) px: the inverse of ``dolly_distance`` (right / up = in)."""
-    return 2.0 ** ((dx + dy) / (DOLLY_PX_PER_DOUBLING * max(ui_scale, 0.1)))
+def dolly_zoom_factor(dx, dy, ui_scale=1.0, invert=False):
+    """Zoom factor for a drag step of (dx, dy) px: the inverse of ``dolly_distance`` (right / up = in,
+    reversed with ``invert``)."""
+    step = (dx + dy) / (DOLLY_PX_PER_DOUBLING * max(ui_scale, 0.1))
+    return 2.0 ** (-step if invert else step)
 
 
 class ALLSET_OT_dolly_2d(bpy.types.Operator):
@@ -156,7 +165,7 @@ class ALLSET_OT_dolly_2d(bpy.types.Operator):
 
     def step(self, context, dx, dy):
         """Zoom by one drag step."""
-        factor = dolly_zoom_factor(dx, dy, context.preferences.system.ui_scale or 1.0)
+        factor = dolly_zoom_factor(dx, dy, context.preferences.system.ui_scale or 1.0, invert_zoom(context))
         if abs(factor - 1.0) > 1e-6:
             bpy.ops.image.view_zoom('EXEC_DEFAULT', factor=factor)
             self.applied *= factor
