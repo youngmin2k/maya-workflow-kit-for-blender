@@ -882,23 +882,18 @@ def bevel_edges(bm, edges, fraction=0.5, offset_as_fraction=True, offset=0.2, se
     return [bm.verts[i] for i in tracked]
 
 
-def _ekey(a, b):
-    return frozenset((tuple(round(x, 7) for x in a), tuple(round(x, 7) for x in b)))
-
-
 def is_hard(e):
     """Maya hardness of a Blender edge: marked sharp, or next to a flat-shaded face."""
     return not e.smooth or not all(f.smooth for f in e.link_faces)
 
 
 def input_hardness(bm, edges):
-    """Before the bevel: {"keys": {position pair: hard}, "segments": [(a, b, hard)] for the edges around the bevelled
-    vertices and their neighbours, "smooth": any face shaded smooth}."""
-    keys = {_ekey(e.verts[0].co, e.verts[1].co): is_hard(e) for e in bm.edges}
+    """Before the bevel: hardness of segments around the picked vertices and their neighbours,
+    and whether any face is shaded smooth. Unaffected edges retain their own flags through BMesh bevel."""
     ring = {v for e in edges for v in e.verts}
     ring |= {e.other_vert(v) for v in list(ring) for e in v.link_edges}
     segs = {e for v in ring for e in v.link_edges}
-    return {"keys": keys, "segments": [(e.verts[0].co.copy(), e.verts[1].co.copy(), is_hard(e)) for e in segs],
+    return {"segments": [(e.verts[0].co.copy(), e.verts[1].co.copy(), is_hard(e)) for e in segs],
             "smooth": any(f.smooth for f in bm.faces)}
 
 
@@ -940,29 +935,30 @@ def set_hardness(bm, hard_in, inner, touched, smoothing_angle):
     edges on smooth-shaded faces (a mesh with no smooth face before and no soft edge after stays flat)."""
     bm.normal_update()
     limit = math.radians(smoothing_angle) + 1e-9
+    redo_edges = {e for v in inner for f in v.link_faces for e in f.edges}
+    affected = redo_edges | {e for v in touched for e in v.link_edges}
     hard = {}
-    for e in bm.edges:
+    for e in affected:
         a, b = e.verts
         if len(e.link_faces) != 2:
             hard[e] = is_hard(e)
             continue
-        redo = any(v in inner for f in e.link_faces for v in f.verts)
-        old = None
-        if not redo:
-            old = hard_in["keys"].get(_ekey(a.co, b.co)) if not (a in touched or b in touched) else None
-            if old is None:
-                old = _on_segment(a.co, b.co, hard_in["segments"])
+        redo = e in redo_edges
+        old = _on_segment(a.co, b.co, hard_in["segments"]) if not redo else None
         if old is not None:
             hard[e] = old
         else:
             f0, f1 = e.link_faces
             hard[e] = f0.normal.angle(f1.normal, 0.0) > limit
     if not hard_in["smooth"] and all(hard.values()):
-        return
+        if all(is_hard(e) for e in bm.edges if e not in hard):
+            return
+    # Read old flat-face hardness before changing the face shading. Only the
+    # affected edges need a geometric decision; every other edge keeps its flags.
+    for e in bm.edges:
+        e.smooth = not hard[e] if e in hard else not is_hard(e)
     for f in bm.faces:
         f.smooth = True
-    for e, h in hard.items():
-        e.smooth = not h
 
 
 def face_uv_maps(bm, faces):
