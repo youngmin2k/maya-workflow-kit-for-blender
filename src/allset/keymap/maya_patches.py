@@ -1444,9 +1444,14 @@ def patch_repeat(kd):
     """G = Maya repeat last, menu / shelf / marking commands too (operators/repeat_maya.py); Blender's
     screen.repeat_last only knows registered operators. Graph Editor G stays anim.scene_range_frame."""
     kd.remove("Screen", "screen.repeat_last", type="G")
+    repeat_maps = ("Screen", "3D View", "Object Mode", "Mesh")
     _add(kd, "Screen", "allset.repeat_last", make_event("G"),
-         shadows=("Graph Editor", "Dopesheet", "Grease Pencil Edit Mode"))   # their own G (frame range / grab) win
+         shadows=repeat_maps + ("Graph Editor", "Dopesheet", "Grease Pencil Edit Mode"))  # their own G wins
     # there; the Dope Sheet's g steps aside in the Timeline, so the Time Slider still repeats
+    # A mode-specific add-on G menu runs ahead of Screen's binding. Own the same
+    # viewport maps so the normal priority watcher can keep Maya Repeat first.
+    for km in repeat_maps[1:]:
+        _add(kd, km, "allset.repeat_last", make_event("G"), shadows=repeat_maps)
 
 
 # --- 51. Blender's render keys ---------------------------------------------------------------------------------------

@@ -27,6 +27,20 @@ SKIP_PREFIXES = ("TRANSFORM_OT_", "VIEW3D_OT_view", "VIEW3D_OT_zoom", "VIEW3D_OT
                  "ED_OT_", "SCREEN_OT_", "WM_OT_", "OUTLINER_OT_", "UI_OT_", "IMAGE_OT_view", "GRAPH_OT_view",
                  "ACTION_OT_view", "ALLSET_OT_repeat", "ALLSET_OT_hotbox", "ALLSET_OT_mm_", "ALLSET_OT_smart_extrude")
 NO_RECORD = {"Edit/Repeat", "Edit/Recent Commands List", "Edit/Undo", "Edit/Redo"}
+# These kit operators implement selection/display or manipulator drags, just like
+# the native operators excluded above. They are UI state, not another modeling command.
+NON_COMMANDS = frozenset({
+    "OBJECT_OT_mode_set", "OBJECT_OT_editmode_toggle",
+    "ALLSET_OT_component_mode", "ALLSET_OT_component_mask", "ALLSET_OT_toggle_sel_mode",
+    "ALLSET_OT_convert_selection", "ALLSET_OT_select_convert", "ALLSET_OT_uv_component",
+    "ALLSET_OT_display_mode", "ALLSET_OT_smooth_preview", "ALLSET_OT_smooth_level",
+    "ALLSET_OT_frame", "ALLSET_OT_frame_all_views", "ALLSET_OT_view_history", "ALLSET_OT_view_home",
+    "ALLSET_OT_toggle_quad_view", "ALLSET_OT_tumble", "ALLSET_OT_dolly", "ALLSET_OT_dolly_2d",
+    "ALLSET_OT_box_zoom", "ALLSET_OT_camera_mode_toggle",
+    "ALLSET_OT_component_scale", "ALLSET_OT_live_translate",
+    "ALLSET_OT_pivot_translate", "ALLSET_OT_pivot_rotate", "ALLSET_OT_pivot_pick",
+    "ALLSET_OT_pivot_exit", "ALLSET_OT_pivot_option", "ALLSET_OT_menu_tool", "ALLSET_OT_last_tool",
+})
 
 
 def _node_edits():
@@ -38,7 +52,44 @@ def _node_edits():
 
 def repeatable(idname):
     """Would Maya's G repeat this Blender operator (bl_idname 'MESH_OT_extrude' style)?"""
-    return not ("_OT_select" in idname or idname.startswith(SKIP_PREFIXES) or idname in _node_edits())
+    return not (idname in NON_COMMANDS or "_OT_select" in idname
+                or idname.startswith(SKIP_PREFIXES) or idname in _node_edits())
+
+
+def _recordable(action):
+    """Apply the same command filter to menu/shelf actions as to key operators.
+
+    Resolve item wrappers so Select > All and RMB > Face do not replace an
+    extrusion, while a wrapped modeling command still records its saved action.
+    """
+    from ..ui import menu_map
+    seen = set()
+    while True:
+        spec = menu_map.normalize(action)
+        if spec is None or spec[0] not in {"op", "v3d"}:
+            return False
+        _kind, target, props = spec
+        if target not in {"allset.menu_item", "allset.component_command", "allset.menu_whole_mesh"}:
+            break
+        item = props.get("item")
+        if item in seen:
+            return False
+        seen.add(item)
+        action = menu_map.MAP.get(item)
+    # Smart Extrude explicitly saves a completed operation with its final values;
+    # its registered drag helper remains excluded from Blender's history.
+    if target == "allset.smart_extrude":
+        return True
+    namespace, name = target.split(".", 1)
+    return repeatable(namespace.upper() + "_OT_" + name)
+
+
+def _operator_repeatable(op):
+    if not repeatable(op.bl_idname):
+        return False
+    if op.bl_idname in {"ALLSET_OT_component_command", "ALLSET_OT_menu_whole_mesh"}:
+        return _recordable(("item", op.properties.item))
+    return True
 
 
 def _mark(context=None):
@@ -50,7 +101,7 @@ def _mark(context=None):
 
 def record(label, action, path=None, context=None):
     """A Maya command finished (menu / shelf / marking menu / option window): remember it for G."""
-    if path in NO_RECORD:
+    if path in NO_RECORD or not _recordable(action):
         return
     entry = {"label": label or "Maya Command", "action": action, "path": path, "mark": _mark(context)}
     if HISTORY and HISTORY[-1]["action"] == action and HISTORY[-1]["path"] == path:
@@ -67,7 +118,7 @@ def _blender_after(context, mark):
         op = ops[i]
         if mark is not None and op.as_pointer() == mark[1]:
             return None
-        if repeatable(op.bl_idname):
+        if _operator_repeatable(op):
             return i
     return None
 
@@ -100,8 +151,12 @@ def run_blender(context, index, undo=True):
     """Repeat Blender's registered operator ``index`` (screen.repeat_history counts like wm.operators)."""
     ops = context.window_manager.operators
     if index == len(ops) - 1:
-        return bpy.ops.screen.repeat_last('EXEC_DEFAULT', undo)
-    return bpy.ops.screen.repeat_history('EXEC_DEFAULT', undo, index=index)
+        bpy.ops.screen.repeat_last('EXEC_DEFAULT', undo)
+    else:
+        bpy.ops.screen.repeat_history('EXEC_DEFAULT', undo, index=index)
+    # Blender's screen.repeat_last returns CANCELLED even after a successful
+    # replay, to keep the wrapper itself out of the operator/undo history.
+    return {'FINISHED'}
 
 
 def repeat(context, inside_undo_op=False):
@@ -127,7 +182,7 @@ def recent(context, limit=15):
     for k, entry in enumerate(HISTORY):
         pos = by_ptr.get(entry["mark"][1], -1) if entry["mark"][0] else -1
         rows.append((pos + 0.5, ("kit", k, entry["label"])))
-    rows += [(i, ("blender", i, op.bl_label)) for i, op in enumerate(ops) if repeatable(op.bl_idname)]
+    rows += [(i, ("blender", i, op.bl_label)) for i, op in enumerate(ops) if _operator_repeatable(op)]
     rows.sort(key=lambda r: r[0], reverse=True)
     return [r[1] for r in rows[:limit]]
 
@@ -149,7 +204,9 @@ class ALLSET_OT_repeat_last(bpy.types.Operator):
         if res is None:
             results.result(self, "Nothing to repeat")
             return {'CANCELLED'}
-        return {'FINISHED'}
+        # A repeated command may start its own modal handler. This wrapper does
+        # not own that handler, so it finishes while the command keeps running.
+        return {'CANCELLED'} if res == {'CANCELLED'} else {'FINISHED'}
 
 
 class ALLSET_OT_repeat_item(bpy.types.Operator):

@@ -10,6 +10,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   set in General was gone in Rigging and the mesh hid the joints inside it. Switching workspaces now keeps the
   main view's display mode (wireframe / shaded, X-Ray, X-Ray Joints, Wireframe on Shaded), like Maya's persp
   panel.
+- G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
+  ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
 
 ## [0.10.0] — 2026-11-02
 
