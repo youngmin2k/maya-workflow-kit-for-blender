@@ -155,6 +155,7 @@ def load(window, name):
 def activate(context, window, name):
     """Show saved workspace ``name`` in ``window`` (appended from its file when the open file lacks it)."""
     from . import workspaces
+    display = workspaces.display_of(window.screen)
     ws = find(name)
     if ws is None:
         prev = window.workspace.name if window.workspace is not None else ""
@@ -165,6 +166,7 @@ def activate(context, window, name):
             ws[switch.PREV_KEY] = prev        # the way back to Blender's layout (switch.leave_layout)
     window.workspace = ws
     workspaces.apply_settings(context, ws)
+    workspaces.carry_display(display, ws)
     return ws
 
 

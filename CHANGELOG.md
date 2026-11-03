@@ -3,6 +3,14 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- **Joints hidden again after switching workspaces** (#289): each workspace had its own viewport, so wireframe
+  set in General was gone in Rigging and the mesh hid the joints inside it. Switching workspaces now keeps the
+  main view's display mode (wireframe / shaded, X-Ray, X-Ray Joints, Wireframe on Shaded), like Maya's persp
+  panel.
+
 ## [0.10.0] — 2026-11-02
 
 ### Added
