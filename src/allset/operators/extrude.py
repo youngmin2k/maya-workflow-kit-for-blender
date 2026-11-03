@@ -52,12 +52,15 @@ NOTICE = "Edit-mode operations have no history in Blender: only the last one can
 class Spec:
     """One kind of Maya modeling node the kit records (edge / vertex extrusion, bevel).
 
+    ``hidden`` = values ``build`` reads that show no row; ``with_object``: ``build`` also gets ``ob=``.
     ``kinds`` = Channel Box text kind per field (cb_entry: "NONE" float, "INT", "BOOL"); ``arrow`` = the field the
     In-View manipulator arrow drags (None: no arrow); ``edit_op`` = the operator that rebuilds the node with new
     values (one undo step); ``build(bm, params, unit)`` (not FACE) -> the vertices to track."""
 
     def __init__(self, kind, node, fields, labels, defaults, kinds, arrow, edit_op, build=None, node_type=None,
-                 manip=(), in_view=True, object_check=None, pre_uv=False):
+                 manip=(), in_view=True, object_check=None, pre_uv=False, hidden=(), with_object=False):
+        self.hidden = tuple(hidden)            # values build reads that have no row (an option-window setting)
+        self.with_object = with_object         # build(bm, params, unit, ob=...) also gets the object
         self.pre_uv = pre_uv                   # a rerun on the same mesh also needs the same UVs (UV projections)
         self.in_view = in_view                 # the In-View Editor shows it (not a UV projection)
         self.object_check = object_check       # (ob, rec) -> the object-mode mesh is still the node's result
@@ -767,7 +770,8 @@ def run(ob, rec, params, unit):
     bm = bmesh.from_edit_mesh(ob.data)
     restore_pre(bm, rec)
     if rec.spec is not FACE:
-        tracked = rec.spec.build(bm, {k: params[k] for k in rec.spec.fields}, unit)
+        values = {k: params[k] for k in rec.spec.fields + rec.spec.hidden if k in params}
+        tracked = rec.spec.build(bm, values, unit, **({"ob": ob} if rec.spec.with_object else {}))
         _store_generic(rec, bm, tracked, params)
         bmesh.update_edit_mesh(ob.data)
         return bool(tracked)
@@ -1021,7 +1025,7 @@ def _record_bm(context, ob, bm, spec, params, unit):
             and (not spec.pre_uv or _uv_signature(old.pre) == _uv_signature(bm))):
         name = old.name
     pre = bm.copy()
-    tracked = spec.build(bm, params, unit)
+    tracked = spec.build(bm, params, unit, **({"ob": ob} if spec.with_object else {}))
     if not tracked:
         pre.free()
         return None

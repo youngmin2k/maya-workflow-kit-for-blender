@@ -89,20 +89,54 @@ def s_sym():
     ov(bpy.ops.allset.symmetry, mode="TOGGLE")
     a = sym.state(bpy.context.scene).on
     check(f"symmetry toggle {b} -> {m} -> {a}", m != b and a == b)
+    # IPR opens its own window; IPR again closes it, and the viewport keeps its shading throughout
     area, _r = view3d()
     sh = area.spaces.active.shading
-    b = sh.type
-    ov(bpy.ops.allset.ipr_toggle)
-    m = sh.type
-    ov(bpy.ops.allset.ipr_toggle)
-    a = sh.type
-    check(f"IPR toggle {b} -> {m} -> {a} (Maya: back to the shading it had)", m != b and a == b)
-    # IPR from wireframe must come back to wireframe
-    sh.type = 'WIREFRAME'
-    ov(bpy.ops.allset.ipr_toggle)
-    ov(bpy.ops.allset.ipr_toggle)
-    check(f"IPR on/off from Wireframe gives Wireframe back ({sh.type})", sh.type == 'WIREFRAME')
     sh.type = 'SOLID'
+    C["ipr_windows"] = len(bpy.context.window_manager.windows)
+    ov(bpy.ops.allset.ipr_toggle)
+    # the shading round trip the IPR window module keeps for a view with no window to open
+    sl().ipr_toggle(area.spaces.active)
+    sl().ipr_toggle(area.spaces.active)
+    check(f"viewport IPR on/off gives Solid back ({sh.type})", sh.type == 'SOLID')
+    sh.type = 'WIREFRAME'
+    sl().ipr_toggle(area.spaces.active)
+    sl().ipr_toggle(area.spaces.active)
+    check(f"viewport IPR on/off from Wireframe gives Wireframe back ({sh.type})", sh.type == 'WIREFRAME')
+    sh.type = 'SOLID'
+
+
+def _wait(fn, cond, limit=150):
+    """Run ``fn`` again next tick until ``cond()`` or ``limit`` ticks."""
+    key = "wait_" + fn.__name__
+    C.setdefault(key, 0)
+    if not cond() and C[key] < limit:
+        C[key] += 1
+        sys.modules["sim"]._steps.insert(0, fn)
+        return True
+    return False
+
+
+@step
+def s_ipr_opened():
+    ipr = import_module(MODULE + ".ui.ipr_window")
+    if _wait(s_ipr_opened, ipr.is_open):
+        return
+    n = len(bpy.context.window_manager.windows)
+    check(f"IPR opens its own window ({C['ipr_windows']} -> {n})", ipr.is_open() and n == C["ipr_windows"] + 1)
+    area, _r = view3d()
+    check(f"the viewport keeps its shading while IPR runs ({area.spaces.active.shading.type})",
+          area.spaces.active.shading.type == 'SOLID')
+    ov(bpy.ops.allset.ipr_toggle)
+
+
+@step
+def s_ipr_closed():
+    ipr = import_module(MODULE + ".ui.ipr_window")
+    if _wait(s_ipr_closed, lambda: not ipr.is_open()):
+        return
+    n = len(bpy.context.window_manager.windows)
+    check(f"IPR again closes the window ({n} windows)", not ipr.is_open() and n == C["ipr_windows"])
 
 
 EDITORS = ("MODELING_TOOLKIT", "ATTRIBUTE", "TOOL_SETTINGS", "CHANNEL_BOX")

@@ -137,4 +137,35 @@ def s_shot():
     shot("gui_issue271_keyed.png")
 
 
+@step
+def s_layer():
+    """The selected weight goes into a new animation layer (Channels > Add to Selected Layers) and a key there is
+    solved onto that layer."""
+    al = import_module(MODULE + ".operators.anim_layers")
+    sc = bpy.context.scene
+    bpy.ops.allset.anim_layer_create(from_selected=False)
+    C["layer"] = sc.allset_anim_layers[sc.allset_anim_layer_index].name
+    cb().set_selected_channels(["bw:smile"])
+    bpy.ops.allset.anim_layer_attrs(add=True)
+    key = mesh().data.shape_keys
+    check(f"the weight's blendShape node joins the layer ({sorted(al.tracks(key))})", C["layer"] in al.tracks(key))
+    kb = key.key_blocks["smile"]
+    C["offset"] = -0.25 if kb.value > 0.5 else 0.25      # the weight slider stops at 0 .. 1
+    kb.value = kb.value + C["offset"]
+    check("a key on the weight goes onto the layer", cb().keyframe(mesh(), "bw:smile"))
+    redraw()
+
+
+@step
+def s_layer_keyed():
+    al = import_module(MODULE + ".operators.anim_layers")
+    key = mesh().data.shape_keys
+    fc = al._fcurve(al.tracks(key)[C["layer"]].strips[0].action, 'key_blocks["smile"].value', 0)
+    got = None if fc is None else round(fc.evaluate(bpy.context.scene.frame_current), 4)
+    check(f"... holding the offset from BaseAnimation ({got})", got == C["offset"])
+    state = cb().channel_state(mesh(), "bw:smile")
+    check(f"the weight row reads layered ({state})", state == 'LAYERED')
+    shot("gui_issue271_layered.png")
+
+
 run()

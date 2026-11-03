@@ -161,3 +161,90 @@ def test_handlers_follow_enable_disable():
             assert not names, (name, names)
     finally:
         kit.enable()
+
+
+# --- Blender's own keys get the Default In / Out Tangent too -------------------------------------------------------
+
+gkm = import_module(kit.MODULE + ".operators.graph_key_menu")
+
+
+class _Tangents:
+    def __init__(self, tin, tout):
+        self.want = (tin, tout)
+
+    def __enter__(self):
+        p = preferences.get()
+        self.old = (p.default_in_tangent, p.default_out_tangent)
+        p.default_in_tangent, p.default_out_tangent = self.want
+
+    def __exit__(self, *_exc):
+        p = preferences.get()
+        p.default_in_tangent, p.default_out_tangent = self.old
+
+
+def _blender_insert(frame):
+    """Blender's own keying, then what the kit does once a Blender insert operator finished (its poll needs an editor,
+    so the operator itself runs in the GUI test)."""
+    ob = bpy.context.active_object
+    ob.keyframe_insert("location", frame=frame)
+    gkm.tangent_blender_keys(ob.animation_data.action)
+    _update()
+
+
+def _key(fc, frame):
+    return next(k for k in fc.keyframe_points if abs(k.co.x - frame) < 1e-3)
+
+
+def test_blender_insert_gets_the_default_tangents():
+    with _Tangents('LINEAR', 'LINEAR'):
+        ob = _object()
+        gkm.remember_all_keys()
+        _blender_insert(1)
+        _blender_insert(10)
+        fc = _curve(ob)
+        assert len(fc.keyframe_points) == 2
+        for f in (1, 10):
+            kp = _key(fc, f)
+            assert kp.interpolation == 'LINEAR', (f, kp.interpolation)
+    with _Tangents('FLAT', 'STEPPED'):
+        ob = _object()
+        gkm.remember_all_keys()
+        _blender_insert(5)
+        kp = _key(_curve(ob, 2), 5)
+        assert kp.interpolation == 'CONSTANT' and kp.handle_left_type == 'FREE', (kp.interpolation,
+                                                                                   kp.handle_left_type)
+
+
+def test_blender_insert_on_an_existing_key_keeps_its_tangents():
+    ob = _object()
+    with _Tangents('LINEAR', 'LINEAR'):
+        gkm.remember_all_keys()
+        _blender_insert(1)
+    kp = _key(_curve(ob), 1)
+    _update()
+    with _Tangents('FLAT', 'STEPPED'):
+        _blender_insert(1)                               # same frame: Blender replaces the value only
+        kp = _key(_curve(ob), 1)
+        assert kp.interpolation == 'LINEAR', kp.interpolation
+
+
+def test_auto_tangents_leave_blender_keys_alone():
+    with _Tangents('AUTO', 'AUTO'):
+        ob = _object()
+        gkm.remember_all_keys()
+        _blender_insert(1)
+        kp = _key(_curve(ob), 1)
+        assert kp.handle_left_type == 'AUTO_CLAMPED' and kp.interpolation == 'BEZIER', kp.handle_left_type
+
+
+def test_key_handlers_follow_enable_disable():
+    assert gkm._keys_depsgraph in bpy.app.handlers.depsgraph_update_post
+    kit.disable()
+    try:
+        for name in ("depsgraph_update_post", "load_post", "undo_post", "redo_post"):
+            left = [fn for fn in getattr(bpy.app.handlers, name)
+                    if getattr(fn, "__module__", "").endswith("graph_key_menu")
+                    and getattr(fn, "__name__", "") in ("_keys_depsgraph", "remember_all_keys")]
+            assert not left, (name, left)
+    finally:
+        kit.enable()

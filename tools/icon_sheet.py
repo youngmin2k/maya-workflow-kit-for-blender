@@ -44,9 +44,10 @@ def _launch():
 
 def _modules():
     sys.path.insert(0, os.path.join(ROOT, "src"))      # a tool, not the package: the source tree as is
-    from allset.ui import panel_toolbar, shelf_data, shelf_icons, status_icons
+    from allset.ui import graph_icons, panel_toolbar, shelf_data, shelf_icons, status_icons
     for name, fn in panel_toolbar.GLYPHS.items():
         status_icons.EXTRA.setdefault("pt_" + name, fn)
+    graph_icons.register()
     return shelf_data, shelf_icons, status_icons, panel_toolbar
 
 
@@ -119,6 +120,14 @@ def _inside():
         items = [(g.removeprefix("pt_"), [status_icons.image(g, s) for s in (48, 32, 24, 16)]) for g in glyphs]
         canvas, labels = _grid(items, f"{title} — kit-drawn glyphs (48, 32, 24, 16 px)")
         _save(canvas, labels, os.path.join(out, f"{name}.png"))
+    # #277: Graph Editor / Dope Sheet toolbar pictures, labelled with the button's Maya tooltip
+    from allset.ui import editor_chrome, graph_icons
+    for editor, fname in (("Graph Editor", "graph_editor_toolbar"), ("Dope Sheet", "dope_sheet_toolbar")):
+        specs = [it for it in editor_chrome.ICONS[editor] if isinstance(it, tuple)]
+        items = [(it[3], [status_icons.image(graph_icons.name(it[0]), s) for s in (48, 32, 20, 16)])
+                 for it in specs if it[0] in graph_icons.GLYPHS]
+        canvas, labels = _grid(items, f"{editor} toolbar — kit-drawn pictures (48, 32, 20, 16 px)")
+        _save(canvas, labels, os.path.join(out, f"{fname}.png"))
     # #54: menu-only drawings, one sheet per drawing module (menus drawn at 16 / 20 / 24 px)
     from allset.ui import menu_drawings
     by_module = {}

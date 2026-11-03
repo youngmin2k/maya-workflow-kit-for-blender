@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Maya UV Editor shell commands.
 
-Shell = the step-66 island rule (`uv_tools.islands`, shared UV coordinates); any selected UV / edge / face of a shell picks
+Shell = the kit island rule (`uv_tools.islands`, shared UV coordinates); any selected UV / edge / face of a shell picks
 the whole shell for the shell commands. A "UV" = the loops of one vertex that share
 one coordinate inside one face set (Maya's UV id); UVs are ordered by their first loop index, which is Maya's UV-index order
 for meshes built face by face (the test meshes).
@@ -105,8 +105,9 @@ def _rotate(island, uv, pivot, deg):
         l[uv].uv = pivot + Vector((c * p.x - s * p.y, s * p.x + c * p.y))
 
 
-def target_shells(bm, uv, synced):
-    return uv_tools.target_islands(bm, uv, synced)
+def target_shells(bm, uv, synced, fallback=True):
+    """Shells touched by the selection; every shell only when ``fallback`` (nothing picked in any mesh)."""
+    return uv_tools.target_islands(bm, uv, synced, fallback=fallback)
 
 
 # --- Stack / Orient / Orient to Edges -------------------------------------------------------------------
@@ -351,7 +352,7 @@ def move_sew(bm, uv, edges):
 
 def create_shell(bm, uv, faces):
     """Maya Create UV Shell: cut along the border of ``faces`` (edges to unselected faces); uv_tools.cut nudges the
-    smaller side by uv_tools.NUDGE so the step-66 island rule sees two shells."""
+    smaller side by uv_tools.NUDGE so the island rule sees two shells."""
     fs = set(faces)
     border = [e for f in faces for e in f.edges
               if len([g for g in e.link_faces if not g.hide]) == 2 and any(g not in fs for g in e.link_faces)]
@@ -394,6 +395,9 @@ def _poll(context):
 class _ShellOp:
     bl_options = {'REGISTER', 'UNDO'}
     empty = "Select UV shells"
+    # "the selected shells, all when none are selected" counts the selection of every mesh in edit mode: a mesh
+    # with nothing picked is left alone while another mesh has a pick
+    _fallback = True
 
     poll = classmethod(lambda cls, context: _poll(context))
 
@@ -403,6 +407,7 @@ class _ShellOp:
     def execute(self, context):
         done = 0
         synced = sync(context)
+        self._fallback = not uv_tools.picked_anywhere(context)
         for ob in _meshes(context):
             bm = bmesh.from_edit_mesh(ob.data)
             uv = bm.loops.layers.uv.verify()
@@ -427,7 +432,7 @@ class ALLSET_OT_uv_stack(_ShellOp, bpy.types.Operator):
                          options={'SKIP_SAVE'})
 
     def run(self, context, bm, uv, synced):
-        groups = target_shells(bm, uv, synced)
+        groups = target_shells(bm, uv, synced, self._fallback)
         n = stack(groups, uv)
         if self.orient == 'ORIENT':
             orient(groups, uv)
@@ -441,7 +446,7 @@ class ALLSET_OT_uv_orient_shells(_ShellOp, bpy.types.Operator):
     bl_label = "Orient Shells"
 
     def run(self, context, bm, uv, synced):
-        return orient(target_shells(bm, uv, synced), uv)
+        return orient(target_shells(bm, uv, synced, self._fallback), uv)
 
 
 @undo_steps.no_redo_panel
@@ -498,7 +503,7 @@ class ALLSET_OT_uv_distribute(_ShellOp, bpy.types.Operator):
     bl_label = "Distribute Shells"
 
     def run(self, context, bm, uv, synced):
-        return distribute(target_shells(bm, uv, synced), uv)
+        return distribute(target_shells(bm, uv, synced, self._fallback), uv)
 
 
 @undo_steps.no_redo_panel
@@ -526,10 +531,11 @@ class ALLSET_OT_uv_unstack(_ShellOp, bpy.types.Operator):
 
     def execute(self, context):
         done = 0
+        fallback = not uv_tools.picked_anywhere(context)
         for ob in _meshes(context):
             bm = bmesh.from_edit_mesh(ob.data)
             uv = bm.loops.layers.uv.verify()
-            groups = target_shells(bm, uv, sync(context))
+            groups = target_shells(bm, uv, sync(context), fallback)
             if len(groups) < 2:
                 continue
             faces = [f for g in groups for f in g]

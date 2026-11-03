@@ -225,7 +225,9 @@ def test_switch_to_blender_in_the_template_file():
     assert bpy.context.preferences.app_template == ""
     sw.set_mode(True)
     sw.set_mode(False)
-    assert len(bpy.data.workspaces) == n_ws + 1, "Blender's Layout is appended once and reused"
+    # + Blender's own workspace for each Maya one named like Blender's (Sculpting -> "Sculpting (Maya)")
+    n_own = len([w for w in bpy.data.workspaces if sw.MAYA_NAME_KEY in w])
+    assert len(bpy.data.workspaces) == n_ws + 1 + n_own, "Blender's workspaces are appended once and reused"
     bpy.ops.wm.read_homefile()
     assert bpy.context.preferences.app_template == ""
     assert not _strips(bpy.context.window_manager.windows[0].screen)

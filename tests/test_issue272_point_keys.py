@@ -207,3 +207,138 @@ def test_frame_handler_is_removed_on_disable():
     kit.disable()
     assert not any(getattr(h, "__module__", "").endswith("point_keys") for h in bpy.app.handlers.frame_change_post)
     kit.enable()
+
+
+def test_time_slider_ticks_show_selected_point_keys():
+    """Component mode: the Time Slider ticks include the keys of the selected points (and only those)."""
+    time_slider = import_module(kit.MODULE + ".ui.time_slider")
+    ob = _cube_in_edit((2,))
+    assert _set_key() == {'FINISHED'}
+    bpy.context.scene.frame_set(7)
+    _cube_select(ob, (5,))
+    assert _set_key() == {'FINISHED'}
+    bpy.context.scene.frame_set(1)
+    assert ob in time_slider.tick_nodes(bpy.context)          # what the Time Slider draws ticks for
+    assert [f for f, _b in time_slider.key_frames([ob])] == [7.0]
+    _cube_select(ob, (2, 5))
+    assert [f for f, _b in time_slider.key_frames([ob])] == [1.0, 7.0]
+    _cube_select(ob, (0,))
+    assert time_slider.key_frames([ob]) == []
+
+
+def _cube_select(ob, select):
+    bm = bmesh.from_edit_mesh(ob.data)
+    for v in bm.verts:
+        v.select = v.index in select
+    bm.select_flush_mode()
+    bmesh.update_edit_mesh(ob.data)
+
+
+# --- Auto Key in component mode, Shift+W / E / R, Channel Box CVs colours ------------------------------------------
+
+def _auto_key_flush():
+    auto_key = import_module(kit.MODULE + ".operators.auto_key")
+    bpy.context.view_layer.update()              # depsgraph_update_post notes the edited object
+    if bpy.app.timers.is_registered(auto_key._flush):
+        bpy.app.timers.unregister(auto_key._flush)
+    auto_key._flush()
+
+
+def _vert_keys(me, i, axis):
+    fc = _find(me, f"vertices[{i}].co", axis)
+    return None if fc is None else [round(k.co.x) for k in fc.keyframe_points]
+
+
+def _find(idd, path, index):
+    return next((f for f in compat.id_fcurves(idd) if f.data_path == path and f.array_index == index), None)
+
+
+def _move_selected(ob, dz):
+    bm = bmesh.from_edit_mesh(ob.data)
+    for v in bm.verts:
+        if v.select:
+            v.co.z += dz
+    bmesh.update_edit_mesh(ob.data)
+
+
+def test_auto_key_keys_only_keyed_points_on_changed_axes():
+    """Maya Auto Key in component mode: moving points keys only the points that already have keys, and only the
+    axes whose value changed."""
+    scene = bpy.context.scene
+    ob = _cube_in_edit((2,))
+    assert _set_key() == {'FINISHED'}                 # vertex 2 keyed at frame 1
+    scene.frame_set(10)
+    _cube_select(ob, (2, 5))
+    scene.allset_auto_key = True
+    try:
+        _move_selected(ob, 1.0)
+        _auto_key_flush()
+    finally:
+        scene.allset_auto_key = False
+    me = ob.data
+    assert _vert_keys(me, 2, 2) == [1, 10], _vert_keys(me, 2, 2)
+    assert _vert_keys(me, 2, 0) == [1] and _vert_keys(me, 2, 1) == [1]
+    assert _vert_keys(me, 5, 2) is None                # an unkeyed point stays unkeyed
+    scene.frame_set(1)                                 # the move is kept at 10, frame 1 plays the old position
+    bm = bmesh.from_edit_mesh(me)
+    bm.verts.ensure_lookup_table()
+    z1 = bm.verts[2].co.z
+    scene.frame_set(10)
+    assert abs(bm.verts[2].co.z - (z1 + 1.0)) < 1e-5
+
+
+def test_auto_key_off_keys_no_points():
+    scene = bpy.context.scene
+    ob = _cube_in_edit((2,))
+    assert _set_key() == {'FINISHED'}
+    scene.frame_set(10)
+    scene.allset_auto_key = False
+    _move_selected(ob, 1.0)
+    _auto_key_flush()
+    assert _vert_keys(ob.data, 2, 2) == [1]
+
+
+def test_auto_key_on_lattice_points():
+    scene = bpy.context.scene
+    _fresh()
+    bpy.ops.object.add(type='LATTICE')
+    ob = bpy.context.active_object
+    _only(ob)
+    bpy.ops.object.mode_set(mode='EDIT')
+    for i, p in enumerate(ob.data.points):
+        p.select = i == 0
+    assert _set_key() == {'FINISHED'}
+    scene.frame_set(5)
+    scene.allset_auto_key = True
+    try:
+        ob.data.points[0].co_deform.x += 0.25
+        ob.data.update_tag()
+        _auto_key_flush()
+    finally:
+        scene.allset_auto_key = False
+    fc = _find(ob.data, "points[0].co_deform", 0)
+    assert [round(k.co.x) for k in fc.keyframe_points] == [1, 5]
+    fc = _find(ob.data, "points[0].co_deform", 1)
+    assert [round(k.co.x) for k in fc.keyframe_points] == [1]
+
+
+def test_shift_w_e_r_key_nothing_in_component_mode():
+    """Maya: points have no translate / rotate / scale, so Shift+W / E / R set no key in component mode (silently)."""
+    ob = _cube_in_edit((2,))
+    for ch in ("TRANSLATE", "ROTATE", "SCALE"):
+        assert bpy.ops.allset.set_key('EXEC_DEFAULT', True, channels=ch) == {'CANCELLED'}
+    assert ob.animation_data is None or not _curves(ob), _curves(ob)
+    assert ob.data.animation_data is None or not _curves(ob.data), _curves(ob.data)
+
+
+def test_cvs_table_states_follow_point_keys():
+    """The Channel Box CVs table draws keyed points in the key colour: a key at this frame, or only a curve."""
+    ob = _cube_in_edit((2,))
+    assert _set_key() == {'FINISHED'}
+    paths = [("vertices[2].co", 0), ("vertices[2].co", 2), ("vertices[5].co", 0)]
+    states = point_keys.point_states(ob, paths, 1)
+    assert states == {("vertices[2].co", 0): 'KEYED', ("vertices[2].co", 2): 'KEYED'}, states
+    states = point_keys.point_states(ob, paths, 4)
+    assert states[("vertices[2].co", 0)] == 'ANIMATED'
+    channel_box = import_module(kit.MODULE + ".ui.channel_box")
+    assert channel_box.state_alert('KEYED') and channel_box.state_alert('ANIMATED')

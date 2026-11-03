@@ -123,6 +123,7 @@ def test_slider_math():
     assert abs(cb.slider_delta(100, "LOC", speed=0.01) - 0.01) < 1e-9
     assert abs(math.degrees(cb.slider_delta(10, "ROT")) - 5.0) < 1e-9
     assert cb.slider_delta(-10, "SCALE", hyperbolic=True) < 0
+    assert abs(cb.slider_delta(120, "CUSTOM") - 12.0) < 1e-9          # custom attributes: 0.1 per px at Medium
 
 
 def test_slider_targets_and_apply():

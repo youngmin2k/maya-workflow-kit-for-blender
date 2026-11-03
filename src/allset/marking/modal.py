@@ -204,6 +204,7 @@ class ALLSET_OT_mm_engine(bpy.types.Operator):
         if any(e != mm.DIVIDER and isinstance(e[1], mm.NodeList) for e in menu.items):
             from . import rmb_nodes      # DG Traversal / Inputs / Outputs of that object
             menu = mm.with_nodes(menu, rmb_nodes.nodes(bpy.data.objects.get(target)) if target else None)
+        menu = mm.with_materials(menu, mm.scene_material_names())    # Assign Existing Material
         # Drawn over the whole window like Maya's menus: bounds = the window's editors.
         # Rows / boxes stay off the area borders Blender draws over every region.
         bounds = draw.window_bounds(context.window, region)

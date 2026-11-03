@@ -9,6 +9,227 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
   ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
 
+## [0.10.0] — 2026-11-02
+
+### Added
+- **Rename from the Channel Box** (#283): click the object's name at the top of the Channel Box, type a new
+  name and press Enter, like Maya's name field. Spaces become "_", a name already in use gets the next free
+  number, and the shape is renamed with it (box -> boxShape). In component mode the name is the shape's.
+- **Numpad digits work like the top row** (#283): as on a Maya keyboard, numpad 1 / 2 / 3 set the smooth
+  preview, numpad 4 / 5 / 6 / 7 the display mode and numpad 0 the rough display; in the UV Editor and Graph
+  Editor the numpad digits do what the top-row digits do there.
+- **Numpad + / - size the manipulator** (#283): in the 3D View the numpad + and - keys make the Move / Scale
+  manipulator bigger and smaller like = and -, as on a Maya keyboard (Blender's numpad zoom is replaced;
+  Shift+numpad + / - still dolly).
+- **Auto Key on points** (#272): with Auto Key on, moving points in component mode keys the points that
+  already have keys, on the axes that changed, like Maya. Points without keys stay unkeyed. The Channel Box CVs
+  table shows keyed point values in the key colour, with the keyed / animated mark at the end of the row.
+  Shift+W / E / R set no key on points (they have no Translate / Rotate / Scale), like Maya.
+- **Time Slider ticks for keyed components** (#272): in component mode (mesh, curve, surface or lattice edit mode)
+  the Time Slider shows the keys of the selected vertices, CVs or lattice points, so keys set with S on them are
+  visible there.
+- **blendShape weights in animation layers, character sets and Set Driven Key** (#271): weight channels picked
+  in the Channel Box (INPUTS > blendShape) can go into the selected animation layers (Channels > Add to Selected
+  Layers; keys on the weight then go onto the layer, the layer weight scales it and the Channel Box marks the weight
+  as a layer member; Remove From Selected Layers and Delete Layer take it out again), into a character set (Create
+  Character Set From Channel Box, Add to / Remove from Character Set; S on the current character keys them), and
+  into Set Driven Key (Load Driver / Load Driven load the blendShape node with that weight).
+- **Save your own workspaces** (#277): Windows > Workspaces > Save Current Workspace As... saves the current
+  layout (areas, editors and their sizes) under a name. Your saved workspaces are listed after Maya's in
+  Windows > Workspaces and the Status Line workspace menu, in every scene; choosing one brings that layout into
+  the open scene without changing its contents. Reset Current Workspace returns it to its saved state and
+  Delete Current Workspace removes it. Only the layout is saved, in the extension's user folder; new scenes
+  still start in Maya Classic.
+- **UV-only edge and face selection, double-click loops** (#264): the UV Toolkit has UV Edge and UV Face
+  buttons next to UV and UV Shell: they pick UV edges / UV faces apart from the mesh (UV Sync Selection off), so a
+  shell border picks one side only. In the UV Editor a double-click on a UV edge selects its UV edge loop,
+  Ctrl+double-click its edge ring, and a double-click on a UV or a UV face its whole UV shell; Shift adds to the
+  selection. Loops stop at UV seams. The Vertex / Edge / Face buttons still pick mesh components.
+- **Maya-style UV manipulator** (#264): in the UV Editor the Move, Rotate and Scale tools (W / E / R) show
+  Maya-style handles at the centre of the selected UVs' box: U and V arrows and a centre square for free moves, one
+  ring that turns the UVs about that centre, U and V scale boxes and a centre box for uniform scaling. Dragging a
+  handle acts along it; a drag off the handles still draws a marquee. Preferences > Maya Workflow Kit > UV
+  Manipulator turns them off and gives back Blender's UV gizmos.
+- **Checker density** (#264): in the UV Editor Ctrl+Up / Ctrl+Down make the checker map finer or coarser, one
+  step at a time (never below 1); the density stays with the checker when you turn it off and on.
+- **Fuller UV Toolkit** (#264): every UV Toolkit button now works. Select By Type has Back-Facing, Front-Facing,
+  Overlapping, Non-Overlapping, Texture Borders and Unmapped; Create, Cut and Sew and Arrange and Layout list all
+  of their UV Editor menu commands (Auto Seams, Split, Stitch Together, Merge, Gather Shells, Layout Along,
+  Randomize, Stack Similar, Unitize ...), with the same option boxes as the menus. New: Align Min / Avg / Max U and
+  V (with the UV Shell mask whole shells move), Unfold Along U / Unfold Along V (the other coordinate stays),
+  and Straighten UVs with U / V buttons and an angle tolerance (30 degrees). Stack Similar lays shells of the same
+  shape onto each other.
+- **Lattice points in the Channel Box** (#274): with lattice points selected in lattice edit mode, the Channel Box
+  shows the CVs line like for mesh vertices; click it for a table of the selected points (number, X, Y, Z in the
+  lattice's own space) where you can type new values (`+=0.1` works).
+- **Maya manipulator for curve and surface CVs** (#274): in curve and NURBS surface edit mode the Move and Scale
+  tools show the same Maya-style manipulator as objects, mesh components and lattice points, placed at the
+  selected CVs (Bezier points and handles count by their own selection), instead of Blender's transform gizmo.
+- **Transform Constraint: Along Normals** (#262): the Move tool's Transform Constraint (Tool Settings and the
+  tool option marking menus' Transform Constraints) has Along Normals: in mesh edit mode a manipulator or
+  middle-mouse drag moves each selected component along its own normal.
+- **Type Manipulator** (#258): Modify > Transformation Tools > Type Manipulator, or the Type Manipulator button in
+  the type's Attribute Editor tab (Text section), lets you move, rotate and scale single characters of a type, like
+  Maya. Click a character to pick it, then use the Move / Rotate / Scale tools or the Channel Box; each character
+  turns and scales about its own middle. Editing the text, font, spacing, extrude or bevel afterwards keeps the
+  character transforms. Reset Character / Reset All put characters back; clicking another object turns the
+  manipulator off.
+
+### Changed
+- **IPR opens its own render window** (#277): Render > IPR Render Current Frame, Redo Previous IPR Render and the
+  Status Line IPR button now open a separate window with a 3D View in Rendered shading, like Maya's IPR render
+  window, instead of switching your viewport to Rendered. The window shows only the picture (no overlays or
+  toolbars), looks where the main view looks and follows it while you tumble, and the IPR button looks pressed
+  while it is open. IPR again, or closing the window, stops it; your viewport keeps its own shading throughout.
+- **Shift+drag names what it does** (#277): while you Shift+drag the Move / Rotate / Scale manipulator, an in-view
+  message says "Shift Duplicate" (objects are copied) or "Shift Extrude" (components are extruded). A Shift+click
+  shows nothing; the add-on preference In-View Messages turns it off.
+- **Other add-ons stay in reach in Maya mode** (#221): menus other add-ons add to Blender's top bar now follow
+  the Maya menus in the menu bar (or sit at the end of the » menu when the bar is full), and tools other add-ons
+  add to the 3D View toolbar stay there after the Maya tools.
+- **Bigger keys in the Graph Editor** (#277): keys are drawn as 11 px dots (Blender's theme draws 6 px) in their
+  own colour, so they are easier to see and to grab; a selected key keeps Blender's active-key dot in the middle.
+  The add-on preference Key Size (also in Windows > Settings/Preferences > Preferences > Animation) sets the size;
+  0 shows Blender's own keys. Toolbar buttons that do different things no longer share an icon (Center current
+  time, Auto load, Unconstrained drag, Re-normalize curves).
+- **Bigger tangent handles in the Graph Editor** (#277): tangent handle points are drawn as bold rings that
+  grow with the Key Size preference, black when unselected and in the selected colour when selected, so
+  they are easier to see and to grab and never look like keys. Key Size 0 shows Blender's own handles.
+- **Graph Editor / Dope Sheet toolbar fits narrow editors** (#277): when the editor is too narrow for every
+  toolbar button, the button groups that fit stay in Maya's order and the rest move into a » menu at the
+  right end of the row (with their Maya names), instead of being cut off.
+- **Graph Editor / Dope Sheet toolbar pictures** (#277): every toolbar button now has its own picture that
+  shows what it does: tangent buttons draw the curve shape they give around a key (Auto, Spline, Clamped,
+  Linear, Flat, Stepped, Plateau ...), key tools draw keys with the tool's motion, the view buttons show how
+  curves are laid out and the infinity buttons show the repeated curve. Hover a button for its Maya name.
+- **Scale Keys box: Shift and moving keys** (#270): in the Graph Editor with the Scale Keys tool (r), Shift+drag on
+  a corner of the box scales the keys in time or in value only, whichever way the drag starts; a drag inside the
+  box moves the selected keys. A click inside the box without dragging, a press on a key that isn't selected and
+  Shift+click still select keys as before.
+- **Channel Box middle-drag follows the axis** (#273): with Translate X / Y / Z selected in the Channel Box, a
+  middle-mouse drag in the viewport moves the object (or joint) along that axis as it is drawn on screen, like
+  dragging that arrow of the Move manipulator, so up / down drags count too. Selected Rotate channels turn
+  0.36 degrees per pixel (right or down turns up). Other channels stay a sideways slider.
+- **Custom attributes drag faster in the Channel Box**: a middle-mouse drag on a selected custom attribute (an
+  attribute added with Add Attribute) changes it by 0.1 per pixel at Medium speed, like Maya (it was 0.01). Ctrl /
+  Shift and the Slow / Fast speeds scale it as before.
+- **Transform Constraint from the Move handles** (#280): with Surface set, dragging an arrow or plane handle of
+  the Move manipulator keeps the move to that axis or plane while each point stays on the mesh surface (before,
+  any handle moved freely). The setting in the Move Tool Settings can be picked in Object Mode too (it was greyed
+  there and looked unavailable); it acts on components in mesh edit mode. Edge slides along edges from any handle
+  or a middle-mouse drag, like before.
+- **The 3D View shows the UV selection in UV mode** (#264): after F12 (UV), the vertices of the UVs you pick in
+  the UV Editor are drawn as selected in the 3D View and every other vertex as unselected, like Maya, instead of
+  the whole mesh looking selected. Mesh component colours now also follow selection changes after you open or
+  start a scene.
+- **Pre-selection for single UVs, edges and faces** (#264): in the UV Editor the UV, UV edge or UV face a click
+  would pick is drawn in the pre-selection red under the mouse, like Maya, not only whole UV shells. The add-on
+  preference UV Pre-selection (formerly UV Shell Pre-selection) turns it off.
+- **Straighten UVs and Randomize Shells work like Maya** (#264): UV Editor > Modify > Straighten UVs lines up the
+  selected UV edges that run within 30 degrees of U or V (each connected run on its own line) instead of putting
+  every selected UV on one line, and Randomize Shells moves, turns and scales each shell within the ranges of its
+  option window (by default it moves shells up to 0.1 along U and V). Both have their option windows.
+- **Bevel at box corners with tilted faces** (#213): Edit Mesh > Bevel on two edges that meet at a corner with one
+  more edge now places the new corner, the new vertex on the third edge and both far ends like Maya when the side
+  faces lean in or out, as long as the two edges' face angles differ by up to about 10.9 degrees (the same
+  point where Maya changes how it builds the corner). Steeper differences keep the previous result for now.
+  With Offset As Fraction off (an absolute Offset) such corners follow Maya at any face angle when the faces are
+  flat. A side face that is not flat (the third edge leaning along a bevelled edge) now gives Maya's result too,
+  in both modes: with Offset As Fraction on, the new vertex on the third edge goes at most one bevel width below
+  the top face; with an absolute Offset, the width along each edge follows the bent face's average slope.
+  A corner where three bevelled edges meet (all three edges of a box corner) now gets Maya's width and puts
+  each face's new corner where Maya does when the corner's face angles stay close (their half-angle sines
+  within 10% of each other), whatever the mesh's vertex numbering, also next to a bent side face.
+  When the third edge leans far over, the width now grows until a far-end vertex reaches the limit of the edge it
+  slides along, like Maya (it used to stop early, leaving the whole bevel narrower).
+  Still different from Maya: corners where the faces' angles differ strongly (the new corner can sit up to a few
+  percent of the bevel width away), corners whose third edge leans far over (Maya can switch to its other corner
+  shape there even when the face angles differ less, and the new corner can sit about 1% of the width away) and
+  three-edge corners whose face angles differ by more than about 10%.
+- **Bevel with Segments 2 or more** (#213): every profile is now a circle that touches both faces, cut in equal
+  angle steps, like Maya, also where the faces meet at other angles than 90 degrees (a triangle prism's side
+  edge) and on inner (concave) edges, where the circle becomes a fillet. Depth moves each point straight toward
+  the line between the profile's ends (0 = on that line, -1 = mirrored), as in Maya, with any number of
+  segments. A corner where three or more bevelled edges meet (all edges of a box) is closed with one polygon
+  through the profiles' ends (a hexagon with 2 segments) instead of a rounded patch. Where two bevelled edges
+  meet, their profiles join in the plane between them with any Depth. Where three or more meet at other angles
+  (a pyramid tip, a prism's corner), each profile now stands in Maya's plane through its ends and bends toward
+  the corner along the faces' other edges, like Maya. Still different from Maya: such a corner where a face
+  holds an unbevelled edge at a sharp tip.
+- **Bevel hard edges, UVs and fan corners** (#213): the new edges of a bevel are hard or soft like Maya: an edge
+  is hard when its two faces meet at more than the Smoothing angle (default 30 degrees, a new field of the Bevel
+  option window), and the edges the bevel only shortens keep their hardness. With Segments 2 or more the end of
+  a bevelled cap rim edge is closed with one polygon through the profile and the fan's spoke point, like Maya
+  (it was split into triangles). The points the bevel makes in the old faces get each face's own UVs at their
+  place, and the bevel's strip shares the UVs of the two faces next to the edge, so Segments 1 bevels keep
+  Maya's UVs. A bevel that leaves soft edges gives the object Maya's smooth normals (each face weighted by its
+  area and its corner angle; Blender weights by the corner angle only): a "Maya Normals" Weighted Normal
+  modifier that is display only like Smooth Mesh Preview (Delete History keeps it, the Channel Box INPUTS don't
+  list it). Still different from Maya: the UVs of the profile points inside a rounded bevel (Segments 2 or
+  more) and of the polygon closing a corner, corners where two
+  bevelled edges meet beside two or more unbevelled ones (Maya merges those into one vertex), Offset As
+  Fraction where three bevelled edges meet at other angles than 90 degrees (Maya's widths differ per edge
+  there), and edges whose faces meet at exactly the Smoothing angle.
+- **Bevel Chamfer and Offset space** (#213): the Bevel option window has Maya's Offset space (World, ignoring
+  the object's scale, on by default) and Chamfer settings, and Chamfer is a row of the polyBevel node in the
+  Channel Box and the In-View Editor. With Chamfer off the old corner stays: the new points run from one face
+  over the corner to the other in equal steps. With an absolute Offset longer than an edge the bevel slides
+  along, the new vertex goes on past that edge's end like Maya (it used to stop there and merge), and on the
+  edges of a cap's centre fan it always sits one width from the corner.
+  Merge Vertices joins every group of new vertices that lie within 0.0001 of each other, also through each
+  other, like Maya (Fraction 1 on a zero-length extrusion's cap now meets in one vertex in the middle).
+
+### Fixed
+- **Booleans with three or more objects** (#284): Mesh > Booleans > Union, Difference and Intersection now
+  work with more than two meshes selected, like Maya: the first selected object meets all the others together.
+  Union joins them all into one mesh, Difference (A - B) cuts every other object out of the first, Difference
+  (B - A) cuts the first out of the others, and Intersection keeps the part of the first inside any of the
+  others. Before, three or more objects only printed "select what it works on first".
+- **Assign Existing Material lists the materials in the marking menu** (#283): in the right-click marking
+  menu, moving onto Assign Existing Material now opens a submenu with the scene's materials, like Maya;
+  pick one to assign it. Before, the list only came up as a separate popup after a click.
+- **Blender's Sculpting tab after Maya mode** (#282): in a Maya Workflow Kit scene, switching to Blender left
+  Maya's Sculpting, UV Editing and Animation workspaces under Blender's names, so the Sculpting tab opened a
+  mix of Maya panels and Blender's sculpt tools. Those Maya workspaces are now called "Sculpting (Maya)" and
+  so on, and the scene gets Blender's own Sculpting, UV Editing and Animation workspaces (from your startup
+  file if it has them). A Maya workspace picked from Windows > Workspaces is no longer left behind when you
+  switch back to Blender either.
+- **No TypeError with Preferences open** (#281): opening Preferences or another window with a temporary screen
+  no longer prints a TypeError from the joint overlay and switch timers.
+- **Box and Lasso select pick joints with nothing selected** (#276): in the Maya layout a box or lasso drawn over
+  joints in Object Mode now selects them even when nothing was selected before, like Maya; one Ctrl+Z undoes the
+  selection.
+- **Auto Key keys only values that change** (#276): a channel changed while Auto Key was off is no longer keyed
+  later when you turn Auto Key on and only change the selection; like Maya, Auto Key keys a channel when its value
+  changes while it is on.
+- **Lattice points on a bent lattice are picked where you see them** (#274): when a Bend or another deformer
+  bends a lattice, a click or a marquee in lattice edit mode now picks the points where they are drawn, not where
+  they were before the deformer (Shift toggles, Ctrl removes, Ctrl+Shift adds; one Ctrl+Z undoes a marquee).
+- **UV commands keep to the picked mesh** (#264): with several meshes in edit mode, Unfold, Layout, Texel
+  Density Get / Set, Stack, Orient, Distribute, Unstack, Layout Along and Stack Similar work only on the shells you
+  picked; the other meshes' UVs are left alone (all shells are used only when nothing is picked).
+- **No face centre dots in UV mode** (#264): switching from face mode to UV mode (F12) no longer leaves Blender's
+  face centre dots in the 3D View in wireframe or X-ray; the view shows only the UVs as points. F11 goes back to
+  face mode.
+- **w / e / r anywhere in the Graph Editor** (#270): the keys now pick the Move / Rotate / Scale key tool with the
+  mouse over the Graph Editor's outliner, menu bar, toolbar row or sidebar too, not only over the curves.
+- **One undo for a snapped key move** (#270): with time snap on, moving a key that sat between two frames in the
+  Graph Editor puts it on a whole frame as part of the move, so one Ctrl+Z undoes it (it took two before).
+- **Default In / Out Tangent on Blender's own keys** (#267): keys made with Blender's Insert Keyframe (the I key,
+  the Insert Keyframe menu and button, the Graph Editor / Dope Sheet insert) now get the Default In / Out Tangent
+  too, like the kit's keys. A key set again on a frame that already had one keeps its tangents.
+- **Time Slider ticks for blendShape keys** (#271): keys on a mesh's blendShape target weights now show as ticks
+  in the Time Slider when the mesh is selected, with the rest of its keys.
+- **Hotkeys imported with Maya mode off wait for it** (#275): Import Settings with Maya mode off now keeps the
+  file's kit hotkeys and gives them the next time Maya mode starts, instead of leaving them out.
+- **Room for other add-ons' top-bar menus** (#221): the Maya menu bar now keeps as much room for other add-ons'
+  menus as their names take, instead of a fixed width each, so short ones stay in the bar and long ones no longer
+  run past its end.
+- **Help opens the Blender 5.2 manual**: the main Help menu, the Layer Editor and Outliner help, and the Help menus
+  of the UV Editor, UV Toolkit, Graph Editor, Dope Sheet and the other Maya editor windows pointed at the Blender 4.5
+  manual, API and release notes; the Component Editor's help page link is fixed.
+
+
 ## [0.9.0] — 2026-11-01
 
 FX, rendering and lighting run Blender's own features from the Maya menus, S keys components, blend shape weights

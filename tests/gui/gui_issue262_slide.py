@@ -37,7 +37,8 @@ def on_an_edge(co):
 
 
 def slide_running():
-    return any(op.bl_idname in ('TRANSFORM_OT_vert_slide', 'TRANSFORM_OT_edge_slide') for op in win().modal_operators)
+    return any(op.bl_idname in ('TRANSFORM_OT_vert_slide', 'TRANSFORM_OT_edge_slide', 'TRANSFORM_OT_shrink_fatten')
+               for op in win().modal_operators)
 
 
 def reset():
@@ -149,6 +150,23 @@ def s_off_result():
     check('Transform Constraint Off: MMB moves (no slide)', not C.get('off_running'))
     check('the vertex moved', (vert() - C['start_co']).length > 1e-3)
     reset()
+    with override():
+        mod('preferences').get(bpy.context).transform_constraint = 'NORMAL'
+
+
+mmb_drag('normal', False)
+
+
+@step
+def s_normal_result():
+    d = vert() - C['start_co']
+    along = d.normalized().dot(C['start_co'].normalized()) if d.length > 1e-6 else 0.0
+    check('Transform Constraint Along Normals: MMB moves along the normal', C.get('normal_running'))
+    check(f'the corner moved along its normal ({tuple(round(c, 3) for c in d)}, {along:.4f})',
+          d.length > 1e-3 and abs(along) > 0.99)
+    reset()
+    with override():
+        mod('preferences').get(bpy.context).transform_constraint = 'NONE'
 
 
 run()

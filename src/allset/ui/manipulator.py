@@ -18,7 +18,7 @@ circle. Maya's:
 handle (``target_set_operator``), so snapping, constraints, numeric input, Smart
 Duplicate/Extrude and the active handle keep working. The Scale centre and axis handles run
 ``allset.manip_scale`` (operators/manip_scale.py), Maya's scale drag on top of Blender's resize. It becomes
-the widget of the Move and Scale tools in object, mesh edit and lattice edit mode by swapping their
+the widget of the Move and Scale tools in object mode and mesh / lattice / curve / surface edit mode by swapping their
 ToolDefs in ``VIEW3D_PT_tools_active._tools`` for copies with another ``widget`` (same
 idname, so ``wm.tool_set_by_id`` still finds them); tools already active are set up
 again. Everything is put back on unregister.
@@ -31,7 +31,7 @@ from mathutils import Matrix, Vector
 
 GROUP = "ALLSET_GGT_xform"
 GIZMO = "ALLSET_GT_maya_handle"
-MODES = ('OBJECT', 'EDIT_MESH', 'EDIT_LATTICE')
+MODES = ('OBJECT', 'EDIT_MESH', 'EDIT_LATTICE', 'EDIT_CURVE', 'EDIT_SURFACE')
 # Rotate keeps Blender's C gizmo: its axis rings (front half), camera ring and trackball already
 # have Maya's layout and take the theme's axis colours; a Python dial can't clip the back half
 # the same way.
@@ -187,15 +187,33 @@ def _lattice_points(ob):
     return [p.co_deform.copy() for p in ob.data.points if p.select and not getattr(p, "hide", False)]
 
 
+def _curve_points(ob):
+    """Selected, shown control points of a curve / surface in edit mode, in object space: Bezier keys and handles
+    (each by its own selection, like Blender's transform), NURBS / poly CVs."""
+    out = []
+    for spline in ob.data.splines:
+        if spline.type == 'BEZIER':
+            for bp in spline.bezier_points:
+                if bp.hide:
+                    continue
+                for flag, co in ((bp.select_control_point, bp.co), (bp.select_left_handle, bp.handle_left),
+                                 (bp.select_right_handle, bp.handle_right)):
+                    if flag:
+                        out.append(co.copy())
+        else:
+            out += [p.co.xyz for p in spline.points if p.select and not p.hide]
+    return out
+
+
 def _edit_points(context):
     """World positions of the selected vertices of the meshes (or points of the lattices) in edit mode, and the
     active element's centre (or None)."""
     pts, active = [], None
     obs = context.objects_in_mode_unique_data or ([context.edit_object] if context.edit_object else [])
     for ob in obs:
-        if ob is not None and ob.type == 'LATTICE':
+        if ob is not None and ob.type in ('LATTICE', 'CURVE', 'SURFACE'):
             mw = ob.matrix_world
-            pts += [mw @ co for co in _lattice_points(ob)]
+            pts += [mw @ co for co in (_lattice_points(ob) if ob.type == 'LATTICE' else _curve_points(ob))]
             continue
         if ob is None or ob.type != 'MESH':
             continue
@@ -367,6 +385,8 @@ def _has_selection(context):
         if ob.type == 'MESH' and ob.data.total_vert_sel:
             return True
         if ob.type == 'LATTICE' and _lattice_points(ob):
+            return True
+        if ob.type in ('CURVE', 'SURFACE') and _curve_points(ob):
             return True
     return False
 
@@ -584,6 +604,12 @@ class ALLSET_GGT_xform(GizmoGroup):
             elif slide and kind == 'TRANSLATE' and not editing and role in ('AXIS', 'PLANE', 'CENTER'):
                 # Maya Transform Constraint Edge / Surface: every Move handle slides the components
                 props = gz.target_set_operator("allset.component_slide")
+                if role in ('AXIS', 'PLANE'):
+                    props.constraint_axis = (tuple(a == data for a in 'XYZ') if role == 'AXIS'
+                                             else PLANES[data][0])
+                    builtin = {'GLOBAL', 'LOCAL', 'NORMAL', 'GIMBAL', 'VIEW', 'CURSOR', 'PARENT'}
+                    props.orient_type = otype if otype in builtin else 'GLOBAL'
+                    props.orient_matrix = Matrix.Identity(3) if otype in builtin else frame
             elif role == 'AXIS':
                 axes = tuple(a == data for a in 'XYZ')
                 props = gz.target_set_operator("allset.component_scale" if clamp and kind == 'RESIZE' else op)

@@ -105,6 +105,15 @@ def _make(sub, name, label, path, is_pie, out=None, reuse=False):
     if is_pie:
         def draw(self, context):
             draw_pie(self.layout.menu_pie(), sub, path)
+    elif isinstance(sub, mm.MaterialList):
+        def draw(self, context):
+            # the scene's materials now (Assign Existing Material)
+            names = mm.scene_material_names()
+            if not names:
+                self.layout.label(text="No materials in the scene")
+            for label, action in mm.material_sub(names).items:
+                menu_sets.draw_spec(self.layout, label, menu_map.normalize(action), f"Marking menu {path}/{label}",
+                                    icon='MATERIAL', translate=False)
     elif isinstance(sub, mm.NodeList):
         def draw(self, context):
             # filled from the object now; a node's own traversal submenu = its first row (Select <node>)

@@ -403,6 +403,11 @@ class ALLSET_OT_graph_key_tool(bpy.types.Operator):
 
     tool: EnumProperty(items=TOOLS, name="Tool", options={'SKIP_SAVE'})
 
+    @classmethod
+    def poll(cls, context):
+        area = context.area
+        return area is None or area.type == 'GRAPH_EDITOR'   # scripts may run it without an editor
+
     def execute(self, context):
         context.window_manager.allset_graph_key_tool = self.tool
         from .. import results
@@ -554,9 +559,89 @@ def _finish_move():
         windows = [w for w in wm.windows if w.as_pointer() == win] or list(wm.windows)
         if windows:
             with bpy.context.temp_override(window=windows[0]):
-                bpy.ops.ed.undo_push(message="Snap Keys To Frames")
+                if not _fold_into_move(moved, last.bl_label):
+                    bpy.ops.ed.undo_push(message="Snap Keys To Frames")
                 _redraw(bpy.context)
     return None
+
+
+def _key_record(fcurves):
+    """The keys of these curves by (action name, curve index in the action, data path, array index), or None when
+    a curve doesn't belong to an action."""
+    from .. import compat
+    rec = []
+    for fc in fcurves:
+        act = fc.id_data
+        if not isinstance(act, bpy.types.Action):
+            return None
+        index = next((i for i, f in enumerate(compat.action_fcurves(act)) if f == fc), None)
+        if index is None:
+            return None
+        keys = [(tuple(kp.co), tuple(kp.handle_left), tuple(kp.handle_right), kp.handle_left_type,
+                 kp.handle_right_type, kp.select_control_point, kp.select_left_handle, kp.select_right_handle)
+                for kp in fc.keyframe_points]
+        rec.append((act.name, index, fc.data_path, fc.array_index, keys))
+    return rec
+
+
+def _write_record(rec):
+    """Puts recorded keys back; False when a curve is missing or its key count differs (nothing is written then)."""
+    from .. import compat
+    found = []
+    for name, index, path, array_index, keys in rec:
+        act = bpy.data.actions.get(name)
+        fcs = compat.action_fcurves(act) if act is not None else []
+        fc = fcs[index] if index < len(fcs) else None
+        if fc is None or fc.data_path != path or fc.array_index != array_index or len(fc.keyframe_points) != len(keys):
+            return False
+        found.append((fc, keys))
+    for fc, keys in found:
+        for kp, (co, hl, hr, tl, tr, sc, sl, sr) in zip(fc.keyframe_points, keys):
+            kp.handle_left_type, kp.handle_right_type = tl, tr
+            kp.co, kp.handle_left, kp.handle_right = co, hl, hr
+            kp.select_control_point, kp.select_left_handle, kp.select_right_handle = sc, sl, sr
+        fc.update()
+        fc.id_data.update_tag()
+    return True
+
+
+def _fold_into_move(fcurves, label):
+    """The whole-frame clean-up becomes part of the move's own undo step: step back to before the move, write the
+    final keys and push one step under the move's name. False (nothing changed) when that can't be done safely."""
+    if bpy.context.mode not in {'OBJECT', 'POSE'}:     # edit-mode undo steps don't hold the keys
+        return False
+    rec = _key_record(fcurves)
+    if not rec:
+        return False
+    try:
+        if bpy.ops.ed.undo() != {'FINISHED'}:
+            return False
+    except RuntimeError:
+        return False
+    if _write_record(rec):
+        bpy.ops.ed.undo_push(message=label or "Move")
+        return True
+    # the move merged keys: go forward to the move again and clean up in a step of its own
+    try:
+        bpy.ops.ed.redo()
+    except RuntimeError:
+        return True                                     # nothing sensible left to do
+    curves = _record_curves(rec)
+    if curves and drop_fractions(curves):
+        bpy.ops.ed.undo_push(message="Snap Keys To Frames")
+    return True
+
+
+def _record_curves(rec):
+    from .. import compat
+    out = []
+    for name, index, path, array_index, _keys in rec:
+        act = bpy.data.actions.get(name)
+        fcs = compat.action_fcurves(act) if act is not None else []
+        fc = fcs[index] if index < len(fcs) else None
+        if fc is not None and fc.data_path == path and fc.array_index == array_index:
+            out.append(fc)
+    return out
 
 
 class ALLSET_OT_graph_move_snap(bpy.types.Operator):

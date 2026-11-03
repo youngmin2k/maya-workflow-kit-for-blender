@@ -31,6 +31,10 @@ edge looked like an orange sliver inside a thick cyan band. ``overlay.show_edge_
 so the hilite line is 1.5 px x UI scale (2 px at 1.25, nothing of Blender's left; 1 px left a dark pixel beside it).
 The lines also failed the depth test on one side of a silhouette edge (bias 0.0005): ``DEPTH_BIAS`` 0.002 for the
 hilite wire, ``EDGE_SEL_BIAS`` 0.003 for selected edges, drawn last and 2 px so they stay on top.
+
+UV mode (the kit's F12 UV component, UV Sync Selection off): like Maya, the 3D View shows the UV selection, not the
+mesh selection (the kit selects every face so the UV Editor shows all UVs). Every vertex is drawn as a point,
+vertices with a selected UV in the selected-vertex colour; no selected edges or face stipple.
 """
 
 import bpy
@@ -125,12 +129,13 @@ def fan_triangles(loop_start, loop_total, corner_vert, mask):
     return np.stack([cv[first], cv[first + offs], cv[first + offs + 1]], axis=1).astype(np.int32)
 
 
-def layers(m, select_mode):
+def layers(m, select_mode, uv=False):
     """What to draw for the Maya component look: dict of index arrays into ``m.co``.
 
     edges: every visible edge (hilite); verts / verts_sel (vertex mode); edges_sel (edge mode); tris (face mode,
-    selected visible faces). Hidden elements are never drawn."""
-    vert_mode, edge_mode, face_mode = (bool(x) for x in select_mode)
+    selected visible faces). Hidden elements are never drawn. ``uv``: UV mode — points only, ``m.vsel`` holds the
+    vertices with a selected UV."""
+    vert_mode, edge_mode, face_mode = (True, False, False) if uv else (bool(x) for x in select_mode)
     vis_e = ~m.ehide
     out = {"edges": m.edges[vis_e]}
     if vert_mode:
@@ -219,10 +224,11 @@ def read_bmesh(bm):
 
 
 class _State:
-    __slots__ = ("arrays", "faces", "batches", "bkey", "name", "me_name")
+    __slots__ = ("arrays", "faces", "batches", "bkey", "name", "me_name", "uv")
 
     def __init__(self, ob):
         self.arrays = None
+        self.uv = False
         self.faces = False          # arrays hold the polygons (read only in face select mode)
         self.batches = None
         self.bkey = None
@@ -270,12 +276,12 @@ def _linear(hex_str):
 
 
 def _batches(st, select_mode):
-    key = tuple(bool(x) for x in select_mode)
+    key = (st.uv,) + tuple(bool(x) for x in select_mode)
     if st.batches is not None and st.bkey == key:
         return st.batches
     from gpu_extras.batch import batch_for_shader
     m = st.arrays
-    lay = layers(m, select_mode)
+    lay = layers(m, select_mode, st.uv)
     flat = _builtin('UNIFORM_COLOR')
     poly = _builtin('POLYLINE_UNIFORM_COLOR')
     out = []
@@ -322,27 +328,44 @@ def edit_objects(context):
             and ob.visible_get()]
 
 
-def state(ob, depsgraph, faces=True):
+def uv_selected_verts(bm):
+    """Per vertex: one of its UVs is selected, among the faces the UV Editor shows (selected, not hidden)."""
+    from .. import compat
+    out = np.zeros(len(bm.verts), bool)
+    uv = bm.loops.layers.uv.active
+    if uv is None:
+        return out
+    bm.verts.index_update()
+    for f in bm.faces:
+        if f.select and not f.hide:
+            for lp in f.loops:
+                if compat.uv_vert_selected(lp, uv):
+                    out[lp.vert.index] = True
+    return out
+
+
+def state(ob, depsgraph, faces=True, uv=False):
     """Up-to-date cached arrays of ``ob`` (None when the kit leaves this mesh to Blender's drawing); ``faces``:
-    the polygons are needed too (face select mode)."""
+    the polygons are needed too (face select mode); ``uv``: UV mode (points show the UV selection)."""
     import bmesh
     key = (ob.as_pointer(), ob.data.as_pointer())
     st = _cache.get(key)
     if st is None or st.name != ob.name or st.me_name != ob.data.name:
         st = _cache[key] = _State(ob)
         st.arrays = None
-    if st.arrays is not None and ob.name not in _dirty and ob.data.name not in _dirty and (st.faces or not faces):
+    if (st.arrays is not None and ob.name not in _dirty and ob.data.name not in _dirty and (st.faces or not faces)
+            and st.uv == uv):
         return st
     bm = bmesh.from_edit_mesh(ob.data)
     # Draw may run before the selection poll. Detect changed membership here.
     # This avoids presenting the previously cached GPU batch for one more frame.
     if len(bm.verts) <= BMESH_LIMIT:
-        sig = _selection_signature(bm)
+        sig = _selection_signature(bm, uv)
         if _selection_snapshot.get(key) != sig:
             _selection_snapshot[key] = sig
             _dirty.update((ob.name, ob.data.name))
     evaluated = use_evaluated(ob.modifiers)
-    if not readable(len(bm.verts), evaluated):
+    if not readable(len(bm.verts), evaluated) or (uv and len(bm.verts) > BMESH_LIMIT):
         st.arrays = None
         return None
     # Blender 4.5: evaluated mesh selection attributes may lag behind the live
@@ -362,7 +385,11 @@ def state(ob, depsgraph, faces=True):
         arrays.esel = np.fromiter((e.select for e in bm.edges), bool, len(bm.edges))
         if faces and len(arrays.fsel) == len(bm.faces):
             arrays.fsel = np.fromiter((f.select for f in bm.faces), bool, len(bm.faces))
-    st.arrays, st.faces, st.batches, st.bkey = arrays, faces, None, None
+    if uv:
+        arrays.vsel = uv_selected_verts(bm)
+        arrays.esel[:] = False
+        arrays.fsel[:] = False
+    st.arrays, st.faces, st.batches, st.bkey, st.uv = arrays, faces, None, None, uv
     return st
 
 
@@ -421,9 +448,10 @@ def _draw():
     t0 = time.perf_counter()
     depsgraph = context.view_layer.depsgraph
     select_mode = tuple(context.tool_settings.mesh_select_mode)
+    uv = uv_mode(context)
     states = []
     for ob in obs:
-        st = state(ob, depsgraph, select_mode[2])
+        st = state(ob, depsgraph, select_mode[2] and not uv, uv)
         if st is not None:
             states.append((ob, st))
     _dirty.difference_update({ob.name for ob in obs} | {ob.data.name for ob in obs})
@@ -482,16 +510,29 @@ def _remove_handler():
         bpy.types.SpaceView3D.draw_handler_remove(_handle.pop(), 'WINDOW')
 
 
-def _selection_signature(bm):
+def uv_mode(context):
+    """The 3D View shows the UV selection: mesh edit mode in the kit's UV component (F12; UV Sync Selection off)."""
+    from ..operators import uv_tools
+    try:
+        return context.mode == 'EDIT_MESH' and uv_tools.in_uv_mode(context.scene)
+    except AttributeError:
+        return False
+
+
+def _selection_signature(bm, uv=False):
     """Track selection *membership*, not only counts (replace/add/subtract all matter).
 
     Blender does not always tag edit-mesh selection as a depsgraph update, especially
     when expanding an existing component selection. The overlay must not cache it forever.
+    In UV mode the UV selection counts too (UV Editor clicks tag nothing in the 3D View).
     """
-    return (len(bm.verts), len(bm.edges), len(bm.faces),
-            tuple(v.index for v in bm.verts if v.select),
-            tuple(e.index for e in bm.edges if e.select),
-            tuple(f.index for f in bm.faces if f.select))
+    sig = (len(bm.verts), len(bm.edges), len(bm.faces),
+           tuple(v.index for v in bm.verts if v.select),
+           tuple(e.index for e in bm.edges if e.select),
+           tuple(f.index for f in bm.faces if f.select))
+    if uv:
+        sig += (uv, tuple(np.flatnonzero(uv_selected_verts(bm)).tolist()))
+    return sig
 
 
 def _poll_selection():
@@ -523,7 +564,7 @@ def _poll_selection():
                         bm.verts.index_update()
                         bm.edges.index_update()
                         bm.faces.index_update()
-                        sig = _selection_signature(bm)
+                        sig = _selection_signature(bm, uv_mode(ctx))
                         if _selection_snapshot.get(key) != sig:
                             _selection_snapshot[key] = sig
                             _dirty.update((ob.name, ob.data.name))
@@ -557,8 +598,15 @@ def _on_reload(*_args):
     _selection_snapshot.clear()
 
 
+@bpy.app.handlers.persistent
+def _on_load(*_args):
+    from ..operators import uv_tools
+    uv_tools.forget_uv_mode()
+    _on_reload()
+
+
 _HANDLERS = (("depsgraph_update_post", _on_depsgraph), ("undo_post", _on_reload), ("redo_post", _on_reload),
-             ("load_post", _on_reload))
+             ("load_post", _on_load))
 
 
 def register():
@@ -566,7 +614,7 @@ def register():
         getattr(bpy.app.handlers, name).append(fn)
     _handle.append(bpy.types.SpaceView3D.draw_handler_add(_callback, (), 'WINDOW', 'POST_VIEW'))
     if not bpy.app.timers.is_registered(_poll_selection):
-        bpy.app.timers.register(_poll_selection, first_interval=_POLL_INTERVAL)
+        bpy.app.timers.register(_poll_selection, first_interval=_POLL_INTERVAL, persistent=True)
 
 
 def unregister():

@@ -110,7 +110,7 @@ def _values(st):
     return [(c[0], c[1], sorted(v for _f, v in c[2])) for c in st]
 
 
-def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), every=False):
+def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), every=False, fraction=0.0):
     st = {}
     for _ in range(10):
         step(lambda: None)
@@ -122,6 +122,13 @@ def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), 
         bpy.context.scene.allset_auto_key = auto_key
         bpy.context.scene.frame_set(current)
         select_only(frames, every)
+        if fraction:                                    # the dragged key starts between two frames
+            fc = curve()
+            kp = next(k for k in fc.keyframe_points if k.select_control_point)
+            kp.co.x += fraction
+            kp.handle_left.x += fraction
+            kp.handle_right.x += fraction
+            fc.update()
         bpy.ops.ed.undo_push(message=f"{name} select")
         st["before"] = state()
         st["press"] = key_px(10)
@@ -150,6 +157,8 @@ def _drag_case(name, button, frame_to, auto_key=False, current=1, frames=(10,), 
         xs = [kp.co.x for kp in curve().keyframe_points]
         check(f"{name}: no key added or lost ({st['count']} -> {count})", count == st["count"])
         check(f"{name}: the dragged key landed past the last key ({xs})", len(xs) == 3 and xs[2] > 20.5)
+        if fraction:
+            check(f"{name}: time snap left the key on a whole frame ({xs})", abs(xs[2] - round(xs[2])) < 1e-6)
         check(f"{name}: every curve keeps its key values, no two keys on one frame",
               _values(after) == _values(st["before"])
               and all(len({f for f, _v in c[2]}) == len(c[2]) for c in after))
@@ -185,6 +194,20 @@ _drag_case("mmb_auto_key", 'MIDDLEMOUSE', 26, auto_key=True, current=15)
 # several keys on every curve slid past the last key
 _drag_case("lmb_columns_auto", 'LEFTMOUSE', 26, frames=(1, 10), every=True, auto_key=True, current=15)
 _drag_case("mmb_columns_auto", 'MIDDLEMOUSE', 26, frames=(1, 10), every=True, auto_key=True, current=15)
+# a key between two frames: Blender's move + the whole-frame clean-up are one undo step
+_drag_case("lmb_fraction", 'LEFTMOUSE', 26, fraction=0.4)
+
+
+@step
+def s_fraction_back():
+    fc = curve()
+    kp = min(fc.keyframe_points, key=lambda k: abs(k.co.x - 10))
+    d = 10.0 - kp.co.x
+    kp.co.x += d
+    kp.handle_left.x += d
+    kp.handle_right.x += d
+    fc.update()
+    bpy.ops.ed.undo_push(message="key back on frame 10")
 
 
 # r = Scale Keys tool: the box around the selected keys; dragging a side / corner scales about the opposite one
@@ -215,7 +238,7 @@ def s_r_check():
         screenshot(os.path.join(SHOTS, "issue270_scale_box.png"))
 
 
-def _box_case(name, grab, move, expect):
+def _box_case(name, grab, move, expect, shift=False):
     st = {}
     for _ in range(10):
         step(lambda: None)
@@ -232,14 +255,22 @@ def _box_case(name, grab, move, expect):
         st["move"] = move(st["box"])
     step(before)
     step(lambda: ev('MOUSEMOVE', 'NOTHING', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1]))
-    step(lambda: ev('LEFTMOUSE', 'PRESS', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1]))
+    def press():
+        if shift:       # a real Shift: the key event sets the window state (mouse-only Shift doesn't reach drags)
+            ev('LEFT_SHIFT', 'PRESS', shift=True)
+        ev('LEFTMOUSE', 'PRESS', x=win_xy(*st["press"])[0], y=win_xy(*st["press"])[1], shift=shift)
+    step(press)
     for i in range(1, 5):
         def mv(i=i):
             x = st["press"][0] + st["move"][0] * i / 4
             y = st["press"][1] + st["move"][1] * i / 4
             ev('MOUSEMOVE', 'NOTHING', x=win_xy(x, y)[0], y=win_xy(x, y)[1])
         step(mv)
-    step(lambda: ev('LEFTMOUSE', 'RELEASE'))
+    def release():
+        ev('LEFTMOUSE', 'RELEASE', shift=shift)
+        if shift:
+            ev('LEFT_SHIFT', 'RELEASE')
+    step(release)
     step(lambda: None)
     step(lambda: None)
 
@@ -282,6 +313,41 @@ _box_case("box_top", lambda b: ((b[0] + b[2]) / 2, b[3]), lambda b: (0, b[3] - b
 # left side pressed inside the box: no scale, Blender's click (the keys don't move)
 _box_case("box_inside", lambda b: ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2 - 3), lambda b: (0, 0),
           lambda pts: (pts == [(1.0, 0.0), (10.0, 0.05), (20.0, 0.02)], "a press inside the box scales nothing"))
+# a drag inside the box (empty space) moves the selected keys: 2 frames right, the key outside the box stays
+_box_case("box_move", lambda b: ((b[0] + b[2]) / 2, (b[1] + b[3]) / 2 + 4), lambda b: (2 * _ppf(), 0),
+          lambda pts: (pts == [(3.0, 0.0), (12.0, 0.05), (20.0, 0.02)], "the selected keys moved 2 frames"))
+# Shift on the top-right corner, dragged mostly right: time x1.5 only, the small upward part doesn't scale values
+_box_case("box_corner_shift", lambda b: (b[2], b[3]), lambda b: (4.5 * _ppf(), 6),
+          lambda pts: (pts[0] == (1.0, 0.0) and pts[1] == (14.0, 0.05) and pts[2] == (20.0, 0.02),
+                       "Shift: the corner scaled time only"), shift=True)
+
+
+# w / e / r also work over the rest of the Graph Editor: its outliner, its toolbar row and its menu bar
+def _other_region_case(name, kind, key, tool):
+    def press():
+        bpy.context.window_manager.allset_graph_key_tool = 'MOVE' if tool != 'MOVE' else 'SCALE'
+        r = next((r for r in C["area"].regions if r.type == kind and r.width > 1 and r.height > 1), None)
+        C[name] = r is not None
+        if r is None:
+            return
+        x, y = r.x + min(r.width // 2, 40), r.y + r.height // 2
+        ev('MOUSEMOVE', 'NOTHING', x=x, y=y)
+        ev(key, 'PRESS', x=x, y=y)
+        ev(key, 'RELEASE', x=x, y=y)
+    press.__name__ = "s_" + name
+    step(press)
+
+    def verify():
+        tool_now = bpy.context.window_manager.allset_graph_key_tool
+        check(f"{key.lower()} over the Graph Editor {kind.lower()} region picks {tool} ({tool_now})",
+              C[name] and tool_now == tool)
+    verify.__name__ = "s_" + name + "_check"
+    step(verify)
+
+
+_other_region_case("keys_channels", 'CHANNELS', 'E', 'ROTATE')
+_other_region_case("keys_footer", 'FOOTER', 'R', 'SCALE')
+_other_region_case("keys_header", 'HEADER', 'W', 'MOVE')
 
 
 @step

@@ -1,4 +1,4 @@
-"""= / - manipulator size (kit manipulator only), PgUp/PgDn smoothing level, 0,
+"""= / - (and numpad + / -) manipulator size (kit manipulator only), PgUp/PgDn smoothing level, 0,
 Home default view, Alt+5 wireframe on shaded."""
 
 from importlib import import_module
@@ -28,6 +28,10 @@ def test_keys_bound():
         [("allset.manip_size", 1.25)]
     assert [(k.idname, round(k.properties.factor, 2)) for k in _items("3D View", 'MINUS')] == \
         [("allset.manip_size", 0.8)]
+    # a Maya keyboard's numpad + / - are the same keys (Blender's numpad zoom goes, Shift = dolly stays)
+    assert [(k.idname, round(k.properties.factor, 2)) for k in _items("3D View", 'NUMPAD_PLUS')] ==         [("allset.manip_size", 1.25)]
+    assert [(k.idname, round(k.properties.factor, 2)) for k in _items("3D View", 'NUMPAD_MINUS')] ==         [("allset.manip_size", 0.8)]
+    assert [k.idname for k in _items("3D View", 'NUMPAD_PLUS', shift=True)] == ["view3d.dolly"]
     assert [k.idname for k in _items("3D View", 'HOME')] == ["allset.view_home"]
     alt5 = _items("3D View", 'FIVE', alt=True)
     assert [k.properties.data_path for k in alt5] == ["space_data.overlay.show_wireframes"]

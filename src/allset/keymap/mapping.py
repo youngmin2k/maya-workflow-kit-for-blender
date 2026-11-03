@@ -489,8 +489,10 @@ ENTRIES = {
     "nodeEditorPanel:NodeEditorGridToggleSnap": _e("IC", ("Node Editor", "wm.context_toggle",
                                                           {"data_path": "tool_settings.use_snap_node"})),
     # --- classified, no Blender equivalent ---
-    "polyTexturePlacementPanel:IncreaseCheckerDensity": _e("NO", note="UV 체커 밀도 없음 (Blender 체커는 이미지); Maya 2026 은 UV Editor 키"),
-    "polyTexturePlacementPanel:DecreaseCheckerDensity": _e("NO", note="UV 체커 밀도 없음; Maya 2026 은 UV Editor 키"),
+    "polyTexturePlacementPanel:IncreaseCheckerDensity": _e("KIT", ("UV Editor", "allset.checker_density", {"step": 1}),
+                                                           note="체커 표시 머티리얼의 Mapping 스케일 +1"),
+    "polyTexturePlacementPanel:DecreaseCheckerDensity": _e("KIT", ("UV Editor", "allset.checker_density", {"step": -1}),
+                                                           note="체커 밀도 -1 (최소 1)"),
     "timeEditorPanel:TimeEditorSceneAuthoringToggle": _e("NO", note="Maya Time Editor 클립 편집 (kit Time Editor = NLA, 그 키는 Blender 그대로)"),
     "timeEditorPanel:TimeEditorClipRazor": _e("NO", note="Maya Time Editor 클립 편집 (kit Time Editor = NLA, 그 키는 Blender 그대로)"),
     "timeEditorPanel:TimeEditorClipTrimToggle": _e("NO", note="Maya Time Editor 클립 편집 (kit Time Editor = NLA, 그 키는 Blender 그대로)"),

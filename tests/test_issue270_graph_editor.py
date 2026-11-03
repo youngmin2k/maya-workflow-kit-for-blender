@@ -123,6 +123,9 @@ def test_scale_box_rules():
     flat = sb.box_of([(40, 20), (40, 80)])
     assert sb.hit(flat, 40, 50) is None and sb.hit(flat, 40, 80) in ("LT", "RT", "T")
     assert sb.hit(flat, 40, 81) in ("LT", "RT", "T")
+    # inside = clear of the sides: a drag there moves the keys
+    assert sb.inside(box, 60, 40) and not sb.inside(box, 12, 40) and not sb.inside(box, 200, 40)
+    assert not sb.inside(None, 0, 0)
 
 
 def test_scale_box_keymap_and_pref():
@@ -131,6 +134,9 @@ def test_scale_box_keymap_and_pref():
              and not (i.shift or i.ctrl or i.alt)]
     assert "allset.graph_scale_box" in plain, plain
     assert plain.index("allset.graph_scale_box") < plain.index("graph.clickselect"), plain
+    shifted = [i.idname for i in km.keymap_items if i.active and i.type == 'LEFTMOUSE' and i.value == 'PRESS'
+               and i.shift and not (i.ctrl or i.alt)]
+    assert shifted.index("allset.graph_scale_box") < shifted.index("graph.clickselect"), shifted
     preferences = import_module(kit.MODULE + ".preferences")
     assert preferences.get().graph_scale_manipulator, "on by default"
     assert auto_key.waits_for("ALLSET_OT_graph_scale_box")

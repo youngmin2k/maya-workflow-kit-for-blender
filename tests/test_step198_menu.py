@@ -54,10 +54,10 @@ def test_menu_items_wired_and_not_noticed():
 
 def test_toolbar_buttons_wired():
     icons = {spec[0]: spec[2] for spec in chrome.GRAPH_ICONS if isinstance(spec, tuple)}
-    assert icons["retimeKeyTool"] == "allset.retime_tool"
-    assert icons["bufferSnapButton"] == "allset.buffer_snapshot" and icons["bufferSwapButton"] == "allset.buffer_swap"
-    assert icons["lockTanButton"] == ("allset.tangent_weight_lock", {"lock": True})
-    for k in ("retimeKeyTool", "bufferSwapButton", "freeTanButton", "lockTanButton"):
+    assert icons["key_retime_tool"] == "allset.retime_tool"
+    assert icons["buffer_snapshot"] == "allset.buffer_snapshot" and icons["buffer_swap"] == "allset.buffer_swap"
+    assert icons["tan_lock_length"] == ("allset.tangent_weight_lock", {"lock": True})
+    for k in ("key_retime_tool", "buffer_swap", "tan_free_length", "tan_lock_length"):
         assert k not in chrome.NOTICES, k
 
 

@@ -62,14 +62,16 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     # Maya Move tool Transform Constraint (default Off)
     transform_constraint: bpy.props.EnumProperty(
         name="Transform Constraint",
-        description="In mesh edit mode the Move tool slides components along their edges or the surface",
+        description="In mesh edit mode the Move tool slides components along their edges or the surface, or moves "
+                    "them along their normals",
         items=(('NONE', "Off", "Move components freely"),
                ('EDGE', "Edge", "Slide components along their edges"),
-               ('SURFACE', "Surface", "Move components along the surface of the mesh")),
+               ('SURFACE', "Surface", "Move components along the surface of the mesh"),
+               ('NORMAL', "Along Normals", "Move each component along its own normal")),
         default='NONE', update=_redraw_tools)
     uv_shell_preview: bpy.props.BoolProperty(
-        name="UV Shell Pre-selection",
-        description="In the UV Editor, while clicks pick whole UV shells, fill the shell under the mouse in the "
+        name="UV Pre-selection",
+        description="In the UV Editor, show the UV, edge, face or whole UV shell under the mouse in the "
                     "pre-selection colour before you click",
         default=True)
     # Maya preSelectHilite true.
@@ -178,6 +180,11 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Unconstrained Drag", default=True,
         description="Middle-mouse drags in the Graph Editor move keys in time and value; off, the first move "
                     "picks time or value")
+    # Graph Editor keys drawn bigger than Blender's theme size (ui/graph_keys_draw.py; 0 = Blender's own size)
+    graph_key_size: bpy.props.IntProperty(
+        name="Key Size", default=11, min=0, max=24, subtype='PIXEL',
+        description="Diameter of the keys in the Graph Editor, in pixels at interface scale 1 (0 = Blender's "
+                    "theme size)")
     graph_scale_manipulator: bpy.props.BoolProperty(
         name="Scale Keys Manipulator", default=True,
         description="With the Scale Keys tool (r) the Graph Editor draws a box around the selected keys: drag a "
@@ -265,14 +272,14 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         items=(('AUTO', "Auto", "Maya Auto: Blender Auto Clamped"), ('SPLINE', "Spline", "Blender Auto"),
                ('LINEAR', "Linear", ""), ('CLAMPED', "Clamped", "Blender Auto Clamped"),
                ('FLAT', "Flat", "Level handles"), ('PLATEAU', "Plateau", "Blender Auto Clamped")),
-        description="In tangent of the keys the kit sets (Maya Tangents > Default In Tangent)")
+        description="In tangent of new keys (Maya Tangents > Default In Tangent)")
     default_out_tangent: bpy.props.EnumProperty(
         name="Default Out Tangent", default='AUTO',
         items=(('AUTO', "Auto", "Maya Auto: Blender Auto Clamped"), ('SPLINE', "Spline", "Blender Auto"),
                ('LINEAR', "Linear", ""), ('CLAMPED', "Clamped", "Blender Auto Clamped"),
                ('FLAT', "Flat", "Level handles"), ('PLATEAU', "Plateau", "Blender Auto Clamped"),
                ('STEPPED', "Stepped", "Blender Constant")),
-        description="Out tangent of the keys the kit sets (Maya Tangents > Default Out Tangent)")
+        description="Out tangent of new keys (Maya Tangents > Default Out Tangent)")
 
     # Top UI (Maya Windows > UI Elements).
     maya_top_bar: bpy.props.BoolProperty(
@@ -302,6 +309,10 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     maya_camera_names: bpy.props.BoolProperty(
         name="Camera Names", description="Maya camera name (persp, top -Y, ...) at the bottom of the view",
         default=True)
+    def _update_uv_manipulator(self, context):
+        from .ui import uv_manipulator
+        uv_manipulator.follow_preference()
+
     @_quiet
     def _update_selection_wire(self, context):
         for window in context.window_manager.windows:
@@ -327,6 +338,11 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Component Colors", description="Mesh edit mode shows Maya's component colors: light blue edges, "
                                               "purple / yellow vertices, orange edges and stippled faces",
         default=True, update=_update_selection_wire)
+    # Maya-style Move / Rotate / Scale handles in the UV Editor (off = Blender's own UV gizmos)
+    maya_uv_manipulator: bpy.props.BoolProperty(
+        name="UV Manipulator", description="The UV Editor's Move / Rotate / Scale tools show Maya-style handles: "
+                                           "U / V arrows, a rotate ring, U / V scale boxes",
+        default=True, update=_update_uv_manipulator)
     # Maya grey docks: the dock areas are lifted from the theme's Properties grey to #444444
     maya_dock_colors: bpy.props.BoolProperty(
         name="Dock Colors", description="The Channel Box / Attribute Editor / Modeling Toolkit docks are drawn "
@@ -546,7 +562,9 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         row.prop(self, "maya_view_axis")
         row.prop(self, "maya_selection_wire")
         row.prop(self, "maya_component_colors")
-        box.prop(self, "maya_dock_colors")
+        row = box.row()
+        row.prop(self, "maya_dock_colors")
+        row.prop(self, "maya_uv_manipulator")
         box.prop(self, "in_view_messages")
 
 

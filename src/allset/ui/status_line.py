@@ -393,16 +393,34 @@ class ALLSET_OT_light_editor(bpy.types.Operator):
 
 
 class ALLSET_OT_ipr_toggle(bpy.types.Operator):
-    """IPR: interactive render in the main viewport (toggle Rendered shading)"""
+    """IPR: interactive render in its own window, looking where the main view looks; click again to close it"""
     bl_idname = "allset.ipr_toggle"
     bl_label = "IPR Render"
 
     def execute(self, context):
+        from . import ipr_window, window_places
+        if ipr_window.is_open():
+            ipr_window.close()
+            return {'FINISHED'}
         area, _r = main_view3d(context.screen)
         if area is None:
             return {'CANCELLED'}
-        ipr_toggle(area.spaces.active)
+        if context.window is None or bpy.app.background:
+            ipr_toggle(area.spaces.active)       # no window to open: the viewport itself
+            return {'FINISHED'}
+        if ipr_window.open_window(context, area) is None:
+            if not window_places.deferred():     # opens on a later tick
+                self.report({'ERROR'}, "Could not open a new window")
+            return {'CANCELLED'}
         return {'FINISHED'}
+
+
+def _ipr_on(space):
+    """The Status Line IPR button looks pressed while the IPR window is open (no window: the viewport's Rendered)."""
+    from . import ipr_window
+    if ipr_window.is_open():
+        return True
+    return bool(space) and bpy.app.background and space.shading.type == 'RENDERED'
 
 
 def ipr_toggle(space):
@@ -643,7 +661,7 @@ def draw_status_line(layout, context, compact=False):
         row = layout.row(align=True)
         _flat(row, "render.view_show", "render_view")
         _flat(row, "allset.render", "render")
-        _flat(row, ALLSET_OT_ipr_toggle.bl_idname, "ipr", depress=bool(space) and space.shading.type == 'RENDERED')
+        _flat(row, ALLSET_OT_ipr_toggle.bl_idname, "ipr", depress=_ipr_on(space))
         _flat(row, ALLSET_OT_render_settings.bl_idname, "render_settings")
         _flat(row, "allset.hypershade", "hypershade")       # ui/hypershade.py
         _grey(row, "render_setup", "Status Line/Render Setup")
@@ -729,6 +747,11 @@ def menu_fit(widths, width, fixed, more):
     fit, the » button (``more`` px) takes its place at the end."""
     if fixed + sum(widths) <= width:
         return len(widths)
+    return fit_beside_more(widths, width, fixed, more)
+
+
+def fit_beside_more(widths, width, fixed, more):
+    """How many leading menus fit in ``width`` px next to the » button."""
     x = fixed + more
     n = 0
     for w in widths:
@@ -771,10 +794,17 @@ def draw_menu_bar_fit(layout, context, menu_set=True):
     names = menu_sets.menus_for_set(prefs.menu_set)
     region = getattr(context, "region", None)
     widths, fixed, more = menu_bar_widths(context, names, menu_set)
-    n = menu_fit(widths, region.width, fixed, more) if region is not None and region.width > 1 else len(names)
+    width = region.width if region is not None and region.width > 1 else None
+    # other add-ons' top-bar menus follow the Maya menus when there is room for them, else they wait behind »
+    funcs = menu_sets.addon_menu_funcs(context)
+    reserve = menu_sets.addon_menus_width(context, funcs) if funcs else 0
+    inline = width is None or fixed + sum(widths) + reserve <= width
+    n = len(names) if inline else menu_fit(widths, width, fixed, more)
+    if not inline and n >= len(names):     # the Maya menus fit: only the add-on menus go behind »
+        n = fit_beside_more(widths, width, fixed, more)
     if context.window is not None:
         _menus_shown[context.window.as_pointer()] = (tuple(names), n)
-    if n >= len(names):
+    if inline:
         menu_sets.draw_menu_bar(layout, context, menu_set=menu_set)
         return
     layout.menu("TOPBAR_MT_blender", text="", icon='BLENDER')
@@ -806,6 +836,10 @@ class ALLSET_MT_menu_more(bpy.types.Menu):
         names, n = shown_menus(context.window)
         for name in names[n:]:
             self.layout.menu(menu_sets.menu_idname(name))
+        if menu_sets.addon_menu_funcs(context):     # other add-ons' top-bar menus, at the end
+            if n < len(names):
+                self.layout.separator()
+            menu_sets.draw_addon_menus(self.layout, context)
 
 
 def draw_left(self, context):

@@ -185,6 +185,8 @@ def test_maya_mode_off_keeps_files_and_preferences():
         _change_everything()
         path = os.path.join(f.tmp, "kit.json")
         bpy.ops.allset.settings_export(filepath=path)
+        m("ui.hotkey_editor").restore_all(bpy.context)
+        assert _key(_row("SelectToggleMode"))[0]["type"] == "F8"
         switch = m("switch")
         switch.set_mode(False, layout=False)
         try:
@@ -196,7 +198,12 @@ def test_maya_mode_off_keeps_files_and_preferences():
                     _prefs().property_unset(name)
             lines = sio.import_file(bpy.context, path)
             assert _prefs().curve_color_rules == "issue275 marker"
-            assert any("turn Maya mode on" in s for s in lines), lines
+            assert any("kept for Maya mode" in s for s in lines), lines
+            assert sio.has_pending()
             assert not _prefs().maya_mode
         finally:
             switch.set_mode(True, layout=False)
+        # the kept hotkeys are given when Maya mode starts, and the waiting file is gone
+        assert not sio.has_pending()
+        ev, changed = _key(_row("SelectToggleMode"))
+        assert (ev["type"], ev["ctrl"], changed) == ("F9", True, True), ev

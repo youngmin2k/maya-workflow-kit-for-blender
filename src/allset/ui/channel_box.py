@@ -76,8 +76,8 @@ INPUT_PREFIX = "in:"     # an INPUTS row as a channel: "in:<modifier type>:<nth 
 SHAPE_PREFIX = "sh:"     # a SHAPES row as a channel: light Intensity / Color, camera Focal Length ...
 BLEND_PREFIX = "bw:"     # a blendShape target weight in INPUTS: "bw:<target name>" (the shape key's value)
 
-# MMB slider: value change per pixel at speed Medium.
-SLIDER_STEP = {"LOC": 0.01, "ROT": math.radians(0.5), "SCALE": 0.01, "CUSTOM": 0.01, "SHAPE": 0.01, "INPUT": 0.01,
+# MMB slider: value change per pixel at speed Medium (a custom attribute moves 0.1 per px, like Maya).
+SLIDER_STEP = {"LOC": 0.01, "ROT": math.radians(0.5), "SCALE": 0.01, "CUSTOM": 0.1, "SHAPE": 0.01, "INPUT": 0.01,
                "HISTORY": 0.01, "BLEND": 0.01}
 SPEEDS = (("SLOWEST", "Slowest", "x0.01", 0.01), ("SLOW", "Slow", "x0.1", 0.1),
           ("MEDIUM", "Medium", "x1", 1.0), ("FAST", "Fast", "x10", 10.0))
@@ -533,6 +533,10 @@ def keyframe(ob, key, keytype='KEYFRAME'):
         kb = blend_target(ob, key)
         if kb is None:
             return False
+        from ..operators import anim_layers
+        if anim_layers.has_layers(kb.id_data):
+            # the weight's blendShape node is in animation layers: keyed on the selected layer, solved like Translate
+            return anim_layers.key(kb.id_data, path, -1)
         try:
             ok = kb.id_data.keyframe_insert(path, keytype=keytype)
         except (TypeError, RuntimeError):
@@ -700,6 +704,14 @@ def channel_state(ob, key, frame=None):
     if driver(ob, key) is not None:
         return 'DRIVEN'
     fc = fcurve(ob, key)
+    if is_blend_key(key):
+        from ..operators import anim_layers
+        kb = blend_target(ob, key)
+        if kb is not None and anim_layers.has_layers(kb.id_data):
+            path = blend_path(kb.name)
+            if anim_layers.member_of_layer(kb.id_data, path, -1):
+                return 'LAYERED'
+            fc = anim_layers.base_curve(kb.id_data, path, -1)
     if (not is_shape_key(key) and not is_input_key(key) and not is_history_key(key) and not is_blend_key(key)
             and (isinstance(ob, bpy.types.Object) or is_bone(ob))):
         from ..operators import anim_layers
@@ -964,9 +976,9 @@ def _text_set(key):
 def _inputs(ob):
     # + the kit deformers a lattice / handle drives: Maya shows ffd1 / bend1 in the INPUTS of ffd1Lattice /
     # bend1Handle
-    from ..operators import deformers, skin_method, skin_tools_199
+    from ..operators import deformers, skin_method, skin_tools_199, type_manip
     return [m for m in getattr(ob, "modifiers", ()) if not display.is_preview(m) and not deformers.is_base(m)
-            and not skin_tools_199.is_part(m) and not skin_method.is_part(m)] \
+            and not skin_tools_199.is_part(m) and not skin_method.is_part(m) and not type_manip.is_part(m)] \
         + deformers.driven_modifiers(ob)
 
 
@@ -1309,6 +1321,89 @@ class ALLSET_PG_cb_row(bpy.types.PropertyGroup):
                       description="Select this channel: click, Ctrl toggle, Shift range, drag over the rows")
 
 
+# --- the name line: click to rename (#283) ---------------------------------------------------------------
+
+def rename_lead(ob, text):
+    """Maya Channel Box name field: rename the lead (spaces -> "_", Maya's name rule; a taken name gets the next
+    number of its base, the shape follows like Maya's rename). Returns the new name, None when nothing changed."""
+    from . import input_line
+    name = input_line.clean_name(text)
+    if name is None:
+        input_line._say(f"Rename: \"{text.strip()}\" is not a valid name (letters, digits and _, "
+                        "not starting with a digit).")
+        return None
+    if name == ob.name:
+        return None
+    if is_bone(ob):
+        ob.name = name
+        return ob.name
+    from ..operators import naming
+    taken = {o.name for o in bpy.data.objects if o != ob}
+    if name in taken:       # a taken name: its base with one more than the highest number (pCube1 -> pCube2)
+        base = naming.base_name(name)
+        name = f"{base}{naming.next_number(base, taken)}"
+    new = name
+    ob.name = new
+    data = ob.data
+    if data is not None and data.users == 1 and hasattr(data, "name") and data.library is None:
+        data.name = input_line.shape_name(new)
+    return new
+
+
+def _lead_name_get(_self):
+    ob = lead()
+    return ob.name if ob is not None else ""
+
+
+def _lead_name_set(_self, value):
+    ob = lead()
+    if ob is not None and rename_lead(ob, value) is not None:
+        _redraw_all()
+
+
+def _redraw_all():
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            area.tag_redraw()
+
+
+class ALLSET_PT_cb_name(bpy.types.Panel):
+    """The Channel Box name editor popover (called by allset.cb_rename only)"""
+    bl_space_type = 'TOPBAR'   # dummy, like Blender's TOPBAR_PT_name (F2): only shown through wm.call_panel
+    bl_region_type = 'HEADER'
+    bl_label = "Rename"
+    bl_ui_units_x = 8
+
+    def draw(self, context):
+        ob = lead(context)
+        if ob is None:
+            return
+        row = self.layout.row()
+        row.activate_init = True
+        if component_mode(ob):
+            row.prop(ob.data, "name", text="")
+        else:
+            row.prop(context.scene.allset_cb, "lead_name", text="")
+
+
+class ALLSET_OT_cb_rename(bpy.types.Operator):
+    """Rename this node (click the name, type, Enter)"""
+    bl_idname = "allset.cb_rename"
+    bl_label = "Rename"
+    bl_options = {'INTERNAL'}
+
+    @classmethod
+    def poll(cls, context):
+        return lead(context) is not None
+
+    def invoke(self, context, event):
+        bpy.ops.wm.call_panel(name=ALLSET_PT_cb_name.__name__, keep_open=False)
+        return {'FINISHED'}
+
+    def execute(self, context):
+        return self.invoke(context, None)
+
+
 def _make_proxy_annotations():
     ann = {}
     for key, label, _path, _idx, kind in MAIN:
@@ -1327,6 +1422,8 @@ def _make_proxy_annotations():
         ann[key + "_sel"] = BoolProperty(name=label, get=_sel_get(key), set=_sel_set(key),
                                          description="Select this channel: click, Ctrl toggle, Shift range, "
                                                      "drag over the rows")
+    ann["lead_name"] = StringProperty(name="Name", get=_lead_name_get, set=_lead_name_set,
+                                      description="The lead's name: Enter renames it")
     ann["rows"] = CollectionProperty(type=ALLSET_PG_cb_row)
     ann["rows_sig"] = StringProperty(options={'HIDDEN'})
     return ann
@@ -1375,6 +1472,56 @@ def drag_limit(ob, key, value):
     return max(rna.soft_min, min(rna.soft_max, value))
 
 
+ROT_DEG_PER_PX = 0.36     # a selected rotate channel turns 0.36 degrees per px, right / down = more (like Maya)
+AXIS_MIN_SHARE = 0.15     # an axis seen nearly end-on (shorter than this share of the longest) drags sideways
+
+
+def node_axes(ob, key):
+    """(world origin, world direction moved by one unit of the translate channel ``key``) of an object or pose
+    bone, None for other channels."""
+    path, index, kind = channel_path(key) if key in MAIN_BY_KEY else (None, -1, None)
+    if kind != "LOC" or index < 0:
+        return None
+    from mathutils import Vector
+    if isinstance(ob, bpy.types.PoseBone):
+        arm = ob.id_data
+        world = arm.matrix_world @ ob.matrix
+        basis = ob.matrix_basis
+    else:
+        world, basis = ob.matrix_world, ob.matrix_basis
+    try:
+        parent = world.to_3x3() @ basis.to_3x3().inverted()
+    except ValueError:
+        return None
+    axis = Vector((0.0, 0.0, 0.0))
+    axis[index] = 1.0
+    return world.translation.copy(), parent @ axis
+
+
+def screen_axis(region, rv3d, origin, direction):
+    """Region px moved per unit along ``direction`` at ``origin`` (None when it can't be projected)."""
+    from bpy_extras.view3d_utils import location_3d_to_region_2d
+    eps = 1e-3
+    a = location_3d_to_region_2d(region, rv3d, origin)
+    b = location_3d_to_region_2d(region, rv3d, origin + direction * eps)
+    if a is None or b is None:
+        return None
+    return (b - a) / eps
+
+
+def projected_delta(axis_px, dx, dy):
+    """Units along an axis for a mouse move (dx, dy): the move projected on the axis as drawn, like dragging that
+    axis of the Move manipulator (vertical moves count)."""
+    ax, ay = axis_px
+    n = ax * ax + ay * ay
+    return (dx * ax + dy * ay) / n if n > 0.0 else 0.0
+
+
+def rotate_delta(dx, dy):
+    """Radians for a mouse move on a selected rotate channel: right and down turn it up, left and up down."""
+    return math.radians(ROT_DEG_PER_PX) * (dx - dy)
+
+
 def slider_apply(starts, dx, speed=1.0, ctrl=False, shift=False, hyperbolic=False):
     """starts: {(ob, key): start value}. Sets each to start + delta."""
     for (ob, key), start in starts.items():
@@ -1382,11 +1529,19 @@ def slider_apply(starts, dx, speed=1.0, ctrl=False, shift=False, hyperbolic=Fals
         set_value(ob, key, drag_limit(ob, key, start + slider_delta(dx, kind, speed, ctrl, shift, hyperbolic)))
 
 
+def _unit_dirs(direction):
+    """``direction`` and two directions of the same length square to it (to tell an end-on axis)."""
+    from mathutils import Vector
+    n = direction.normalized()
+    side = n.orthogonal().normalized()
+    return [direction, side * direction.length, n.cross(side) * direction.length]
+
+
 class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
     """MMB-drag in the viewport changes the channels selected in the Channel Box"""
     bl_idname = "allset.cb_virtual_slider"
     bl_label = "Channel Box Virtual Slider"
-    bl_options = {'REGISTER', 'UNDO', 'GRAB_CURSOR_X', 'BLOCKING'}
+    bl_options = {'REGISTER', 'UNDO', 'GRAB_CURSOR', 'BLOCKING'}
 
     def invoke(self, context, event):
         if context.mode not in {'OBJECT', 'POSE'}:
@@ -1397,8 +1552,26 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
         if not pairs:
             return {'PASS_THROUGH'}  # let the tool's MMB drag run
         self._starts = {(ob, key): get_value(ob, key) for ob, key in pairs}
-        self._dx = 0
-        self._last_x = event.mouse_x
+        self._dx = self._dy = 0
+        self._last = (event.mouse_x, event.mouse_y)
+        # translate channels follow their axis as drawn in this view (Maya's channel manipulator); rotate channels
+        # turn with right / down moves; the rest are a sideways slider
+        self._axes = {}
+        region, rv3d = context.region, context.region_data
+        if rv3d is not None and context.area is not None and context.area.type == 'VIEW_3D':
+            for ob, key in pairs:
+                kind = channel_path(key)[2]
+                if kind == "ROT" and not _non_euler_rot(ob, kind):
+                    self._axes[(ob, key)] = "ROT"
+                    continue
+                axes = node_axes(ob, key)
+                if axes is None:
+                    continue
+                px = screen_axis(region, rv3d, *axes)
+                longest = max((v.length for v in (screen_axis(region, rv3d, axes[0], d) for d in
+                                                   _unit_dirs(axes[1])) if v is not None), default=0.0)
+                if px is not None and px.length > AXIS_MIN_SHARE * longest > 0.0:
+                    self._axes[(ob, key)] = (px.x, px.y)
         from .. import preferences
         prefs = preferences.get(context)
         self._speed = SPEED_FACTOR[prefs.cb_speed]
@@ -1412,12 +1585,24 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
 
     def modal(self, context, event):
         if event.type == 'MOUSEMOVE':
-            step = event.mouse_x - self._last_x
-            self._last_x = event.mouse_x
-            if context.region and abs(step) > context.region.width // 2:
-                step = 0  # cursor wrapped by GRAB_CURSOR_X: not a real move
-            self._dx += step
-            slider_apply(self._starts, self._dx, self._speed, event.ctrl, event.shift, self._hyper)
+            sx, sy = event.mouse_x - self._last[0], event.mouse_y - self._last[1]
+            self._last = (event.mouse_x, event.mouse_y)
+            if context.region and abs(sx) > context.region.width // 2:
+                sx = 0  # cursor wrapped by GRAB_CURSOR: not a real move
+            if context.region and abs(sy) > context.region.height // 2:
+                sy = 0
+            self._dx += sx
+            self._dy += sy
+            rest = {}
+            for pair, start in self._starts.items():
+                how = self._axes.get(pair)
+                if how is None:
+                    rest[pair] = start
+                    continue
+                ob, key = pair
+                d = rotate_delta(self._dx, self._dy) if how == "ROT" else projected_delta(how, self._dx, self._dy)
+                set_value(ob, key, start + d)
+            slider_apply(rest, self._dx, self._speed, event.ctrl, event.shift, self._hyper)
             ob, key = next(iter(self._starts))
             self._header(context, f"{channel_label(key)}: {get_value(ob, key):.3f}  "
                                   "(Ctrl slower, Shift faster, Esc cancel)")
@@ -3174,14 +3359,18 @@ class ALLSET_PT_channel_box(bpy.types.Panel):
         cb = context.scene.allset_cb
         sel = set(selected_channels(context))
         head = layout.row(align=True)
+        # Maya: the lead's name as plain text; a click edits it (a borderless Blender text field would need a
+        # double-click)
+        name = head.row(align=True)
+        name.alignment = 'LEFT'
         if comp:
             # Maya component mode: the shape node, then INPUTS — no transform channels, no SHAPES header
             # (as Maya)
-            head.prop(ob.data, "name", text="", emboss=False)
+            name.operator(ALLSET_OT_cb_rename.bl_idname, text=ob.data.name, emboss=False, translate=False)
             args = (context, ob)
             draw = _draw_component_lines
         else:
-            head.prop(ob, "name", text="", emboss=False)   # Maya: the lead's name as plain text
+            name.operator(ALLSET_OT_cb_rename.bl_idname, text=ob.name, emboss=False, translate=False)
             args = (context, ob, cb, sel, constrained_keys(ob))
             draw = _draw_lines
         n = len(targets(context))
@@ -3271,7 +3460,7 @@ class ALLSET_PT_dock_modeling_toolkit(bpy.types.Panel):
 
 classes = (ALLSET_PG_cb_row, ALLSET_PG_channel_box, ALLSET_OT_cb_virtual_slider, ALLSET_OT_cb_select_channel,
            ALLSET_OT_cb_deselect_channels, ALLSET_OT_cb_hover, ALLSET_OT_cb_channel_drag, ALLSET_OT_cb_field_drag,
-           ALLSET_PT_cb_field, ALLSET_OT_cb_node_toggle, ALLSET_OT_cb_scroll, ALLSET_OT_cb_wheel, *CHANNEL_OPS,
+           ALLSET_PT_cb_field, ALLSET_PT_cb_name, ALLSET_OT_cb_rename, ALLSET_OT_cb_node_toggle, ALLSET_OT_cb_scroll, ALLSET_OT_cb_wheel, *CHANNEL_OPS,
            ALLSET_OT_cb_show_all,
            ALLSET_MT_cb_channels, ALLSET_MT_cb_freeze, ALLSET_MT_cb_settings, ALLSET_OT_cb_make_lead,
            ALLSET_OT_cb_rotate_order, ALLSET_MT_cb_edit, ALLSET_MT_cb_interp,

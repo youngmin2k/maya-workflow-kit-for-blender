@@ -48,6 +48,27 @@ def s_bigger():
 def s_smaller():
     size = manip_size()
     check(f"- makes it smaller ({C['big']} -> {size})", size < C["big"])
+    C["small"] = size
+    C["dist"] = view3d()[0].spaces.active.region_3d.view_distance
+    centre()
+    tap('NUMPAD_PLUS')
+
+
+@step
+def s_numpad_plus():
+    size = manip_size()
+    check(f"numpad + makes it bigger ({C['small']} -> {size})", size > C["small"])
+    dist = view3d()[0].spaces.active.region_3d.view_distance
+    check(f"numpad + doesn't zoom the view ({C['dist']} -> {dist})", abs(dist - C["dist"]) < 1e-6)
+    C["big"] = size
+    centre()
+    tap('NUMPAD_MINUS')
+
+
+@step
+def s_numpad_minus():
+    size = manip_size()
+    check(f"numpad - makes it smaller ({C['big']} -> {size})", size < C["big"])
     ov = view3d()[0].spaces.active.overlay
     C["wire"] = ov.show_wireframes
     centre()

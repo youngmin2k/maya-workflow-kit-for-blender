@@ -305,6 +305,7 @@ TYPE = [
       ("prop", "data", "space_line", "Leading"),
       ("prop", "data", "space_word", "Word Spacing"),
       ("prop", "data", "shear", "Slant"),
+      ("draw", "type_manipulator"),
       ("missing", "Kerning", "Blender sets kerning per character in text edit mode (Alt+Left / Alt+Right).")),
     S("Geometry", True,
       ("prop", "data", "extrude", "Extrude Distance"),

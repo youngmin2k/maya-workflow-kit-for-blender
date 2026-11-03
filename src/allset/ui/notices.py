@@ -138,7 +138,8 @@ NOTICES = {
         "Hook with falloff", "Blender's soft modification is a Hook modifier on the whole mesh with Maya's falloff "
         "(radius 5, smooth), driven by softModNHandle."),
     "Render/IPR Render Current Frame": (
-        "Viewport Rendered", "Blender's IPR is the viewport in Rendered shading (Render Region: Ctrl+B)."),
+        "Rendered window", "Blender's IPR is a 3D View in Rendered shading: it opens in its own window and looks "
+        "where the main view looks; IPR again closes it (Render Region: Ctrl+B)."),
     # FX
     **{path: ("Emit from Object", "Blender particles come from a mesh: select a mesh and use Emit from Object (a "
               "particle system on it).") for path in ("nParticles/Create Emitter", "nParticles/Create Emitter#2")},
@@ -625,8 +626,6 @@ CATEGORIES = {
                      "data-blocks as assets, expose values with library overrides or custom properties."),
     "Modify/Convert": ("Object > Convert", "Blender converts curves, text, meshes and Grease Pencil; subdiv surfaces, "
                        "Paint Effects, displacement and fluids aren't separate types."),
-    "Modify/Transformation Tools": ("Toolbar transform tools", "Blender's manipulator is the active tool's gizmo: "
-                                    "there is no Type Manipulator."),
     "Edit": ("Edit menu", "Blender has no LOD groups, fur or attribute-value transfer: Object > Link/Transfer Data "
              "copies data between objects."),
     **{f"Edit/{sub}": ("Outliner / Purge", "Blender has no node of this type: delete it in the Outliner, or File > "
@@ -1337,9 +1336,6 @@ MARKING.update({
     **{f"{m}/Selection Constraints": (
         "Select Loops / Linked", "Blender has no selection constraints: use Select > Select Loops or Select Linked "
         "after picking.") for m in _TOOLS},
-    **{f"{m}/Transform Constraints/Along Normals": (
-        "Normal orientation", "The kit's Surface Slide moves along the surface only: move along normals with the "
-        "Normal axis of the Move tool.") for m in _TOOLS},
 })
 
 

@@ -9,6 +9,9 @@ The table stays open for the next selection. Edges / faces selected: no CVs line
 Maya's values are the point tweaks (``pnts``, 0 on an untweaked cube); Blender keeps no tweak layer, so the rows
 show the vertex positions in object space, in display units, and typing moves the vertex (relative entry ``+=1``
 works like Maya's).
+
+A lattice in edit mode shows its selected points the same way, by their point number, with their positions in the
+lattice's own space (a unit cube, -0.5 .. 0.5: plain numbers, not lengths).
 """
 
 import bmesh
@@ -32,8 +35,18 @@ def edit_mesh(ob):
         return None
 
 
+def edit_lattice(ob):
+    if ob is None or ob.type != 'LATTICE' or ob.mode != 'EDIT':
+        return None
+    return ob.data
+
+
 def selected_points(ob):
-    """Indices of the selected vertices of ``ob``'s edit mesh ([] when not a mesh in edit mode)."""
+    """Indices of the selected vertices of ``ob``'s edit mesh / selected points of its edit lattice ([] when
+    neither is in edit mode)."""
+    lt = edit_lattice(ob)
+    if lt is not None:
+        return [i for i, p in enumerate(lt.points) if p.select]
     bm = edit_mesh(ob)
     if bm is None:
         return []
@@ -42,6 +55,8 @@ def selected_points(ob):
 
 def points_shown(ob):
     """Maya's CVs line: points (vertex mode) are selected — not edges / faces."""
+    if edit_lattice(ob) is not None:
+        return any(p.select for p in ob.data.points)
     if ob is None or ob.type != 'MESH':
         return False
     vert, _edge, _face = bpy.context.tool_settings.mesh_select_mode
@@ -69,39 +84,51 @@ def has_selection(ob):
 
 
 def _value(slot, axis):
+    """(object, point coordinates (a vector), value kind) of the table row ``slot``, or (None, None, None)."""
     from . import channel_box
     ob = channel_box.lead()
     pts = _state["points"]
+    if slot >= len(pts):
+        return None, None, None
+    lt = edit_lattice(ob)
+    if lt is not None:
+        if pts[slot] >= len(lt.points):
+            return None, None, None
+        return ob, lt.points[pts[slot]].co_deform, "NONE"
     bm = edit_mesh(ob)
-    if bm is None or slot >= len(pts):
+    if bm is None:
         return None, None, None
     bm.verts.ensure_lookup_table()
     if pts[slot] >= len(bm.verts):
         return None, None, None
-    return ob, bm, bm.verts[pts[slot]]
+    return ob, bm.verts[pts[slot]].co, "LENGTH"
 
 
 def _get(slot, axis):
     def get(_self):
-        _ob, _bm, v = _value(slot, axis)
-        if v is None:
+        _ob, co, kind = _value(slot, axis)
+        if co is None:
             return ""
-        return cb_entry.format_value(v.co[AXES.index(axis)], "LENGTH", bpy.context.scene)
+        return cb_entry.format_value(co[AXES.index(axis)], kind, bpy.context.scene)
     return get
 
 
 def _set(slot, axis):
     def set_(_self, text):
-        ob, _bm, v = _value(slot, axis)
-        if v is None:
+        ob, co, kind = _value(slot, axis)
+        if co is None:
             return
         i = AXES.index(axis)
         try:
-            value = cb_entry.parse_entry(text, v.co[i], "LENGTH", bpy.context.scene)
+            value = cb_entry.parse_entry(text, co[i], kind, bpy.context.scene)
         except (ValueError, TypeError, SyntaxError, NameError):
             return
-        v.co[i] = value
-        bmesh.update_edit_mesh(ob.data, loop_triangles=True, destructive=False)
+        co[i] = value
+        if ob.type == 'LATTICE':
+            ob.data.update_tag()
+            ob.update_tag()
+        else:
+            bmesh.update_edit_mesh(ob.data, loop_triangles=True, destructive=False)
     return set_
 
 
@@ -150,7 +177,13 @@ def draw(lines, context, ob):
         cols = split.row(align=True)
         for axis in AXES:
             cols.label(text=axis.upper())
+        r.label(text="", icon='BLANK1')
     props = context.scene.allset_cb_points
+    from . import channel_box
+    from ..operators import point_keys
+    base = "points[{}].co_deform" if edit_lattice(ob) is not None else "vertices[{}].co"
+    states = point_keys.point_states(ob, [(base.format(i), a) for i in _state["points"] for a in range(3)],
+                                     context.scene.frame_current)
     for slot, index in enumerate(_state["points"]):
         r = lines.row()
         if r is None:
@@ -158,8 +191,14 @@ def draw(lines, context, ob):
         split = r.split(factor=0.16, align=True)
         split.label(text=str(index))
         cols = split.row(align=True)
-        for axis in AXES:
-            cols.prop(props, f"p{slot}_{axis}", text="")
+        row_states = [states.get((base.format(index), a)) for a in range(3)]
+        for a, axis in enumerate(AXES):
+            # keyed / animated points draw in the key colour, like channel rows
+            cell = cols.row(align=True)
+            cell.alert = channel_box.state_alert(row_states[a])
+            cell.prop(props, f"p{slot}_{axis}", text="")
+        shown = next((s for s in ('KEYED', 'ANIMATED', 'MUTED') if s in row_states), None)
+        r.label(text="", icon=channel_box._STATE_ICON.get(shown, 'BLANK1'))
     if len(pts) > MAX_POINTS:
         r = lines.row()
         if r is not None:

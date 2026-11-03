@@ -117,15 +117,30 @@ def selected_edges(bm, uv, synced):
     return list(out)
 
 
-def target_islands(bm, uv, synced):
-    """Shells touched by the selection (faces, else any selected UV), or every shell."""
-    every = islands(bm, uv, [f for f in bm.faces if not f.hide])
+def _picked_faces(bm, uv, synced):
     if synced:
-        picked = {f for f in bm.faces if f.select}
-    else:
-        picked = {f for f in bm.faces if f.select and any(compat.uv_vert_selected(l, uv) for l in f.loops)}
+        return {f for f in bm.faces if f.select and not f.hide}
+    return {f for f in bm.faces if f.select and not f.hide and any(compat.uv_vert_selected(l, uv) for l in f.loops)}
+
+
+def target_islands(bm, uv, synced, fallback=True):
+    """Shells touched by the selection (faces, else any selected UV), or every shell (``fallback``)."""
+    every = islands(bm, uv, [f for f in bm.faces if not f.hide])
+    picked = _picked_faces(bm, uv, synced)
     chosen = [isl for isl in every if picked & set(isl)]
-    return chosen or every
+    return chosen or (every if fallback else [])
+
+
+def picked_anywhere(context):
+    """True when some UV / face is selected in any mesh in edit mode: then the commands that work on "the selected
+    shells, all when none are selected" leave the other meshes alone."""
+    synced = sync(context)
+    for ob in _edit_meshes(context):
+        bm = bmesh.from_edit_mesh(ob.data)
+        uv = bm.loops.layers.uv.active
+        if uv is not None and _picked_faces(bm, uv, synced):
+            return True
+    return False
 
 
 def _island_loops(island):
@@ -272,12 +287,14 @@ def mark_shell_borders(bm, uv, faces):
             e.seam = True
 
 
-def unfold(context, ob):
+def unfold(context, ob, fallback=True):
     """Maya Unfold on the target shells of ``ob``: Blender Unwrap (Minimum Stretch), each shell back in its place."""
     bm = bmesh.from_edit_mesh(ob.data)
     uv = bm.loops.layers.uv.verify()
     bm.faces.index_update()
-    shells = target_islands(bm, uv, sync(context))
+    shells = target_islands(bm, uv, sync(context), fallback=fallback)
+    if not shells:
+        return 0
     faces = [f for isl in shells for f in isl]
     mark_shell_borders(bm, uv, faces)
     # Maya Unfold (Unfold3D) keeps each shell's UV area and the mean of its UVs
@@ -312,10 +329,12 @@ def _point_mean(island, uv):
     return sum((q for _v, q in pts), Vector((0.0, 0.0))) / max(len(pts), 1)
 
 
-def layout(context, ob, padding_px, map_size):
+def layout(context, ob, padding_px, map_size, fallback=True):
     bm = bmesh.from_edit_mesh(ob.data)
     uv = bm.loops.layers.uv.verify()
-    shells = target_islands(bm, uv, sync(context))
+    shells = target_islands(bm, uv, sync(context), fallback=fallback)
+    if not shells:
+        return 0
     faces = [f for isl in shells for f in isl]
     margin = padding_px / max(map_size, 1)
     _with_faces(context, ob, faces, lambda: bpy.ops.uv.pack_islands(
@@ -770,7 +789,8 @@ class ALLSET_OT_uv_unfold(bpy.types.Operator):
     poll = classmethod(lambda cls, context: _uv_poll(context))
 
     def execute(self, context):
-        n = sum(unfold(context, ob) for ob in _edit_meshes(context))
+        fb = not picked_anywhere(context)
+        n = sum(unfold(context, ob, fb) for ob in _edit_meshes(context))
         if not n:
             return {'CANCELLED'}
         results.result(self, NOTICE_UNFOLD)
@@ -795,7 +815,8 @@ class ALLSET_OT_uv_layout(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context):
-        n = sum(layout(context, ob, self.shell_padding, self.map_size) for ob in _edit_meshes(context))
+        fb = not picked_anywhere(context)
+        n = sum(layout(context, ob, self.shell_padding, self.map_size, fb) for ob in _edit_meshes(context))
         return {'FINISHED'} if n else {'CANCELLED'}
 
 
@@ -811,10 +832,11 @@ class ALLSET_OT_uv_texel_get(bpy.types.Operator):
         s = settings(context)
         unit = units.maya_unit(context.scene)
         uva = wa = 0.0
+        fb = not picked_anywhere(context)
         for ob in _edit_meshes(context):
             bm = bmesh.from_edit_mesh(ob.data)
             uv = bm.loops.layers.uv.verify()
-            faces = [f for isl in target_islands(bm, uv, sync(context)) for f in isl]
+            faces = [f for isl in target_islands(bm, uv, sync(context), fb) for f in isl]
             uva += sum(_uv_area(f, uv) for f in faces)
             wa += sum(_world_area(f, ob.matrix_world) for f in faces) / (unit * unit)
         if wa <= 1e-12:
@@ -839,10 +861,11 @@ class ALLSET_OT_uv_texel_set(bpy.types.Operator):
             return {'CANCELLED'}
         unit = units.maya_unit(context.scene)
         done = 0
+        fb = not picked_anywhere(context)
         for ob in _edit_meshes(context):
             bm = bmesh.from_edit_mesh(ob.data)
             uv = bm.loops.layers.uv.verify()
-            for isl in target_islands(bm, uv, sync(context)):
+            for isl in target_islands(bm, uv, sync(context), fb):
                 d = density(isl, uv, ob.matrix_world, s.map_size, unit)
                 if d > 0:
                     scale_island(isl, uv, s.texel_density / d)
@@ -857,8 +880,14 @@ COMPONENTS = (('VERTEX', "Vertex", "Mesh vertices (UV Sync Selection on)"),
               ('EDGE', "Edge", "Mesh edges (UV Sync Selection on)"),
               ('FACE', "Face", "Mesh faces (UV Sync Selection on)"),
               ('UV', "UV", "UVs picked apart from the mesh (UV Sync Selection off)"),
+              ('UV_EDGE', "UV Edge", "UV edges picked apart from the mesh (UV Sync Selection off)"),
+              ('UV_FACE', "UV Face", "UV faces picked apart from the mesh (UV Sync Selection off)"),
               ('SHELL', "UV Shell", "Maya UV Shell mask: a click / box picks whole UV shells (faces), 3D View and UV Editor"),
               ('OPEN', "Open", "Only open the UV Editor"))
+
+# UV-only components: Blender's UV select mode with UV Sync Selection off
+UV_SELECT_MODES = {'UV': 'VERTEX', 'UV_EDGE': 'EDGE', 'UV_FACE': 'FACE'}
+
 
 
 def find_uv_editor(context):
@@ -889,6 +918,21 @@ def prepare(context):
 # from before it is kept here and put back when a mesh component mode comes back (issue #80).
 _MESH_SELECTION = {}     # object name -> ((verts, edges, faces) counts, selected vert / edge / face indices)
 
+# Scenes the kit's UV component (F12, the UV / UV Edge / UV Face / island modes) put in UV mode: the 3D View then
+# shows the UV selection. UV Sync Selection off alone doesn't mean UV mode (the Maya layout scene starts with it off).
+_UV_MODE = set()         # scene pointers
+
+
+def in_uv_mode(scene):
+    """The kit's UV component mode is on in ``scene`` (and UV Sync Selection is still off)."""
+    return (scene is not None and scene.as_pointer() in _UV_MODE
+            and not scene.tool_settings.use_uv_select_sync)
+
+
+def forget_uv_mode():
+    """After a file load: scene pointers may be reused."""
+    _UV_MODE.clear()
+
 
 def _counts(bm):
     return len(bm.verts), len(bm.edges), len(bm.faces)
@@ -910,6 +954,7 @@ def leave_uv_mode(context):
     """Maya F9 / F10 / F11 after F12 / Alt+F12: UV Sync Selection back on and the mesh selection from before UV mode
     back (when the mesh still has the same element counts)."""
     ts = context.scene.tool_settings
+    _UV_MODE.discard(context.scene.as_pointer())
     from . import uv_shell_select
     was_shell = uv_shell_select.flag(context)
     uv_shell_select.set_flag(context, False)      # another component mode ends the UV Shell mask
@@ -939,6 +984,7 @@ def set_component(context, mode):
     from . import uv_shell_select
     ts = context.scene.tool_settings
     if mode == 'SHELL':
+        _UV_MODE.discard(context.scene.as_pointer())
         if not _MESH_SELECTION:       # from a mesh component mode: F9 / F10 / F11 bring its selection back (#80)
             remember_mesh_selection(context)
         uv_shell_select.enter(context)
@@ -947,9 +993,16 @@ def set_component(context, mode):
     if mode in ('VERTEX', 'EDGE', 'FACE'):
         leave_uv_mode(context)
         ts.mesh_select_mode = (mode == 'VERTEX', mode == 'EDGE', mode == 'FACE')
-    elif mode in ('UV', 'ISLAND'):
+    elif mode in ('UV', 'UV_EDGE', 'UV_FACE', 'ISLAND'):
         ts.use_uv_select_sync = False
+        _UV_MODE.add(context.scene.as_pointer())
+        # the 3D View shows UVs as points now: Blender's face select mode would add its face centre dots (X-ray,
+        # wireframe), which Maya's UV mode doesn't show. F9 / F10 / F11 set the mesh mode again on the way out.
+        if ts.mesh_select_mode[2] and not ts.mesh_select_mode[0]:
+            ts.mesh_select_mode = (True, False, False)
         compat.set_uv_island_mode(ts, mode == 'ISLAND')
+        if mode in UV_SELECT_MODES:
+            ts.uv_select_mode = UV_SELECT_MODES[mode]
         # without sync Blender draws only the selected faces' UVs: Maya shows them all
         for ob in _edit_meshes(context):
             bm = bmesh.from_edit_mesh(ob.data)
@@ -991,7 +1044,7 @@ class ALLSET_OT_uv_component(bpy.types.Operator):
                 ts.mesh_select_mode = (self.mode == 'VERTEX', self.mode == 'EDGE', self.mode == 'FACE')
             return {'FINISHED'}
         # coming from a mesh component mode (or object mode): keep its selection for F9 / F10 / F11 (#80)
-        remember = self.mode == 'UV' and (context.mode != 'EDIT_MESH' or ts.use_uv_select_sync)
+        remember = self.mode in ('UV', 'UV_EDGE', 'UV_FACE') and (context.mode != 'EDIT_MESH' or ts.use_uv_select_sync)
         if self.mode in ('VERTEX', 'EDGE', 'FACE') and context.mode == 'EDIT_MESH':
             leave_uv_mode(context)     # before prepare() turns UV Sync Selection on
         if not prepare(context):

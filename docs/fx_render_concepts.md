@@ -88,7 +88,7 @@ it lights only its included objects.
 | Render > Render Current Frame, Redo Previous Render | Render Image (the scene camera, at the Output properties size; without one: persp, placed where the view looks from) |
 | Render > Render Sequence, Batch Render | Render Animation in this Blender session (Esc stops it; without a scene camera: persp, placed where the view looks from) |
 | Render > Show Batch Render, Windows > Rendering Editors > Render View | The Render window |
-| Render > IPR Render Current Frame | The viewport in Rendered shading |
+| Render > IPR Render Current Frame | A window with a 3D View in Rendered shading that looks where the main view looks (IPR again closes it) |
 | Render > Test Resolution | Output properties > Resolution % (10 % to 150 %) |
 | Render > Render Using | Render engine (EEVEE, Cycles, Workbench) |
 | Render > Render Settings, Windows > Rendering Editors > Render Settings | A window with Blender's Render properties |

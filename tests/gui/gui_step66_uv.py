@@ -233,9 +233,26 @@ def s_tabs():
 
 
 @step
-def s_end():
+def s_toolkit_shot():
     w, _a, _r = uv_window()
     shot("gui_step66_toolkit.png", w)
+
+
+@step
+def s_toolkit_scroll():
+    """Scroll the UV Toolkit down to its Unfold / Arrange and Layout sections."""
+    _w, a, _r = uv_window()
+    ui = next(r for r in a.regions if r.type == 'UI')
+    uv_ev('MOUSEMOVE', 'NOTHING', ui.x + ui.width // 2, ui.y + ui.height // 2)
+    for _ in range(12):
+        uv_ev('WHEELDOWNMOUSE', 'PRESS')
+    redraw_all()
+
+
+@step
+def s_end():
+    w, _a, _r = uv_window()
+    shot("gui_step66_toolkit_lower.png", w)
 
 
 run()

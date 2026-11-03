@@ -61,7 +61,7 @@ def is_maya_workspace(ws):
     """A workspace that already is the Maya layout (appended by the switch or a Maya Workflow Kit file)."""
     if ws is None:
         return False
-    if PREV_KEY in ws or TEMPLATE_KEY in ws:     # TEMPLATE_KEY: any Maya workspace of the template
+    if PREV_KEY in ws or TEMPLATE_KEY in ws or USER_KEY in ws:     # TEMPLATE_KEY: any Maya workspace of the template
         return True
     for screen in ws.screens:
         for area in screen.areas:
@@ -72,10 +72,11 @@ def is_maya_workspace(ws):
     return False
 
 
-def _fit_views(ws, scene):
-    """The template views are in cm (Maya unit 0.01 BU): keep them on the same Maya-unit scene."""
+def _fit_views(ws, scene, saved_unit=0.01):
+    """The template views are in cm (Maya unit 0.01 BU; a saved workspace: the Maya unit it was saved with): keep
+    them on the same Maya-unit scene."""
     from .operators import units
-    ratio = units.maya_unit(scene) / 0.01
+    ratio = units.maya_unit(scene) / (saved_unit or 0.01)
     for screen in ws.screens:
         for area in screen.areas:
             for space in area.spaces:
@@ -120,31 +121,54 @@ def enter_layout(window):
 
 
 TEMPLATE_KEY = "allset_template"      # the template workspace a Maya workspace was made from
+USER_KEY = "allset_user_workspace"    # a workspace the user saved (Save Current Workspace As): its name
+USER_UNIT_KEY = "allset_user_unit"    # the Maya unit of the scene it was saved in
 
 
-def append_workspace(window, template_name):
+def append_workspace(window, template_name, filepath=None, idname=None):
     """Append the template workspace ``template_name`` (General, Animation, ... tools/make_startup.MAYA_WORKSPACES) into
-    the open file and show it in ``window``: its Status Line / Shelf masks and cm views are set up (#81)."""
+    the open file and show it in ``window``: its Status Line / Shelf masks and cm views are set up (#81). With
+    ``filepath`` / ``idname``: workspace ``idname`` of that file (a saved workspace, ``template_name`` None)."""
     before = set(bpy.data.workspaces)
+    libs = set(bpy.data.libraries)
     with bpy.context.temp_override(**_window_override(window)):
-        bpy.ops.workspace.append_activate(idname=template_name, filepath=_template_blend())
+        bpy.ops.workspace.append_activate(idname=idname or template_name, filepath=filepath or _template_blend())
+    if filepath is not None:
+        # the appended workspace is local: the saved file's library entry isn't needed
+        def same(path):
+            return os.path.normcase(os.path.normpath(bpy.path.abspath(path))) ==                 os.path.normcase(os.path.normpath(filepath))
+        for lib in [lib for lib in bpy.data.libraries if lib not in libs and same(lib.filepath)]:
+            if not _linked_from(lib):
+                bpy.data.libraries.remove(lib)
     new = [ws for ws in bpy.data.workspaces if ws not in before]
     if not new:
         return None
     ws = new[0]
-    ws[TEMPLATE_KEY] = template_name
+    if template_name is not None:
+        ws[TEMPLATE_KEY] = template_name
     window.workspace = ws
     # region flag writes call ED_area_init, which reads the context window's workspace (None after a file load in
     # -b crashed Blender)
     with bpy.context.temp_override(**_window_override(window)):
         _mark_strips(ws)
-        _fit_views(ws, window.scene)
+        _fit_views(ws, window.scene, ws.get(USER_UNIT_KEY, 0.01))
     return ws
+
+
+def _linked_from(lib):
+    """True when some data of the open file is still linked from library ``lib``."""
+    for attr in dir(bpy.data):
+        coll = getattr(bpy.data, attr, None)
+        if attr == "libraries" or not isinstance(coll, bpy.types.bpy_prop_collection):
+            continue
+        if any(getattr(i, "library", None) == lib for i in coll):
+            return True
+    return False
 
 
 def template_of(ws):
     """The template name of a Maya workspace (None: not one of the kit's Maya workspaces)."""
-    if ws is None:
+    if ws is None or USER_KEY in ws:      # a saved workspace isn't a template's copy
         return None
     name = ws.get(TEMPLATE_KEY)
     if isinstance(name, str) and name:
@@ -201,7 +225,9 @@ def _mark_strips(ws):
 
 
 def leave_layout(window):
-    """Back to the workspace from before ``enter_layout``; the appended one is deleted."""
+    """Back to the workspace from before ``enter_layout``; the Maya workspaces appended on the way (the layout and
+    any Maya workspace picked from Windows > Workspaces) are deleted, so no Maya layout is left among Blender's
+    workspaces (#282)."""
     if window is None:
         return False
     ws = window.workspace
@@ -209,12 +235,26 @@ def leave_layout(window):
         return False
     if PREV_KEY not in ws:
         return _leave_template_layout(window) if is_maya_workspace(ws) else False
-    prev = bpy.data.workspaces.get(ws[PREV_KEY]) or next(
-        (w for w in bpy.data.workspaces if w != ws and not is_maya_workspace(w)), None)
+    chain, cur = [], ws
+    while cur is not None and PREV_KEY in cur and cur not in chain:
+        chain.append(cur)
+        cur = bpy.data.workspaces.get(cur[PREV_KEY])
+    appended = [w for w in bpy.data.workspaces if PREV_KEY in w]
+    prev = cur if cur is not None and not is_maya_workspace(cur) else next(
+        (w for w in bpy.data.workspaces if w not in appended and not is_maya_workspace(w)), None)
     if prev is None:
-        return False
+        if not any(is_maya_workspace(w) and w not in appended for w in bpy.data.workspaces):
+            return False
+        prev = blender_target(window)          # only Maya workspaces besides: the user's / Blender's own
+        if prev is None:
+            return False
     window.workspace = prev
-    added = list(ws.get(MASK_KEY, ()))
+    added = []
+    for w in appended:
+        added += [m for m in w.get(MASK_KEY, ()) if m not in added]
+    for w in appended:
+        if w != ws:
+            _delete_workspace(window, w.name, [])
     name = ws.name
     if window.workspace == ws:
         # The window changes workspace on its next event loop: delete the old one after that. Deleting the
@@ -299,11 +339,69 @@ def _users_startup_workspaces(window):
     return next(iter(got.values()), None)
 
 
+# Blender's factory workspaces (the embedded startup file, Blender 5.x)
+BLENDER_WORKSPACES = ("Layout", "Modeling", "Sculpting", "UV Editing", "Texture Paint", "Shading", "Animation",
+                      "Rendering", "Compositing", "Geometry Nodes", "Scripting")
+MAYA_SUFFIX = " (Maya)"
+MAYA_NAME_KEY = "allset_maya_name"      # a Maya workspace renamed in Blender mode: its name in the template
+
+
+def _startup_names(path):
+    try:
+        with bpy.data.libraries.load(path) as (src, _dst):
+            return list(src.workspaces)
+    except (OSError, RuntimeError):
+        return []
+
+
+def _blender_names():
+    """Workspace names a switch to Blender may show as Blender's own: the user's startup file's, else Blender's
+    factory ones."""
+    path = user_startup_file()
+    names = _startup_names(path) if path is not None else []
+    return names or list(BLENDER_WORKSPACES)
+
+
+def _rename_maya_clashes():
+    """A Maya Workflow Kit file carries Maya workspaces with Blender's names (Sculpting, UV Editing, Animation): in
+    Blender mode those tabs would open a Maya layout with Blender's tools (#282). Rename them "<name> (Maya)" (the
+    Maya menus find them by their template, not their name). Returns the freed names."""
+    names = set(_blender_names())
+    renamed = []
+    for ws in list(bpy.data.workspaces):
+        if ws.name in names and is_maya_workspace(ws) and ws.library is None:
+            ws[MAYA_NAME_KEY] = ws.name
+            renamed.append(ws.name)
+            ws.name = ws.name + MAYA_SUFFIX
+    return renamed
+
+
+def _append_counterparts(window, names):
+    """Blender's own workspace for each freed name the file lacks: the user's startup file's, else Blender's
+    factory one."""
+    names = [n for n in names if bpy.data.workspaces.get(n) is None]
+    path = user_startup_file()
+    if path is not None and names:
+        have = set(_startup_names(path))
+        for ws in _append_workspaces(path, [n for n in names if n in have]).values():
+            del ws[BLENDER_LAYOUT_KEY]          # not a workspace to go back to (_users_workspace)
+    for name in [n for n in names if bpy.data.workspaces.get(n) is None]:
+        try:
+            with bpy.context.temp_override(**_window_override(window)):
+                bpy.ops.workspace.append_activate(idname=name, filepath=EMBEDDED_STARTUP)
+        except RuntimeError as ex:
+            print("Maya Workflow Kit: Blender workspace not appended:", ex)
+
+
 def blender_target(window):
     """The workspace a switch to Blender shows in ``window`` when its Maya layout came with the file (no workspace
     to go back to): the user's workspace if the file has one, else the user's own startup workspaces appended,
-    else Blender's factory Layout (#19, #185)."""
+    else Blender's factory Layout (#19, #185). Maya workspaces with Blender's names step aside for Blender's own
+    (#282). The caller shows the result after these appends (each append also asks the window to show what it
+    appended; the last request wins)."""
+    renamed = _rename_maya_clashes()
     target = _users_workspace(window) or _users_startup_workspaces(window)
+    _append_counterparts(window, renamed)
     if target is not None:
         return target
     before = set(bpy.data.workspaces)
@@ -341,6 +439,16 @@ def _delete_workspace(window, name, added):
         mask = bpy.data.masks.get(mask_name)
         if mask is not None:
             bpy.data.masks.remove(mask)
+
+
+def drop_workspace(window, ws):
+    """Remove workspace ``ws`` from the open file (once ``window`` no longer shows it)."""
+    name = ws.name + " (old)" if not ws.name.endswith(" (old)") else ws.name
+    ws.name = name
+    if window.workspace == ws:
+        _delete_later(window, ws.name, [])
+    else:
+        _delete_workspace(window, ws.name, [])
 
 
 def _delete_later(window, name, added, tries=40):
@@ -444,7 +552,7 @@ def stop_playback():
         return 0
     for window in _windows():
         screen = window.screen
-        if screen is None or not screen.is_animation_playing:
+        if screen is None or screen.is_temporary or not screen.is_animation_playing:
             continue
         try:
             with bpy.context.temp_override(window=window, screen=screen):
@@ -487,6 +595,7 @@ def set_mode(on, layout=True):
         prefs.maya_mode = True
         from . import keymap
         keymap.activate()
+        _pending_hotkeys()
         if layout and not bpy.app.background:
             for window in _windows()[:1]:
                 enter_layout(window)
@@ -514,6 +623,18 @@ def set_mode(on, layout=True):
 
 
 _registered = [False]
+
+
+def _pending_hotkeys():
+    """Hotkeys a settings import made with Maya mode off wait for Maya mode: give them now."""
+    try:
+        from . import settings_io
+        done = settings_io.apply_pending(bpy.context)
+    except Exception as ex:         # never stop Maya mode for this
+        print("Maya Workflow Kit: kept hotkeys:", ex)
+        return
+    if done:
+        print(f"Maya Workflow Kit: {done} imported hotkey(s) given")
 
 
 def _redraw():

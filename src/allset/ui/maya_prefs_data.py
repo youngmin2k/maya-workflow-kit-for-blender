@@ -75,6 +75,7 @@ PAGES = (
             ("pref", "maya_selection_wire", "Selection wireframe (lead green, others white)"),
             ("pref", "maya_component_colors", "Component colours"),
             ("pref", "maya_dock_colors", "Panel colours"),
+            ("pref", "maya_uv_manipulator", "UV Editor manipulator"),
             ("pref", "lock_ortho_tumble", "Lock tumble in orthographic views"),
         ]),
     ]),
@@ -123,6 +124,7 @@ PAGES = (
         ("Graph Editor", [
             ("pref", "graph_auto_frame", "Auto frame"),
             ("pref", "graph_curve_names", "Curve name"),
+            ("pref", "graph_key_size", "Key size"),
             ("pref", "graph_scale_manipulator", "Scale keys manipulator"),
             ("pref", "snap_time_to_selection", "Snap time to selection"),
         ]),

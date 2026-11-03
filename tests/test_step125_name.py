@@ -11,7 +11,7 @@ import kit
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "src", "allset")
 # Hidden identifiers users never see (leading-dot data names, a PropertyGroup class name).
-HIDDEN = (".Allset Tension", ".Allset Solidify", ".Allset Sculpt", ".Allset Morph", ".Allset Jiggle", ".AllsetList", ".AllsetStrip", ".AllsetShelf", ".Allset Smooth Preview Shading", ".Allset Wire", ".Allset Sweep Mesh", ".Allset Weight Sum", '".Allset"', "AllsetNucleus", '"Allset"',
+HIDDEN = (".Allset Tension", ".Allset Solidify", ".Allset Sculpt", ".Allset Morph", ".Allset Jiggle", ".AllsetList", ".AllsetStrip", ".AllsetShelf", ".Allset Smooth Preview Shading", ".Allset Wire", ".Allset Sweep Mesh", ".Allset Weight Sum", ".Allset Type", '".Allset"', "AllsetNucleus", '"Allset"',
           # helper collections, linked to no scene (never in a View Layer Outliner)
           ".AllsetConstraintHelpers", ".AllsetControlShapes", ".AllsetPoseHelpers")
 

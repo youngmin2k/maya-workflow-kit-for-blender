@@ -916,6 +916,19 @@ class ALLSET_OT_sdk_window(bpy.types.Operator):
         return {'FINISHED'}
 
 
+def blend_pick(node, sel):
+    """(shape Key, its SDK keys) for the blendShape weight channels (``bw:<target>``) picked in the Channel Box on
+    an object: Set Driven Key lists those weights under the blendShape node. (None, []) when none is picked."""
+    names = [k[len(cb.BLEND_PREFIX):] for k in sel if cb.is_blend_key(k)]
+    if not names or cb.is_bone(node) or is_key(node) or is_constraint(node):
+        return None, []
+    key = getattr(getattr(node, "data", None), "shape_keys", None)
+    if key is None:
+        return None, []
+    have = set(channels(key))
+    return key, [SHAPE + n for n in names if SHAPE + n in have]
+
+
 class ALLSET_OT_sdk_load(bpy.types.Operator):
     """Load the lead (Driver) or every selected object / joint (Driven, with its blendShape and constraint
     nodes); the channels selected in the Channel Box become the selected attributes"""
@@ -932,9 +945,15 @@ class ALLSET_OT_sdk_load(bpy.types.Operator):
             if node is None:
                 self.report({'WARNING'}, "Select the driver object (or joint) first")
                 return {'CANCELLED'}
-            store(st.driver, node)
             avail = channels(node)
-            st.driver_attr = next((k for k in sel if k in avail), "")
+            picked = next((k for k in sel if k in avail), "")
+            key, weights = blend_pick(node, sel)
+            if not picked and weights:      # a picked blendShape weight drives: the blendShape node is the driver
+                store(st.driver, key, node)
+                picked = weights[0]
+            else:
+                store(st.driver, node)
+            st.driver_attr = picked
         else:
             nodes = cb.targets(context)
             if not nodes:
@@ -947,7 +966,12 @@ class ALLSET_OT_sdk_load(bpy.types.Operator):
                     store(st.driven.add(), extra, node if is_key(extra) else None)
             st.driven_index = 0
             avail = set(channels(nodes[0]))
-            st.driven_attrs = ",".join(k for k in sel if k in avail)
+            picked = [k for k in sel if k in avail]
+            key, weights = blend_pick(nodes[0], sel)
+            if not picked and weights:      # picked blendShape weights: their node is the one shown
+                st.driven_index = next((i for i, n in enumerate(driven_nodes(st)) if n == key), 0)
+                picked = weights
+            st.driven_attrs = ",".join(picked)
         refresh_items(st)
         _watch(st)
         _redraw(context)

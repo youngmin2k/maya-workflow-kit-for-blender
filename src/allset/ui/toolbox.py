@@ -24,7 +24,7 @@ import math
 import bpy
 from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active as TOOLBAR
 
-from .. import compat
+from .. import compat, switch
 from ..operators import tool_keys, view
 
 # Maya 2022 Tool Box order: Select, Lasso, Paint Select, Move, Rotate, Scale.
@@ -88,7 +88,8 @@ def _flat(items):
 def maya_tools(blender_items, mode):
     """The Tool Box for one mode from Blender's tool items (ToolDefs, groups, None), or None when the
     mode lacks the Maya tools. The last slot is the last non-sacred tool used in that mode (Maya's
-    last non-sacred tool; tool_keys.LAST, the Y key's memory)."""
+    last non-sacred tool; tool_keys.LAST, the Y key's memory). Tools other add-ons registered for the mode
+    follow, so they stay reachable."""
     by_id = {t.idname: t for t in _flat(blender_items)}
     picked = [by_id[i] for i in MAYA_TOOLS if i in by_id]
     if not any(t.idname == "builtin.move" for t in picked):
@@ -97,7 +98,15 @@ def maya_tools(blender_items, mode):
     last = tool_keys.LAST.get(mode)
     if last in by_id and last not in MAYA_TOOLS:
         out.append(by_id[last])
+    others = [t for t in by_id.values() if is_other_addon_tool(t.idname) and t.idname != last]
+    if others:     # tools other add-ons registered stay in the toolbar, after the Maya tools
+        out += ([] if out[-1] is None else [None]) + others
     return out
+
+
+def is_other_addon_tool(idname):
+    """A tool another add-on registered (not one of Blender's, not one of the kit's)."""
+    return not (idname.startswith("builtin") or idname.startswith("allset."))
 
 
 def kit_icons_on(items, context):
@@ -462,6 +471,8 @@ def fit_columns(start_fit=True):
     for window in context.window_manager.windows:
         screen = window.screen
         armed = _armed(screen, scale)
+        if window.workspace is not None and switch.USER_KEY in window.workspace:
+            armed = False        # a workspace the user saved keeps the sizes it was saved with
         needed = False       # an edge of this screen is off its fitted place
         # the Maya shelf row (tab row + icon row, 64 px at scale 1): grow it downwards
         row = shelf_row_area(screen)

@@ -21,7 +21,7 @@ ADDED = []
 # Operators that return PASS_THROUGH when they don't apply, so they may sit in
 # front of another item with the same event in the same keymap.
 PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.uv_shell_hover", "allset.emulated_tumble", "allset.cb_virtual_slider", "allset.cb_hover", "allset.weight_numbers_hover", "allset.cb_scroll","allset.time_range_drag", "allset.manip_ctrl", "allset.manip_duplicate", "allset.manip_release", "allset.manip_press",
-                      "allset.select_priority", "allset.select_through", "allset.toolbox_guard", "allset.time_scrub",
+                      "allset.select_priority", "allset.type_char_pick", "allset.select_through", "allset.toolbox_guard", "allset.time_scrub",
                       "allset.time_slider_menu", "allset.outliner_set_click", "allset.outliner_set_menu",
                       "allset.graph_channel_click", "allset.graph_channel_scroll", "allset.script_run",
                       "allset.dock_strip_click",
@@ -664,11 +664,15 @@ def patch_component_delete(kd):
 
 
 # --- 23. Manipulator size, smoothing level, default view, wireframe on shaded -------------------
-# Maya hotkeys = Shift++ -, PgUp/PgDn, 0, Home, Alt+5.
+# Maya hotkeys = Shift++ - (numpad + - too), PgUp/PgDn, 0, Home, Alt+5.
 
 def patch_view_keys(kd):
+    # A Maya keyboard's numpad + / - are the same keys (IC: numpad zoom in / out; Shift = dolly stays).
+    for key in ("NUMPAD_PLUS", "NUMPAD_MINUS"):
+        kd.remove("3D View", "view3d.zoom", type=key, repeat=True)
     for ev, factor in ((make_event("EQUAL"), 1.25), (make_event("EQUAL", shift=True), 1.25),
-                       (make_event("MINUS"), 0.8)):
+                       (make_event("MINUS"), 0.8), (make_event("NUMPAD_PLUS"), 1.25),
+                       (make_event("NUMPAD_MINUS"), 0.8)):
         _add(kd, "3D View", "allset.manip_size", ev, {"factor": factor})
     # Text edit mode keeps Home = line start (Font keymap runs first).
     _add(kd, "3D View", "allset.view_home", make_event("HOME"), shadows=("Font",))
@@ -795,6 +799,13 @@ def patch_select_priority(kd):
         for shift, ctrl in ((False, False), (True, False), (False, True), (True, True)):
             _add(kd, km, "allset.select_priority", make_event("LEFTMOUSE", value, shift=shift, ctrl=ctrl),
                  first=True, shadows=(km,))   # in front of view3d.select on purpose (PASS_THROUGH)
+
+
+# Type Manipulator: a click on a character of a type whose manipulator is on picks that character (right behind the
+# selection priority item, in front of the selection items; passes through anywhere else, operators/type_manip.py).
+def patch_type_char_pick(kd):
+    for km, value in SELECT_PRIORITY_ITEMS:
+        _add(kd, km, "allset.type_char_pick", make_event("LEFTMOUSE", value), first=True, shadows=(km,))
 
 
 # --- 27. Maya key batch --------------------------------------------------------------
@@ -946,6 +957,16 @@ def patch_uv(kd):
     _add(kd, UV_KM, "allset.uv_sew", make_event("S", shift=True))
     _add(kd, UV_KM, "allset.uv_unfold", make_event("U", ctrl=True))
     _add(kd, UV_KM, "allset.uv_layout", make_event("L", ctrl=True))
+    # double-click = UV edge loop (Ctrl: edge ring), on a UV / UV face its shell; Shift adds (operators/uv_loop_pick.py).
+    # IC's own double-click loop picks give way
+    for shift in (False, True):
+        kd.remove(UV_KM, "uv.select_loop", type="LEFTMOUSE", value="DOUBLE_CLICK", shift=shift)
+        for ctrl in (False, True):
+            _add(kd, UV_KM, "allset.uv_loop_pick", make_event("LEFTMOUSE", value="DOUBLE_CLICK", shift=shift, ctrl=ctrl),
+                 {"extend": shift, "ring": ctrl}, shadows=("Screen",))
+    # Ctrl+Up / Ctrl+Down = checker density up / down (whole steps, at least 1)
+    _add(kd, UV_KM, "allset.checker_density", make_event("UP_ARROW", ctrl=True), {"step": 1})
+    _add(kd, UV_KM, "allset.checker_density", make_event("DOWN_ARROW", ctrl=True), {"step": -1})
     for km in ("Object Mode", "Mesh"):
         _add(kd, km, "allset.uv_component", make_event("F12"), {"mode": 'UV'},
              shadows=("Screen",))      # Screen F12 = Blender render, Maya's F12 wins in the 3D View
@@ -1163,6 +1184,10 @@ def patch_graph_keys_2(kd):
     for button in ("MIDDLEMOUSE", "LEFTMOUSE"):
         _add(kd, "Graph Editor", "allset.graph_move_snap", make_event(button, "CLICK_DRAG"), first=True,
              shadows=("Graph Editor",))
+    # Scale Keys box, Shift on a corner: scale in time or value only (a Shift press off the corners / sides passes
+    # through); added before the Shift press watcher below, which therefore still runs first
+    _add(kd, "Graph Editor", "allset.graph_scale_box", make_event("LEFTMOUSE", shift=True), first=True,
+         shadows=("Graph Editor", "Screen", "View2D"))
     # Blender's Shift+click toggles a selected key off on the press: remember the selection so a Shift+drag from it
     # still moves the keys (PASS_THROUGH, the toggle runs)
     _add(kd, "Graph Editor", "allset.graph_shift_press", make_event("LEFTMOUSE", shift=True), first=True,
@@ -1450,7 +1475,7 @@ PATCHES = (patch_tweak_fallback, patch_selection, patch_display, patch_group, pa
            patch_mesh_components, patch_key_stepping, patch_manip_duplicate,
            patch_component_delete, patch_view_keys, patch_active_handle, patch_materials,
            patch_uv_shell_select, patch_select_through, patch_key_batch, patch_component_pick_walk,
-           patch_toolbox_guard, patch_select_priority, patch_pose_joints, patch_time_slider, patch_joints, patch_uv,
+           patch_toolbox_guard, patch_type_char_pick, patch_select_priority, patch_pose_joints, patch_time_slider, patch_joints, patch_uv,
            patch_scene_files, patch_graph_keys, patch_key_batch_2, patch_outliner_drag,
            patch_key_insert, patch_time_range, patch_manip_ctrl, patch_view_keys_3,
            patch_global_keys_4, patch_graph_keys_2, patch_outliner_sets, patch_render_slots,
@@ -1496,7 +1521,22 @@ def patch_emulated_tumble(kd):
              shadows=("Image Paint", "Object Mode", "Pose") if km == "3D View" else (km, "3D View"))
 
 
-PATCHES += (patch_weight_paint_exit, patch_global_set_key, patch_emulated_tumble)
+# --- w / e / r over the whole Graph Editor ------------------------------------------------------------------------
+# The Graph Editor's own keymap covers only its curve area. Over its outliner, menu bar, toolbar row and sidebar the
+# same keys pick the key tool too: one "Screen" item each, whose poll lets the key through outside a Graph Editor.
+# Every editor / mode item with the same key runs before "Screen", so those keep their meaning.
+
+def patch_graph_key_tool_everywhere(kd):
+    for key, tool in (("W", 'MOVE'), ("E", 'ROTATE'), ("R", 'SCALE')):
+        ev = make_event(key)
+        under = tuple(n for n in kd.keymap_names() if n != "Screen" and kd.find(n, type=key))
+        for i, (km, idname, e, props, shadows) in enumerate(ADDED):
+            if km != "Screen" and patch.event_key(e) == patch.event_key(ev) and "Screen" not in shadows:
+                ADDED[i] = (km, idname, e, props, shadows + ("Screen",))
+        _add(kd, "Screen", "allset.graph_key_tool", ev, {"tool": tool}, shadows=under)
+
+
+PATCHES += (patch_weight_paint_exit, patch_global_set_key, patch_graph_key_tool_everywhere, patch_emulated_tumble)
 
 
 # --- Edge slide with the Move tool (#262) ----------------------------------------------------------------------
@@ -1520,6 +1560,31 @@ def patch_uv_shell_hover(kd):
 
 
 PATCHES += (patch_uv_shell_hover,)
+
+
+# --- Numpad digits = the top row (#283) -----------------------------------------------------------------------
+# On a Maya keyboard the numpad digits are the same keys as the top row: 1 / 2 / 3 smooth preview, 4-7 display,
+# 0 rough display, and every other plain digit key. Each plain digit item the kit adds gets a numpad twin, unless
+# that key map already has an item on the numpad key (then Blender's stays). Runs after every other patch.
+
+DIGITS = ("ZERO", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE")
+NUMPAD_DIGITS = {key: f"NUMPAD_{n}" for n, key in enumerate(DIGITS)}
+
+
+def patch_numpad_digits(kd):
+    plain = (0,) * len(patch.MODS)
+    twins = []
+    for km, idname, e, props, shadows in ADDED:
+        numpad = NUMPAD_DIGITS.get(e["type"])
+        if numpad is not None and e.get("value", "PRESS") == "PRESS" and not e.get("any") and                 patch.event_key(e)[2] == plain and e.get("key_modifier", "NONE") == "NONE":
+            twins.append((km, idname, numpad, props, shadows))
+    taken = {(km, numpad) for km, _i, numpad, _p, _s in twins if kd.find(km, type=numpad)}
+    for km, idname, numpad, props, shadows in twins:
+        if (km, numpad) not in taken:
+            _add(kd, km, idname, make_event(numpad), props, shadows=shadows)
+
+
+PATCHES += (patch_numpad_digits,)
 
 
 def apply(data):

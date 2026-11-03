@@ -132,7 +132,8 @@ def s_shot_bevel():
     shot("gui_step139_bevel.png")
     C["rows"] = in_view_rows()
     check(f"In-View rows = Maya polyBevel names ({C['rows'] and list(C['rows'])})",
-          C["rows"] is not None and list(C["rows"]) == ["fraction", "offset_as_fraction", "offset", "segments", "depth"])
+          C["rows"] is not None and list(C["rows"]) == ["fraction", "offset_as_fraction", "offset", "segments", "depth",
+                                                           "chamfer"])
     if C["rows"]:
         x, y = C["rows"]["segments"]
         ev('MOUSEMOVE', 'NOTHING', x=x, y=y)

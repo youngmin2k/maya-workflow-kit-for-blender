@@ -101,6 +101,89 @@ def s_back():
     check(f"frame 1 in edit mode: the vertex is back ({bm.verts[2].co.z:.3f})", abs(bm.verts[2].co.z - C["z0"]) < 1e-4)
 
 
+# --- Auto Key in component mode: a real move of a keyed and an unkeyed vertex ----------------------------------
+
+@step
+def s_auto_setup():
+    ob = bpy.data.objects[C["ob"]]
+    scene = bpy.context.scene
+    scene.frame_set(20)
+    bm = bmesh.from_edit_mesh(ob.data)
+    for v in bm.verts:
+        v.select = v.index in (2, 5)
+    bm.select_flush_mode()
+    bmesh.update_edit_mesh(ob.data)
+    scene.allset_auto_key = True
+    hover()
+
+
+@step
+def s_auto_move():
+    area, region = view3d()
+    with bpy.context.temp_override(window=bpy.context.window_manager.windows[0], area=area, region=region):
+        bpy.ops.transform.translate('INVOKE_DEFAULT', constraint_axis=(False, False, True), orient_type='GLOBAL')
+
+
+@step
+def s_auto_drag1():
+    _area, r = view3d()
+    ev('MOUSEMOVE', 'NOTHING', x=r.x + r.width // 2, y=r.y + r.height // 2 + 40)
+
+
+@step
+def s_auto_drag2():
+    _area, r = view3d()
+    ev('MOUSEMOVE', 'NOTHING', x=r.x + r.width // 2, y=r.y + r.height // 2 + 80)
+
+
+@step
+def s_auto_confirm():
+    ev('LEFTMOUSE', 'PRESS')
+    ev('LEFTMOUSE', 'RELEASE')
+
+
+@step
+def s_auto_wait():
+    pass
+
+
+@step
+def s_auto_keyed():
+    ob = bpy.data.objects[C["ob"]]
+
+    def keys(i, a):
+        fc = next((f for f in compat().id_fcurves(ob.data)
+                   if f.data_path == f"vertices[{i}].co" and f.array_index == a), None)
+        return None if fc is None else [round(k.co.x) for k in fc.keyframe_points]
+    bm = bmesh.from_edit_mesh(ob.data)
+    bm.verts.ensure_lookup_table()
+    moved = bm.verts[2].co.z - (C["z0"] + 2.0)
+    check(f"the move went up ({moved:.5f}; the Maya layout scene is in cm)", moved > 1e-4)
+    fc = next(f for f in compat().id_fcurves(ob.data) if f.data_path == "vertices[2].co" and f.array_index == 2)
+    check("... and the key holds the moved position", abs(fc.evaluate(20) - bm.verts[2].co.z) < 1e-5)
+    check(f"Auto Key keys the keyed vertex's moved axis at 20 ({keys(2, 2)})", keys(2, 2) == [1, 10, 20])
+    check(f"... not its unchanged axes ({keys(2, 0)})", keys(2, 0) == [1, 10])
+    check(f"... and not the unkeyed vertex ({keys(5, 2)})", keys(5, 2) is None)
+    bpy.context.scene.allset_auto_key = False
+    hover()
+
+
+@step
+def s_shift_w():
+    ev('LEFT_SHIFT', 'PRESS', shift=True)
+    ev('W', 'PRESS', shift=True)
+    ev('W', 'RELEASE', shift=True)
+    ev('LEFT_SHIFT', 'RELEASE')
+
+
+@step
+def s_shift_w_nothing():
+    ob = bpy.data.objects[C["ob"]]
+    check(f"Shift+W in component mode keys no object channel ({ob.animation_data})",
+          ob.animation_data is None or not curves(ob))
+    check(f"... still in edit mode ({bpy.context.mode})", bpy.context.mode == 'EDIT_MESH')
+
+
 @step
 def s_lattice():
     bpy.ops.object.mode_set(mode='OBJECT')

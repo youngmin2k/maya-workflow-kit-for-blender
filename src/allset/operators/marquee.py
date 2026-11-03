@@ -104,6 +104,8 @@ def _watch():
 def restore_all():
     from . import joint_marquee
     joint_marquee.cancel_all()
+    from . import lattice_pick
+    lattice_pick.cancel_all()
     for entry in _active.values():
         _restore(entry)
     _active.clear()
@@ -121,6 +123,11 @@ class ALLSET_OT_select_through(bpy.types.Operator):
         begin(context)
         from . import joint_marquee
         joint_marquee.begin(context)      # joints drawn by the kit: Maya's marquee rules once the drag ends
+        from . import lattice_pick         # #274: a deformed lattice's points boxed where they are drawn
+        if lattice_pick.box_takes(context):
+            lattice_pick.start_box(context, event)
+            return {'FINISHED'}
+        lattice_pick.begin_box(context)
         return {'PASS_THROUGH'}
 
 

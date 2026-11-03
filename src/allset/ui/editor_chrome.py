@@ -6,7 +6,7 @@ Maya 2022's editors:
 - menu bars: Graph Editor Edit / View / Select / Curves / Keys / Tangents / List / Show / Help, Dope Sheet the same
   without Select, UV Editor Edit / Create / Select / Cut/Sew / Modify / Tools / View / Image / Textures / UV Sets /
   Help (structure ``editor_menu_data``, actions ``editor_menu_map``, classes built by ``menu_sets``);
-- icon rows under them (Maya's control names; order kept, Maya icons not copied);
+- icon rows under them (the kit's own button names; Maya's order kept, Maya icons not copied);
 - the Graph Editor's outliner lists the object and its attributes "Translate X" (red) / "Translate Y" (green), no
   Action / group rows.
 
@@ -27,7 +27,7 @@ from bpy.props import BoolProperty, IntProperty, StringProperty
 from gpu_extras.batch import batch_for_shader
 
 from .. import live_refs
-from . import editor_menu_data, graph_layers, menu_map, menu_sets
+from . import editor_menu_data, graph_icons, graph_layers, menu_map, menu_sets
 
 GE, DS, UV = "Graph Editor", "Dope Sheet", "UV Editor"
 
@@ -99,7 +99,7 @@ def draw_menus(layout, context, editor):
 
 
 # --- icon rows -----------------------------------------------------------------------------------------------------
-# (Maya control name, Blender icon, action or None, Maya tooltip). An action is a menu_map value
+# (kit button name, Blender icon, action or None, tooltip). An action is a menu_map value
 # (incl. ("prop", ...)); "|" = separator, "STATS" = the selected key's time / value fields, "IMAGE" / "UVMAP" = the
 # UV Editor's texture field / UV set. Unmapped buttons draw greyed with their notice (NOTICES below).
 
@@ -112,121 +112,121 @@ def _inf(side, mode):
 
 
 GRAPH_ICONS = (
-    ("directKeyTool", 'RESTRICT_SELECT_OFF', None, "Move Nearest Picked Key Tool"),
-    ("insertKeyTool", 'KEY_HLT', "allset.insert_key_tool", "Insert Keys Tool"),
-    ("latticeDeformKeyTool", 'MOD_LATTICE', None, "Lattice Deform Keys"),
-    ("regionSelectKeyTool", 'FULLSCREEN_ENTER', "transform.resize", "Region Tool: Scale or move keys"),
-    ("retimeKeyTool", 'TIME', "allset.retime_tool", "Retime Tool: scale and ripple keys"),
+    ("key_nearest_tool", 'RESTRICT_SELECT_OFF', None, "Move Nearest Picked Key Tool"),
+    ("key_insert_tool", 'KEY_HLT', "allset.insert_key_tool", "Insert Keys Tool"),
+    ("key_lattice_tool", 'MOD_LATTICE', None, "Lattice Deform Keys"),
+    ("key_region_tool", 'FULLSCREEN_ENTER', "transform.resize", "Region Tool: Scale or move keys"),
+    ("key_retime_tool", 'TIME', "allset.retime_tool", "Retime Tool: scale and ripple keys"),
     "|",
     # Maya's curve sculpting group (the w / e / r key tools are keys and Edit > Transformation Tools items)
-    ("sculptKeyGrabTool", 'MOUSE_LMB_DRAG', None, "Grab Keys Tool"),
-    ("sculptKeySmoothTool", 'SMOOTHCURVE', "graph.smooth", "Smooth Keys"),
-    ("sculptKeySmearTool", 'MOUSE_MMB_DRAG', None, "Smear Keys Tool"),
-    ("sculptKeyReduceTool", 'MOD_DECIM', "graph.decimate", "Reduce Keys"),
+    ("key_grab_tool", 'MOUSE_LMB_DRAG', None, "Grab Keys Tool"),
+    ("key_smooth", 'SMOOTHCURVE', "graph.smooth", "Smooth Keys"),
+    ("key_smear_tool", 'MOUSE_MMB_DRAG', None, "Smear Keys Tool"),
+    ("key_reduce", 'MOD_DECIM', "graph.decimate", "Reduce Keys"),
     "|", "STATS", "|",
-    ("frameAllButton", 'ZOOM_ALL', ("allset.graph_frame", {"mode": 'ALL'}), "Frame all"),
-    ("frameRangeButton", 'PREVIEW_RANGE', "anim.scene_range_frame", "Frame playback range"),
-    ("centerCurrentTimeButton", 'TIME', "allset.graph_center_time", "Scroll the view so the current time sits in the middle"),
+    ("frame_all", 'ZOOM_ALL', ("allset.graph_frame", {"mode": 'ALL'}), "Frame all"),
+    ("frame_range", 'PREVIEW_RANGE', "anim.scene_range_frame", "Frame playback range"),
+    ("center_time", 'CENTER_ONLY', "allset.graph_center_time", "Scroll the view so the current time sits in the middle"),
     "|",
-    ("autoTanButton", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto tangents"),
-    ("autoeaseTanButton", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto Ease tangents"),
-    ("automixTanButton", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto Mix tangents"),
-    ("autocustomTanButton", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto Custom tangents"),
-    ("splineTanButton", 'IPO_BEZIER', _t("SPLINE"), "Spline tangents"),
-    ("clampedTanButton", 'HANDLE_AUTO', _t("CLAMPED"), "Clamped tangents"),
-    ("linearTanButton", 'IPO_LINEAR', _t("LINEAR"), "Linear tangents"),
-    ("flatTanButton", 'IPO_SINE', _t("FLAT"), "Flat tangents"),
-    ("stepTanButton", 'IPO_CONSTANT', _t("STEPPED"), "Stepped tangents"),
-    ("plateauTanButton", 'IPO_EASE_IN_OUT', _t("PLATEAU"), "Plateau tangents"),
+    ("tan_auto", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto tangents"),
+    ("tan_auto_ease", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto Ease tangents"),
+    ("tan_auto_mix", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto Mix tangents"),
+    ("tan_auto_custom", 'HANDLE_AUTOCLAMPED', _t("AUTO"), "Auto Custom tangents"),
+    ("tan_spline", 'IPO_BEZIER', _t("SPLINE"), "Spline tangents"),
+    ("tan_clamped", 'HANDLE_AUTO', _t("CLAMPED"), "Clamped tangents"),
+    ("tan_linear", 'IPO_LINEAR', _t("LINEAR"), "Linear tangents"),
+    ("tan_flat", 'IPO_SINE', _t("FLAT"), "Flat tangents"),
+    ("tan_stepped", 'IPO_CONSTANT', _t("STEPPED"), "Stepped tangents"),
+    ("tan_plateau", 'IPO_EASE_IN_OUT', _t("PLATEAU"), "Plateau tangents"),
     "|",
-    ("graphEdDefaultTanInButton", 'TRIA_LEFT', ("submenu", "Tangents/Default In Tangent"), "Default in tangent"),
-    ("graphEdDefaultTanOutButton", 'TRIA_RIGHT', ("submenu", "Tangents/Default Out Tangent"), "Default out tangent"),
+    ("tan_default_in", 'TRIA_LEFT', ("submenu", "Tangents/Default In Tangent"), "Default in tangent"),
+    ("tan_default_out", 'TRIA_RIGHT', ("submenu", "Tangents/Default Out Tangent"), "Default out tangent"),
     "|",
-    ("bufferSnapButton", 'GHOST_ENABLED', "allset.buffer_snapshot", "Buffer curve snapshot"),
-    ("bufferSwapButton", 'GHOST_DISABLED', "allset.buffer_swap", "Swap buffer curves"),
+    ("buffer_snapshot", 'GHOST_ENABLED', "allset.buffer_snapshot", "Buffer curve snapshot"),
+    ("buffer_swap", 'GHOST_DISABLED', "allset.buffer_swap", "Swap buffer curves"),
     "|",
-    ("breakTanButton", 'HANDLE_FREE', _t("BREAK"), "Break tangents"),
-    ("unifyTanButton", 'HANDLE_ALIGNED', _t("UNIFY"), "Unify tangents"),
-    ("freeTanButton", 'UNLOCKED', ("allset.tangent_weight_lock", {"lock": False}), "Free tangent length"),
-    ("lockTanButton", 'LOCKED', ("allset.tangent_weight_lock", {"lock": True}), "Lock tangent length"),
+    ("tan_break", 'HANDLE_FREE', _t("BREAK"), "Break tangents"),
+    ("tan_unify", 'HANDLE_ALIGNED', _t("UNIFY"), "Unify tangents"),
+    ("tan_free_length", 'UNLOCKED', ("allset.tangent_weight_lock", {"lock": False}), "Free tangent length"),
+    ("tan_lock_length", 'LOCKED', ("allset.tangent_weight_lock", {"lock": True}), "Lock tangent length"),
     "|",
-    ("OutlineEdloadToggleButton", 'RESTRICT_SELECT_OFF', ("prop", "window_manager.allset_auto_load", {}),
+    ("list_auto_load", 'LINKED', ("prop", "window_manager.allset_auto_load", {}),
      "Auto load Graph Editor on selection"),
-    ("OutlineEdreloadButton", 'FILE_REFRESH', ("allset.graph_list", {"action": "LOAD"}), "Load the selected objects"),
+    ("list_load", 'FILE_REFRESH', ("allset.graph_list", {"action": "LOAD"}), "Load the selected objects"),
     "|",
     # Maya's drag constraint button: on = a middle drag moves freely, off = along the first direction
-    ("switchConstrainedDragStateButton", 'MOUSE_MMB_DRAG', ("prop", "addon_prefs.graph_unconstrained_drag", {}),
+    ("constrained_drag", 'VIEW_PAN', ("prop", "addon_prefs.graph_unconstrained_drag", {}),
      "Unconstrained drag"),
-    ("timeSnapButton", 'SNAP_ON', ("prop", "tool_settings.use_snap_anim", {}), "Time snap"),
-    ("valueSnapButton", 'SNAP_INCREMENT', None, "Value snap"),
+    ("time_snap", 'SNAP_ON', ("prop", "tool_settings.use_snap_anim", {}), "Time snap"),
+    ("value_snap", 'SNAP_INCREMENT', None, "Value snap"),
     "|",
-    ("graphEditorAbsoluteViewIconButton", 'FCURVE', ("prop", "space_data.use_normalization", {"value": False}),
+    ("view_absolute", 'FCURVE', ("prop", "space_data.use_normalization", {"value": False}),
      "Absolute view"),
-    ("graphEditorStackedViewIconButton", 'ALIGN_JUSTIFY', ("allset.graph_view_mode", {"mode": "STACKED"}),
+    ("view_stacked", 'ALIGN_JUSTIFY', ("allset.graph_view_mode", {"mode": "STACKED"}),
      "Stacked view"),
-    ("graphEditorNormalizedViewIconButton", 'NORMALIZE_FCURVES',
+    ("view_normalized", 'NORMALIZE_FCURVES',
      ("prop", "space_data.use_normalization", {"value": True}), "Normalized view"),
-    ("renormalizeCurvesButton", 'FILE_REFRESH', ("prop", "space_data.use_auto_normalization", {}),
+    ("renormalize", 'RECOVER_LAST', ("prop", "space_data.use_auto_normalization", {}),
      "Re-normalize curves"),
     "|",
-    ("curvesPreInfinityCycleButton", 'LOOP_BACK', _inf("PRE", "CYCLE"), "Pre-infinity cycle"),
-    ("curvesPreInfinityCycleOffsetButton", 'FRAME_PREV', _inf("PRE", "CYCLE_OFFSET"), "Pre-infinity cycle with offset"),
-    ("curvesPostInfinityCycleButton", 'LOOP_FORWARDS', _inf("POST", "CYCLE"), "Post-infinity cycle"),
-    ("curvesPostInfinityCycleOffsetButton", 'FRAME_NEXT', _inf("POST", "CYCLE_OFFSET"),
+    ("pre_cycle", 'LOOP_BACK', _inf("PRE", "CYCLE"), "Pre-infinity cycle"),
+    ("pre_cycle_offset", 'FRAME_PREV', _inf("PRE", "CYCLE_OFFSET"), "Pre-infinity cycle with offset"),
+    ("post_cycle", 'LOOP_FORWARDS', _inf("POST", "CYCLE"), "Post-infinity cycle"),
+    ("post_cycle_offset", 'FRAME_NEXT', _inf("POST", "CYCLE_OFFSET"),
      "Post-infinity cycle with offset"),
     "|",
     # Maya 2026: the editor buttons at the right end are Graph Editor / Dope Sheet / Time Editor
     # in both editors (Maya 2022: Trax Editor for the Time Editor)
-    ("getGraphEditorButton", 'GRAPH', ("allset.open_editor", {"ui_type": 'FCURVES'}), "Open the Graph Editor"),
-    ("getDopeSheetButton", 'ACTION', ("allset.open_editor", {"ui_type": 'DOPESHEET'}), "Open the Dope Sheet"),
-    ("getCTEButton", 'NLA', ("allset.open_editor", {"ui_type": 'NLA_EDITOR'}), "Open the Time Editor"),
+    ("open_graph_editor", 'GRAPH', ("allset.open_editor", {"ui_type": 'FCURVES'}), "Open the Graph Editor"),
+    ("open_dope_sheet", 'ACTION', ("allset.open_editor", {"ui_type": 'DOPESHEET'}), "Open the Dope Sheet"),
+    ("open_time_editor", 'NLA', ("allset.open_editor", {"ui_type": 'NLA_EDITOR'}), "Open the Time Editor"),
 )
 
 # Maya 2026 Dope Sheet tools: Select keys / Move Tool / Scale Tool / Insert Keys Tool (Maya 2022: select, move
 # nearest picked key, insert)
 DOPE_ICONS = (
-    ("selectTool", 'RESTRICT_SELECT_OFF', None, "Select keys"),
-    ("moveTool", 'ORIENTATION_CURSOR', ("transform.transform", {"mode": 'TIME_TRANSLATE'}), "Move Tool"),
-    ("scaleTool", 'FULLSCREEN_ENTER', ("transform.transform", {"mode": 'TIME_SCALE'}), "Scale Tool"),
-    ("insertKeyTool", 'KEY_HLT', "action.keyframe_insert", "Insert Keys Tool"),
+    ("key_select_tool", 'RESTRICT_SELECT_OFF', None, "Select keys"),
+    ("key_move_tool", 'ORIENTATION_CURSOR', ("transform.transform", {"mode": 'TIME_TRANSLATE'}), "Move Tool"),
+    ("key_scale_tool", 'FULLSCREEN_ENTER', ("transform.transform", {"mode": 'TIME_SCALE'}), "Scale Tool"),
+    ("key_insert_tool", 'KEY_HLT', "action.keyframe_insert", "Insert Keys Tool"),
     "|", "STATS", "|",
-    ("frameAllButton", 'ZOOM_ALL', "action.view_all", "Frame all"),
-    ("frameRangeButton", 'PREVIEW_RANGE', "anim.scene_range_frame", "Frame playback range"),
-    ("centerCurrentTimeButton", 'TIME', "action.view_frame", "Scroll the view so the current time sits in the middle"),
+    ("frame_all", 'ZOOM_ALL', "action.view_all", "Frame all"),
+    ("frame_range", 'PREVIEW_RANGE', "anim.scene_range_frame", "Frame playback range"),
+    ("center_time", 'TIME', "action.view_frame", "Scroll the view so the current time sits in the middle"),
     "|",
-    ("hierButton", 'OUTLINER', ("prop", "window_manager.allset_hierarchy_below", {}), "Show the hierarchy below"),
+    ("hierarchy_below", 'OUTLINER', ("prop", "window_manager.allset_hierarchy_below", {}), "Show the hierarchy below"),
     "|",
-    ("OutlineEdloadToggleButton", 'RESTRICT_SELECT_OFF', ("prop", "window_manager.allset_auto_load", {}),
+    ("list_auto_load", 'LINKED', ("prop", "window_manager.allset_auto_load", {}),
      "Auto load Dope Sheet on selection"),
-    ("OutlineEdreloadButton", 'FILE_REFRESH', ("allset.graph_list", {"action": "LOAD"}), "Load the selected objects"),
+    ("list_load", 'FILE_REFRESH', ("allset.graph_list", {"action": "LOAD"}), "Load the selected objects"),
     "|",
-    ("dopeSheetTimeSnapButton", 'SNAP_ON', ("prop", "tool_settings.use_snap_anim", {}), "Time snap"),
+    ("dope_time_snap", 'SNAP_ON', ("prop", "tool_settings.use_snap_anim", {}), "Time snap"),
     "|",
-    ("getGraphEditorButton", 'GRAPH', ("allset.open_editor", {"ui_type": 'FCURVES'}), "Open the Graph Editor"),
-    ("getDopeSheetButton", 'ACTION', ("allset.open_editor", {"ui_type": 'DOPESHEET'}), "Open the Dope Sheet"),
-    ("getCTEButton", 'NLA', ("allset.open_editor", {"ui_type": 'NLA_EDITOR'}), "Open the Time Editor"),
+    ("open_graph_editor", 'GRAPH', ("allset.open_editor", {"ui_type": 'FCURVES'}), "Open the Graph Editor"),
+    ("open_dope_sheet", 'ACTION', ("allset.open_editor", {"ui_type": 'DOPESHEET'}), "Open the Dope Sheet"),
+    ("open_time_editor", 'NLA', ("allset.open_editor", {"ui_type": 'NLA_EDITOR'}), "Open the Time Editor"),
 )
 
 _UVE = "space_data.uv_editor"
 UV_ICONS = (
-    ("viewUVWireframeButton", 'SHADING_WIRE', ("prop", f"{_UVE}.show_faces", {"value": False}),
+    ("uv_wireframe", 'SHADING_WIRE', ("prop", f"{_UVE}.show_faces", {"value": False}),
      "Display the UVs as wireframe"),
-    ("viewShadeUVButton", 'SHADING_SOLID', ("prop", f"{_UVE}.show_faces", {"value": True}),
+    ("uv_shaded", 'SHADING_SOLID', ("prop", f"{_UVE}.show_faces", {"value": True}),
      "Shade the UV shells"),
-    ("distortionButton", 'MOD_UVPROJECT', ("prop", f"{_UVE}.show_stretch", {}), "Display UV distortion"),
+    ("uv_distortion", 'MOD_UVPROJECT', ("prop", f"{_UVE}.show_stretch", {}), "Display UV distortion"),
     "|",
-    ("toggleTextureBorderButton", 'MOD_EDGESPLIT', ("prop", "window_manager.allset_uv_texture_borders", {}), "Display texture borders"),
-    ("toggleShellBorderButton", 'MESH_DATA', ("prop", "window_manager.allset_uv_shell_borders", {}), "Display shell borders"),
+    ("texture_borders", 'MOD_EDGESPLIT', ("prop", "window_manager.allset_uv_texture_borders", {}), "Display texture borders"),
+    ("shell_borders", 'MESH_DATA', ("prop", "window_manager.allset_uv_shell_borders", {}), "Display shell borders"),
     "|",
-    ("gridDisplayButton", 'GRID', ("prop", "space_data.overlay.show_grid_background", {}), "Display the grid"),
-    ("isolateViewSelectButton", 'HIDE_OFF', "allset.uv_isolate", "Isolate select"),
+    ("grid_show", 'GRID', ("prop", "space_data.overlay.show_grid_background", {}), "Display the grid"),
+    ("isolate_selected", 'HIDE_OFF', "allset.uv_isolate", "Isolate select"),
     "|",
-    ("snapShotButton", 'IMAGE_DATA', "uv.export_layout", "UV snapshot"),
+    ("uv_snapshot", 'IMAGE_DATA', "uv.export_layout", "UV snapshot"),
     "|",
-    ("checkeredButton", 'TEXTURE', "allset.checker_toggle", "Checker tiling"),
+    ("checker_tiles", 'TEXTURE', "allset.checker_toggle", "Checker tiling"),
     "IMAGE",
-    ("imageChannelButton", 'IMAGE_RGB_ALPHA', ("channels", "space_data.display_channels", {}), "Image channels"),
-    ("dimmerButton", 'LIGHT', None, "Dim the image"),
+    ("image_channels", 'IMAGE_RGB_ALPHA', ("channels", "space_data.display_channels", {}), "Image channels"),
+    ("image_dim", 'LIGHT', None, "Dim the image"),
     "|", "UVMAP",
 )
 
@@ -234,56 +234,56 @@ def _hsg(action):
     return ("allset.hs_graph", {"action": action})
 
 
-# Maya Hypershade graph toolbar (Maya's control names + tooltips); actions run in the Hypershade's graph (ui/hypershade.py)
+# Maya Hypershade graph toolbar (kit button names + tooltips); actions run in the Hypershade's graph (ui/hypershade.py)
 HS_GRAPH_ICONS = (
-    ("showUpstreamButton", 'BACK', _hsg("UPSTREAM"), "Input connections"),
-    ("showUpAndDownstreamButton", 'ARROW_LEFTRIGHT', _hsg("BOTH"), "Input and output connections"),
-    ("showDownstreamButton", 'FORWARD', _hsg("DOWNSTREAM"), "Output connections"),
+    ("show_inputs", 'BACK', _hsg("UPSTREAM"), "Input connections"),
+    ("show_inputs_outputs", 'ARROW_LEFTRIGHT', _hsg("BOTH"), "Input and output connections"),
+    ("show_outputs", 'FORWARD', _hsg("DOWNSTREAM"), "Output connections"),
     "|",
-    ("clearGraphButton", 'X', None, "Clear graph"),
-    ("addSelectedButton", 'ADD', None, "Add selected nodes to graph"),
-    ("removeSelectedButton", 'REMOVE', None, "Remove selected nodes from graph"),
-    ("rearrangeGraphButton", 'NODETREE', None, "Rearrange graph"),
-    ("graphMaterialsButton", 'MATERIAL', ("allset.hs_edit", {"action": "FROM_OBJECT"}),
+    ("graph_clear", 'X', None, "Clear graph"),
+    ("graph_add_selected", 'ADD', None, "Add selected nodes to graph"),
+    ("graph_remove_selected", 'REMOVE', None, "Remove selected nodes from graph"),
+    ("graph_rearrange", 'NODETREE', None, "Rearrange graph"),
+    ("graph_materials", 'MATERIAL', ("allset.hs_edit", {"action": "FROM_OBJECT"}),
      "Graph materials on selected objects"),
     "|",
-    ("LODSimpleModeButton", 'COLLAPSEMENU', _hsg("COLLAPSE"), "Hide attributes on selected nodes"),
-    ("LODConnectedModeButton", 'LINKED', _hsg("CONNECTED"), "Show connected attributes on selected nodes"),
-    ("LODShowAllButton", 'ALIGN_JUSTIFY', _hsg("SHOW_ALL"), "Show primary attributes on selected nodes"),
-    ("LODShowCustomButton", 'PRESET', None, "Show attributes from custom attribute view"),
-    ("attrFilterToggleButton", 'FILTER', None, "Toggle the display of the attribute filter field on selected nodes"),
-    ("swatchSizeToggleButton", 'IMAGE_PLANE', _hsg("PREVIEW"), "Toggle the icon swatch size of selected nodes to "
+    ("attrs_hidden", 'COLLAPSEMENU', _hsg("COLLAPSE"), "Hide attributes on selected nodes"),
+    ("attrs_connected", 'LINKED', _hsg("CONNECTED"), "Show connected attributes on selected nodes"),
+    ("attrs_primary", 'ALIGN_JUSTIFY', _hsg("SHOW_ALL"), "Show primary attributes on selected nodes"),
+    ("attrs_custom", 'PRESET', None, "Show attributes from custom attribute view"),
+    ("attr_filter", 'FILTER', None, "Toggle the display of the attribute filter field on selected nodes"),
+    ("swatch_size", 'IMAGE_PLANE', _hsg("PREVIEW"), "Toggle the icon swatch size of selected nodes to "
      "small/large"),
     "|",
-    ("tabsRLCTButton", 'LOOP_BACK', None, "Restore last closed tab"),
+    ("tab_reopen", 'LOOP_BACK', None, "Restore last closed tab"),
 )
 ICONS = {GE: GRAPH_ICONS, DS: DOPE_ICONS, UV: UV_ICONS, "Hypershade": HS_GRAPH_ICONS}
 
 # Notices of the greyed icon buttons (same form as ui/notices.NOTICES)
 NOTICES = {
-    "directKeyTool": ("Drag a key", "Blender's Graph Editor / Dope Sheet always move the key under the mouse when you "
+    "key_nearest_tool": ("Drag a key", "Blender's Graph Editor / Dope Sheet always move the key under the mouse when you "
                       "drag it: no tool to pick."),
-    "selectTool": ("Click / box select", "Blender selects keys with a click or a box drag: no tool to pick."),
-    "latticeDeformKeyTool": ("Scale (S)", "Blender has no lattice for keys: scale the selected keys with S."),
-    "sculptKeyGrabTool": ("Move keys (G)", "Blender has no brush that drags keys: select keys and move them with G "
+    "key_select_tool": ("Click / box select", "Blender selects keys with a click or a box drag: no tool to pick."),
+    "key_lattice_tool": ("Scale (S)", "Blender has no lattice for keys: scale the selected keys with S."),
+    "key_grab_tool": ("Move keys (G)", "Blender has no brush that drags keys: select keys and move them with G "
                           "(proportional editing for a soft pull)."),
-    "sculptKeySmearTool": ("Move keys (G)", "Blender has no smear brush for keys: move the selected keys with G and "
+    "key_smear_tool": ("Move keys (G)", "Blender has no smear brush for keys: move the selected keys with G and "
                            "proportional editing."),
-    "valueSnapButton": ("Snap", "Blender snaps keys to frames only (Edit > Snap, time snap button)."),
-    "toggleTextureBorderButton": ("Seams", "Blender draws seams in the 3D View, not texture borders here."),
-    "toggleShellBorderButton": ("Select Linked", "Blender doesn't draw shell borders in the UV Editor: select a "
+    "value_snap": ("Snap", "Blender snaps keys to frames only (Edit > Snap, time snap button)."),
+    "texture_borders": ("Seams", "Blender draws seams in the 3D View, not texture borders here."),
+    "shell_borders": ("Select Linked", "Blender doesn't draw shell borders in the UV Editor: select a "
                                 "shell with Select > Select Linked."),
-    "isolateViewSelectButton": ("Hide", "Blender isolates UVs by hiding the rest (H / Shift+H)."),
-    "clearGraphButton": ("Pin", "Blender's graph always shows the whole material: pin another material to change "
+    "isolate_selected": ("Hide", "Blender isolates UVs by hiding the rest (H / Shift+H)."),
+    "graph_clear": ("Pin", "Blender's graph always shows the whole material: pin another material to change "
                          "what it shows."),
-    "addSelectedButton": ("Pin", "Blender's graph shows one material's whole network: nodes can't be added to it "
+    "graph_add_selected": ("Pin", "Blender's graph shows one material's whole network: nodes can't be added to it "
                           "from elsewhere."),
-    "removeSelectedButton": ("Hide attributes", "Blender's graph shows the whole network: collapse nodes instead."),
-    "rearrangeGraphButton": ("Move nodes", "Blender has no automatic node layout: move nodes with G."),
-    "LODShowCustomButton": ("Not in Blender", "Blender has no custom attribute views on nodes."),
-    "attrFilterToggleButton": ("Not in Blender", "Blender's nodes have no attribute filter field."),
-    "tabsRLCTButton": ("Not in Blender", "Blender's graph has one tab (one material at a time)."),
-    "dimmerButton": ("Image field", "Blender doesn't dim the image: pick no image in the header field to hide it."),
+    "graph_remove_selected": ("Hide attributes", "Blender's graph shows the whole network: collapse nodes instead."),
+    "graph_rearrange": ("Move nodes", "Blender has no automatic node layout: move nodes with G."),
+    "attrs_custom": ("Not in Blender", "Blender has no custom attribute views on nodes."),
+    "attr_filter": ("Not in Blender", "Blender's nodes have no attribute filter field."),
+    "tab_reopen": ("Not in Blender", "Blender's graph has one tab (one material at a time)."),
+    "image_dim": ("Image field", "Blender doesn't dim the image: pick no image in the header field to hide it."),
 }
 
 
@@ -295,70 +295,173 @@ def _submenu(editor, sub):
     return menu_sets.SUBMENU_IDS.get(f"{editor}/{sub}")
 
 
-def draw_icons(layout, context, editor):
-    row = layout.row(align=True)
+def icon_groups(editor):
+    """The icon row split at Maya's separators: lists of items (spec tuples, "STATS", "IMAGE", "UVMAP")."""
+    groups, cur = [], []
     for it in ICONS[editor]:
         if it == "|":
-            row.separator()
-            row = layout.row(align=True)
-        elif it == "STATS":
-            scene = context.scene
-            sub = layout.row(align=True)
-            sub.label(text="Stats")
-            col = sub.row(align=True)
-            col.ui_units_x = 3.5
-            col.prop(scene, "allset_key_time", text="")
-            col = sub.row(align=True)
-            col.ui_units_x = 3.5
-            col.prop(scene, "allset_key_value", text="")
-        elif it == "IMAGE":
-            sima = context.space_data
-            layout.template_ID(sima, "image", new="image.new", open="image.open")
-        elif it == "UVMAP":
-            ob = context.edit_object
-            if ob is not None and ob.type == 'MESH' and ob.data.uv_layers.active is not None:
-                sub = layout.row()
-                sub.ui_units_x = 5
-                sub.prop(ob.data.uv_layers.active, "name", text="", icon='GROUP_UVS')
+            if cur:
+                groups.append(cur)
+            cur = []
         else:
-            _draw_icon(row, context, editor, it)
+            cur.append(it)
+    if cur:
+        groups.append(cur)
+    return groups
 
 
-def _draw_icon(row, context, editor, it):
+STATS_UNITS = (2.0, 3.5, 3.5)       # "Stats" label, time field, value field (ui_units_x sub-rows)
+SEP_UNITS = 0.3                     # Blender's separator in a header row
+FOLD = (GE, DS)                     # editors whose toolbar row folds into » when the area is too narrow
+
+
+def group_px(group, u):
+    """Px width of one icon group (aligned row of buttons / the Stats fields), its trailing separator included."""
+    from .toolbar_fit import px
+    w = 0
+    for it in group:
+        if it == "STATS":
+            w += sum(px(k, u) for k in STATS_UNITS)
+        else:
+            w += u
+    return w + px(SEP_UNITS, u)
+
+
+def shown_groups(context, editor):
+    """How many leading icon groups fit the toolbar row; the rest go behind Maya's » button."""
+    groups = icon_groups(editor)
+    region = getattr(context, "region", None)
+    if editor not in FOLD or region is None or getattr(region, "type", None) != 'FOOTER' or region.width <= 1:
+        return len(groups)
+    from . import toolbar_fit
+    system = context.preferences.system
+    scale = system.ui_scale or 1.0
+    u = toolbar_fit.unit(scale, system.pixel_size)
+    return toolbar_fit.fit_widths([group_px(g, u) for g in groups], region.width, scale, system.pixel_size)
+
+
+# area pointer -> (editor, index of the first group behind ») written while the toolbar draws (no ID data written)
+_FIRST_HIDDEN = {}
+
+
+def _draw_stats(layout, context, menu=False):
+    scene = context.scene
+    if menu:
+        layout.prop(scene, "allset_key_time")
+        layout.prop(scene, "allset_key_value")
+        return
+    sub = layout.row(align=True)
+    lab = sub.row(align=True)
+    lab.ui_units_x = STATS_UNITS[0]
+    lab.label(text="Stats")
+    for prop, units in (("allset_key_time", STATS_UNITS[1]), ("allset_key_value", STATS_UNITS[2])):
+        col = sub.row(align=True)
+        col.ui_units_x = units
+        col.prop(scene, prop, text="")
+    sub.separator()
+
+
+def draw_icons(layout, context, editor):
+    groups = icon_groups(editor)
+    n = shown_groups(context, editor)
+    area = getattr(context, "area", None)
+    if area is not None:
+        _FIRST_HIDDEN[area.as_pointer()] = (editor, n)
+    for k, group in enumerate(groups[:n]):
+        row = layout.row(align=True) if any(isinstance(it, tuple) for it in group) else None
+        for it in group:
+            if it == "STATS":
+                _draw_stats(layout, context)
+            elif it == "IMAGE":
+                sima = context.space_data
+                layout.template_ID(sima, "image", new="image.new", open="image.open")
+            elif it == "UVMAP":
+                ob = context.edit_object
+                if ob is not None and ob.type == 'MESH' and ob.data.uv_layers.active is not None:
+                    sub = layout.row()
+                    sub.ui_units_x = 5
+                    sub.prop(ob.data.uv_layers.active, "name", text="", icon='GROUP_UVS')
+            else:
+                _draw_icon(row, context, editor, it)
+        if k < len(groups) - 1 and row is not None:
+            row.separator()
+    if n >= len(groups):
+        return
+    # Maya's overflow arrow at the right end: the groups that don't fit, in a menu (Maya's button order kept)
+    from . import status_icons, toolbar_fit
+    layout.separator_spacer()
+    sub = layout.row(align=True)
+    sub.ui_units_x = toolbar_fit.MORE_UNITS
+    icon = status_icons.icon("pt_more") if "pt_more" in status_icons.EXTRA else 0
+    if icon:
+        sub.menu(ALLSET_MT_editor_more.bl_idname, text="", icon_value=icon)
+    else:
+        sub.menu(ALLSET_MT_editor_more.bl_idname, text="»")
+
+
+class ALLSET_MT_editor_more(bpy.types.Menu):
+    """More toolbar buttons: the ones that don't fit this editor's width"""
+    bl_idname = "ALLSET_MT_editor_more"
+    bl_label = "More Buttons"
+
+    def draw(self, context):
+        area = context.area
+        editor, first = _FIRST_HIDDEN.get(area.as_pointer(), (None, 0)) if area is not None else (None, 0)
+        if editor not in ICONS:
+            return
+        layout = self.layout
+        for k, group in enumerate(icon_groups(editor)[first:]):
+            if k:
+                layout.separator()
+            for it in group:
+                if it == "STATS":
+                    _draw_stats(layout, context, menu=True)
+                elif isinstance(it, tuple):
+                    _draw_icon(layout, context, editor, it, text=it[3])
+
+
+def _icon_args(editor, key, icon):
+    """Button icon keywords: the kit-drawn picture of ``key`` when there is one, else Blender's icon."""
+    value = graph_icons.icon_value(editor, key) if editor in (GE, DS) else 0
+    return {"icon_value": value} if value else {"icon": icon}
+
+
+def _draw_icon(row, context, editor, it, text=""):
     key, icon, action, _tip = it
+    ic = _icon_args(editor, key, icon)
     if action is None:
-        row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text="", icon=icon).key = f"{editor}|{key}"
+        row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text=text, **ic).key = f"{editor}|{key}"
         return
     if action[0] == "submenu":
         idname = _submenu(editor, action[1])
         if idname:
-            row.menu(idname, text="", icon=icon)
+            row.menu(idname, text=text, **ic)
         return
     if action[0] in ("prop", "channels"):
         owner, attr = menu_sets.prop_owner(context, action[1])
         if owner is None:
-            row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text="", icon=icon).key = f"{editor}|{key}"
+            row.operator(ALLSET_OT_editor_icon_unavailable.bl_idname, text=text, **ic).key = f"{editor}|{key}"
             return
         if action[0] == "channels":
-            row.prop(owner, attr, text="", icon_only=True)
+            row.prop(owner, attr, text=text, icon_only=not text)
             return
         props = action[2]
         if "value" not in props:
-            row.prop(owner, attr, text="", icon=icon, toggle=True)
+            row.prop(owner, attr, text=text, toggle=True, **ic)
             return
         current = getattr(owner, attr)
         value = props["value"]
         on = abs(current - value) < 1e-6 if isinstance(value, float) else current == value
-        op = row.operator(menu_sets.ALLSET_OT_menu_set_value.bl_idname, text="", icon=icon, depress=on)
+        op = row.operator(menu_sets.ALLSET_OT_menu_set_value.bl_idname, text=text, depress=on, **ic)
         op.target, op.value = action[1], repr(value)
         return
     on = _toggle_state(context, key)
-    row.operator(ALLSET_OT_editor_icon.bl_idname, text="", icon=icon, depress=bool(on)).key = f"{editor}|{key}"
+    row.operator(ALLSET_OT_editor_icon.bl_idname, text=text, depress=bool(on), **ic).key = f"{editor}|{key}"
 
 
 def _toggle_state(context, key):
     """Pressed state of icon buttons that run a toggle operator (Maya iconTextCheckBox), None otherwise."""
-    if key == "checkeredButton":
+    if key == "checker_tiles":
         from ..operators import menu_items
         return menu_items.checker_on(context)
     return None
@@ -1964,7 +2067,7 @@ def prepare_later(window, ui_type, tries=60):
 
 # --- registration --------------------------------------------------------------------------------------------------
 
-classes = (ALLSET_OT_editor_icon, ALLSET_OT_editor_icon_unavailable, ALLSET_OT_graph_channel_click,
+classes = (ALLSET_OT_editor_icon, ALLSET_OT_editor_icon_unavailable, ALLSET_MT_editor_more, ALLSET_OT_graph_channel_click,
            ALLSET_OT_graph_channel_scroll, ALLSET_OT_graph_list, ALLSET_OT_graph_pin, ALLSET_OT_graph_attr_clear,
            *_BLENDER.values(), *_BAR.values())
 _handle = []
@@ -1989,6 +2092,7 @@ def register():
     bpy.types.WindowManager.allset_auto_load = BoolProperty(
         name="Auto Load Selected Objects", description="Maya: the list follows the selection (off: Load / Add "
         "Selected Objects keep a fixed list)", get=_auto_get, set=_auto_set, options={'SKIP_SAVE'})
+    graph_icons.register()
     patch_headers()
     _handle.append(bpy.types.SpaceGraphEditor.draw_handler_add(draw_channels, (), 'CHANNELS', 'POST_PIXEL'))
     graph_layers.register()
@@ -1999,6 +2103,7 @@ def unregister():
     while _handle:
         bpy.types.SpaceGraphEditor.draw_handler_remove(_handle.pop(), 'CHANNELS')
     unpatch_headers()
+    graph_icons.unregister()
     del bpy.types.Scene.allset_key_time
     del bpy.types.Scene.allset_key_value
     del bpy.types.WindowManager.allset_show_characters
@@ -2009,6 +2114,7 @@ def unregister():
     _expanded.clear()
     _up_label.clear()
     _scroll.clear()
+    _FIRST_HIDDEN.clear()
     _picked["ids"], _picked["sig"] = set(), None
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

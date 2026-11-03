@@ -24,6 +24,7 @@ from . import xform_constraint
 from . import live
 from . import live_translate
 from . import point_keys  # S on selected points keys their positions
+from . import lattice_pick  # lattice points picked where a deformer draws them
 
 classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pivot_pick.classes,
@@ -32,7 +33,7 @@ classes = (*display.classes, *group.classes, *hold.classes, *taphold.classes,
            *pickwalk.classes, *view.classes, *freeze.classes, *parenting.classes,
            *duplicate.classes, *history.classes, *create.classes, *visibility.classes,
            *component.classes, *manip.classes, *material.classes,
-           *marquee.classes, *preselect.classes, *select_priority.classes, *menu_extras.classes,
+           *marquee.classes, *lattice_pick.classes, *preselect.classes, *select_priority.classes, *menu_extras.classes,
            *tool_keys.classes, *symmetry.classes, *pivot.classes, *snap_align.classes, *time_keys.classes,
            *joints.classes, *skin.classes, *driven_key.classes, *rig_tools.classes, *mesh_maya.classes,
            *mesh_tools.classes, *extrude.classes, *uv_tools.classes, *uv_shells.classes, *uv_modify.classes, *anim_layers.classes, *uv_select_178.classes, *shading_maps.classes, *fx.classes, *project.classes, *graph_keys.classes, *graph_key_menu.classes, *deformer_weights.classes, *joint_labels.classes, *ik_fk.classes, *playblast.classes, *key_batch.classes, *cut_sew.classes, *multi_cut.classes,
@@ -164,6 +165,8 @@ classes += joint_display.classes
 from . import skin_method  # noqa: E402  #167: Weight Blended / DQ skinning method
 from . import uv_shell_select  # noqa: E402  #172: Maya UV Shell selection in the 3D View / UV Editor
 classes += uv_shell_select.classes
+from . import uv_loop_pick  # noqa: E402  UV Editor double-click: UV edge loop / ring, UV shell
+classes += uv_loop_pick.classes
 from . import manip_scale  # noqa: E402  #200: Maya Scale manipulator centre / axis drag
 classes += manip_scale.classes
 from . import dome_light  # noqa: E402  #201: Create > Lights > Dome Light = the World environment
@@ -185,6 +188,12 @@ classes += fx_more.classes + render_more.classes
 
 from . import render_persp  # noqa: E402  renders without a scene camera go through persp
 classes += render_persp.classes
+
+from . import uv_toolkit_ops  # noqa: E402  UV Toolkit Align / Straighten UVs / Unfold Along / Randomize
+classes += uv_toolkit_ops.classes
+
+from . import type_manip  # noqa: E402  Type Manipulator: per-character move / rotate / scale (#258)
+classes += type_manip.classes
 
 _register_classes, _unregister_classes = bpy.utils.register_classes_factory(classes)
 
@@ -221,6 +230,7 @@ def register():
     extrude.register_handlers()
     smart_extrude.register_props()
     uv_tools.register_props()
+    uv_toolkit_ops.register_props()
     uv_shell_select.register_props()
     taphold.register_bindings()
     graph_keys.register_bindings()
@@ -267,9 +277,11 @@ def register():
     curves_207.register_handlers()
     sweep_mesh.register()
     point_keys.register_handlers()
+    type_manip.register_handlers()
 
 
 def unregister():
+    type_manip.unregister_handlers()
     point_keys.unregister_handlers()
     autosave.unregister()
     sweep_mesh.unregister()
@@ -343,6 +355,7 @@ def unregister():
     lights.unregister_props()
     material.unregister_props()
     uv_shell_select.unregister_props()
+    uv_toolkit_ops.unregister_props()
     uv_tools.unregister_props()
     extrude.unregister_handlers()
     key_batch3.unregister_handlers()

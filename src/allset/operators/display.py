@@ -68,13 +68,34 @@ class ALLSET_OT_display_mode(bpy.types.Operator):
 PREVIEW_MOD_NAME = "Maya Smooth Preview"
 PREVIEW_SHADE_NAME = "Maya Smooth Preview Shading"
 SHADE_GROUP_NAME = ".Allset Smooth Preview Shading"  # leading dot: hidden in node menus
-PREVIEW_NAMES = (PREVIEW_MOD_NAME, PREVIEW_SHADE_NAME)
+# Maya's smooth normals weight each face by its area times its corner angle (Blender's by the corner angle only):
+# a Weighted Normal modifier in that mode (weight 50 = no extra bias, sharp edges kept) gives Maya's normals. Display
+# only like the preview modifiers, placed before them.
+NORMALS_MOD_NAME = "Maya Normals"
+PREVIEW_NAMES = (PREVIEW_MOD_NAME, PREVIEW_SHADE_NAME, NORMALS_MOD_NAME)
 _WIRE_FLAG = "allset_preview_wire"  # object custom prop: we turned show_wire on
 
 
 def is_preview(mod):
-    """True for the kit's smooth-preview modifiers (display only, not Maya history)."""
+    """True for the kit's display modifiers: smooth preview and Maya normals (display only, not Maya history)."""
     return mod.name in PREVIEW_NAMES
+
+
+def ensure_maya_normals(ob):
+    """Give ``ob`` the Maya Normals modifier (before the smooth preview ones). Returns it."""
+    md = ob.modifiers.get(NORMALS_MOD_NAME)
+    if md is not None:
+        return md
+    md = ob.modifiers.new(NORMALS_MOD_NAME, 'WEIGHTED_NORMAL')
+    md.mode = 'FACE_AREA_WITH_ANGLE'
+    md.weight = 50
+    md.keep_sharp = True
+    md.show_expanded = False
+    first = next((i for i, m in enumerate(ob.modifiers) if m.name in (PREVIEW_MOD_NAME, PREVIEW_SHADE_NAME)), None)
+    if first is not None:
+        with bpy.context.temp_override(object=ob):
+            bpy.ops.object.modifier_move_to_index(modifier=md.name, index=first)
+    return md
 
 
 def _shade_group():

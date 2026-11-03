@@ -278,6 +278,28 @@ class ALLSET_OT_manip_release(bpy.types.Operator):
         return {'PASS_THROUGH'}
 
 
+# In-view label while a Shift+drag copies / extrudes (the names of the tool options that turn it off)
+LABELS = {'DUPLICATE': "Shift Duplicate", 'EXTRUDE': "Shift Extrude"}
+
+
+def label(kind):
+    """In-view message text for a Smart Duplicate / Extrude drag of ``kind``, or None."""
+    from .. import i18n
+    text = LABELS.get(kind)
+    return f"<hl>{i18n.iface(text)}</hl>" if text else None
+
+
+def announce(state, window, area, region_ptr):
+    """The drag really started: say what it does (in-view message, add-on pref ``in_view_messages``)."""
+    text = label(state.get("kind"))
+    if text is None or window is None or area is None:
+        return False
+    from ..ui import view_message
+    region = live_refs.region(area, region_ptr)
+    with bpy.context.temp_override(window=window, area=area, region=region):
+        return view_message.show(bpy.context, text, 'TOP_CENTER')
+
+
 def watch(state, window, area, region):
     """Poll until the gizmo's transform ends, then ``finish``."""
     state["last_op"] = _last_op()
@@ -291,6 +313,8 @@ def watch(state, window, area, region):
                 cleanup(state)
                 return None
             if _transform_running(window):
+                if not state.get("seen"):
+                    announce(state, window, live_refs.area(area_ptr, window), region_ptr)
                 state["seen"] = True
                 return POLL
             # The gizmo starts its transform only once the mouse moves past the drag threshold ("Maybe Drag"):
