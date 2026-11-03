@@ -45,17 +45,11 @@ def _layer_hidden(ob, scene):
 
 
 def hidden_self(ob, scene, view_layer=None):
-    """Maya: the node's own visibility off, or its display layer hidden (the node's drawOverride). Blender's own hide
-    (the Outliner's Ctrl+H, ``hide_set``) counts too, unless this rule set it (``MARK``) or a Show menu type
-    filter did (``SHOW_FILTER``)."""
-    if ob.hide_viewport or _layer_hidden(ob, scene):
-        return True
-    if view_layer is None or MARK in ob or SHOW_FILTER in ob:
-        return False
-    try:
-        return ob.hide_get(view_layer=view_layer)
-    except RuntimeError:          # not in this view layer
-        return False
+    """Maya: the node's own visibility off, or its display layer hidden (the node's drawOverride). Blender's own
+    eye / H hide (``hide_set``) doesn't count: in Blender it never hides the children, and files made in Blender use
+    it on helper objects (a hair surface mesh, a rig) whose children must stay visible. The kit's own Hide keys
+    (also in the Outliner) set Visibility."""
+    return bool(ob.hide_viewport or _layer_hidden(ob, scene))
 
 
 def hidden_by_ancestor(ob, scene, view_layer=None):

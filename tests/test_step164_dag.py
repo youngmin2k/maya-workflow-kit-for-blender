@@ -153,53 +153,44 @@ def test_unregister_shows_what_the_parent_rule_hid():
     assert dag.MARK not in c1 and not c1.hide_get()
 
 
-def test_blender_hide_on_a_parent_hides_the_child():
-    """The Outliner's Ctrl+H is Blender's own hide (``hide_set``, not Visibility): Maya hides the group's children too,
-    and Alt+H / showing the group brings them back."""
-    g, c1, c2 = _scene()
-    g.hide_set(True)                             # outliner.hide on group1
-    _upd()
-    assert not c1.visible_get() and dag.MARK in c1, (c1.visible_get(), dag.MARK in c1)
-    assert not c1.hide_viewport and c2.visible_get()
-    g.hide_set(False)
-    _upd()
-    assert c1.visible_get() and dag.MARK not in c1
-
-
-def test_parenting_into_a_blender_hidden_group_hides_the_node():
+def test_blender_hide_on_a_parent_keeps_the_child_visible():
+    """Blender's own eye / H hide (``hide_set``) on a parent hides only that object, like in Blender: the kit's
+    parent rule follows Visibility and display layers only."""
     g, c1, c2 = _scene()
     g.hide_set(True)
     _upd()
-    c2.parent = g                                # dropped onto group1 in the Outliner
-    _upd()
-    assert not c2.visible_get(), "Maya: a node parented under a hidden group is hidden"
-    c2.parent = None
-    _upd()
-    assert c2.visible_get()
-
-
-def test_a_grandchild_follows_a_blender_hidden_grandparent():
-    """The parent rule's own ``hide_set`` (``MARK``) on the middle node isn't a hide of its own: showing the top
-    group shows the whole chain."""
-    g, c1, c2 = _scene()
-    c2.parent = c1
-    _upd()
-    g.hide_set(True)
-    _upd()
-    assert not c1.visible_get() and not c2.visible_get()
-    g.hide_set(False)
-    _upd()
-    assert c1.visible_get() and c2.visible_get(), (c1.visible_get(), c2.visible_get())
-
-
-def test_a_show_menu_type_filter_hides_only_that_node():
-    """The panel Show menu hides a node type (IK handles) with Blender's hide: a type filter, so the node's children
-    stay visible."""
-    g, c1, c2 = _scene()
-    g.hide_set(True)
-    g[dag.SHOW_FILTER] = True
-    _upd()
+    assert not g.visible_get()
     assert c1.visible_get() and dag.MARK not in c1, (c1.visible_get(), dag.MARK in c1)
-    del g[dag.SHOW_FILTER]
+    g.hide_set(False)
     _upd()
-    assert not c1.visible_get(), "a plain Blender hide on the group still hides its children"
+    assert c1.visible_get() and g.visible_get()
+
+
+def test_visibility_off_on_a_parent_still_hides_the_child():
+    """Maya's Hide (Visibility off) on a group hides its children and a node parented under it."""
+    g, c1, c2 = _scene()
+    g.hide_viewport = True
+    _upd()
+    assert not c1.visible_get() and dag.MARK in c1
+    c2.parent = g
+    _upd()
+    assert not c2.visible_get(), "a node parented under a hidden group is hidden"
+    c2.parent = None
+    g.hide_viewport = False
+    _upd()
+    assert c1.visible_get() and c2.visible_get()
+
+
+def test_hair_under_a_blender_hidden_surface_stays_visible():
+    """A hair Curves object parented to a surface mesh hidden with Blender's eye (a usual setup in files made in
+    Blender) stays visible."""
+    g, c1, c2 = _scene()
+    scalp = c2
+    scalp.parent = None
+    hair = bpy.data.objects.new("hair", bpy.data.hair_curves.new("hair"))
+    bpy.context.scene.collection.objects.link(hair)
+    hair.parent = scalp
+    scalp.hide_set(True)
+    _upd()
+    assert hair.visible_get() and dag.MARK not in hair, (hair.visible_get(), dag.MARK in hair)
+    bpy.data.objects.remove(hair)
