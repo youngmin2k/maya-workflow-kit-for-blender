@@ -17,6 +17,17 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   `<language code>.json` (for example `de_DE.json`) in the translations folder and fill in what you like: empty
   values stay English, and a file for Japanese or Chinese corrects the built-in translation. Reload Translations
   reads the files again; the kit follows Blender's interface language.
+- **Trax Editor and animation clips** (#287): Windows > Animation Editors > Trax Editor opens Blender's NLA Editor
+  with Maya's Trax menu bar. Create > Animation Clip (with its option window: name, leave keys in timeline, time
+  range, include hierarchy / subcharacters) turns the keys of the current character set, or of the selected
+  objects and the objects below them, into a clip: a source clip (`clip1Source`) and an instance (`clip1`) on
+  its own track, with a character set for the clip's channels (`pCube1Ch`, `multiCh`). Several objects share one
+  clip. Library > Insert Clip and the sidebar's Clip Library (rename, insert at the current time, delete) reuse a
+  source clip as often as needed; Edit > Duplicate, Split, Trim Before / After, Modify > Enable/Disable,
+  Activate/Deactivate Keys, Remove Empty Tracks and Create > Blend (over the part where two clips overlap) work on
+  the selected clips; scale and cycle are the strip's own Scale and Repeat. Animation layers stay on top of the
+  clips. Playback > Set Range to > Enabled Clips and Edit > Delete All by Type > Clips work too. A clip keeps its
+  absolute values (Maya's Relative offset is not there), and two clips blend only where they overlap.
 
 ### Fixed
 - **= / - didn't resize the Rotate manipulator** (#283): the keys (and numpad + / -) changed only the Move and

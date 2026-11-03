@@ -37,7 +37,8 @@ NOTICES = {
         "Rotate; the position already is the object's pivot."),
     # Animation (W3: Time Editor / Trax -> NLA; Animation Layers and Character Sets are real)
     "Windows/Animation Editors/Trax Editor": (
-        "NLA Editor", "Blender has no Trax: clips are actions laid out as NLA strips."),
+        "NLA Editor", "Blender's Trax is the NLA Editor with Maya's Trax menus: clips are actions laid out as NLA "
+        "strips."),
     "Windows/Animation Editors/Time Editor": (
         "NLA Editor", "Blender has no Time Editor: clips are actions laid out as NLA strips."),
     # Playback: Blender playback always loops
@@ -680,7 +681,60 @@ def _anim_editor_categories(ed):
     return m
 
 
+_TX = "Trax Editor/"
 CATEGORIES.update({
+    # the Trax Editor's menu bar (ui/trax_editor.py; clips = NLA strips, operators/trax_clips.py)
+    _TX + "File": (
+        "Append the action", "Blender has no clip files or character maps: append or link a source clip's action "
+        "from another .blend (File > Append > Action), then Library > Insert Clip."),
+    _TX + "Edit/Cut": (
+        "Duplicate / Delete", "Blender's NLA has no clip clipboard: Edit > Duplicate places a copy, the sidebar's "
+        "Delete removes one."),
+    _TX + "Edit/Copy": (
+        "Duplicate", "Blender's NLA has no clip clipboard: Edit > Duplicate places a copy right after the clip."),
+    _TX + "Edit/Paste": (
+        "Library > Insert Clip", "Blender's NLA has no clip clipboard: Library > Insert Clip places a source clip at "
+        "the current time."),
+    _TX + "Edit/Merge": (
+        "Bake Action", "Blender merges strips by baking: Object > Animation > Bake Action, then Create > Animation "
+        "Clip of the result."),
+    _TX + "Edit/Merge Cache Clips": (
+        "Mesh Sequence Cache", "Blender has no cache clips in the NLA: geometry caches play through a Mesh Sequence "
+        "Cache modifier."),
+    _TX + "Library/Insert Clip": (
+        "Create > Animation Clip", "Blender lists source clips here once Create > Animation Clip made one."),
+    _TX + "Edit/Copy Channel Offsets": (
+        "Absolute clips", "Blender strips play their action's absolute values: there are no clip offsets to copy."),
+    _TX + "Edit/Quick Select Sets": (
+        "Create > Quick Select Set...", "Blender lists the kit's quick select sets here once Create > Quick Select "
+        "Set... made one."),
+    _TX + "Edit/Group": (
+        "Character sets", "Blender has no character summary rows in the NLA: a character set groups the objects."),
+    _TX + "Edit/Ungroup": (
+        "Character sets", "Blender has no character summary rows in the NLA: a character set groups the objects."),
+    _TX + "Edit/Set Clip Ghost Root": (
+        "Ghosting", "Blender doesn't ghost clips: Visualize > Ghost Selected shows an object's motion."),
+    _TX + "Modify/Match Clips": (
+        "Move the strip", "Blender has no clip matching: move the strip (G) so the poses meet, or blend the overlap."),
+    _TX + "Create/Constraint Clip": (
+        "Constraint influence", "Blender's NLA plays actions only: key the constraint's Influence instead."),
+    _TX + "Create/Expression Clip": (
+        "Drivers", "Blender's NLA plays actions only: use a driver for an expression."),
+    _TX + "Create/Pose": (
+        "Pose Library", "Blender keeps poses as pose assets (Pose Library), not as Trax poses."),
+    _TX + "Create/Time Warp": (
+        "Strip time", "Blender strips have no time warp curve: turn on the strip's Animated Strip Time in the "
+        "sidebar and key it."),
+    _TX + "Create/Geometry Cache": (
+        "Alembic / Mesh Cache", "Blender caches geometry with Alembic export or a Mesh Sequence Cache modifier, not "
+        "as clips."),
+    _TX + "Library/Insert Pose": (
+        "Pose Library", "Blender keeps poses as pose assets (Pose Library), not as Trax poses."),
+    _TX + "List": (
+        "Only Show Selected", "Blender lists the selected objects' tracks (List > Auto Load Selected Characters); it "
+        "has no manual character loading or bookmarks."),
+    _TX + "Help/What's New/Highlight What's New": (
+        "Release notes", "Blender doesn't highlight new menu items: Help > What's New lists them."),
     **_anim_editor_categories("Graph Editor"),
     **_anim_editor_categories("Dope Sheet"),
     "Graph Editor/View/Theme": (

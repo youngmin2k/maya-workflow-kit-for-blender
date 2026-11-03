@@ -91,6 +91,10 @@ from . import character_sets  # noqa: E402  Maya Character Sets on Keying Sets
 
 classes += character_sets.classes
 
+from . import trax_clips  # noqa: E402  Maya Trax clips on the NLA (#287)
+
+classes += trax_clips.classes
+
 from . import color_sets_maya, normals_maya  # noqa: E402  Mesh Display normals and colour sets
 
 classes += normals_maya.classes + color_sets_maya.classes

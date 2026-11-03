@@ -57,7 +57,8 @@ def is_uv(space):
 
 BLENDER_MENUS = {GE: "GRAPH_MT_editor_menus", DS: "DOPESHEET_MT_editor_menus", UV: "IMAGE_MT_editor_menus",
                  # Hypershade / Script Editor windows
-                 "Hypershade": "NODE_MT_editor_menus", "Script Editor": "INFO_MT_editor_menus"}
+                 "Hypershade": "NODE_MT_editor_menus", "Script Editor": "INFO_MT_editor_menus",
+                 "Trax Editor": "NLA_MT_editor_menus"}
 
 
 def _blender_menu_class(editor):

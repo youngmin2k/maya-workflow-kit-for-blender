@@ -183,6 +183,7 @@ MAP = {
        if v not in ('HISTORY', 'NON_DEFORMER_HISTORY')},
     **{f"Edit/Delete All by Type/{k}": _del(v, True)
        for k, v in {**_DELETE_BY_TYPE, **_DELETE_ALL_ONLY}.items()},
+    "Edit/Delete All by Type/Clips": ("allset.trax_delete_source", {"every": True}),     # Trax clips (#287)
     "Edit/Duplicate": "allset.duplicate",                     # Maya names, in place
     "Edit/Duplicate Special": "allset.duplicate_special",
     "Edit/Duplicate with Transform": "allset.duplicate_with_transform",
@@ -504,6 +505,7 @@ MAP = {
     "Playback/Set Range to/Start/End": ("allset.time_set_range", {"mode": "START_END"}),
     "Playback/Set Range to/Min/Max": ("allset.time_set_range", {"mode": "MIN_MAX"}),
     "Playback/Set Range to/Selected": ("allset.time_set_range", {"mode": "SELECTED"}),
+    "Playback/Set Range to/Enabled Clips": ("allset.trax_tracks", {"action": "RANGE"}),    # Trax clips (#287)
     "Playback/Playback Speed/Real-time": ("wm.context_set_enum", {"data_path": "scene.sync_mode",
                                                                    "value": "FRAME_DROP"}),
     # Maya 2026 Play Every Frame, Free / Max Real-time = Blender Play Every Frame (never above the fps)

@@ -203,14 +203,16 @@ def remove_object(scene, ob, layer):
         bpy.data.actions.remove(act)
 
 
-def order_tracks(ob, names):
+def order_tracks(ob, names, force=False):
     """NLA tracks in the layer list order, bottom first (Blender can only move tracks by recreating them, so only the
-    kit tracks' strip settings are swapped into place: track i gets layer names[i])."""
+    kit tracks' strip settings are swapped into place: track i gets layer names[i]). The layer tracks are re-added on
+    top, so other tracks (Trax clip tracks, operators/trax_clips.py) stay below them; ``force`` re-adds them even
+    when the order is right (a clip track was just added on top)."""
     have = tracks(ob)
     want = [n for n in names if n in have]
     ad = ob.animation_data
     kit = [tr for tr in ad.nla_tracks if tr.name in have]
-    if [tr.name for tr in kit] == want:
+    if [tr.name for tr in kit] == want and not force:
         return
     data = {n: (_strip(have[n]).action, have[n].mute, strip_state(_strip(have[n]))) for n in want}
     for tr in kit:
@@ -633,7 +635,16 @@ def result(ob, path, index, frame=None, scene=None):
     known = [(m, w, x) for _n, m, w, x in steps if x is not None]
     if not known:
         return None
-    return compose(known, 1.0 if is_scale(path) else 0.0)
+    return compose(known, below_value(ob, path, max(index, 0), frame))
+
+
+def below_value(ob, path, index, frame):
+    """What the layer stack starts from: the Trax clips' value (their tracks sit below the layers,
+    operators/trax_clips.py), else the property's default (scale 1, else 0) like Blender's NLA."""
+    from . import trax_clips
+    default = 1.0 if is_scale(path) else 0.0
+    v = trax_clips.stack_value(ob, path, index, frame, default)
+    return default if v is None else v
 
 
 def layer_curves(ob, layer):
@@ -670,7 +681,7 @@ def key(ob, path, index, frame=None, value=None, scene=None, layer=None):
         steps.append((layer, 'REPLACE' if st.blend_type == 'REPLACE' else
                       ('MUL' if is_scale(path) else 'ADD'), 1.0, None))
     # NLA starts a channel no lower strip animates from the property's default (scale 1, else 0)
-    start = value if layer == BASE else (1.0 if is_scale(path) else 0.0)
+    start = value if layer == BASE else below_value(ob, path, index, frame)
     x = solve(steps, value, layer, start)
     act = _strip(tracks(ob)[layer]).action
     fc = _fcurve(act, path, index)

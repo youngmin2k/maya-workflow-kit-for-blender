@@ -191,7 +191,7 @@ def snapshot():
             if it is not None and not callable(it) and it.idname in ("builtin.move", "builtin.rotate", "builtin.scale"))
     # Maya menu bars / icon rows in the Graph Editor and Dope Sheet headers
     snap["ui_methods"] += [f"{c} own draw: {getattr(getattr(bpy.types, c).draw, '_draw_funcs', [getattr(bpy.types, c).draw])[0]!r}"
-                           for c in ("GRAPH_HT_header", "DOPESHEET_HT_header",
+                           for c in ("GRAPH_HT_header", "DOPESHEET_HT_header", "NLA_HT_header",
                                      # Render Settings / Script Editor windows
                                      "PROPERTIES_HT_header", "INFO_HT_header", "TEXT_HT_header",
                                      # Maya panel bar / panel toolbar in the Maya Workflow Kit layout's 3D Views

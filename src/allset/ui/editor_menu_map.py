@@ -692,6 +692,47 @@ MAP.update({
 MAP.pop(f"{SH}/Help/Help on {SH}", None)    # Maya titles it Help on Shape Authoring
 
 
+# Trax Editor = an NLA Editor with Maya's menu bar (ui/trax_editor.py; clips: operators/trax_clips.py; literal: no
+# bpy imports)
+TX = "Trax Editor"
+
+
+def _clip(action):
+    return ("allset.trax_clip_edit", {"action": action})
+
+
+_SIDEBAR = ("wm.context_toggle", {"data_path": "space_data.show_region_ui"})
+MAP.update({
+    f"{TX}/File/Visor...": _SIDEBAR,
+    f"{TX}/Edit/Undo": "ed.undo",
+    f"{TX}/Edit/Redo": "ed.redo",
+    f"{TX}/Edit/Split": _clip("SPLIT"),
+    f"{TX}/Edit/Trim Before": _clip("TRIM_BEFORE"),
+    f"{TX}/Edit/Trim After": _clip("TRIM_AFTER"),
+    f"{TX}/Edit/Duplicate": _clip("DUPLICATE"),
+    f"{TX}/View/Frame All": "nla.view_all",
+    f"{TX}/View/Frame Selection": "nla.view_selected",
+    f"{TX}/View/Frame Playback Range": "anim.scene_range_frame",
+    f"{TX}/View/Center Current Time": "nla.view_frame",
+    f"{TX}/View/Frame All Scene Clips": "nla.view_all",
+    f"{TX}/View/Graph Anim Curves...": ("allset.open_editor", {"ui_type": 'FCURVES'}),
+    f"{TX}/Modify/Attribute Editor...": _SIDEBAR,
+    f"{TX}/Modify/Enable/Disable": _clip("ENABLE"),
+    f"{TX}/Modify/Activate/Deactivate Keys": "allset.trax_activate_keys",
+    f"{TX}/Modify/Remove Empty Tracks": ("allset.trax_tracks", {"action": "REMOVE_EMPTY"}),
+    f"{TX}/Create/Animation Clip": "allset.trax_create_clip",
+    f"{TX}/Create/Blend": _clip("BLEND"),
+    f"{TX}/Create/Character Set": "allset.character_create",
+    f"{TX}/Create/Quick Select Set...": "allset.create_quick_select_set",
+    f"{TX}/Edit/Quick Select Sets": ("menu", "ALLSET_MT_quick_select_sets"),
+    f"{TX}/Library/Insert Clip": ("menu", "ALLSET_MT_trax_insert_clip"),
+    f"{TX}/List/Auto Load Selected Characters": _prop("space_data.dopesheet.show_only_selected"),
+    **_help_menu(TX, "editors/nla/index.html"),
+    f"{TX}/Help/Help on Trax": _url(_MANUAL + "editors/nla/index.html"),
+})
+MAP.pop(f"{TX}/Help/Help on {TX}", None)    # Maya titles it Help on Trax
+
+
 # Change Rotation Interp / Key Sync / Peak Removal / Select Curve Nodes (operators/graph_curves_203.py);
 # Maya 2026's Dope Sheet has no Curves menu / Select Curve Nodes
 # (literal here: tools/menu_count.py loads the menu maps without bpy)

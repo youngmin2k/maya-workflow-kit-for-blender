@@ -505,6 +505,8 @@ def _extend():
     WINDOWS.extend(motion_path_228.windows())    # Attach to Motion Path
     from . import option_windows_uv
     WINDOWS.extend(option_windows_uv.WINDOWS)    # UV Editor Straighten UVs / Randomize Shells
+    from . import option_windows_trax
+    WINDOWS.extend(option_windows_trax.WINDOWS)    # Trax Editor Create Clip
 
 
 _extend()
