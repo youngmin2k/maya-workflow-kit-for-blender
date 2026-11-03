@@ -10,6 +10,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   set in General was gone in Rigging and the mesh hid the joints inside it. Switching workspaces now keeps the
   main view's display mode (wireframe / shaded, X-Ray, X-Ray Joints, Wireframe on Shaded), like Maya's persp
   panel.
+- **Outliner button opened a new window** (#290): in a layout without the Tool Box column (Blender's own
+  layouts, Modeling - Expert) the Tool Box Outliner button hid the Outliner and the next click opened it in a new
+  window. It now docks the Outliner back on the left of the main viewport.
 - G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
   ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
 

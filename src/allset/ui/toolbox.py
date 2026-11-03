@@ -704,9 +704,13 @@ def _beside_column(screen):
 
 
 def dock_outliner(context, window):
-    """Split the area right of the Tool Box column and put a Maya Outliner on its left. The new area or None."""
+    """Split the area right of the Tool Box column (without a column: the main 3D View, e.g. Blender's own layouts)
+    and put a Maya Outliner on its left. The new area or None."""
     screen = window.screen
     area = _beside_column(screen)
+    if area is None:
+        from .status_line import main_view3d
+        area = main_view3d(screen)[0]
     if area is None:
         return None
     region = next((r for r in area.regions if r.type == 'WINDOW'), None)
@@ -763,7 +767,7 @@ class ALLSET_OT_toggle_outliner(bpy.types.Operator):
             return {'FINISHED'}
         if dock_outliner(context, window) is not None:
             return {'FINISHED'}
-        # no Tool Box column here: the Outliner opens in its own window
+        # no 3D View to dock beside (a maximized view ...): the Outliner opens in its own window
         return bpy.ops.allset.open_editor(ui_type='OUTLINER')
 
 
