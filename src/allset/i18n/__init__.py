@@ -12,6 +12,10 @@ menus, the shelf tabs, wrapped paragraphs) is translated here first with ``iface
 
 ``<locale>.py`` = ``STRINGS = {English: translation}`` (no ``bpy``: ``tools/i18n_strings.py`` reads them for its
 coverage report). Add a language by adding a module and listing it in ``LANGUAGES``.
+
+Users add or correct languages with ``<language code>.json`` files in the kit's user folder (``user_files``; the
+English template ``template_en.json`` lists every string by menu / window / file); they are read on register and by
+``reload``, and their entries go over the built-in table of that language.
 """
 
 from . import ja_JP, zh_HANS
@@ -24,10 +28,14 @@ ARROW = " ▸"
 _registered = []
 
 
-def table():
-    """{locale: {(context, English): translation}} for ``bpy.app.translations.register``."""
+def table(user=None):
+    """{locale: {(context, English): translation}} for ``bpy.app.translations.register``: the built-in tables with
+    ``user`` ({locale: {English: translation}}, the user's translation files) over them."""
+    merged = {locale: dict(strings) for locale, strings in LANGUAGES.items()}
+    for locale, strings in (user or {}).items():
+        merged.setdefault(locale, {}).update(strings)
     return {locale: {(ctx, en): tr for en, tr in strings.items() for ctx in CONTEXTS}
-            for locale, strings in LANGUAGES.items()}
+            for locale, strings in merged.items()}
 
 
 def mark(text):
@@ -124,17 +132,33 @@ def split_points(text):
     return out
 
 
+def _user_tables():
+    from . import user_files
+    try:
+        return user_files.read_all()
+    except Exception as ex:          # a broken user folder must not stop the add-on
+        print("Maya Workflow Kit: could not read the translation files:", ex)
+        return {}
+
+
 def register():
     import bpy
     name = __package__
     if name in _registered:
         return
+    data = table(_user_tables())
     try:
-        bpy.app.translations.register(name, table())
+        bpy.app.translations.register(name, data)
     except ValueError:        # left over from a module reload: replace it
         bpy.app.translations.unregister(name)
-        bpy.app.translations.register(name, table())
+        bpy.app.translations.register(name, data)
     _registered.append(name)
+
+
+def reload():
+    """Read the user's translation files again and hand the tables to Blender anew."""
+    unregister()
+    register()
 
 
 def unregister():
@@ -142,3 +166,5 @@ def unregister():
     for name in _registered:
         bpy.app.translations.unregister(name)
     _registered.clear()
+    from . import user_files
+    user_files.LOADED.clear()

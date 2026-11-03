@@ -5,6 +5,9 @@
     python tools/i18n_strings.py --stale         # dictionary keys that are no kit string any more
     python tools/i18n_strings.py --dump [category]            # every string of a category, one per line
 
+``tools/gen_i18n_template.py`` writes the same strings, grouped by menu / window / file, as the English
+translation template.
+
 Runs without Blender. Categories:
 
 - ``menus``         main Maya menu bar: menu names, items, section titles, menu set names (``ui/menu_data.py``)
@@ -264,6 +267,66 @@ CATEGORIES = {"menus": menus, "editor_menus": editor_menus, "panel_menus": panel
 def collect():
     """{category: set of English strings}."""
     return {name: fn() for name, fn in CATEGORIES.items()}
+
+
+def sections():
+    """{section: sorted English strings}: the same strings as ``collect`` grouped by where they are shown (one
+    section per Maya menu, editor menu, marking menu, shelf tab and source file). A string used in several places
+    is listed in each of them."""
+    out = {}
+
+    def put(section, strings, check=False):
+        strings = {s for s in strings if _ok(s)} if check else set(strings)
+        if strings:
+            out.setdefault(section, set()).update(strings)
+
+    md = _load("ui/menu_data.py")
+    for _name, (label, _set, _src, items) in md.MENUS.items():
+        found = {label}
+        _walk_menu(items, found)
+        put(f"Main menu/{label}", found)
+    put("Main menu/Menu sets", {label for _sid, label, _menus in md.MENU_SETS})
+    ed = _load("ui/editor_menu_data.py")
+    for editor, bars in ed.EDITORS.items():
+        for title, items in bars:
+            found = {editor, title}
+            _walk_menu(items, found)
+            put(f"Editor menus/{editor}/{title}", found)
+    pm = _load("ui/panel_menu_data.py")
+    for _idname, (prefix, rows) in pm.MENUS.items():
+        found = set(prefix.split("/"))
+        for row in rows:
+            if row[0] == "sep":
+                if len(row) > 1 and row[1]:
+                    found.add(row[1])
+                continue
+            found.add(row[1] if row[0] in ("grey", "run", "menu") else row[-1])
+        put(f"Panel menus/{prefix}", found, True)
+    put("Panel menus/Menu bar", {title for title, _idname in pm.BAR}, True)
+    put("Panel menus/Panel types", {label for label, _ui in pm.PANEL_TYPES}, True)
+    put("Panel toolbar", {label for group in pm.TOOLBAR for _glyph, _kind, _data, label in group}, True)
+    put("Status Line", {path.split("/", 1)[1] for path in pm.STATUS_LINE}, True)
+    mm = _load("marking/menus.py")
+    for menu in mm.MENUS.values():
+        found = {menu.label}
+        _walk_marking(menu, found)
+        put(f"Marking menus/{menu.label}", found, True)
+    sd = _load("ui/shelf_data.py")
+    for _file, tab, buttons in sd.SHELVES:
+        put(f"Shelves/{tab}", {tab} | {label for label, _cmd in buttons}, True)
+    put("Notices", notices())
+    files = sorted(PKG.rglob("*.py"))
+    for path in files:
+        rel = path.relative_to(PKG).as_posix()
+        if rel in _DATA or rel.startswith("i18n/") or rel.startswith("keymap/ic_"):
+            continue
+        put(f"Labels/{rel[:-3]}", _literals(path), True)
+    for path in files:
+        rel = path.relative_to(PKG).as_posix()
+        if rel.startswith("i18n/") or rel.startswith("keymap/ic_"):
+            continue
+        put(f"Tooltips/{rel[:-3]}", _docstrings(path), True)
+    return {name: sorted(strings) for name, strings in out.items()}
 
 
 def all_strings(cats=None):

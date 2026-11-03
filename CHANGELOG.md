@@ -12,6 +12,11 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Drag a camera from the Outliner into a view** (#294): middle-drag a camera from the Outliner and drop it on
   a viewport; that viewport looks through the camera as its own camera, like a Maya panel. Other objects dropped
   on a viewport change nothing, and middle-drags inside the Outliner still parent.
+- **Your own translations** (#293): *Preferences > Add-ons > Maya Workflow Kit > Translations* writes an English
+  template of every kit text, grouped by menu, editor, marking menu, shelf and window. Copy it to
+  `<language code>.json` (for example `de_DE.json`) in the translations folder and fill in what you like: empty
+  values stay English, and a file for Japanese or Chinese corrects the built-in translation. Reload Translations
+  reads the files again; the kit follows Blender's interface language.
 
 ### Fixed
 - **= / - didn't resize the Rotate manipulator** (#283): the keys (and numpad + / -) changed only the Move and

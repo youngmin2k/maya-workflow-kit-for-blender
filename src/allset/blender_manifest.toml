@@ -29,10 +29,11 @@ copyright = [
 ]
 
 [permissions]
-# Writes: the extension user folder (your shelves) and the Maya project folders the file dialogs open in
+# Writes: the extension user folder (your shelves, the translation template) and the Maya project folders the
+# file dialogs open in
 # Nothing outside them: no layout template, no
 # preference snapshot, no theme backup.
-files = "Your shelves and Maya project folders"
+files = "Your shelves, translation template and Maya project folders"
 
 [build]
 paths_exclude_pattern = [

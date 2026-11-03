@@ -69,6 +69,7 @@ commercial goal behind it. It is not affiliated with or endorsed by Autodesk.
 - [Recommended setup](#recommended-setup)
 - [Quick start for Maya users](#quick-start-for-maya-users)
 - [FAQ](#faq)
+- [Translations](#translations)
 - [Development](#development)
 - [Contributors](#contributors) · [Credits](#credits) · [License](#license) · [Trademarks](#trademarks)
 
@@ -97,7 +98,8 @@ one-line note saying why and what to use instead.
 - The kit uses your own Blender theme; see [Recommended setup](#recommended-setup) for a Maya-like look.
 - **Languages**: the kit's menus, marking menus, shelves and tooltips follow Blender's *Preferences > Interface >
   Language* — Japanese (日本語) and Simplified Chinese (简体中文) so far, with Blender's *Translate* switches for
-  interface and tooltips. Corrections from native speakers are welcome.
+  interface and tooltips. Corrections from native speakers are welcome. To add your own language, see
+  [Translations](#translations).
 
 ### Navigation & selection
 
@@ -412,6 +414,24 @@ the Blender Foundation. See [Trademarks](#trademarks).
 **Does it use the network?**
 No network access and no auto-updater. Help menu items open Blender manual pages in your browser only when you click
 them.
+
+---
+
+## Translations
+
+The kit's texts follow Blender's *Preferences > Interface > Language* and its *Translate* switches (Blender keeps one
+language for its whole interface, so the kit has no language setting of its own). Japanese and Simplified Chinese
+are built in. To translate the kit into another language, or to correct a built-in translation:
+
+1. In *Preferences > Add-ons > Maya Workflow Kit > Translations*, click **Write Template** and then
+   **Open Translations Folder**.
+2. Copy `template_en.json` to `<language code>.json`, using Blender's language code (for example `de_DE.json`,
+   `fr_FR.json`, `ko_KR.json`).
+3. Replace the English values with your translation. The file is grouped by menu, editor, marking menu, shelf and
+   window; a value left empty or in English is skipped, so you can translate part of it.
+4. Click **Reload Translations** (or restart Blender) and choose the language in Blender's preferences.
+
+The files stay in the extension's user folder and are only read as data.
 
 ---
 

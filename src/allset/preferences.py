@@ -495,6 +495,8 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         row = box.row(align=True)
         row.operator("allset.settings_export", icon='EXPORT')
         row.operator("allset.settings_import", icon='IMPORT')
+        from . import translations
+        translations.draw(layout)
         if not self.maya_mode:
             return
         box = layout.box()
