@@ -5420,6 +5420,7 @@ STRINGS = {
     'Mute the selected keys: the curve holds the key\'s value until the next unmuted key (Maya Keys > Mute Key;\nBlender has no per-key mute: a Stepped modifier named "Maya mute" holds the value)': '将选定关键帧静音：曲线保持该关键帧的值直到下一个未静音的关键帧 (Maya 关键帧 > 静音关键帧；\nBlender 没有逐关键帧静音：由名为 "Maya mute" 的阶梯修改器保持该值)',
     "Look at the view from this side; a perspective view stays perspective, like Maya's persp camera": '从这一侧查看视图；透视视图保持透视，与 Maya 的 persp 摄像机相同',
     'ViewCube Face': 'ViewCube 面',
+    'A Rotate axis ring: only its front half is drawn and picked (picked on screen, ahead of the trackball).': 'Rotate 轴环：只绘制和拾取前半部分（在屏幕上拾取，优先于轨迹球）。',
     'Navigate the current viewport without moving the scene camera': '导航当前视口，不移动场景摄像机',
     'New / Duplicate / Rename / Delete a marking menu, or Restore Default': '新建 / 复制 / 重命名 / 删除标记菜单，或恢复默认',
     'New set holding the selected objects': '包含选定对象的新集',

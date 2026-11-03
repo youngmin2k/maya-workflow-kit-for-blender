@@ -5420,6 +5420,7 @@ STRINGS = {
     'Mute the selected keys: the curve holds the key\'s value until the next unmuted key (Maya Keys > Mute Key;\nBlender has no per-key mute: a Stepped modifier named "Maya mute" holds the value)': '選択キーをミュート: 次のミュートされていないキーまでカーブがそのキーの値を保持 (Maya キー > キーをミュート。\nBlender にはキーごとのミュートがないため、"Maya mute" という名前のステップモディファイアで値を保持)',
     "Look at the view from this side; a perspective view stays perspective, like Maya's persp camera": 'この側からビューを見る。パースビューはパースのまま (Maya の persp カメラと同じ)',
     'ViewCube Face': 'ViewCube の面',
+    'A Rotate axis ring: only its front half is drawn and picked (picked on screen, ahead of the trackball).': 'Rotate の軸リング: 手前の半分だけを描画して選択 (画面上で選択、トラックボールより優先)。',
     'Navigate the current viewport without moving the scene camera': 'シーンカメラを動かさずに現在のビューポートをナビゲート',
     'New / Duplicate / Rename / Delete a marking menu, or Restore Default': 'マーキングメニューの新規作成 / 複製 / 名前の変更 / 削除、またはデフォルトに戻す',
     'New set holding the selected objects': '選択オブジェクトを含む新しいセット',
