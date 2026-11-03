@@ -3238,6 +3238,104 @@
    "Search": "Search",
    "What's New": "What's New"
   },
+  "Editor menus/Trax Editor/File": {
+   "Character Mapper...": "Character Mapper...",
+   "Export Animation Clip...": "Export Animation Clip...",
+   "Export Character Map...": "Export Character Map...",
+   "File": "File",
+   "Import Animation Clip to Characters...": "Import Animation Clip to Characters...",
+   "Import Animation Clip...": "Import Animation Clip...",
+   "Import Audio...": "Import Audio...",
+   "Import Cache...": "Import Cache...",
+   "Trax Editor": "Trax Editor",
+   "Visor...": "Visor..."
+  },
+  "Editor menus/Trax Editor/Edit": {
+   "Copy": "Copy",
+   "Copy Channel Offsets": "Copy Channel Offsets",
+   "Cut": "Cut",
+   "Duplicate": "Duplicate",
+   "Edit": "Edit",
+   "Group": "Group",
+   "Merge": "Merge",
+   "Merge Cache Clips": "Merge Cache Clips",
+   "No Quick Select Sets Defined": "No Quick Select Sets Defined",
+   "Paste": "Paste",
+   "Quick Select Sets": "Quick Select Sets",
+   "Redo": "Redo",
+   "Set Clip Ghost Root": "Set Clip Ghost Root",
+   "Split": "Split",
+   "Trax Editor": "Trax Editor",
+   "Trim After": "Trim After",
+   "Trim Before": "Trim Before",
+   "Undo": "Undo",
+   "Ungroup": "Ungroup"
+  },
+  "Editor menus/Trax Editor/View": {
+   "Center Current Time": "Center Current Time",
+   "Frame All": "Frame All",
+   "Frame All Scene Clips": "Frame All Scene Clips",
+   "Frame Playback Range": "Frame Playback Range",
+   "Frame Selection": "Frame Selection",
+   "Graph Anim Curves...": "Graph Anim Curves...",
+   "Trax Editor": "Trax Editor",
+   "View": "View"
+  },
+  "Editor menus/Trax Editor/Modify": {
+   "Activate/Deactivate Keys": "Activate/Deactivate Keys",
+   "Attribute Editor...": "Attribute Editor...",
+   "Enable/Disable": "Enable/Disable",
+   "Match Clips": "Match Clips",
+   "Modify": "Modify",
+   "Remove Empty Tracks": "Remove Empty Tracks",
+   "Trax Editor": "Trax Editor"
+  },
+  "Editor menus/Trax Editor/Create": {
+   "Animation Clip": "Animation Clip",
+   "Blend": "Blend",
+   "Character Set": "Character Set",
+   "Constraint Clip": "Constraint Clip",
+   "Create": "Create",
+   "Expression Clip": "Expression Clip",
+   "Geometry Cache": "Geometry Cache",
+   "Pose": "Pose",
+   "Quick Select Set...": "Quick Select Set...",
+   "Time Warp": "Time Warp",
+   "Trax Editor": "Trax Editor"
+  },
+  "Editor menus/Trax Editor/Library": {
+   "Insert Clip": "Insert Clip",
+   "Insert Pose": "Insert Pose",
+   "Library": "Library",
+   "No clips on characters loaded in Trax": "No clips on characters loaded in Trax",
+   "No poses on characters loaded in Trax": "No poses on characters loaded in Trax",
+   "Trax Editor": "Trax Editor"
+  },
+  "Editor menus/Trax Editor/List": {
+   "Add Selected Characters": "Add Selected Characters",
+   "Auto Load Selected Characters": "Auto Load Selected Characters",
+   "Bookmark Current Characters": "Bookmark Current Characters",
+   "Bookmarks": "Bookmarks",
+   "List": "List",
+   "Load Selected Characters": "Load Selected Characters",
+   "Remove All Bookmarks": "Remove All Bookmarks",
+   "Trax Editor": "Trax Editor"
+  },
+  "Editor menus/Trax Editor/Help": {
+   "Find Menu": "Find Menu",
+   "Help": "Help",
+   "Help on Trax": "Help on Trax",
+   "Highlight What's New": "Highlight What's New",
+   "List of What's New": "List of What's New",
+   "MEL Command Reference": "MEL Command Reference",
+   "Maya Help": "Maya Help",
+   "Maya Home Page": "Maya Home Page",
+   "Node and Attribute Reference": "Node and Attribute Reference",
+   "Python Command Reference": "Python Command Reference",
+   "Search": "Search",
+   "Trax Editor": "Trax Editor",
+   "What's New": "What's New"
+  },
   "Panel menus/View": {
    "Align Camera To Polygon": "Align Camera To Polygon",
    "Around Center of Interest": "Around Center of Interest",
@@ -4558,7 +4656,6 @@
    "Blender has no ReCap link: import point clouds / meshes from files (PLY, OBJ).": "Blender has no ReCap link: import point clouds / meshes from files (PLY, OBJ).",
    "Blender has no Spray / Repeat / Imprint stamps or Maya sculpt targets: use a textured Draw brush, or sculpt on a shape key.": "Blender has no Spray / Repeat / Imprint stamps or Maya sculpt targets: use a textured Draw brush, or sculpt on a shape key.",
    "Blender has no Time Editor: clips are actions laid out as NLA strips.": "Blender has no Time Editor: clips are actions laid out as NLA strips.",
-   "Blender has no Trax: clips are actions laid out as NLA strips.": "Blender has no Trax: clips are actions laid out as NLA strips.",
    "Blender has no XGen: hair is a Curves object groomed in Sculpt mode with Geometry Nodes hair modifiers.": "Blender has no XGen: hair is a Curves object groomed in Sculpt mode with Geometry Nodes hair modifiers.",
    "Blender has no ambient light: raise the World colour (World Properties > Surface) for light from every side, or add a Point Light.": "Blender has no ambient light: raise the World colour (World Properties > Surface) for light from every side, or add a Point Light.",
    "Blender has no assets with published attributes: mark data-blocks as assets, expose values with library overrides or custom properties.": "Blender has no assets with published attributes: mark data-blocks as assets, expose values with library overrides or custom properties.",
@@ -4657,6 +4754,7 @@
    "Blender's Object > Quick Effects has Smoke, Fire, Liquid and Explode; Fireworks, Lightning, Shatter and Flow aren't built in (Cell Fracture extension for Shatter).": "Blender's Object > Quick Effects has Smoke, Fire, Liquid and Explode; Fireworks, Lightning, Shatter and Flow aren't built in (Cell Fracture extension for Shatter).",
    "Blender's Subdivision Surface has no invisible faces: delete the faces or hide them (Display > Hide).": "Blender's Subdivision Surface has no invisible faces: delete the faces or hide them (Display > Hide).",
    "Blender's Time Slider is the Timeline area: drag its edge to hide it, or maximize the view (Ctrl+Space) for more room.": "Blender's Time Slider is the Timeline area: drag its edge to hide it, or maximize the view (Ctrl+Space) for more room.",
+   "Blender's Trax is the NLA Editor with Maya's Trax menus: clips are actions laid out as NLA strips.": "Blender's Trax is the NLA Editor with Maya's Trax menus: clips are actions laid out as NLA strips.",
    "Blender's area light falls off like Maya's; its power matches Maya intensity 1 (2 x 2 units).": "Blender's area light falls off like Maya's; its power matches Maya intensity 1 (2 x 2 units).",
    "Blender's camera view always draws the render resolution frame (Maya's resolution gate; a new Maya camera has it off, overscan 1.0): it can't be hidden. Gate Mask dims the outside (Blender passepartout).": "Blender's camera view always draws the render resolution frame (Maya's resolution gate; a new Maya camera has it off, overscan 1.0): it can't be hidden. Gate Mask dims the outside (Blender passepartout).",
    "Blender's clip-based animation editor is the NLA Editor (Windows > Animation Editors).": "Blender's clip-based animation editor is the NLA Editor (Windows > Animation Editors).",
@@ -6157,6 +6255,11 @@
    "Keep original": "Keep original",
    "Keep originals": "Keep originals"
   },
+  "Labels/operators/option_windows_trax": {
+   "Include Hierarchy": "Include Hierarchy",
+   "Include subcharacters in clip": "Include subcharacters in clip",
+   "Leave keys in timeline": "Leave keys in timeline"
+  },
   "Labels/operators/option_windows_uv": {
    "Clockwise": "Clockwise",
    "Counter-clockwise": "Counter-clockwise",
@@ -6794,6 +6897,36 @@
    "Last Tool": "Last Tool",
    "Menu Set": "Menu Set",
    "Object/Component": "Object/Component"
+  },
+  "Labels/operators/trax_clips": {
+   "Activate/Deactivate Keys": "Activate/Deactivate Keys",
+   "All Clips": "All Clips",
+   "Blend": "Blend",
+   "Clip": "Clip",
+   "Create Clip": "Create Clip",
+   "Delete": "Delete",
+   "Delete Source Clip": "Delete Source Clip",
+   "Duplicate": "Duplicate",
+   "Edit Clips": "Edit Clips",
+   "Enable/Disable": "Enable/Disable",
+   "Enabled Clips": "Enabled Clips",
+   "End": "End",
+   "Every clip in the scene (Edit > Delete All by Type > Clips)": "Every clip in the scene (Edit > Delete All by Type > Clips)",
+   "Include Hierarchy": "Include Hierarchy",
+   "Include subcharacters in clip": "Include subcharacters in clip",
+   "Insert Clip": "Insert Clip",
+   "Instance name (empty = the selected clips)": "Instance name (empty = the selected clips)",
+   "Leave keys in timeline": "Leave keys in timeline",
+   "Name": "Name",
+   "Put clip in Visor only": "Put clip in Visor only",
+   "Remove Empty Tracks": "Remove Empty Tracks",
+   "Source Clip": "Source Clip",
+   "Split": "Split",
+   "Start": "Start",
+   "Time range": "Time range",
+   "Trax Tracks": "Trax Tracks",
+   "Trim After": "Trim After",
+   "Trim Before": "Trim Before"
   },
   "Labels/operators/type_manip": {
    "All Characters": "All Characters",
@@ -8181,6 +8314,19 @@
    "Single Perspective View": "Single Perspective View",
    "Tool Box Click": "Tool Box Click"
   },
+  "Labels/ui/trax_editor": {
+   "Blend": "Blend",
+   "Clip": "Clip",
+   "Clip Library": "Clip Library",
+   "Create Clip": "Create Clip",
+   "Delete Selected Clips": "Delete Selected Clips",
+   "Duplicate": "Duplicate",
+   "Insert Clip": "Insert Clip",
+   "Insert at Current Time": "Insert at Current Time",
+   "No clips on characters loaded in Trax": "No clips on characters loaded in Trax",
+   "Source clips (name, character, instances)": "Source clips (name, character, instances)",
+   "Trax": "Trax"
+  },
   "Labels/ui/user_workspaces": {
    "Delete Current Workspace": "Delete Current Workspace",
    "Name": "Name",
@@ -8286,6 +8432,7 @@
    "Maya ViewCube": "Maya ViewCube",
    "Perspective / Orthographic": "Perspective / Orthographic",
    "ViewCube": "ViewCube",
+   "ViewCube Face": "ViewCube Face",
    "ViewCube Navigation": "ViewCube Navigation"
   },
   "Labels/ui/weight_numbers": {
@@ -9076,6 +9223,14 @@
    "Switch the Maya menu set (Maya F2 Modeling, F3 Rigging, F4 Animation, F5 FX, F6 Rendering)": "Switch the Maya menu set (Maya F2 Modeling, F3 Rigging, F4 Animation, F5 FX, F6 Rendering)",
    "Toggle object / component selection (Maya F8, SelectToggleMode) with Maya's in-view message": "Toggle object / component selection (Maya F8, SelectToggleMode) with Maya's in-view message"
   },
+  "Tooltips/operators/trax_clips": {
+   "Delete this source clip and all its instances": "Delete this source clip and all its instances",
+   "Edit the selected Trax clips (Maya Trax Edit / Modify menu commands)": "Edit the selected Trax clips (Maya Trax Edit / Modify menu commands)",
+   "Edit the selected clip's keys in place, or stop editing them (Maya Activate/Deactivate Keys)": "Edit the selected clip's keys in place, or stop editing them (Maya Activate/Deactivate Keys)",
+   "Place a new instance of this source clip at the current time (Maya Library > Insert Clip)": "Place a new instance of this source clip at the current time (Maya Library > Insert Clip)",
+   "Trax track commands": "Trax track commands",
+   "Turn the current character's (or the selected objects') keys into a clip on the Trax tracks": "Turn the current character's (or the selected objects') keys into a clip on the Trax tracks"
+  },
   "Tooltips/operators/type_manip": {
    "Pick a character of a type whose Type Manipulator is on": "Pick a character of a type whose Type Manipulator is on",
    "Put the picked character back (all characters with Reset All)": "Put the picked character back (all characters with Reset All)",
@@ -9345,6 +9500,7 @@
    "Toggle the layer's visibility (V) or playback (P)": "Toggle the layer's visibility (V) or playback (P)"
   },
   "Tooltips/ui/manipulator": {
+   "A Rotate axis ring: only its front half is drawn and picked (picked on screen, ahead of the trackball).": "A Rotate axis ring: only its front half is drawn and picked (picked on screen, ahead of the trackball).",
    "One Maya manipulator handle: custom shapes, picked with a fatter invisible shape.": "One Maya manipulator handle: custom shapes, picked with a fatter invisible shape."
   },
   "Tooltips/ui/marked_window": {
@@ -9542,6 +9698,10 @@
    "Switch joint/object modes from the main viewport header.": "Switch joint/object modes from the main viewport header.",
    "Switch the selected skeleton between Object, Edit, and Pose modes": "Switch the selected skeleton between Object, Edit, and Pose modes"
   },
+  "Tooltips/ui/trax_editor": {
+   "Maya Trax Library > Insert Clip: the source clips": "Maya Trax Library > Insert Clip: the source clips",
+   "Source clips (Maya's Visor clips)": "Source clips (Maya's Visor clips)"
+  },
   "Tooltips/ui/user_workspaces": {
    "Delete the current saved workspace (Maya Windows > Workspaces > Delete Current Workspace): its file is removed\nand the window shows Maya Classic": "Delete the current saved workspace (Maya Windows > Workspaces > Delete Current Workspace): its file is removed\nand the window shows Maya Classic",
    "Save the current workspace under a name (Maya Windows > Workspaces > Save Current Workspace As): it is listed\nunder Windows > Workspaces in every scene. Only the layout is saved, in the extension's user folder": "Save the current workspace under a name (Maya Windows > Workspaces > Save Current Workspace As): it is listed\nunder Windows > Workspaces in every scene. Only the layout is saved, in the extension's user folder",
@@ -9557,6 +9717,7 @@
    "UV Editor: remember the mouse for the UV pre-selection highlight": "UV Editor: remember the mouse for the UV pre-selection highlight"
   },
   "Tooltips/ui/view_furniture": {
+   "Look at the view from this side; a perspective view stays perspective, like Maya's persp camera": "Look at the view from this side; a perspective view stays perspective, like Maya's persp camera",
    "Navigate the current viewport without moving the scene camera": "Navigate the current viewport without moving the scene camera"
   },
   "Tooltips/ui/weight_numbers": {
