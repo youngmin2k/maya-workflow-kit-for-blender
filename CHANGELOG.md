@@ -5,6 +5,14 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 
 ## [Unreleased]
 
+### Added
+- **RMB marking menu in Sculpt Mode** (#294): RMB over the mesh while sculpting opens the same marking menu as in
+  Object Mode, like Maya. Object Mode, Vertex, Edge, Face, Multi and Select leave Sculpt Mode for that mode. A
+  brush that maps its texture as a stencil keeps RMB for moving the stencil.
+- **Drag a camera from the Outliner into a view** (#294): middle-drag a camera from the Outliner and drop it on
+  a viewport; that viewport looks through the camera as its own camera, like a Maya panel. Other objects dropped
+  on a viewport change nothing, and middle-drags inside the Outliner still parent.
+
 ### Fixed
 - **= / - didn't resize the Rotate manipulator** (#283): the keys (and numpad + / -) changed only the Move and
   Scale manipulators. The Rotate tool now has the kit's own manipulator too: X / Y / Z rings drawn and grabbed on
@@ -23,6 +31,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   A perspective view now stays perspective, like Maya's persp camera.
 - G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
   ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
+- **Look Through keeps the scene camera** (#294): Panels > Look Through Selected and the Panels camera lists no
+  longer make the camera the scene's render camera when the view had none of its own.
 
 ## [0.10.0] — 2026-11-02
 

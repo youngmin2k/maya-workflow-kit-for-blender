@@ -31,7 +31,7 @@ PASS_THROUGH_FIRST = ("allset.pivot_pick", "allset.uv_shell_hover", "allset.emul
                       "allset.graph_axis_drag", "allset.graph_move_snap", "allset.graph_shift_press",
                       "allset.graph_key_drag", "allset.graph_scale_box",
                       "allset.hg_click", "allset.hg_mmb", "allset.hg_rmb", "allset.hg_zoom",
-                      "allset.hg_frame")
+                      "allset.hg_frame", "allset.marking_menu")
 
 
 def _add(kd, km_name, idname, event, props=None, shadows=(), first=False):
@@ -428,6 +428,12 @@ def patch_marking_menus(kd):
         kd.remove(km, "wm.call_menu", type="RIGHTMOUSE")
         for trigger, mods in MM_EVENTS:
             _add(kd, km, "allset.marking_menu", make_event("RIGHTMOUSE", **mods), {"trigger": trigger})
+    # Sculpt Mode: Maya sculpts with a tool and keeps its RMB marking menu over the mesh (Object Mode / Vertex / Edge /
+    # Face leave Sculpt Mode); IC's sculpt context panel goes. First, so it runs before the stencil drag on the same
+    # event, which it passes through to while the brush maps a stencil.
+    kd.remove("Sculpt", "wm.call_panel", type="RIGHTMOUSE")
+    _add(kd, "Sculpt", "allset.marking_menu", make_event("RIGHTMOUSE"), {"trigger": "RMB"}, shadows=("Sculpt",),
+         first=True)
     kd.remove("3D View", "view3d.cursor3d", type="RIGHTMOUSE", shift=True)
     kd.remove("3D View", "transform.translate", type="RIGHTMOUSE", value="CLICK_DRAG", shift=True)
     for km in TOOL_KEY_KEYMAPS:

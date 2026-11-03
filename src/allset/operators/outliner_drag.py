@@ -12,6 +12,11 @@ or ``OUTLINER_OT_parent_clear`` (empty space); MMB does nothing. So
   timer undoes it and applies the same parent changes with ``parenting`` (one undo step);
 - MMB is ``allset.outliner_drag``, a modal that finds the rows under the press / release with
   ``outliner.item_activate`` (the only Python hit test of the C tree) and puts the selection back.
+
+Maya: MMB-drag a camera from the Outliner into a view panel = that panel looks through the camera (each panel has its
+own camera); other items dropped on a panel do nothing. The modal keeps the window's mouse events after the cursor
+leaves the Outliner, so a release outside it is mapped to the 3D View under it (any window, ``ui/hs_drag.view_under``)
+and that view looks through the camera (``ui/panel_menus.look_through``).
 """
 
 import json
@@ -228,6 +233,12 @@ def _first_object(ids):
 
 # --- MMB drag ------------------------------------------------------------------------------------------
 
+def _inside(region, event):
+    """True when the event's window position lies in ``region``."""
+    x, y = event.mouse_x - region.x, event.mouse_y - region.y
+    return 0 <= x < region.width and 0 <= y < region.height
+
+
 def _rect(x0, y0, x1, y1, width=2.0):
     sh = gpu.shader.from_builtin('UNIFORM_COLOR')
     gpu.state.blend_set('ALPHA')
@@ -243,7 +254,7 @@ def _draw_drop():
     op = _draw["op"]
     region = bpy.context.region
     try:
-        if op is None or not op.dragging or region is None or region.as_pointer() != op.region_ptr:
+        if op is None or not op.dragging or op.outside or region is None or region.as_pointer() != op.region_ptr:
             return
     except ReferenceError:
         return
@@ -289,11 +300,13 @@ class ALLSET_OT_outliner_drag(bpy.types.Operator):
         if ob is None:
             return {'PASS_THROUGH'}
         self.dragged = sorted(selected) if ob.name in selected else [ob.name]
+        self.pressed = ob.name
         self.start = (event.mouse_region_x, event.mouse_region_y)
         self.scale = context.preferences.system.ui_scale or 1.0
         self.row_h = ROW_PX * self.scale
         self.region_ptr = context.region.as_pointer()
         self.dragging = False
+        self.outside = False
         self.zone = (0, 'ON')
         _draw["op"] = self
         _add_draw()
@@ -304,6 +317,7 @@ class ALLSET_OT_outliner_drag(bpy.types.Operator):
         x, y = event.mouse_region_x, event.mouse_region_y
         if not self.dragging and math.hypot(x - self.start[0], y - self.start[1]) >= DRAG_PX * self.scale:
             self.dragging = True
+        self.outside = not _inside(context.region, event)
         if self.dragging:
             _vx, vy = context.region.view2d.region_to_view(x, y)
             self.zone = zone(vy, self.row_h)
@@ -325,8 +339,27 @@ class ALLSET_OT_outliner_drag(bpy.types.Operator):
             self._end(context)
             if not self.dragging:
                 return {'CANCELLED'}
+            if not _inside(context.region, event):
+                return self.drop_on_view(context, event)
             return self.drop(context, _first_object(hit_ids(context)))
         return {'RUNNING_MODAL'}
+
+    def drop_on_view(self, context, event):
+        """Release outside the Outliner: a camera dropped on a 3D View = that view looks through it."""
+        ob = bpy.data.objects.get(self.pressed)
+        if ob is None or ob.type != 'CAMERA' or context.window is None:
+            return {'CANCELLED'}
+        from ..ui import hs_drag
+        win = context.window
+        found = hs_drag.view_under(hs_drag.screen_point((win.x, win.y), (event.mouse_x, event.mouse_y)),
+                                   win.as_pointer())
+        if found is None:
+            return {'CANCELLED'}
+        _win, area, _region, _xy = found
+        from ..ui import panel_menus
+        panel_menus.look_through(context, area, ob)
+        area.tag_redraw()
+        return {'FINISHED'}
 
     def drop(self, context, target):
         where = self.zone[1]

@@ -247,6 +247,31 @@ def test_keymap_marking_menus():
     assert not [k for k in v3d if k.type == 'RIGHTMOUSE' and k.shift and not k.ctrl], "Shift+RMB cursor removed"
 
 
+def test_sculpt_rmb():
+    """Sculpt Mode: plain RMB = the object marking menu, first in "Sculpt" (before the stencil drag); Blender's
+    sculpt context panel is gone; the menu resolves to the mesh one."""
+    items = [k for k in _items("Sculpt") if k.type == 'RIGHTMOUSE' and k.value == 'PRESS'
+             and not (k.shift or k.ctrl or k.alt)]
+    assert items and items[0].idname == "allset.marking_menu" and items[0].properties.trigger == "RMB", \
+        [k.idname for k in items]
+    assert not [k for k in items if k.idname == "wm.call_panel"], [k.idname for k in items]
+    assert "allset.marking_menu" in maya_patches.PASS_THROUGH_FIRST
+    _fresh()
+    with _override():
+        bpy.ops.mesh.primitive_cube_add()
+        bpy.ops.object.mode_set(mode='SCULPT')
+        assert marking.resolve("RMB", bpy.context) == ("pie", marking.idname("RMB_MESH"))
+        assert not marking.sculpt_stencil(bpy.context)
+        # Select leaves Sculpt Mode, Vertex enters vertex select mode
+        bpy.ops.allset.mm_component(type='NONE')
+        assert bpy.context.mode == 'OBJECT'
+        bpy.ops.object.mode_set(mode='SCULPT')
+        bpy.ops.allset.mm_component(type='VERT')
+        assert bpy.context.mode == 'EDIT_MESH'
+        assert tuple(bpy.context.scene.tool_settings.mesh_select_mode) == (True, False, False)
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+
 def test_keymap_qwer_tap_hold():
     for km in maya_patches.TOOL_KEY_KEYMAPS:
         items = _items(km)

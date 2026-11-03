@@ -557,8 +557,10 @@ class ALLSET_OT_panel_look_through(bpy.types.Operator):
 
 def look_through(context, area, ob):
     space = area.spaces.active
-    space.camera = ob
+    # the view's own camera (a Maya panel's): local first, since a camera set on a view locked to the scene becomes
+    # the scene camera
     space.use_local_camera = ob != context.scene.camera
+    space.camera = ob
     space.region_3d.view_perspective = 'CAMERA'
     # Maya: navigating a view that looks through a camera moves the camera (#9)
     space.lock_camera = True
