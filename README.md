@@ -93,7 +93,7 @@ one-line note saying why and what to use instead.
   Outliner, Channel Box / Layer Editor tab stack, Time Slider and Range Slider, Help Line and Command Line.
 - **Maya's docking**: Channel Box, Attribute Editor and Modeling Toolkit share one tab stack next to the viewport and
   tear off into floating windows by their `:::::` handle; Outliner and Tool Settings dock on the left.
-- The Maya **Move / Scale manipulator**.
+- The Maya **Move / Rotate / Scale manipulator** (= / - resize it).
 - **Alt+B** cycles the background of every 3D view through Maya's solid background colours.
 - The kit uses your own Blender theme; see [Recommended setup](#recommended-setup) for a Maya-like look.
 - **Languages**: the kit's menus, marking menus, shelves and tooltips follow Blender's *Preferences > Interface >
