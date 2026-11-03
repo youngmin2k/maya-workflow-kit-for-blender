@@ -35,6 +35,9 @@ hilite wire, ``EDGE_SEL_BIAS`` 0.003 for selected edges, drawn last and 2 px so 
 UV mode (the kit's F12 UV component, UV Sync Selection off): like Maya, the 3D View shows the UV selection, not the
 mesh selection (the kit selects every face so the UV Editor shows all UVs). Every vertex is drawn as a point,
 vertices with a selected UV in the selected-vertex colour; no selected edges or face stipple.
+
+Vertices are drawn with Blender's point shader: the plain uniform-colour shader ignores the point size on Vulkan and
+Metal (every vertex became a single dark pixel there and the theme's Vertex Size did nothing).
 """
 
 import bpy
@@ -282,7 +285,7 @@ def _batches(st, select_mode):
     from gpu_extras.batch import batch_for_shader
     m = st.arrays
     lay = layers(m, select_mode, st.uv)
-    flat = _builtin('UNIFORM_COLOR')
+    dots = _builtin('POINT_UNIFORM_COLOR')   # Vulkan / Metal size points only with a point shader
     poly = _builtin('POLYLINE_UNIFORM_COLOR')
     out = []
 
@@ -292,7 +295,7 @@ def _batches(st, select_mode):
 
     def points(idx, color, size):
         if len(idx):
-            out.append(('POINTS', flat, batch_for_shader(flat, 'POINTS', {"pos": m.co[idx]}), color, size))
+            out.append(('POINTS', dots, batch_for_shader(dots, 'POINTS', {"pos": m.co[idx]}), color, size))
     if "tris" in lay and len(lay["tris"]):
         sh = _stipple()
         out.append(('TRIS', sh, batch_for_shader(sh, 'TRIS', {"pos": m.co}, indices=lay["tris"]),

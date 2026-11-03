@@ -517,7 +517,7 @@ class ALLSET_GT_preselect(bpy.types.Gizmo):
         gpu.state.depth_test_set('NONE')
         gpu.state.blend_set('ALPHA')
         if kind == 'VERT':
-            shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+            shader = gpu.shader.from_builtin('POINT_UNIFORM_COLOR')     # sized points on Vulkan / Metal too
             gpu.state.point_size_set(VERT_PX * scale)
             batch = batch_for_shader(shader, 'POINTS', {"pos": [tuple(c.co[i])]})
             shader.uniform_float("color", (*RGB, 1.0))

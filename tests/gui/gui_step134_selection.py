@@ -15,7 +15,7 @@ import bpy
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from sim import MODULE, check, run, step, setup, screenshot, win, load_maya_layout, view3d, scale  # noqa: E402
+from sim import MODULE, check, ev, run, step, setup, screenshot, win, load_maya_layout, view3d, scale  # noqa: E402
 
 SHOTS = os.environ.get("ALLSET_GUI_SHOTS", "")
 C = {}
@@ -36,7 +36,9 @@ def prefs():
 
 def shot(name):
     """Window screenshot as (h, w, 3) sRGB floats, row 0 = window bottom; also kept in SHOTS."""
-    tag = f"{scale():.2f}".replace(".", "")
+    import gpu
+    backend = gpu.platform.backend_type_get()
+    tag = f"{scale():.2f}".replace(".", "") + ("" if backend == 'OPENGL' else "_" + backend.lower())
     path = os.path.join(SHOTS or bpy.app.tempdir, f"gui_step134_{name}_{tag}.png")
     screenshot(path)
     img = bpy.data.images.load(path, check_existing=False)
@@ -139,6 +141,9 @@ def s_scene():
         bpy.context.view_layer.objects.active = lead
         bpy.ops.view3d.view_selected()
     C["names"] = [o.name for o in obs]
+    # rest the pointer in the viewport's empty corner: over the cube the kit's red pre-selection highlight of the
+    # hovered component is drawn on top of the selection colours the shots check
+    ev('MOUSEMOVE', 'NOTHING', x=region.x + 12, y=region.y + 12)
     redraw()
 
 
@@ -206,6 +211,13 @@ def s_vertex_mode():
     check("vertex mode: the selected vertex is yellow #fdff88", hits(px, sel, VERT_SEL))
     n = sum(hits(px, p, VERT) for p in uns)
     check(f"vertex mode: unselected visible vertices are purple #c800c8 ({n}/3)", n >= 2)
+    # the points have the theme Vertex Size x UI scale (a backend that ignores the point size draws one pixel)
+    cc = import_module(MODULE + ".ui.component_colors")
+    want = [max(1, round(s * scale())) for s in cc.theme_point_sizes(bpy.context)]
+    big = [int(near(px[int(p[1]) - 6:int(p[1]) + 7, int(p[0]) - 6:int(p[0]) + 7], VERT).sum()) for p in uns]
+    big_sel = int(near(px[int(sel[1]) - 6:int(sel[1]) + 7, int(sel[0]) - 6:int(sel[0]) + 7], VERT_SEL).sum())
+    check(f"vertex mode: points follow the theme Vertex Size ({want[0]} / {want[1]} px wide): selected point "
+          f"{big_sel} px, unselected {big}", big_sel >= want[1] ** 2 // 2 and max(big) >= want[0] ** 2 // 2)
     near_edges = [e for e in bm.edges if bm.verts[order[0]] not in e.verts and
                   any(v.index in order[1:4] for v in e.verts)]
     n = sum(hits(px, to_window(mw @ ((e.verts[0].co + e.verts[1].co) / 2)), HILITE) for e in near_edges)
@@ -303,6 +315,12 @@ def frame_ms(n=30):
 @step
 def s_time_off():
     C["off"] = frame_ms()
+    redraw()
+
+
+@step
+def s_faces_back():
+    # the kit gives the overlay back from a timer after a draw, so look one step after the timed draws
     check("preference off gives Blender's face highlight back (show_faces on)",
           view3d()[0].spaces.active.overlay.show_faces)
     prefs().maya_component_colors = True

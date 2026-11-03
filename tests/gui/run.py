@@ -88,6 +88,13 @@ def skip_reason(path):
     return m.group(1) if m else ""
 
 
+def file_args(path):
+    """Extra Blender arguments of one file: a top-level ``GUI_ARGS = "<args>"`` line (e.g. ``--gpu-backend vulkan``
+    runs the file's checks on another GPU backend)."""
+    m = re.search(r"^GUI_ARGS\s*=\s*[\"'](.+)[\"']", path.read_text(encoding="utf-8"), re.M)
+    return m.group(1).split() if m else []
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Run Maya Workflow Kit GUI event tests")
     ap.add_argument("-k", default="", help="only files whose name contains this (comma-separated: any)")
@@ -132,6 +139,7 @@ def main(argv=None):
         out = headless.SANDBOX / "results" / f"{path.stem}.json"
         log = headless.SANDBOX / "logs" / f"{path.stem}.log"
         cmd = [args.blender, "--factory-startup", "--enable-event-simulate", *os.environ.get("ALLSET_GUI_ARGS", "").split(),
+               *file_args(path),
                # ALLSET_GUI_GEOMETRY="2048 0 1600 900": open the window on a second monitor
                "--window-geometry", *os.environ.get("ALLSET_GUI_GEOMETRY", "0 0 1600 900").split(),
                "--python", str(path), "--", str(out)]
