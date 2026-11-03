@@ -13,6 +13,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Outliner button opened a new window** (#290): in a layout without the Tool Box column (Blender's own
   layouts, Modeling - Expert) the Tool Box Outliner button hid the Outliner and the next click opened it in a new
   window. It now docks the Outliner back on the left of the main viewport.
+- **Alt+LMB stopped tumbling after a ViewCube click** (#288): a ViewCube face turned the persp view into an
+  orthographic side view, where the kit locks tumbling like Maya's top / front / side views, so the view stayed stuck.
+  A perspective view now stays perspective, like Maya's persp camera.
 - G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
   ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
 

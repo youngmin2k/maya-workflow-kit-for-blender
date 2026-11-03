@@ -5419,6 +5419,8 @@ STRINGS = {
     'Multi-Cut hover preview: the point / loop under the mouse (passes the event on)': 'マルチカットのホバープレビュー: マウス下のポイント / ループ (イベントはそのまま渡します)',
     'Mute or unmute the animation of every channel shown (Maya Channels > Mute All / Unmute All)': '表示中のすべてのチャンネルのアニメーションをミュートまたはミュート解除 (Maya チャンネル > すべてミュート / すべてのミュートを解除)',
     'Mute the selected keys: the curve holds the key\'s value until the next unmuted key (Maya Keys > Mute Key;\nBlender has no per-key mute: a Stepped modifier named "Maya mute" holds the value)': '選択キーをミュート: 次のミュートされていないキーまでカーブがそのキーの値を保持 (Maya キー > キーをミュート。\nBlender にはキーごとのミュートがないため、"Maya mute" という名前のステップモディファイアで値を保持)',
+    "Look at the view from this side; a perspective view stays perspective, like Maya's persp camera": 'この側からビューを見る。パースビューはパースのまま (Maya の persp カメラと同じ)',
+    'ViewCube Face': 'ViewCube の面',
     'Navigate the current viewport without moving the scene camera': 'シーンカメラを動かさずに現在のビューポートをナビゲート',
     'New / Duplicate / Rename / Delete a marking menu, or Restore Default': 'マーキングメニューの新規作成 / 複製 / 名前の変更 / 削除、またはデフォルトに戻す',
     'New set holding the selected objects': '選択オブジェクトを含む新しいセット',

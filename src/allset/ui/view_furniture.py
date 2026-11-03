@@ -651,6 +651,27 @@ def _remove_handler():
 
 # --- ViewCube gizmo -------------------------------------------------------------------------
 
+class ALLSET_OT_view_cube_face(bpy.types.Operator):
+    """Look at the view from this side; a perspective view stays perspective, like Maya's persp camera"""
+    bl_idname = 'allset.view_cube_face'
+    bl_label = 'ViewCube Face'
+    bl_options = {'INTERNAL'}
+
+    type: bpy.props.EnumProperty(items=[(name, name.title(), '') for name in FACE_NAMES])
+
+    @classmethod
+    def poll(cls, context):
+        return bpy.ops.view3d.view_axis.poll()
+
+    def execute(self, context):
+        rv = context.region_data
+        previous = rv.view_perspective if rv is not None else None
+        result = bpy.ops.view3d.view_axis('INVOKE_DEFAULT', type=self.type)
+        if previous == 'PERSP' and rv.view_perspective == 'ORTHO':
+            rv.view_perspective = 'PERSP'
+        return result
+
+
 class ALLSET_OT_view_cube_control(bpy.types.Operator):
     """Navigate the current viewport without moving the scene camera"""
     bl_idname = 'allset.view_cube_control'
@@ -728,7 +749,7 @@ class ALLSET_MT_view_cube(bpy.types.Menu):
         layout.operator('view3d.view_persportho', text='Perspective / Orthographic')
         layout.separator()
         for name in FACE_NAMES:
-            layout.operator('view3d.view_axis', text=name.title()).type = name
+            layout.operator('allset.view_cube_face', text=name.title()).type = name
 
 
 def _ensure_cube_controls(gizmo):
@@ -751,9 +772,9 @@ class ALLSET_GT_view_cube(bpy.types.Gizmo):
     def setup(self):
         self.hover = None
         self.use_tooltip = False          # like the kit's other gizmos: no Blender operator tooltip
-        # one view3d.view_axis call per face: test_select returns the face's index as the part
+        # one face operator per face: test_select returns the face's index as the part
         for i, name in enumerate(FACE_NAMES):
-            op = self.target_set_operator("view3d.view_axis", index=i)
+            op = self.target_set_operator("allset.view_cube_face", index=i)
             op.type = name
 
     def draw(self, context):
@@ -814,7 +835,7 @@ class ALLSET_GGT_view_cube(bpy.types.GizmoGroup):
         self.gizmos.new(ALLSET_GT_view_cube.bl_idname)
 
 
-classes = (ALLSET_OT_view_cube_control, ALLSET_MT_view_cube, ALLSET_GT_view_cube, ALLSET_GGT_view_cube)
+classes = (ALLSET_OT_view_cube_face, ALLSET_OT_view_cube_control, ALLSET_MT_view_cube, ALLSET_GT_view_cube, ALLSET_GGT_view_cube)
 
 
 def register():
