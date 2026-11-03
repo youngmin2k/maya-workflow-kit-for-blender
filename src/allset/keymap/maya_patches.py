@@ -275,6 +275,11 @@ def patch_pick_walk(kd):
 def patch_camera(kd):
     kd.remove("3D View", "view3d.rotate", type="LEFTMOUSE", alt=True)       # IC:674
     _add(kd, "3D View", "allset.tumble", make_event("LEFTMOUSE", alt=True))
+    # Maya's tumble never snaps. Blender's rotate snaps to the nearest axis view when Alt is pressed during the drag
+    # and then turns a perspective view orthographic; Alt is the tumble key itself, so pressing it again mid-drag
+    # locked the persp view like a top / front / side view (#288).
+    for snap in ("AXIS_SNAP_ENABLE", "AXIS_SNAP_DISABLE"):
+        kd.remove("View3D Rotate Modal", snap)
     # Alt+RMB dolly reads the drag itself: Blender's zoom axis is a preference the kit no longer sets (#51)
     kd.remove("3D View", "view3d.zoom", type="RIGHTMOUSE", alt=True)       # IC:433
     _add(kd, "3D View", "allset.dolly", make_event("RIGHTMOUSE", alt=True),

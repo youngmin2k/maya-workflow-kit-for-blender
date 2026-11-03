@@ -48,6 +48,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Alt+LMB stopped tumbling after a ViewCube click** (#288): a ViewCube face turned the persp view into an
   orthographic side view, where the kit locks tumbling like Maya's top / front / side views, so the view stayed stuck.
   A perspective view now stays perspective, like Maya's persp camera.
+- **Alt+LMB stopped tumbling after Alt was pressed again during a tumble** (#288): Blender's rotate snapped the view
+  to the nearest side view when Alt was pressed mid-drag and turned the persp view orthographic, so it locked like
+  a top / front / side view. Tumbling no longer snaps, like Maya.
 - G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
   ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
 - **Look Through keeps the scene camera** (#294): Panels > Look Through Selected and the Panels camera lists no
