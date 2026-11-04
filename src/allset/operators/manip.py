@@ -189,6 +189,10 @@ OP_KINDS = {"TRANSFORM_OT_translate": 'TRANSLATE', "TRANSFORM_OT_rotate": 'ROTAT
             "TRANSFORM_OT_resize": 'RESIZE', "ALLSET_OT_component_scale": 'RESIZE', 'ALLSET_OT_live_translate': 'TRANSLATE'}
 
 
+# The Rotate view ring as the active handle: a rotation about the view axis.
+VIEW_HANDLE = {"constraint_axis": (False, False, False), "orient_type": 'VIEW', "orient_axis": 'Z'}
+
+
 def handle_from_op(bl_idname, props):
     """(kind, handle) for a transform the manipulator ran; handle None = free (centre)."""
     if bl_idname == 'ALLSET_OT_pivot_translate':
@@ -228,33 +232,28 @@ def reset_handle(kind):
 
 
 def handle_from_gizmo(context, gz):
-    """(kind, handle) of the manipulator handle ``gz`` that a press is on, as ``handle_from_op`` gives it; kind None
-    when the MMB drag can't use it (the Rotate trackball, the pivot rings)."""
+    """(kind, handle) of the manipulator handle ``gz`` that a press is on, as ``handle_from_op`` gives it for a drag
+    on it; kind None when the MMB drag can't use it (the Rotate trackball, the pivot rings)."""
     from ..ui import manipulator
-    role = getattr(gz, "handle_role", None)
-    if role is not None:      # the kit's Move / Scale manipulator
-        kind = manipulator.tool_kind(context)
-        if role == 'CENTER':
-            return kind, None
-        if role == 'AXIS':
-            axes = tuple(a == gz.handle_axis for a in 'XYZ')
-        elif role == 'PLANE':
-            axes = manipulator.PLANES[gz.handle_axis][0]
-        else:
-            return None, None
-        return kind, {"constraint_axis": axes, "orient_type": manipulator.slot_type(context.scene, kind)}
-    # Blender's Rotate gizmo: the axis rings clip their back half, the view ring doesn't, the trackball is filled
-    tool = manipulator.active_tool(context)
-    if (tool is None or tool.idname != 'builtin.rotate' or gz.bl_idname != "GIZMO_GT_dial_3d"
-            or 'FILL' in gz.draw_options):
+    kind = manipulator.tool_kind(context)
+    if kind is None:
         return None, None
-    if 'CLIP' not in gz.draw_options:
-        return 'ROTATE', None
-    _centre, frame, otype = manipulator.pivot_frame(context, 'ROTATE')
-    normal = gz.matrix_world.col[2].xyz.normalized()      # a ring's local Z is its axis
-    i = max(range(3), key=lambda k: abs(frame.col[k].normalized().dot(normal)))
-    return 'ROTATE', {"constraint_axis": tuple(k == i for k in range(3)), "orient_type": otype,
-                      "orient_axis": 'XYZ'[i]}
+    role = getattr(gz, "handle_role", None)
+    if role == 'CENTER':
+        return kind, None
+    otype = manipulator.slot_type(context.scene, kind)
+    if role == 'AXIS':
+        return kind, {"constraint_axis": tuple(a == gz.handle_axis for a in 'XYZ'), "orient_type": otype}
+    if role == 'PLANE':
+        return kind, {"constraint_axis": manipulator.PLANES[gz.handle_axis][0], "orient_type": otype}
+    if role == 'RING':        # a Rotate axis ring
+        return kind, {"constraint_axis": tuple(a == gz.handle_axis for a in 'XYZ'), "orient_type": otype,
+                      "orient_axis": gz.handle_axis}
+    # the Rotate view ring (a plain dial; the trackball dial picks its whole disc): rotate about the view axis
+    if (kind == 'ROTATE' and role is None and gz.bl_idname == "GIZMO_GT_dial_3d"
+            and 'FILL_SELECT' not in gz.draw_options):
+        return kind, dict(VIEW_HANDLE)
+    return None, None
 
 
 def finish(state, window, area, region):

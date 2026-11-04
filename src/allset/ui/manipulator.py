@@ -838,7 +838,11 @@ class ALLSET_GGT_xform(GizmoGroup):
                 gz.scale_basis = s * ROTATE_RING_R
             elif role in ('VIEW_RING', 'TRACKBALL'):
                 rot = view
-                gz.color = CENTER_IDLE if role == 'VIEW_RING' else TRACKBALL
+                if role == 'VIEW_RING':     # light blue, #fdff88 while it is the active handle
+                    h = _active_handle(kind)
+                    gz.color = ACTIVE if h is not None and h.get("orient_type") == 'VIEW' else CENTER_IDLE
+                else:
+                    gz.color = TRACKBALL
                 gz.scale_basis = s * ROTATE_RING_R * (VIEW_RING if role == 'VIEW_RING' else 1.0)
             elif role == 'CENTER':
                 # Maya: the centre (free move / uniform scale) is the active handle by default, drawn #fdff88;

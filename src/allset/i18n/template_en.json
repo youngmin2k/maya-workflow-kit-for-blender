@@ -9045,7 +9045,7 @@
   },
   "Tooltips/operators/manip": {
    "Ctrl+LMB on the manipulator: a Move handle drag moves along that handle with grid snapping, Ctrl+click on\nthe Move centre frees the active handle, a Scale axis handle scales the other two axes": "Ctrl+LMB on the manipulator: a Move handle drag moves along that handle with grid snapping, Ctrl+click on\nthe Move centre frees the active handle, a Scale axis handle scales the other two axes",
-   "LMB on the manipulator: remember which handle the drag used (Maya active handle)": "LMB on the manipulator: remember which handle the drag used (Maya active handle)",
+   "LMB on the manipulator: clicking or dragging a handle makes it the active handle (Maya active handle)": "LMB on the manipulator: clicking or dragging a handle makes it the active handle (Maya active handle)",
    "Left button released: a Smart Duplicate / Extrude press that never became a drag was a click": "Left button released: a Smart Duplicate / Extrude press that never became a drag was a click",
    "MMB drag anywhere: move/rotate/scale along the last picked manipulator handle\n(free when none, Maya)": "MMB drag anywhere: move/rotate/scale along the last picked manipulator handle\n(free when none, Maya)",
    "Make the manipulator bigger or smaller (Maya = / -)": "Make the manipulator bigger or smaller (Maya = / -)",
