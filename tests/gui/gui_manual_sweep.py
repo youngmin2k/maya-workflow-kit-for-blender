@@ -297,7 +297,9 @@ def m70_3_a():
     v3d_g = [it.idname for km_name in ("3D View", "Object Mode", "3D View Generic")
              for it in kc.keymaps[km_name].keymap_items if it.active and it.type == 'G' and it.value == 'PRESS'
              and not (it.shift or it.ctrl or it.alt)]
-    check(f"[M70-3] 3D View G stays Repeat Last ({rep}, 3D View G items {v3d_g})", "Screen" in rep and not v3d_g)
+    # the viewport maps carry their own Repeat Last G, ahead of any mode's G menu; no other G there
+    check(f"[M70-3] 3D View G stays Repeat Last ({rep}, 3D View G items {v3d_g})",
+          "Screen" in rep and all(i == "allset.repeat_last" for i in v3d_g))
     C["garea"].ui_type = 'VIEW_3D'
 
 

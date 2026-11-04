@@ -62,6 +62,16 @@ def s_shot_maya_keys():
 
 
 @step
+def s_wait_blender():
+    # the switch runs from a timer once the key event is handled; a busy first redraw can delay that past one tick
+    import sim
+    C.setdefault("wait_off", 0)
+    if sw().is_on() and C["wait_off"] < 10:
+        C["wait_off"] += 1
+        sim._steps.insert(0, s_wait_blender)
+
+
+@step
 def s_blender():
     kcs = bpy.context.window_manager.keyconfigs
     check(f"Ctrl+Alt+Shift+M -> Blender mode (keymap {kcs.active.name}, Maya classes gone)",
