@@ -704,7 +704,44 @@ class ALLSET_GGT_xform(GizmoGroup):
         _cache_pivot_rings(context, self.handles, pivot and not hide)
 
 
-classes = (ALLSET_GT_maya_handle, ALLSET_GGT_xform)
+class ALLSET_GGT_rotate_active(GizmoGroup):
+    """The active Rotate handle drawn #fdff88 like Maya's: Blender's C rings take their theme colour back on every
+    redraw, so the active ring is drawn again over them (not pickable: the press reaches the C ring)."""
+    bl_idname = "ALLSET_GGT_rotate_active"
+    bl_label = "Maya Active Rotate Handle"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'WINDOW'
+    bl_options = {'3D', 'PERSISTENT'}
+
+    @classmethod
+    def poll(cls, context):
+        space = context.space_data
+        if space is None or space.type != 'VIEW_3D' or not space.show_gizmo or not space.show_gizmo_tool:
+            return False
+        tool = active_tool(context)
+        return (tool is not None and tool.idname == 'builtin.rotate' and not pivot_edit(context)
+                and _has_selection(context))
+
+    def setup(self, context):
+        gz = self.gizmos.new("GIZMO_GT_dial_3d")
+        gz.draw_options = {'CLIP'}
+        gz.hide_select = True
+        gz.use_draw_scale = True
+        gz.line_width = 2.0
+        gz.color = ACTIVE
+        gz.alpha = ALPHA
+        self.ring = gz
+
+    def draw_prepare(self, context):
+        handle = _active_handle('ROTATE')
+        axis = handle.get("orient_axis") if handle else None
+        center, frame, _otype = pivot_frame(context, 'ROTATE')
+        self.ring.hide = center is None or axis not in ('X', 'Y', 'Z')
+        if not self.ring.hide:
+            self.ring.matrix_basis = Matrix.Translation(center) @ (frame @ _axis_rot(axis)).to_4x4()
+
+
+classes = (ALLSET_GT_maya_handle, ALLSET_GGT_xform, ALLSET_GGT_rotate_active)
 
 
 # --- Tool Settings: Maya Move / Rotate / Scale Settings --------

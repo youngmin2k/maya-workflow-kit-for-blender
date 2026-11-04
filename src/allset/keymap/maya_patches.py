@@ -686,7 +686,8 @@ def patch_view_keys(kd):
 
 # --- 24. MMB drag = the last picked manipulator handle -------------------------------
 # Maya manipsRememberActiveHandle. A plain LMB press on the gizmo
-# remembers the handle (after the drag); the tool keymaps' MMB press (IC: free transform) uses it.
+# picks the handle (a click is enough; a drag remembers its transform); the tool keymaps' MMB press (IC: free
+# transform) uses it.
 # The Channel Box MMB slider (patch 14) stays in front.
 
 MMB_TOOLS = (("3D View Tool: Move", "transform.translate", 'TRANSLATE'),
