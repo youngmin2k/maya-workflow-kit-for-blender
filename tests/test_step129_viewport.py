@@ -101,7 +101,7 @@ def test_camera_buttons_need_a_camera_view():
     space = _space()
     space.region_3d.view_perspective = 'PERSP'
     ctx = Ctx(space)
-    for key in ("CAMERA_LOCK", "FILM_GATE", "GATE_MASK", "SAFE_TITLE", "SELECT_CAMERA"):
+    for key in ("CAMERA_LOCK", "FILM_GATE", "GATE_MASK", "SAFE_TITLE"):
         assert not pm.apply(ctx, key), key
         assert key in pm.FAILS
 

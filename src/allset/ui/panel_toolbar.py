@@ -349,7 +349,7 @@ def _draw_item(row, context, item, text=""):
         if data in panel_menus.CAMERA_KEYS:
             sub.enabled = panel_menus.view_camera(context) is not None
         elif data == "SELECT_CAMERA":
-            sub.enabled = panel_menus.panel_camera(context) is not None
+            sub.enabled = panel_menus.has_panel_camera(context)
         op = sub.operator(panel_menus.ALLSET_OT_panel_set.bl_idname, text=text, icon_value=_icon(glyph),
                           depress=on)
         op.key, op.toggle = data, True
