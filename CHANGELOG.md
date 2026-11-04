@@ -31,6 +31,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Keyboard: Maya / Blender** (#309): a Keyboard choice in the add-on preferences and the Hotkey Editor. Blender
   uses your active Blender keymap alone while the Maya layout, menus and tools stay; Maya puts the kit's Maya keys
   back. Ctrl+Alt+Shift+M switches Maya mode with either choice.
+- **Click a manipulator handle to make it the active handle** (#304): like Maya, a click on a Move or Scale handle
+  or a Rotate ring makes it the active handle without moving anything, drawn yellow; a middle-mouse drag anywhere
+  in the view then moves, rotates or scales along it. A click on the Move / Scale centre frees it, and a click on
+  the Rotate view ring makes the view axis the active handle.
 - **Trax Editor and animation clips** (#287): Windows > Animation Editors > Trax Editor opens Blender's NLA Editor
   with Maya's Trax menu bar. Create > Animation Clip (with its option window: name, leave keys in timeline, time
   range, include hierarchy / subcharacters) turns the keys of the current character set, or of the selected
