@@ -51,6 +51,15 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Alt+LMB stopped tumbling after Alt was pressed again during a tumble** (#288): Blender's rotate snapped the view
   to the nearest side view when Alt was pressed mid-drag and turned the persp view orthographic, so it locked like
   a top / front / side view. Tumbling no longer snaps, like Maya.
+- **Hair hidden under a hidden parent** (#291): a parent hidden with Blender's own eye / H no longer hides its
+  children in Maya mode, so hair curves parented to a hidden surface mesh or rig show up as they do in Blender.
+  Maya's Hide (Visibility) and display layers still hide the whole hierarchy.
+- **Tiny vertices on Vulkan and Metal**: edit-mode vertices, the hovered-vertex highlight, the mesh tools' hovered
+  vertex and the UV shell preview's points were single pixels with the Vulkan / Metal backends and ignored the theme
+  Vertex Size. They now keep their size on every backend.
+- **Japanese Maya terms** (#286): 16 Japanese menu labels (Set Key, Render Sequence, Quad Draw, Target Weld, Center
+  Pivot, Reverse Normals, Match Translation / Rotation / Scaling, Conform, Reduce, Retopologize, Triangulate,
+  Quadrangulate and their tools) and the labels and tooltips that use them now read as in Japanese Maya.
 - G keeps the last modeling command after display, selection and component-menu changes, and reaches Repeat
   ahead of other add-ons' viewport G menus. Recent Commands uses the same filter; cancelled menu commands stay cancelled.
 - **Look Through keeps the scene camera** (#294): Panels > Look Through Selected and the Panels camera lists no
