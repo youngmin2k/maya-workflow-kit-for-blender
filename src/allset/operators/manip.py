@@ -395,8 +395,7 @@ class ALLSET_OT_manip_duplicate(bpy.types.Operator):
 
 
 class ALLSET_OT_manip_press(bpy.types.Operator):
-    """LMB on the manipulator: the handle under the mouse becomes the active handle, on a click as on a drag
-    (Maya active handle)"""
+    """LMB on the manipulator: clicking or dragging a handle makes it the active handle (Maya active handle)"""
     bl_idname = "allset.manip_press"
     bl_label = "Manipulator Press"
     bl_options = {'INTERNAL'}

@@ -705,8 +705,8 @@ class ALLSET_GGT_xform(GizmoGroup):
 
 
 class ALLSET_GGT_rotate_active(GizmoGroup):
-    """The active Rotate handle drawn #fdff88 like Maya's: Blender's C rings take their theme colour back on every
-    redraw, so the active ring is drawn again over them (not pickable: the press reaches the C ring)."""
+    # The active Rotate handle drawn #fdff88 like Maya's: Blender's C rings take their theme colour back on every
+    # redraw, so the active ring is drawn again over them (not pickable: the press reaches the C ring).
     bl_idname = "ALLSET_GGT_rotate_active"
     bl_label = "Maya Active Rotate Handle"
     bl_space_type = 'VIEW_3D'
