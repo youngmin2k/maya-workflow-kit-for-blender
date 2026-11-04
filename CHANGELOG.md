@@ -51,6 +51,9 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Alt+LMB stopped tumbling after Alt was pressed again during a tumble** (#288): Blender's rotate snapped the view
   to the nearest side view when Alt was pressed mid-drag and turned the persp view orthographic, so it locked like
   a top / front / side view. Tumbling no longer snaps, like Maya.
+- **Space tap kept splitting the view on high-DPI screens** (#302): at a large UI scale the kit didn't find its own
+  four view, so every Space tap split the panel under the mouse into four more. A Space tap now switches between one
+  panel and the four view at any UI scale.
 - **Hair hidden under a hidden parent** (#291): a parent hidden with Blender's own eye / H no longer hides its
   children in Maya mode, so hair curves parented to a hidden surface mesh or rig show up as they do in Blender.
   Maya's Hide (Visibility) and display layers still hide the whole hierarchy.
