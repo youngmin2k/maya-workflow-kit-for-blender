@@ -75,7 +75,18 @@ def _areas(screen):
 
 # --- the block by places (pure: anything with x / y / width / height) ---------------------------------------------
 
-GAP = 6                              # px between neighbouring areas (border + pixel size, up to UI scale 2)
+GAP = 6                              # px between neighbouring areas at UI scale 1 (border + pixel size), with room
+
+
+def border_gap():
+    """Px allowed between neighbouring areas: the area border grows with the UI scale (and the screen's DPI), e.g.
+    3 px at scale 1 but 9 px at scale 2 — with a fixed tolerance a high-DPI four view was not found and every Space
+    tap split it again (#302)."""
+    try:
+        scale = bpy.context.preferences.system.ui_scale
+    except AttributeError:
+        scale = 1.0
+    return max(GAP, math.ceil(GAP * scale))
 
 
 def rect(a):
@@ -99,11 +110,13 @@ def _size(r):
     return max(0, r[2] - r[0]) * max(0, r[3] - r[1])
 
 
-def grids(areas, gap=GAP):
+def grids(areas, gap=None):
     """Every 2 x 2 group of ``areas`` that fills a rectangle: [{role: area}] (top / persp over front / side; the
-    middle edges of the two rows may differ)."""
+    middle edges of the two rows may differ). ``gap``: px allowed between neighbours (default: by the UI scale)."""
+    tol = border_gap() if gap is None else gap
+
     def near(a, b):
-        return abs(a - b) <= gap
+        return abs(a - b) <= tol
     out = []
     for tl in areas:
         t = rect(tl)

@@ -66,6 +66,25 @@ def test_block_follows_the_recorded_rect():
     check(not four_view.is_four(FakeScreen(every, {"on": False, "rect": whole})), "off")
 
 
+def test_wide_borders_at_a_large_ui_scale():
+    """Issue #302: at UI scale 2 the borders between the four panels are 9 px; the block is still one four view."""
+    tl, tr = area(40, 309, 400, 300), area(449, 309, 500, 300, 'VIEW_3D')
+    bl, br = area(40, 100, 460, 200), area(509, 100, 440, 200)
+    check(four_view.grids([tl, tr, bl, br], gap=6) == [], "a fixed 6 px tolerance misses 9 px borders")
+    import bpy
+    view = bpy.context.preferences.view
+    old = view.ui_scale
+    try:
+        view.ui_scale = 2.0
+        scale = bpy.context.preferences.system.ui_scale
+        check(four_view.border_gap() >= four_view.GAP * scale, f"tolerance follows the UI scale ({scale})")
+        if scale >= 1.5:
+            check(len(four_view.grids([tl, tr, bl, br])) == 1, "found at UI scale 2")
+    finally:
+        view.ui_scale = old
+    check(four_view.border_gap() >= four_view.GAP, "never below the scale-1 tolerance")
+
+
 def test_single_panel_by_the_recorded_rect():
     _four, every = layout()
     one = area(40, 100, 902, 502, 'FCURVES')
