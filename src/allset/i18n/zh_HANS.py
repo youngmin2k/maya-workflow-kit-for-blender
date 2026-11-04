@@ -5918,4 +5918,6 @@ STRINGS = {
     'Blender has no UV selection or transform constraints: pick with Select Linked / Select Split and move along edges with snapping.': 'Blender 没有 UV 选择约束或变换约束：用“选择相连 / 选择拆分”来选取，并用吸附沿边移动。',
     'New Scene Time': '新建场景时间',
     "Playback speed of a new scene made with File > New Scene / Ctrl+N in Maya mode (like Maya's New Scene Options). The open scene and Blender's startup file are not changed": '在 Maya 模式下用 File > New Scene / Ctrl+N 新建的场景的播放速度 (与 Maya 的 New Scene Options 相同)。不会更改当前打开的场景和 Blender 的启动文件',
+    'Keyboard': '键盘',
+    'The keys Maya mode uses. The Maya / Blender switch shortcut (Ctrl+Alt+Shift+M) works with both': 'Maya 模式使用的按键。Maya / Blender 切换快捷键 (Ctrl+Alt+Shift+M) 在两者下都可用',
 }

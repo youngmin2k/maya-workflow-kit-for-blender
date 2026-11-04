@@ -48,6 +48,26 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     # starts respect a different keymap the user picked.
     keymap_auto_activated: bpy.props.BoolProperty(options={'HIDDEN'})
 
+    @_quiet
+    def _update_keymap_set(self, context):
+        if not self.maya_mode:
+            return
+        from . import switch
+        if not switch._registered[0]:
+            return
+        from . import keymap
+        keymap.sync()
+        bpy.context.window_manager.keyconfigs.update()
+        _redraw_tools(self, context)
+
+    # #309: which keys Maya mode uses. Blender = the active Blender keymap alone; layout, menus and tools stay.
+    keymap_set: bpy.props.EnumProperty(
+        name="Keyboard",
+        description="The keys Maya mode uses. The Maya / Blender switch shortcut (Ctrl+Alt+Shift+M) works with both",
+        items=(('MAYA', "Maya", "The kit's Maya hotkeys, marking menus and hold keys"),
+               ('BLENDER', "Blender", "Your active Blender keymap, unchanged; the Maya layout, menus and tools stay")),
+        default='MAYA', update=_update_keymap_set)
+
     # Maya mode on/off (switch.py), kept across restarts. Off after install: enabling the
     # extension changes nothing until the user opts in (welcome dialog / button / switch).
     maya_mode: bpy.props.BoolProperty(name="Maya Mode", default=False, options={'HIDDEN'})
@@ -516,6 +536,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         row.scale_y = 1.4
         row.operator("allset.new_maya_scene", icon='FILE_NEW')
         row.operator("allset.maya_layout_here", icon='WORKSPACE')
+        box.prop(self, "keymap_set")
         box.prop(self, "start_in_maya_layout")
         box.prop(self, "new_scene_time")
         box.prop(self, "maya_layout_on_open")

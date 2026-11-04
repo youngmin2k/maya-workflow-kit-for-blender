@@ -399,6 +399,25 @@ def deactivate():
     _state["applied"] = False
 
 
+def wants_maya_keys():
+    """The add-on preferences' Keyboard choice: Maya (the kit's Maya keys) or Blender (the active Blender keymap
+    alone, while the Maya layout, menus and tools stay)."""
+    from .. import preferences
+    try:
+        return preferences.get().keymap_set != 'BLENDER'
+    except (KeyError, AttributeError):
+        return True
+
+
+def sync():
+    """The Maya keys in place or taken out, as the Keyboard choice says (Maya mode on)."""
+    if wants_maya_keys():
+        activate()
+        keep_first_now()
+    else:
+        deactivate()
+
+
 class ALLSET_OT_keymap_activate(bpy.types.Operator):
     """Use the Maya keymap (add-on keymap items; your active keymap stays selected)"""
     bl_idname = "allset.keymap_activate"
@@ -416,7 +435,8 @@ classes = (ALLSET_OT_keymap_activate,)
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    activate()
+    if wants_maya_keys():
+        activate()
 
 
 def unregister():

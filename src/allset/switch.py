@@ -626,8 +626,7 @@ def set_mode(on, layout=True):
         # already on (a start with Maya mode saved on keeps the user's workspace): the Maya button puts the Maya
         # keys back in place and opens the Maya layout
         from . import keymap
-        keymap.activate()
-        keymap.keep_first_now()
+        keymap.sync()
         if layout and not bpy.app.background:
             for window in _windows()[:1]:
                 enter_layout(window)
@@ -647,7 +646,7 @@ def set_mode(on, layout=True):
         last_error[0] = None
         prefs.maya_mode = True
         from . import keymap
-        keymap.activate()
+        keymap.sync()
         _pending_hotkeys()
         if layout and not bpy.app.background:
             for window in _windows()[:1]:

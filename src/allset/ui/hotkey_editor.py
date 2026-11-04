@@ -565,6 +565,11 @@ class ALLSET_PT_hotkey_editor(bpy.types.Panel):
         top.operator(ALLSET_OT_hotkey_import.bl_idname, icon='IMPORT')
         op = top.operator("allset.settings_export", text="Export...", icon='EXPORT')
         op.preferences = op.shelves = op.marking_menus = False
+        from .. import preferences
+        try:
+            top.prop(preferences.get(context), "keymap_set")     # Maya keys or the Blender keymap (#309)
+        except KeyError:
+            pass
         top.operator(ALLSET_OT_hotkey_blender_prefs.bl_idname, icon='PREFERENCES')
         search = layout.row(align=True)
         search.prop(wm, "allset_hk_by", text="")
