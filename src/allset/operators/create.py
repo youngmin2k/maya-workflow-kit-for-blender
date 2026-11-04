@@ -65,6 +65,9 @@ KINDS = {
     'SPOT_LIGHT': ("Spot Light", "spotLight", "object.light_add", {"type": 'SPOT'}, LEVEL),
     'AREA_LIGHT': ("Area Light", "areaLight", "object.light_add", {"type": 'AREA'}, LEVEL),
     'CAMERA': ("Camera", "camera", "object.camera_add", {}, LEVEL),
+    # #299: the camera plus Maya's aim (and up) nodes in camera1_group (_aim_rig)
+    'CAMERA_AIM': ("Camera and Aim", "camera", "object.camera_add", {}, LEVEL),
+    'CAMERA_AIM_UP': ("Camera, Aim and Up", "camera", "object.camera_add", {}, LEVEL),
     'LOCATOR': ("Locator", "locator", "object.empty_add",
                 {"type": 'PLAIN_AXES', "radius": 1.0}, None),
     'EMPTY_GROUP': ("Empty Group", "null", "object.empty_add",
@@ -149,6 +152,8 @@ def create(context, kind, maya_naming=True, overrides=None):
         ob[LOCATOR_PROP] = True
     if kind == 'JOINT':
         _first_joint(ob, maya_naming)
+    if kind in ('CAMERA_AIM', 'CAMERA_AIM_UP'):
+        _aim_rig(ob, kind == 'CAMERA_AIM_UP', k)
     if maya_naming:
         from . import material
         material.give_default(ob)   # Maya: a new shape joins initialShadingGroup = lambert1
@@ -163,6 +168,27 @@ def _first_joint(ob, maya_naming):
     pose_bone = ob.pose.bones.get(bone.name)
     if pose_bone is not None:
         pose_bone.rotation_mode = 'XYZ'
+
+
+def _aim_rig(cam, up, k):
+    """Maya's camera1_group holding camera1 and camera1_aim at the centre of interest 5 units ahead, which the camera
+    looks at with world up; with ``up``, camera1_up 1 unit above sets the camera's roll."""
+    def node(suffix, location, size):
+        ob = bpy.data.objects.new(f"{cam.name}_{suffix}", None)
+        ob.location, ob.empty_display_size = location, size
+        cam.users_collection[0].objects.link(ob)
+        return ob
+
+    group = node("group", (0.0, 0.0, 0.0), 0.0)        # a Maya group draws nothing
+    nodes = [cam, node("aim", (0.0, 5.0 * k, 0.0), k)]   # LEVEL: the camera looks along +Y
+    aim = cam.constraints.new('TRACK_TO')
+    aim.target, aim.track_axis, aim.up_axis = nodes[1], 'TRACK_NEGATIVE_Z', 'UP_Y'
+    if up:
+        nodes.append(node("up", (0.0, 0.0, k), k))
+        roll = cam.constraints.new('LOCKED_TRACK')
+        roll.target, roll.track_axis, roll.lock_axis = nodes[2], 'TRACK_Y', 'LOCK_Z'
+    for ob in nodes:
+        ob.parent = group
 
 
 class ALLSET_OT_create(bpy.types.Operator):

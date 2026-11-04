@@ -203,7 +203,9 @@ MAP = {
     "Create/Lights/Spot Light": _create('SPOT_LIGHT'),
     "Create/Lights/Area Light": _create('AREA_LIGHT'),
     "Create/Lights/Dome Light": "allset.dome_light",                # #201: the World environment
-    "Create/Cameras": _create('CAMERA'),
+    "Create/Cameras/Camera": _create('CAMERA'),
+    "Create/Cameras/Camera and Aim": _create('CAMERA_AIM'),
+    "Create/Cameras/Camera, Aim and Up": _create('CAMERA_AIM_UP'),
     "Create/Curve Tools/CV Curve Tool": "allset.cv_curve_tool",            # operators/curve_draw.py
     "Create/Curve Tools/EP Curve Tool": "allset.ep_curve_tool",
     "Create/Curve Tools/Three Point Circular Arc": "allset.arc3_tool",
