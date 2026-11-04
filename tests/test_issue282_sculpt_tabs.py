@@ -2,8 +2,10 @@
 
 A Maya Workflow Kit scene carries Maya workspaces named like Blender's (Sculpting, UV Editing, Animation). Switching
 to Blender used to leave them under those names, so the Sculpting tab opened a Maya layout with Blender's sculpt
-tools. Now they become "<name> (Maya)" and the file gets Blender's own workspace of that name."""
+tools. Now in a saved file they become "<name> (Maya)" and the file gets Blender's own workspace of that name."""
 
+import os
+import tempfile
 from importlib import import_module
 
 import bpy
@@ -32,6 +34,8 @@ def test_maya_workspaces_step_aside_for_blenders_own():
     sw.user_startup_file = lambda: None
     _record_targets()
     first_start.new_maya_scene()
+    # a saved file keeps its Maya workspaces (a never saved new scene loses them, #307)
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(tempfile.mkdtemp(prefix="allset282_"), "maya_scene.blend"))
     clashing = sorted(w.name for w in bpy.data.workspaces
                       if sw.is_maya_workspace(w) and w.name in sw.BLENDER_WORKSPACES)
     assert {"Sculpting", "UV Editing", "Animation"} <= set(clashing), clashing

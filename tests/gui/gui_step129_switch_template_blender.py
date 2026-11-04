@@ -66,7 +66,7 @@ def s_check_blender():
 @step
 def s_maya_again():
     check(f"Maya again in the same file: its own Maya layout is back ({len(strips())} strips, "
-          f"{len(bpy.data.workspaces)} workspaces)", len(strips()) == 2 and len(bpy.data.workspaces) == C["n_ws"])
+          f"{len(bpy.data.workspaces)} workspaces)", len(strips()) == 2 and len(bpy.data.workspaces) <= C["n_ws"] + 1)
     sw().set_mode(False)
 
 

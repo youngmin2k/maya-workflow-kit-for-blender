@@ -225,9 +225,11 @@ def test_switch_to_blender_in_the_template_file():
     assert bpy.context.preferences.app_template == ""
     sw.set_mode(True)
     sw.set_mode(False)
-    # + Blender's own workspace for each Maya one named like Blender's (Sculpting -> "Sculpting (Maya)")
-    n_own = len([w for w in bpy.data.workspaces if sw.MAYA_NAME_KEY in w])
-    assert len(bpy.data.workspaces) == n_ws + 1 + n_own, "Blender's workspaces are appended once and reused"
+    # a never saved new scene: its Maya workspaces go (in -b the shown one waits for an event loop), Blender's own
+    # workspaces are appended once and reused
+    own = sorted(w.name for w in bpy.data.workspaces if not sw.is_maya_workspace(w))
+    maya = [w for w in bpy.data.workspaces if sw.is_maya_workspace(w)]
+    assert own == sorted(sw.BLENDER_WORKSPACES) and maya == [win.workspace] and n_ws > 1, (own, maya)
     bpy.ops.wm.read_homefile()
     assert bpy.context.preferences.app_template == ""
     assert not _strips(bpy.context.window_manager.windows[0].screen)

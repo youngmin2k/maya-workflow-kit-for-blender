@@ -214,7 +214,9 @@ def s_template():
 
 @step
 def s_template_wait():
-    pass
+    # a saved file keeps its Maya workspaces (a never saved new scene loses them, #307)
+    import tempfile
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(tempfile.mkdtemp(prefix="allset282_"), "maya_scene.blend"))
 
 
 @step
@@ -232,7 +234,9 @@ def s_template_blender_wait():
 def s_template_tabs():
     sculpt = bpy.data.workspaces.get("Sculpting")
     maya = bpy.data.workspaces.get("Sculpting (Maya)")
-    check(f"Blender mode shows Blender's Layout ({win().workspace.name})", win().workspace.name == "Layout")
+    start = sw().START_WORKSPACE["name"] or "Layout"        # the workspace before Maya mode (#307)
+    check(f"Blender mode shows the Blender workspace from before Maya mode ({win().workspace.name}, {start})",
+          win().workspace.name == start and not sw().is_maya_workspace(win().workspace))
     check("the Sculpting tab is Blender's own", sculpt is not None and not sw().is_maya_workspace(sculpt))
     check("Maya's Sculpting workspace is kept as Sculpting (Maya)",
           maya is not None and sw().template_of(maya) == "Sculpting")

@@ -29,8 +29,12 @@ def new_maya_scene():
     _armed[0] = False      # this load is the Maya layout: the start hook must not load it again (#47)
     win = _window()
     from . import switch
-    if win is not None and win.workspace is not None and not switch.is_maya_workspace(win.workspace):
-        switch.START_WORKSPACE["name"] = win.workspace.name    # shown again by a switch to Blender (#185)
+    if win is not None and win.workspace is not None:
+        # shown again by a switch to Blender (#185); from the Maya layout: the workspace before it (#307)
+        name = win.workspace.name if not switch.is_maya_workspace(win.workspace) else win.workspace.get(switch.PREV_KEY)
+        prev = bpy.data.workspaces.get(name) if isinstance(name, str) else None
+        if prev is not None and not switch.is_maya_workspace(prev):
+            switch.START_WORKSPACE["name"] = prev.name
     if win is None:
         res = bpy.ops.wm.read_homefile(filepath=app_template.STARTUP, load_ui=True)
     else:

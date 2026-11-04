@@ -393,40 +393,93 @@ def _append_counterparts(window, names):
             print("Maya Workflow Kit: Blender workspace not appended:", ex)
 
 
+def _drop_new_scene_layouts(window):
+    """A new Maya scene that was never saved: its Maya workspaces leave the file (#307), like the ones a switch
+    appends to a Blender file, so Blender mode shows Blender's tabs only. Switching back to Maya brings the Maya layout
+    again. A saved file keeps its Maya workspaces. The one ``window`` shows goes once the window shows another; one
+    another window shows stays for that window's own switch. Returns the names dropped."""
+    if bpy.data.filepath:
+        return []
+    shown = {w.workspace for w in _windows() if w != window}
+    gone = []
+    for ws in list(bpy.data.workspaces):
+        if ws.library is not None or not is_maya_workspace(ws) or ws in shown:
+            continue
+        gone.append(ws.name)
+        if ws == window.workspace:
+            _delete_later(window, ws.name, [])
+        else:
+            bpy.data.batch_remove(ids=[ws])
+    return gone
+
+
+def _append_blender_workspaces(window):
+    """Blender's factory workspaces the file lacks, in Blender's order; returns the one to show (the one the user's
+    file showed, else Layout)."""
+    for name in BLENDER_WORKSPACES:
+        if bpy.data.workspaces.get(name) is not None:
+            continue
+        before = set(bpy.data.workspaces)
+        try:
+            with bpy.context.temp_override(**_window_override(window)):
+                bpy.ops.workspace.append_activate(idname=name, filepath=EMBEDDED_STARTUP)
+        except RuntimeError as ex:
+            print("Maya Workflow Kit: Blender workspace not appended:", ex)
+            continue
+        if name == "Layout":
+            for ws in bpy.data.workspaces:
+                if ws not in before:
+                    ws[BLENDER_LAYOUT_KEY] = True
+    for name in (START_WORKSPACE["name"], "Layout"):
+        ws = bpy.data.workspaces.get(name) if name else None
+        if ws is not None and not is_maya_workspace(ws):
+            return ws
+    return next((w for w in bpy.data.workspaces if BLENDER_LAYOUT_KEY in w), None)
+
+
 def blender_target(window):
     """The workspace a switch to Blender shows in ``window`` when its Maya layout came with the file (no workspace
     to go back to): the user's workspace if the file has one, else the user's own startup workspaces appended,
-    else Blender's factory Layout (#19, #185). Maya workspaces with Blender's names step aside for Blender's own
-    (#282). The caller shows the result after these appends (each append also asks the window to show what it
-    appended; the last request wins)."""
+    else Blender's factory workspaces, showing Layout (#19, #185). Maya workspaces with Blender's names step aside for
+    Blender's own (#282); a never saved new Maya scene loses its Maya workspaces (#307). The caller shows the result
+    after these appends (each append also asks the window to show what it appended; the last request wins)."""
     renamed = _rename_maya_clashes()
-    target = _users_workspace(window) or _users_startup_workspaces(window)
+    _drop_new_scene_layouts(window)
+    target = _users_workspace(window) or _users_startup_workspaces(window) or _append_blender_workspaces(window)
     _append_counterparts(window, renamed)
-    if target is not None:
-        return target
-    before = set(bpy.data.workspaces)
-    try:
-        with bpy.context.temp_override(**_window_override(window)):
-            bpy.ops.workspace.append_activate(idname="Layout", filepath=EMBEDDED_STARTUP)
-    except RuntimeError as ex:
-        print("Maya Workflow Kit: Blender layout not appended:", ex)
-        return None
-    new = [w for w in bpy.data.workspaces if w not in before]
-    if not new:
-        return None
-    new[0][BLENDER_LAYOUT_KEY] = True
-    return new[0]
+    return target
 
 
 def _leave_template_layout(window):
     """The window shows the Maya layout of a Maya Workflow Kit template file (no workspace to go back to): give it
-    the user's workspace (``blender_target``), appended once and reused. The Maya one stays in the file for the way
-    back (``enter_layout``)."""
+    the user's workspace (``blender_target``), appended once and reused. In a saved file the Maya one stays for the
+    way back (``enter_layout``)."""
     target = blender_target(window)
     if target is None:
         return False
     window.workspace = target
+    _show_later(window, target.name)
     return True
+
+
+def _show_later(window, name, tries=3):
+    """Show workspace ``name`` in ``window`` again over the next event loops: Blender's appends switch the window to
+    the workspace each appended once the event loop runs, after the switch chose the one to show."""
+    ptr = window.as_pointer()
+    left = [tries]
+
+    def tick():
+        win = live_refs.window(ptr)
+        ws = bpy.data.workspaces.get(name)
+        left[0] -= 1
+        if win is None or ws is None or left[0] < 0:
+            _forget_timer(tick)
+            return None
+        if win.workspace != ws:
+            win.workspace = ws
+        return 0.05
+    _timers.append(tick)
+    bpy.app.timers.register(tick, first_interval=0.05)
 
 
 def _delete_workspace(window, name, added):
