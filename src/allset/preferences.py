@@ -34,6 +34,11 @@ def _redraw_tools(_self, context):
             area.tag_redraw()
 
 
+# The Time choices of Maya's New Scene Options (playback speed of a new scene).
+NEW_SCENE_TIMES = ("12 fps", "15 fps", "23.976 fps", "24 fps", "25 fps", "29.97 fps", "30 fps", "48 fps", "50 fps",
+                   "60 fps")
+
+
 class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
     # Must equal the top-level package name: "bl_ext.<repo>.allset" as an
     # extension, "allset" as a legacy add-on.
@@ -115,6 +120,13 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         name="Start in Maya Layout",
         description="When Blender starts without a file in Maya mode, open a new scene in the Maya layout",
         default=False)
+    # Time (playback speed) of a new Maya scene, like Maya's New Scene Options Time (default 24 fps); the
+    # New Scene option window's Time field edits this value.
+    new_scene_time: bpy.props.EnumProperty(
+        name="New Scene Time",
+        description="Playback speed of a new scene made with File > New Scene / Ctrl+N in Maya mode (like Maya's "
+                    "New Scene Options). The open scene and Blender's startup file are not changed",
+        items=[(t, t, "") for t in NEW_SCENE_TIMES], default="24 fps")
 
     # #63: Maya's UI doesn't come from the scene file: opening a file
     # shows the Maya layout (ui/scene_carry.py).
@@ -505,6 +517,7 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
         row.operator("allset.new_maya_scene", icon='FILE_NEW')
         row.operator("allset.maya_layout_here", icon='WORKSPACE')
         box.prop(self, "start_in_maya_layout")
+        box.prop(self, "new_scene_time")
         box.prop(self, "maya_layout_on_open")
         col = layout.column()
         col.prop(self, "lock_ortho_tumble")

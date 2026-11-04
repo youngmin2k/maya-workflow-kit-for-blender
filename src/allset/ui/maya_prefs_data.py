@@ -109,6 +109,7 @@ PAGES = (
         ("Working Units", [
             ("scene", "unit_settings.length_unit", "Linear"),
             ("scene", "unit_settings.system_rotation", "Angular"),
+            ("pref", "new_scene_time", "Time (new scenes)"),
             ("pref", "maya_units", "Maya units (1 BU = 1 cm)"),
         ]),
     ]),

@@ -21,6 +21,7 @@ from bpy.props import BoolProperty, EnumProperty, FloatProperty, FloatVectorProp
 from mathutils import Matrix, Vector
 
 from . import units
+from ..preferences import NEW_SCENE_TIMES
 
 # --- spec -------------------------------------------------------------------------------------------
 
@@ -49,8 +50,10 @@ class F:
 
 class Window:
     def __init__(self, key, title, action, match, fields, run, paths=(), missing=(), width=440, apply_text="Apply",
-                 click_saved=True):
+                 click_saved=True, pref_fields=None):
         self.key, self.title, self.action = key, title, action
+        # field -> add-on preference that keeps its value (shown and set elsewhere too), not the saved option values
+        self.pref_fields = dict(pref_fields or {})
         # a plain menu click runs the window's command with the saved values (Maya); False = the click keeps running
         # the menu's own action (Display > Grid toggles the grid, its window only sets how it looks)
         self.click_saved = click_saved
@@ -307,26 +310,59 @@ def _run_uv_auto(context, v):
     return bpy.ops.allset.uv_automatic('EXEC_DEFAULT', planes=v["planes"], spacing=v["spacing"])
 
 
-def _run_new_scene(context, v):
-    values = dict(v)
+def set_time(scene, text):
+    """A Maya Time choice ("24 fps", "29.97 fps") as the scene's frame rate (fps / fps_base)."""
+    fps = float(text.split()[0])
+    scene.render.fps, scene.render.fps_base = (round(fps), round(fps) / fps)
 
-    def later():
-        from .. import first_start
-        first_start.new_maya_scene()     # the Maya layout file bundled in the extension
-        scene = bpy.context.scene
-        us = scene.unit_settings
-        if not values["keep_units"]:
+
+def scene_units(scene):
+    """The working units of ``scene`` (Do not reset working units carries them into the new scene)."""
+    us = scene.unit_settings
+    return {"system": us.system, "length_unit": us.length_unit, "system_rotation": us.system_rotation,
+            "fps": scene.render.fps, "fps_base": scene.render.fps_base}
+
+
+def new_scene_values():
+    """The New Scene Options a new Maya scene gets: the saved option values (None when never saved) and the New
+    Scene Time, which is always applied."""
+    window = _BY_KEY["new_scene"]
+    stored = saved(window.key)
+    prefs = _prefs()
+    time = getattr(prefs, "new_scene_time", None) if prefs is not None else None
+    return {**window.defaults(), "fps": time or window.defaults()["fps"], **(stored or {})}, stored is not None
+
+
+def apply_new_scene(scene, values, full, before=None):
+    """Give a new Maya scene its New Scene Options: the working units (or ``before``, the previous scene's, when Do
+    not reset working units is on) and, when ``full`` (options applied or saved), the time ranges."""
+    us = scene.unit_settings
+    if values["keep_units"]:
+        if before:
+            us.system, us.length_unit = before["system"], before["length_unit"]
+            us.system_rotation = before["system_rotation"]
+            scene.render.fps, scene.render.fps_base = before["fps"], before["fps_base"]
+    else:
+        if full:
             us.length_unit = {"millimeter": 'MILLIMETERS', "centimeter": 'CENTIMETERS', "meter": 'METERS',
                               "inch": 'INCHES', "foot": 'FEET', "yard": 'YARDS'}[values["linear"]]
             if values["linear"] in ("inch", "foot", "yard"):
                 us.system = 'IMPERIAL'
             us.system_rotation = 'DEGREES' if values["angular"] == "degrees" else 'RADIANS'
-            fps = float(values["fps"].split()[0])
-            scene.render.fps, scene.render.fps_base = (round(fps), round(fps) / fps)
+        set_time(scene, values["fps"])
+    if full:
         scene.frame_start, scene.frame_end = int(values["anim_start"]), int(values["anim_end"])
         scene.use_preview_range = True
         scene.frame_preview_start, scene.frame_preview_end = int(values["play_start"]), int(values["play_end"])
         scene.frame_current = int(values["play_start"])
+
+
+def _run_new_scene(context, v):
+    values = dict(v)
+
+    def later():
+        from .. import first_start
+        first_start.new_maya_scene(values)     # the Maya layout file bundled in the extension + these options
         return None
     # Maya's Save Changes prompt first (#57); never load a file inside a running operator
     #: save_prompt runs it from a timer
@@ -467,11 +503,10 @@ WINDOWS = [
         F("keep_units", "", "bool", False, text="Do not reset working units"),
         F("linear", "Linear:", "enum", "centimeter", items=("millimeter", "centimeter", "meter", "inch", "foot", "yard")),
         F("angular", "Angular:", "enum", "degrees", items=("degrees", "radians")),
-        F("fps", "Time:", "enum", "24 fps", items=("12 fps", "15 fps", "23.976 fps", "24 fps", "25 fps",
-                                                   "29.97 fps", "30 fps", "48 fps", "50 fps", "60 fps")),
+        F("fps", "Time:", "enum", "24 fps", items=NEW_SCENE_TIMES),
         F("play_start", "Playback start:", "int", 1, lo=-100000), F("play_end", "Playback end:", "int", 120, lo=-100000),
         F("anim_start", "Animation start:", "int", 1, lo=-100000), F("anim_end", "Animation end:", "int", 200, lo=-100000)],
-        _run_new_scene, paths=("File/New Scene",), missing=("Enable default scene", "Show the Compass", "Color Management enabled")),
+        _run_new_scene, paths=("File/New Scene",), pref_fields={"fps": "new_scene_time"}, missing=("Enable default scene", "Show the Compass", "Color Management enabled")),
     Window("save_scene", "Save Scene Options", "Save Scene", None, [
         F("incremental", "", "bool", False, text="Incremental save"),
         F("compressed", "", "bool", False, text="Compressed save")], _run_save, paths=("File/Save Scene",),
@@ -560,9 +595,20 @@ def _prefs():
 def saved(key):
     prefs = _prefs()
     try:
-        return json.loads(prefs.option_settings).get(key) if prefs is not None and prefs.option_settings else None
+        out = json.loads(prefs.option_settings).get(key) if prefs is not None and prefs.option_settings else None
     except ValueError:
         return None
+    window = _BY_KEY.get(key)
+    if out is not None and window is not None:
+        out = {**out, **_pref_values(window, prefs, out)}
+    return out
+
+
+def _pref_values(window, prefs, stored=()):
+    """The window's fields kept in add-on preferences; a value saved with the options before the preference
+    existed stays until the preference is set."""
+    return {name: getattr(prefs, attr) for name, attr in window.pref_fields.items()
+            if hasattr(prefs, attr) and (name not in stored or prefs.is_property_set(attr))}
 
 
 def store(key, values):
@@ -573,10 +619,18 @@ def store(key, values):
         data = json.loads(prefs.option_settings) if prefs.option_settings else {}
     except ValueError:
         data = {}
+    window = _BY_KEY.get(key)
+    for name, attr in (window.pref_fields if window is not None else {}).items():
+        if not hasattr(prefs, attr):
+            continue
+        if values is None:
+            prefs.property_unset(attr)       # Reset Settings: the preference's default too
+        elif name in values and getattr(prefs, attr) != values[name]:
+            setattr(prefs, attr, values[name])
     if values is None:
         data.pop(key, None)
     else:
-        data[key] = values
+        data[key] = {k: v for k, v in values.items() if window is None or k not in window.pref_fields}
     prefs.option_settings = json.dumps(data)
 
 
@@ -679,7 +733,9 @@ def _make(window):
     def invoke(self, context, event):
         if window.key == "paint_skin_weights":
             return bpy.ops.allset.weight_workspace('INVOKE_DEFAULT')
-        for name, val in (saved(window.key) or {}).items():
+        prefs = _prefs()
+        stored = saved(window.key) or {}
+        for name, val in {**stored, **(_pref_values(window, prefs, stored) if prefs else {})}.items():
             if name in ann:
                 try:
                     setattr(self, name, val)

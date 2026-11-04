@@ -5916,4 +5916,6 @@ STRINGS = {
     'Unfold Tool': '展開ツール',
     'Select menu / Snapping': '選択メニュー / スナップ',
     'Blender has no UV selection or transform constraints: pick with Select Linked / Select Split and move along edges with snapping.': 'Blender には UV の選択コンストレイントもトランスフォーム コンストレイントもありません: リンク選択 / 分割選択で選び、スナップを使ってエッジに沿って移動します。',
+    'New Scene Time': '新規シーンの時間',
+    "Playback speed of a new scene made with File > New Scene / Ctrl+N in Maya mode (like Maya's New Scene Options). The open scene and Blender's startup file are not changed": 'Maya モードの File > New Scene / Ctrl+N で作る新規シーンの再生速度です (Maya の New Scene Options と同じ)。開いているシーンと Blender のスタートアップファイルは変わりません',
 }

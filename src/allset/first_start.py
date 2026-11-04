@@ -24,9 +24,17 @@ from . import app_template, preferences
 _armed = [False]
 
 
-def new_maya_scene():
-    """Replace the open file with a new untitled file in the Maya layout (not from inside an operator)."""
+def new_maya_scene(options=None):
+    """Replace the open file with a new untitled file in the Maya layout (not from inside an operator), with the
+    New Scene Options: ``options`` (the option window's values) or the saved ones and the New Scene Time."""
     _armed[0] = False      # this load is the Maya layout: the start hook must not load it again (#47)
+    from .operators import option_windows
+    if options is None:
+        options, full = option_windows.new_scene_values()
+    else:
+        full = True
+    old = bpy.context.scene
+    before = option_windows.scene_units(old) if old is not None else None
     win = _window()
     from . import switch
     if win is not None and win.workspace is not None:
@@ -45,6 +53,7 @@ def new_maya_scene():
     scene = bpy.context.scene or (bpy.data.scenes[0] if bpy.data.scenes else None)
     if scene is not None:
         startup_cameras.ensure(scene, scene.view_layers[0])
+        option_windows.apply_new_scene(scene, options, full, before)
     return res
 
 
