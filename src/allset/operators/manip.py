@@ -227,6 +227,36 @@ def reset_handle(kind):
     HANDLES.pop(kind, None)
 
 
+def handle_from_gizmo(context, gz):
+    """(kind, handle) of the manipulator handle ``gz`` that a press is on, as ``handle_from_op`` gives it; kind None
+    when the MMB drag can't use it (the Rotate trackball, the pivot rings)."""
+    from ..ui import manipulator
+    role = getattr(gz, "handle_role", None)
+    if role is not None:      # the kit's Move / Scale manipulator
+        kind = manipulator.tool_kind(context)
+        if role == 'CENTER':
+            return kind, None
+        if role == 'AXIS':
+            axes = tuple(a == gz.handle_axis for a in 'XYZ')
+        elif role == 'PLANE':
+            axes = manipulator.PLANES[gz.handle_axis][0]
+        else:
+            return None, None
+        return kind, {"constraint_axis": axes, "orient_type": manipulator.slot_type(context.scene, kind)}
+    # Blender's Rotate gizmo: the axis rings clip their back half, the view ring doesn't, the trackball is filled
+    tool = manipulator.active_tool(context)
+    if (tool is None or tool.idname != 'builtin.rotate' or gz.bl_idname != "GIZMO_GT_dial_3d"
+            or 'FILL' in gz.draw_options):
+        return None, None
+    if 'CLIP' not in gz.draw_options:
+        return 'ROTATE', None
+    _centre, frame, otype = manipulator.pivot_frame(context, 'ROTATE')
+    normal = gz.matrix_world.col[2].xyz.normalized()      # a ring's local Z is its axis
+    i = max(range(3), key=lambda k: abs(frame.col[k].normalized().dot(normal)))
+    return 'ROTATE', {"constraint_axis": tuple(k == i for k in range(3)), "orient_type": otype,
+                      "orient_axis": 'XYZ'[i]}
+
+
 def finish(state, window, area, region):
     """After the transform: remember its handle; keep a moved copy / extrusion, take back
     one that didn't move."""
@@ -365,7 +395,7 @@ class ALLSET_OT_manip_duplicate(bpy.types.Operator):
 
 
 class ALLSET_OT_manip_press(bpy.types.Operator):
-    """LMB on the manipulator: remember which handle the drag used (Maya active handle)"""
+    """LMB on the manipulator: clicking or dragging a handle makes it the active handle (Maya active handle)"""
     bl_idname = "allset.manip_press"
     bl_label = "Manipulator Press"
     bl_options = {'INTERNAL'}
@@ -374,6 +404,12 @@ class ALLSET_OT_manip_press(bpy.types.Operator):
         from . import snap_align
         snap_align.apply_active(context)       # this tool's Step Snap Relative / Absolute
         if from_xform_gizmo(context) and context.window is not None:
+            gz = next((g for g in context.gizmo_group.gizmos if g.is_highlight), None)
+            kind, handle = handle_from_gizmo(context, gz) if gz is not None else (None, None)
+            if kind is not None:
+                HANDLES[kind] = handle
+                context.area.tag_redraw()
+            # a drag then remembers what its transform registered
             watch({"kind": 'PRESS'}, context.window, context.area, context.region)
         return {'PASS_THROUGH'}
 

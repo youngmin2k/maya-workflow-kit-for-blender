@@ -5126,7 +5126,7 @@ STRINGS = {
     "Key the selected rigid bodies active or passive at the current frame (Maya Set Active Key / Set Passive Key:\nBlender's rigid body Animated checkbox, keyed)": '選択リジッドボディを現在フレームでアクティブまたはパッシブとしてキー設定 (Maya アクティブ キーの設定 / パッシブ キーの設定:\nBlender のリジッドボディの Animated チェックボックスにキー)',
     'Key: record (driver value, driven value) for every loaded driven attribute': 'キー: 読み込んだすべてのドリブンアトリビュートについて (ドライバ値、ドリブン値) を記録',
     "Kit settings back to their defaults and the scene values to the default settings (like Maya's Edit > Restore\nDefault Settings)": 'キットの設定を既定値に、シーンの値を既定の設定に戻す (Maya の 編集 > デフォルト設定に\n戻す と同様)',
-    'LMB on the manipulator: remember which handle the drag used (Maya active handle)': 'マニピュレータ上の LMB: ドラッグに使ったハンドルを記憶 (Maya のアクティブハンドル)',
+    'LMB on the manipulator: clicking or dragging a handle makes it the active handle (Maya active handle)': 'マニピュレータ上の LMB: クリックやドラッグしたハンドルをアクティブハンドルにする (Maya のアクティブハンドル)',
     'Left button released: a Smart Duplicate / Extrude press that never became a drag was a click': '左ボタンを離した: ドラッグにならなかったスマート複製 / 押し出しの押下はクリックとして扱う',
     'Lay every CV leg of the selected curves on one line, keeping their lengths (Maya Curves > Straighten)': '選択カーブのすべての CV レッグを長さを保ったまま一直線に並べる (Maya の カーブ > 直線化)',
     'Lay the quads between two selected corner vertices out as a grid shell over 0-1 (Maya Cut/Sew > Create Shell\n(Grid))': '選択した 2 つのコーナー頂点の間のクアッドを 0-1 上のグリッドシェルとして配置 (Maya の カット/縫合 > シェルを作成\n(グリッド))',
