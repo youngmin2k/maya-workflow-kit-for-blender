@@ -5130,7 +5130,7 @@ STRINGS = {
     "Key the selected rigid bodies active or passive at the current frame (Maya Set Active Key / Set Passive Key:\nBlender's rigid body Animated checkbox, keyed)": '在当前帧将选定刚体设为主动或被动并设置关键帧 (Maya 设置主动关键帧 / 设置被动关键帧：\nBlender 刚体的动画复选框，设置关键帧)',
     'Key: record (driver value, driven value) for every loaded driven attribute': '关键帧：为每个已加载的受驱动属性记录 (驱动者值，受驱动值)',
     "Kit settings back to their defaults and the scene values to the default settings (like Maya's Edit > Restore\nDefault Settings)": '将套件设置恢复为默认值，并将场景值恢复为默认设置 (与 Maya 的编辑 > 恢复\n默认设置相同)',
-    'LMB on the manipulator: clicking or dragging a handle makes it the active handle (Maya active handle)': '在操纵器上 LMB：单击或拖动的控制柄成为当前控制柄 (Maya 当前控制柄)',
+    'LMB on the manipulator: clicking or dragging a handle makes it the active handle (Maya active handle)': '在操纵器上 LMB：单击或拖动的控制柄成为活动控制柄 (Maya 活动控制柄)',
     'Left button released: a Smart Duplicate / Extrude press that never became a drag was a click': '松开左键：未变成拖动的智能复制 / 挤出按下视为单击',
     'Lay every CV leg of the selected curves on one line, keeping their lengths (Maya Curves > Straighten)': '将选定曲线的每段 CV 连线排在一条直线上，保持其长度 (Maya 曲线 > 拉直)',
     'Lay the quads between two selected corner vertices out as a grid shell over 0-1 (Maya Cut/Sew > Create Shell\n(Grid))': '将两个选定角顶点之间的四边形以网格壳的形式排布在 0-1 内 (Maya 剪切/缝合 > 创建壳\n(栅格))',
