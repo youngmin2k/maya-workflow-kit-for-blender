@@ -50,7 +50,7 @@ def border_edges(bm, uv):
         if e.hide:
             continue
         fs = [f for f in e.link_faces if not f.hide]
-        if len(fs) == 1:
+        if len(fs) == 1 or e.seam:     # a cut edge (seam) shows at once, also inside a shell
             out.append(e)
         elif len(fs) == 2:
             a, b = fs

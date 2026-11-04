@@ -20,6 +20,8 @@ Maya 2022 UV Editor hotkeys (context polyTexturePlacementPanel) and View menu:
 
 Shell borders follow the step-66 island rule (operators/uv_tools.islands: faces join where their UVs match at both
 ends of an edge): an edge is a border on a face's side when no other shown face shares the same UVs across it.
+A seam edge is a border too: Cut UVs marks one, and like Maya the cut edge shows as a border at once, also a
+single edge inside a shell that stays in one piece.
 They are drawn by an Image Editor WINDOW POST_PIXEL handler in UV space mapped through ``View2D.view_to_region``;
 segments are cached per object and dropped on any depsgraph update of a mesh / object (like cut_sew.py).
 """
@@ -63,7 +65,7 @@ def border_segments(bm, uv, faces):
         for loop in f.loops:
             e = loop.edge
             joined = False
-            for g in e.link_faces:
+            for g in () if e.seam else e.link_faces:     # a cut edge (seam) is a border even inside one shell
                 if g is f or g not in shown:
                     continue
                 if all(uv_tools._same(uv_tools._uv_at(f, v, uv), uv_tools._uv_at(g, v, uv)) for v in e.verts):

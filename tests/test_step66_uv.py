@@ -215,8 +215,11 @@ def test_uv_components():
 def _ctx(space_mode='UV', sync=True, island=False):
     ts = bpy.context.scene.tool_settings
     ts.use_uv_select_sync = sync
+    ts.mesh_select_mode = (True, False, False)
+    ts.uv_select_mode = 'VERTEX'
     compat.set_uv_island_mode(ts, island)
     return types.SimpleNamespace(mode='EDIT_MESH', scene=bpy.context.scene, active_object=None,
+                                 window_manager=types.SimpleNamespace(allset_uv_shell_mask=False),
                                  space_data=types.SimpleNamespace(type='IMAGE_EDITOR', mode=space_mode))
 
 

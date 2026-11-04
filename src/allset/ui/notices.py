@@ -1400,3 +1400,28 @@ NOTICES.update({
         "Cycles Bake", "Blender has no image warp between UV sets: assign the texture with the old UV Map, make the "
         "new UV Map active for an empty image and bake (Render Properties > Bake, Cycles)."),
 })
+
+
+# UV Editor Shift+RMB marking menus: greyed entries share the UV Editor menus' notices.
+_UV_MENUS = ("SHIFT_UV", "SHIFT_UV_SHELL", "SHIFT_UV_FACE")
+_UV_CONSTRAINTS = ("Select menu / Snapping", "Blender has no UV selection or transform constraints: pick with Select "
+                   "Linked / Select Split and move along edges with snapping.")
+MARKING.update({
+    **{f"{m}/Symmetrize": CATEGORIES["UV Editor/Modify/Symmetrize"] for m in ("SHIFT_UV", "SHIFT_UV_FACE")},
+    "SHIFT_UV/Measure Pixel Distance": (
+        "Sidebar UV Vertex", "Blender has no pixel ruler: the sidebar (N) Image tab shows the selected UVs' position, "
+        "so two readings give the distance."),
+    **{f"{m}/Tools/Symmetrize Tool": CATEGORIES["UV Editor/Tools/Symmetrize"] for m in _UV_MENUS},
+    **{f"{m}/Tools/Lattice Tool": (
+        "Proportional Editing", "Blender's UV Editor has no lattice tool: move UVs with proportional editing (O) for "
+        "a smooth falloff.") for m in _UV_MENUS},
+    **{f"{m}/Tools/Smear Tool": (
+        "Grab brush", "Blender's UV sculpt brushes are Grab, Relax and Pinch: Grab drags the UVs under the brush.")
+       for m in _UV_MENUS},
+    **{f"{m}/Pinning/Reset Settings": CATEGORIES["UV Editor/Edit/Reset UV Editor UI"] for m in _UV_MENUS},
+    **{f"{m}/Pinning/{label}": _UV_CONSTRAINTS for m in _UV_MENUS
+       for label in ("Selection Constraints", "Transform Constraints")},
+    **{f"SHIFT_UV_SHELL/Distribute Shells/{label}": (
+        "Distribute Shells Right", "The kit lines shells up to the right only: run Right, then rotate or move the "
+        "row.") for label in ("Left", "Up", "Down", "Towards Target")},
+})

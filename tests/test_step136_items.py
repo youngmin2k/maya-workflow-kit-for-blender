@@ -29,9 +29,8 @@ QUANT_25 = [
     "SHIFT_EDGE/Edit Edge Flow", "SHIFT_FACE/Wedge Face",
     "SHIFT_FACE/Face Normals/Reverse Normals", "SHIFT_DEFAULT/Quad Draw Tool",
     "CTRL_CONVERT/To UV Shell",
-    "SHIFT_UV/Mapping/Best Plane", "SHIFT_UV_SHELL/Mapping/Best Plane",
-    "SHIFT_UV/Mapping/Contour Stretch", "SHIFT_UV_SHELL/Mapping/Contour Stretch",
-    "SHIFT_UV/UV Set Editor", "SHIFT_UV_SHELL/UV Set Editor",
+    "SHIFT_UV_SHELL/Mapping/Automatic Mapping", "SHIFT_UV_FACE/Mapping/Automatic Mapping",
+    "SHIFT_UV/Auto Seams", "SHIFT_UV_SHELL/Auto Seams", "SHIFT_UV/Cut UVs", "SHIFT_UV/Sew UVs",
     "RMB_MESH/Make Live", "RMB_CURVE/Make Live",
 ]
 
@@ -61,7 +60,8 @@ def test_greyed_counts_and_notices():
     for key, (substitute, line) in notices.MARKING.items():
         assert substitute and line.endswith("."), key
     # Maya 2026 adds the shared Select / constraint submenus of the tool option menus and Polygon Display lists
-    assert len(greyed) <= 115, len(greyed)
+    # (104); the three UV Editor Shift+RMB menus add 25 (their shared Tools / Pinning lists repeat per menu)
+    assert len(greyed) <= 129, len(greyed)
 
 
 def test_item_paths_are_mapped():

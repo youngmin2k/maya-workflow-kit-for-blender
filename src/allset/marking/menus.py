@@ -11,6 +11,8 @@ Kept free of Blender UI so the step-9 marking-menu engine can draw the same
 definitions.
 """
 
+import math
+
 RADIALS = ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
 DIVIDER = "-"
 
@@ -1206,58 +1208,142 @@ UV_EDITOR_RMB = MarkingMenu(
     items=[(title, ("menu", f"ALLSET_MT_ed_UvEditor_{i}")) for i, title in enumerate(
         ("Edit", "Create", "Select", "Cut/Sew", "Modify", "Tools", "View", "Image", "Textures", "UV Sets"))])
 
-# Shift+RMB in the UV Editor: Maya's UV / UV Shell tool marking menus,
-# Mapping = Maya's UV mapping submenu.
-UV_MAPPING = Sub(radial={
-    "N": ("Planar", "allset.uv_planar"),
-    "NE": ("Normal-Based", "allset.uv_planar"),
-    "E": ("Camera-Based", ("v3d", "uv.project_from_view", {})),
-    "SE": ("Cylindrical", ("v3d", "uv.cylinder_project", {})),
-    "S": ("Best Plane", _item("UV/Best Plane")),
-    "SW": ("Spherical", ("v3d", "uv.sphere_project", {})),
-    "W": ("Contour Stretch", _item("UV/Contour Stretch")),
-    "NW": ("Automatic", _item("UV/Automatic")),               # polyAutoProj
-}, options={"Planar", "Normal-Based", "Camera-Based", "Cylindrical", "Spherical", "Contour Stretch", "Automatic"})
-# SetMeshGrabUVTool: Maya grabs UVs from the 3D View; these menus open in the UV Editor, whose Grab tool does it.
-GRAB_UV = _item("UV Editor/Tools/Grab")
-_UV_TAIL = [("Texture Borders", ("allset.uv_display", {"mode": 'TEXTURE_BORDERS'})), DIVIDER, ("UV Editor", ("allset.uv_component", {"mode": 'OPEN'})),
-            ("UV Set Editor", _item("UV/UV Set Editor"))]
+# Shift+RMB in the UV Editor: Maya's UV Editor editing marking menus, one per component: UVs (also edges and
+# vertices), UV shells and faces. Items run the UV Editor menu commands (same undo step and option box).
+UV_QUARTER_TURN = math.pi / 2       # transform.rotate in the UV Editor: a positive angle turns clockwise
+
+
+def _uve(path):
+    return _item("UV Editor/" + path)
+
+
+def _align(axis, where):
+    return ("allset.uv_align_to", {"axis": axis, "where": where})
+
+
+_ROTATE = Sub(radial={
+    "E": ("Rotate Clockwise", ("transform.rotate", {"value": UV_QUARTER_TURN})),
+    "W": ("Rotate Counterclockwise", ("transform.rotate", {"value": -UV_QUARTER_TURN})),
+})
+_LAYOUT = Sub(radial={
+    "SW": ("Layout UV", _uve("Modify/Layout")),
+    "W": ("Layout Along U", ("allset.uv_layout_along", {"direction": 'U'})),
+    "NW": ("Layout Along V", ("allset.uv_layout_along", {"direction": 'V'})),
+}, options={"Layout UV"})
+_UNFOLD = Sub(radial={
+    "W": ("Unfold", _uve("Modify/Unfold")),
+    "NW": ("Unfold Along U", ("allset.uv_unfold_along", {"axis": 'U'})),
+    "SW": ("Unfold Along V", ("allset.uv_unfold_along", {"axis": 'V'})),
+}, options={"Unfold"})
+_ALIGN = Sub(radial={
+    "NE": ("Max V", _align('V', 'MAX')), "E": ("Center V", _align('V', 'AVG')), "SE": ("Min V", _align('V', 'MIN')),
+    "S": ("Linear Align", _uve("Modify/Linear Align")),
+    "SW": ("Min U", _align('U', 'MIN')), "W": ("Center U", _align('U', 'AVG')), "NW": ("Max U", _align('U', 'MAX')),
+})
+_UV_MAPPING = Sub(radial={
+    "N": ("Planar Mapping", _uve("Create/Planar")),
+    "NE": ("Normal-Based Mapping", _uve("Create/Normal-based")),
+    "NW": ("Automatic Mapping", _uve("Create/Automatic")),
+}, options={"Planar Mapping", "Normal-Based Mapping", "Automatic Mapping"})
+_UV_TOOLS = Sub(items=[
+    ("Cut Tool", _uve("Tools/Cut")), ("Sew Tool", _uve("Tools/Sew")), DIVIDER,
+    ("Optimize Tool", _uve("Tools/Optimize")), ("Unfold Tool", _uve("Tools/Unfold")), DIVIDER,
+    ("Grab Tool", _uve("Tools/Grab")), ("Lattice Tool", None), ("Pin Tool", _uve("Tools/Pin")),
+    ("Pinch Tool", _uve("Tools/Pinch")), ("Smear Tool", None), ("Symmetrize Tool", None),
+], options={"Optimize Tool", "Grab Tool", "Pinch Tool"})
+# Pinning also holds the editor's display switches, like Maya's
+_UV_PINNING = Sub(items=[
+    ("Pin Selection", _uve("Edit/Pin Selection")), ("Inverse Pinning", _uve("Edit/Invert Pinning")),
+    ("Unpin Selection", _uve("Edit/Unpin Selection")), ("Unpin All", _uve("Edit/Unpin All")), DIVIDER,
+    ("Reset Settings", unavailable()), DIVIDER,
+    ("Selection Constraints", unavailable()), ("Transform Constraints", unavailable()), DIVIDER,
+    ("Toggle Shell Borders", _uve("View/Toggle Shell Borders")), ("Texture Borders", _uve("View/Texture Borders")),
+    DIVIDER,
+    ("Display Image", _uve("Image/Display")), ("Checker Map", _uve("Textures/Checker Map")),
+    ("Distortion Shader", _uve("View/UV Distortion")),
+])
+_UV_LIST_TAIL = [DIVIDER, ("Tools", _UV_TOOLS), DIVIDER, ("Pinning", _UV_PINNING)]
 
 SHIFT_UV = MarkingMenu(
-    "SHIFT_UV", "UV Tools", "maya",
+    "SHIFT_UV", "UV Editor UVs", "maya",
     radial={
-        "N": ("Mapping", UV_MAPPING),
-        "NE": ("3D Grab UV Tool", GRAB_UV),
-        "E": ("Sew UVs", "allset.uv_sew"),
-        "SE": ("Create UV Shell", "allset.uv_create_shell"),
-        "S": ("Merge UVs", "allset.uv_merge"),
-        "SW": ("Delete UVs", "allset.uv_delete"),
-        "W": ("Cut UVs", "allset.uv_cut"),
-        "NW": ("3D Cut and Sew UV Tool", "allset.cut_sew_tool_set"),
+        "N": ("Snap", Sub(radial={
+            "NE": ("Snap Together", _uve("Modify/Snap Together")),
+            "SE": ("Match UVs", _uve("Modify/Match UVs")),
+            "SW": ("Match Grid", _uve("Modify/Match Grid")),
+            "NW": ("Snap and Stack", _uve("Modify/Snap and Stack")),
+        }, options={"Snap Together", "Match UVs", "Match Grid"})),
+        "NE": ("Straighten", Sub(radial={
+            "N": ("Straighten UVs", _uve("Modify/Straighten UVs")),
+            "NE": ("Straighten Border", _uve("Modify/Straighten Border")),
+            "NW": ("Straighten Shell", _uve("Modify/Straighten Shell")),
+        }, options={"Straighten UVs", "Straighten Border"})),
+        "E": ("Optimize", _uve("Modify/Optimize")),
+        "SE": ("Align UVs", _ALIGN),
+        "S": ("Rotate UVs", _ROTATE),
+        "SW": ("Layout", _LAYOUT),
+        "W": ("Unfold", _UNFOLD),
+        "NW": ("Normalize", _uve("Modify/Normalize")),
     },
-    items=[("Auto Seams", _item("UV/Auto Seams")), *_UV_TAIL],
-    options={"3D Grab UV Tool", "Merge UVs", "3D Cut and Sew UV Tool", "Auto Seams"})
+    items=[("Distribute", _uve("Modify/Distribute UVs")), ("Flip", _uve("Modify/Flip")),
+           ("Map Border", _uve("Modify/Map Border")), ("Symmetrize", None), ("Unitize", _uve("Modify/Unitize")),
+           DIVIDER, ("Auto Seams", _uve("Cut/Sew/Auto Seams")),
+           DIVIDER, ("Create UV Shell", _uve("Cut/Sew/Create UV Shell")),
+           DIVIDER, ("Cut UVs", _uve("Cut/Sew/Cut")), ("Delete UVs", _uve("Edit/Delete")),
+           ("Merge UVs", _uve("Cut/Sew/Merge")), ("Sew UVs", _uve("Cut/Sew/Sew")),
+           DIVIDER, ("Measure Pixel Distance", None), *_UV_LIST_TAIL],
+    options={"Optimize", "Normalize", "Distribute", "Flip", "Map Border", "Unitize", "Auto Seams", "Merge UVs"})
 
 SHIFT_UV_SHELL = MarkingMenu(
-    "SHIFT_UV_SHELL", "UV Shell Tools", "maya",
+    "SHIFT_UV_SHELL", "UV Editor UV Shells", "maya",
     radial={
-        "N": ("Mapping", UV_MAPPING),
-        "NE": ("3D Grab UV Tool", GRAB_UV),
-        "E": ("Optimize", "uv.minimize_stretch"),
-        "SE": ("Flip", ("transform.mirror", {"constraint_axis": (True, False, False)})),  # Flip U
-        "S": ("Auto Seams", _item("UV/Auto Seams")),
-        "SW": ("Layout", "allset.uv_layout"),
-        "W": ("Unfold", "allset.uv_unfold"),
-        "NW": ("3D Cut and Sew UV Tool", "allset.cut_sew_tool_set"),
+        "N": ("Mapping", _UV_MAPPING),
+        "NE": ("Flip Along V", ("transform.mirror", {"constraint_axis": (False, True, False)})),
+        "E": ("Optimize", _uve("Modify/Optimize")),
+        "SE": ("Align Shells", _ALIGN),
+        "S": ("Rotate Shell", _ROTATE),
+        "SW": ("Layout", _LAYOUT),
+        "W": ("Unfold", _UNFOLD),
+        "NW": ("Flip Along U", ("transform.mirror", {"constraint_axis": (True, False, False)})),
     },
-    items=list(_UV_TAIL),
-    options={"3D Grab UV Tool", "Optimize", "Flip", "Auto Seams", "Layout", "Unfold", "3D Cut and Sew UV Tool"})
+    items=[("Auto Seams", _uve("Cut/Sew/Auto Seams")),
+           DIVIDER, ("Match Grid", _uve("Modify/Match Grid")), ("Match UVs", _uve("Modify/Match UVs")),
+           ("Normalize", _uve("Modify/Normalize")), ("Straighten Border", _uve("Modify/Straighten Border")),
+           ("Straighten UVs", _uve("Modify/Straighten UVs")), ("Unitize", _uve("Modify/Unitize")),
+           DIVIDER, ("Distribute Shells", Sub(items=[
+               ("Right", _uve("Modify/Distribute Shells")), ("Left", None), ("Up", None), ("Down", None), DIVIDER,
+               ("Towards Target", None)])),
+           ("Gather Shells", _uve("Modify/Gather Shells")), ("Orient Shells", _uve("Modify/Orient Shells")),
+           ("Randomize Shells", _uve("Modify/Randomize Shells")),
+           ("Snap and Stack Shells", _uve("Modify/Snap and Stack")), ("Stack Shells", _uve("Modify/Stack Shells")),
+           ("Stack and Orient Shells", _uve("Modify/Stack and Orient Shells")),
+           ("Stack Similar Shells", _uve("Modify/Stack Similar Shells")),
+           ("Unstack Shells", _uve("Modify/Unstack Shells")), *_UV_LIST_TAIL],
+    options={"Optimize", "Auto Seams", "Match Grid", "Match UVs", "Normalize", "Straighten Border", "Straighten UVs",
+             "Unitize", "Randomize Shells", "Stack Similar Shells", "Unstack Shells"})
+
+SHIFT_UV_FACE = MarkingMenu(
+    "SHIFT_UV_FACE", "UV Editor Faces", "maya",
+    radial={
+        "N": ("Mapping", _UV_MAPPING),
+        "NE": ("Straighten UVs", _uve("Modify/Straighten UVs")),
+        "E": ("Optimize", _uve("Modify/Optimize")),
+        "SE": ("Create UV Shell", _uve("Cut/Sew/Create UV Shell")),
+        "S": ("Rotate Faces", _ROTATE),
+        "SW": ("Layout", _LAYOUT),
+        "W": ("Unfold", _UNFOLD),
+        "NW": ("Normalize", _uve("Modify/Normalize")),
+    },
+    items=[("Cycle", _uve("Modify/Cycle")), ("Flip", _uve("Modify/Flip")), ("Match Grid", _uve("Modify/Match Grid")),
+           ("Match UVs", _uve("Modify/Match UVs")), ("Symmetrize", None), *_UV_LIST_TAIL],
+    options={"Straighten UVs", "Optimize", "Normalize", "Flip", "Match Grid", "Match UVs"})
+
 
 MENUS = {m.name: m for m in (RMB_MESH, RMB_CURVE, RMB_LATTICE, RMB_EMPTY, PIVOT_EDIT, SHIFT_OBJECT, SHIFT_VERTEX,
                              SHIFT_EDGE, SHIFT_FACE, SHIFT_DEFAULT, CTRL_CONVERT,
                              OPT_MOVE, OPT_ROTATE, OPT_SCALE, OPT_SELECT, OPT_QUAD_DRAW, SELECT_ALL,
                              HB_NORTH, HB_SOUTH, HB_EAST, HB_WEST, HB_CENTER,
-                             UV_EDITOR_RMB, SHIFT_UV, SHIFT_UV_SHELL, KEY_TANGENT,
+                             UV_EDITOR_RMB, SHIFT_UV, SHIFT_UV_SHELL, SHIFT_UV_FACE, KEY_TANGENT,
                              SELECT_COMPONENT, SELECT_POLYGON)}
 # The kit's own menus. MENUS is what opens: user_menus.apply (Marking Menu Editor) puts rebuilt copies of the
 # menus the user changed and the user's own menus into it; these factory objects are never changed.

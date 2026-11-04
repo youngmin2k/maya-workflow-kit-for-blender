@@ -5188,7 +5188,7 @@ def _m79_1_menu():
     with override():
         bpy.ops.allset.shelf_button(shelf=shelf, index=i)
     check(f"[M79-1] the {shelf} shelf button does the same ({cs_state()})", cs_state() == CS_ON)
-    # the UV Toolkit button and the UV marking menus' NW item run the same operator
+    # the UV Toolkit button runs the same operator
     rec = OpRecorder()
     panel = mod("ui.uv_toolkit").ALLSET_PT_uv_toolkit
     fake = type("P", (), {**{n: f for n, f in vars(panel).items() if callable(f) and not n.startswith("__")},
@@ -5197,11 +5197,7 @@ def _m79_1_menu():
         panel.draw(fake, bpy.context) \
             if hasattr(mod("ui.uv_toolkit"), "ALLSET_PT_uv_toolkit") else None
     tk = [x[0] for kind, t, x in rec.out if kind == "op" and t == "3D Cut and Sew Tool"]
-    mm = mod("marking.menus")
-    nw = [m.radial["NW"][1] for m in (mm.SHIFT_UV, mm.SHIFT_UV_SHELL)] if hasattr(mm, "SHIFT_UV") else \
-        [m.radial["NW"][1] for m in mm.MENUS.values() if m.radial.get("NW", (None,))[0] == "3D Cut and Sew UV Tool"]
-    check(f"[M79-1] UV Toolkit button ({tk}) and UV marking menu NW ({nw}) = allset.cut_sew_tool_set",
-          tk == ["allset.cut_sew_tool_set"] and len(nw) == 2 and set(nw) == {"allset.cut_sew_tool_set"})
+    check(f"[M79-1] UV Toolkit button ({tk}) = allset.cut_sew_tool_set", tk == ["allset.cut_sew_tool_set"])
     cs_reset(False)
     with override():
         bpy.ops.allset.cut_sew_tool_set()

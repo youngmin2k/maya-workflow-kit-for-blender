@@ -27,7 +27,7 @@ from .uv_tools import EPS
 class Arrays:
     """One edit mesh: faces F, loops L (face order), verts V."""
     __slots__ = ("loop_start", "loop_total", "corner_vert", "corner_edge", "corner_face", "corner_next", "uv",
-                 "face_hide", "face_sel", "vert_sel", "_uv_sel")
+                 "face_hide", "face_sel", "vert_sel", "edge_seam", "_uv_sel")
 
     def uv_sel(self, bm, uv, shown):
         """Per-loop UV selection (UV Sync off), read from the BMesh for the loops of ``shown`` faces only."""
@@ -162,6 +162,7 @@ def _read(ob, bm, uv, depsgraph, evaluated):
     a.face_hide = np.fromiter((f.hide for f in bm.faces), bool, len(bm.faces))
     a.face_sel = np.fromiter((f.select for f in bm.faces), bool, len(bm.faces))
     a.vert_sel = np.fromiter((v.select for v in bm.verts), bool, len(bm.verts))
+    a.edge_seam = np.fromiter((e.seam for e in bm.edges), bool, len(bm.edges))
     return a
 
 
@@ -303,6 +304,9 @@ def border_loops(a, shown):
         for m in range(z):
             others = np.delete(grp, m)
             joined[s + m] = bool(_joined(a, np.full(len(others), grp[m]), others).any())
+    seam = getattr(a, "edge_seam", None)
+    if seam is not None and len(seam):
+        joined &= ~seam[se]          # a cut edge (seam) is a border at once, though the shell holds together
     return np.sort(sl[~joined])
 
 

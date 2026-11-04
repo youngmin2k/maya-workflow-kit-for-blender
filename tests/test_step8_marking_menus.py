@@ -72,7 +72,7 @@ def _fresh():
 # --- definitions ------------------------------------------------------------------
 
 def test_definitions_well_formed():
-    assert len(mm.MENUS) == 28, sorted(mm.MENUS)  # 13 + 5 hotbox zones + A + 3 UV Editor + pivot edit + lattice + Quad Draw options
+    assert len(mm.MENUS) == 29, sorted(mm.MENUS)  # 13 + 5 hotbox zones + A + 4 UV Editor + pivot edit + lattice + Quad Draw options
     # + Shift+S keyframe / tangent + Shift+Q / Alt+Q
     for name, menu in mm.MENUS.items():
         for path, label, action in mm.walk(menu, name):

@@ -268,16 +268,17 @@ def resolve(trigger, context, picked=None):
         return ("pie", idname(name)) if name else None
     space = getattr(context, "space_data", None)
     if space is not None and space.type == 'IMAGE_EDITOR':
-        # UV Editor: Maya 2026's UV Editor RMB marking menu, Shift+RMB = UV / UV Shell tools
+        # UV Editor: Maya 2026's UV Editor RMB marking menu; Shift+RMB = its UV editing menu for the component
+        # (UVs, edges and vertices share the UV one)
         if mode != 'EDIT_MESH' or space.mode != 'UV':
             return None
         if trigger == "RMB":
             return ("pie", idname("UV_EDITOR_RMB"))
         if trigger == "SHIFT_RMB":
-            ts = context.scene.tool_settings
-            from .. import compat
-            shell = not ts.use_uv_select_sync and compat.uv_island_mode(ts)
-            return ("pie", idname("SHIFT_UV_SHELL" if shell else "SHIFT_UV"))
+            from ..ui import uv_toolkit
+            comp = uv_toolkit.current_component(context)
+            name = {'SHELL': "SHIFT_UV_SHELL", 'FACE': "SHIFT_UV_FACE", 'UV_FACE': "SHIFT_UV_FACE"}.get(comp, "SHIFT_UV")
+            return ("pie", idname(name))
         return None
     if trigger == "CTRL_RMB":
         # Maya's Ctrl+RMB convert menu picks by the lead's shape type, not the mode: a mesh lead gets CTRL_CONVERT in

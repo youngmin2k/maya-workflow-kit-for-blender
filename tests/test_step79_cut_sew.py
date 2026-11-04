@@ -97,8 +97,11 @@ def test_entries():
     assert menu_map.MAP["UV/3D Cut and Sew UV Tool"] == "allset.cut_sew_tool_set"
     assert "UV/3D Cut and Sew UV Tool" not in notices.NOTICES
     assert shelf_map.BY_COMMAND["SetCutSewUVTool"][0] == "allset.cut_sew_tool_set"
-    for name in ("SHIFT_UV", "SHIFT_UV_SHELL"):
-        assert menus.MENUS[name].radial["NW"] == ("3D Cut and Sew UV Tool", "allset.cut_sew_tool_set"), name
+    # the UV Editor's Shift+RMB menus list Maya's UV Editor Cut / Sew tools under Tools
+    for name in ("SHIFT_UV", "SHIFT_UV_SHELL", "SHIFT_UV_FACE"):
+        tools = dict(e for e in menus.MENUS[name].items if e != menus.DIVIDER)["Tools"]
+        got = dict(e for e in tools.items if e != menus.DIVIDER)
+        assert got["Cut Tool"] == ("item", "UV Editor/Tools/Cut") and got["Sew Tool"] == ("item", "UV Editor/Tools/Sew")
 
 
 def test_tool_set_needs_a_view_and_unfold_layout_runs():

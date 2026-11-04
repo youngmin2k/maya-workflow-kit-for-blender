@@ -44,8 +44,9 @@ TRIGGERS = {
     "OPT_SELECT": "Q + LMB (Select Tool)", "OPT_QUAD_DRAW": "Ctrl+Shift+RMB (Quad Draw Tool)", "SELECT_ALL": "A + LMB",
     "HB_NORTH": "Hotbox, north zone", "HB_SOUTH": "Hotbox, south zone", "HB_EAST": "Hotbox, east zone",
     "HB_WEST": "Hotbox, west zone", "HB_CENTER": "Hotbox, centre zone",
-    "UV_EDITOR_RMB": "RMB in the UV Editor", "SHIFT_UV": "Shift+RMB in the UV Editor",
-    "SHIFT_UV_SHELL": "Shift+RMB in the UV Editor (UV shells)", "KEY_TANGENT": "Shift+S + LMB",
+    "UV_EDITOR_RMB": "RMB in the UV Editor", "SHIFT_UV": "Shift+RMB in the UV Editor (UVs, edges, vertices)",
+    "SHIFT_UV_SHELL": "Shift+RMB in the UV Editor (UV shells)", "SHIFT_UV_FACE": "Shift+RMB in the UV Editor (faces)",
+    "KEY_TANGENT": "Shift+S + LMB",
     "SELECT_COMPONENT": "Shift+Q + LMB", "SELECT_POLYGON": "Alt+Q + LMB",
 }
 
