@@ -359,6 +359,25 @@ def _armed(screen, scale):
     return state[2]
 
 
+_sizes = {}          # window pointer -> [(width, height), monotonic time the size last changed]
+
+
+def _resized(window):
+    """True within FIT_WINDOW seconds of a change of the window's size (#305): Blender scales every area with the
+    window, so the one-header Status Line row and the shelf row grow with it and leave empty strips."""
+    import time
+    now = time.monotonic()
+    size = (window.width, window.height)
+    rec = _sizes.get(window.as_pointer())
+    if rec is None:
+        _sizes[window.as_pointer()] = [size, -math.inf]     # first seen: the load-time fit covers it
+        return False
+    if rec[0] != size:
+        rec[0], rec[1] = size, now
+        _warps.clear()        # a new size may use its own cursor-warp fits
+    return now - rec[1] <= FIT_WINDOW
+
+
 def _disarm(screen):
     state = _state.get(screen.name)
     if state is not None:
@@ -466,23 +485,38 @@ def fit_columns(start_fit=True):
     context = bpy.context
     want = column_width(context)
     pending = {}
-    from .shelf import shelf_row_area
+    from .shelf import shelf_row_area, strip_area
     scale = context.preferences.system.ui_scale
     for window in context.window_manager.windows:
         screen = window.screen
-        armed = _armed(screen, scale)
-        if window.workspace is not None and switch.USER_KEY in window.workspace:
-            armed = False        # a workspace the user saved keeps the sizes it was saved with
+        loaded = _armed(screen, scale)
+        resized = _resized(window)
+        user = window.workspace is not None and switch.USER_KEY in window.workspace
+        # a workspace the user saved keeps the sizes it was saved with
+        armed = loaded and not user
         needed = False       # an edge of this screen is off its fitted place
-        # the Maya shelf row (tab row + icon row, 64 px at scale 1): grow it downwards
         row = shelf_row_area(screen)
         if row is not None and row.spaces.active.show_region_header:
             # the shelf row draws its tab strip in the WINDOW region (layouts saved before carry a header)
             with context.temp_override(window=window, screen=screen, area=row):
                 row.spaces.active.show_region_header = False
-        if row is not None:
+        # the Status Line row is one header high (#305): a taller one shows an empty strip above the shelf. Its
+        # extra height goes to the viewport under the shelf row (the shelf row keeps its height).
+        strip = strip_area(screen)
+        strip_fitted = False
+        if strip is not None and row is not None and (loaded or resized) \
+                and 0 <= strip.y - (row.y + row.height) <= round(GAP_PX * max(scale, 1.0)):
+            hdr = next((r.height for r in strip.regions if r.type == 'HEADER'), 0)
+            extra = strip.height - hdr
+            if hdr > 0 and extra > 1:
+                needed = strip_fitted = True
+                x = strip.x + strip.width // 2
+                if _move_edge(window, strip, x, strip.y, extra, (x, strip.y - 1), pending):
+                    _move_edge(window, row, x, row.y, extra, (x, row.y - 1), pending)
+        # the Maya shelf row (tab row + icon row, 64 px at scale 1): grow it downwards
+        if row is not None and not strip_fitted:
             d = round(SHELF_PX * scale) - row.height
-            if abs(d) > 2 and armed:
+            if abs(d) > 2 and (armed or (resized and not user)):
                 needed = True
                 _move_edge(window, row, row.x + row.width // 2, row.y, -d,
                            (row.x + row.width // 2, row.y - 1), pending)

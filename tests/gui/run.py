@@ -81,6 +81,13 @@ def file_timeout(path):
     return max(int(m.group(1)), TIMEOUT) if m else TIMEOUT
 
 
+def file_geometry(path):
+    """A test file may ask for its own window with a top-level ``GUI_GEOMETRY = "x y w h"`` line; else
+    ALLSET_GUI_GEOMETRY or 0 0 1600 900."""
+    m = re.search(r"^GUI_GEOMETRY\s*=\s*[\"']([\d ]+)[\"']", path.read_text(encoding="utf-8"), re.M)
+    return (m.group(1) if m else os.environ.get("ALLSET_GUI_GEOMETRY", "0 0 1600 900")).split()
+
+
 def skip_reason(path):
     """A quarantined file has a top-level ``GUI_SKIP = "<reason>"`` line: it hangs or fails only for
     environment reasons; it is left out unless --include-skipped and its checks are done by hand."""
@@ -141,7 +148,7 @@ def main(argv=None):
         cmd = [args.blender, "--factory-startup", "--enable-event-simulate", *os.environ.get("ALLSET_GUI_ARGS", "").split(),
                *file_args(path),
                # ALLSET_GUI_GEOMETRY="2048 0 1600 900": open the window on a second monitor
-               "--window-geometry", *os.environ.get("ALLSET_GUI_GEOMETRY", "0 0 1600 900").split(),
+               "--window-geometry", *file_geometry(path),
                "--python", str(path), "--", str(out)]
         with headless.blender_slots.slot(f"gui {path.stem}"), \
                 open(log, "w", encoding="utf-8", errors="replace") as fh:
