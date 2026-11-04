@@ -17,6 +17,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   `<language code>.json` (for example `de_DE.json`) in the translations folder and fill in what you like: empty
   values stay English, and a file for Japanese or Chinese corrects the built-in translation. Reload Translations
   reads the files again; the kit follows Blender's interface language.
+- **Create > Cameras > Camera and Aim / Camera, Aim and Up** (#299): Create > Cameras opens its submenu. Camera and
+  Aim puts `camera1` and `camera1_aim` in `camera1_group`, with the camera always looking at the aim; Camera, Aim and
+  Up adds `camera1_up`, which rolls the camera. Each node moves and keys on its own, and moving the group moves the
+  whole rig, like Maya.
 - **Trax Editor and animation clips** (#287): Windows > Animation Editors > Trax Editor opens Blender's NLA Editor
   with Maya's Trax menu bar. Create > Animation Clip (with its option window: name, leave keys in timeline, time
   range, include hierarchy / subcharacters) turns the keys of the current character set, or of the selected
