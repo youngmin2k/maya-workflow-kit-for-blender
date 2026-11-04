@@ -306,7 +306,7 @@ def test_shapes_and_centre():
 def test_rotate_gimbal_rings():
     """Gimbal rings: the last applied Euler axis stays the parent's, earlier ones turn with the later rotations."""
     import math
-    ob = bpy.data.objects.new("gimbal_probe", None)
+    ob = bpy.data.objects.new("gimbal_rings", None)
     bpy.context.scene.collection.objects.link(ob)
     try:
         ob.rotation_mode = 'XYZ'

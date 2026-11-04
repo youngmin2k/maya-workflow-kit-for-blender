@@ -10,7 +10,10 @@ here, and are dedicated to the public domain under CC0 1.0 Universal
   app_template/Maya_Workflow_Kit/splash_2x.png    tools/make_splash.py
   welcome.png                                     tools/make_splash.py
   app_template/Maya_Workflow_Kit/startup.blend    tools/make_startup.py
-  i18n/template_en.json                           tools/gen_i18n_template.py
+
+i18n/template_en.json (made by tools/gen_i18n_template.py) lists the
+interface texts of the kit for translators and is licensed
+GPL-3.0-or-later like the code.
 
 Icons in the user interface (shelf, Status Line, viewport toolbar) are drawn
 by code at run time; no image files ship for them.

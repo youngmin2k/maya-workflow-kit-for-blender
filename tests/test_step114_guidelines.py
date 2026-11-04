@@ -4,7 +4,7 @@
    without any ``maya`` entry and ``sys.path`` unchanged; ``import maya.cmds`` works only inside the Command Line /
    shelf / Script Editor entries, whose import lines the runner rewrites to the kit's module (``runner.prepare``).
 2. Assets: every non-code file in the package is a kit-made file listed in ``ASSETS_LICENSE.txt`` (CC0-1.0, also
-   in the manifest's ``license``); the extension zip carries no legacy ``bl_info`` (the legacy zip does).
+   in the manifest's ``license``; the translation template is GPL like the code); the extension zip carries no legacy ``bl_info`` (the legacy zip does).
 """
 
 import os
