@@ -21,6 +21,16 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   Aim puts `camera1` and `camera1_aim` in `camera1_group`, with the camera always looking at the aim; Camera, Aim and
   Up adds `camera1_up`, which rolls the camera. Each node moves and keys on its own, and moving the group moves the
   whole rig, like Maya.
+- **UV Editor Shift+RMB marking menus like Maya's** (#298): Shift+RMB in the UV Editor opens the UV editing menu
+  for the component: UVs / edges / vertices (Snap, Straighten, Optimize, Align, Rotate, Layout, Unfold, Normalize),
+  UV shells or faces, with Cut / Sew / Merge, the shell arranging commands, Tools and Pinning in the list below.
+- **Time for new scenes** (#308): File > New Scene, Ctrl+N and the Status Line's new button give the new scene the
+  New Scene Time (default 24 fps), like Maya's New Scene Options. Set it in the New Scene option box, the kit's
+  Preferences window (Settings > Working Units) or the add-on preferences; Blender's own File > New and startup
+  file are not changed. "Do not reset working units" now keeps the open scene's units and frame rate.
+- **Keyboard: Maya / Blender** (#309): a Keyboard choice in the add-on preferences and the Hotkey Editor. Blender
+  uses your active Blender keymap alone while the Maya layout, menus and tools stay; Maya puts the kit's Maya keys
+  back. Ctrl+Alt+Shift+M switches Maya mode with either choice.
 - **Trax Editor and animation clips** (#287): Windows > Animation Editors > Trax Editor opens Blender's NLA Editor
   with Maya's Trax menu bar. Create > Animation Clip (with its option window: name, leave keys in timeline, time
   range, include hierarchy / subcharacters) turns the keys of the current character set, or of the selected
@@ -57,6 +67,18 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - **Alt+LMB stopped tumbling after Alt was pressed again during a tumble** (#288): Blender's rotate snapped the view
   to the nearest side view when Alt was pressed mid-drag and turned the persp view orthographic, so it locked like
   a top / front / side view. Tumbling no longer snaps, like Maya.
+- **Cut edges show as borders right away** (#298): after Cut UVs the cut edge is drawn as a thick texture border at
+  once, also a single edge cut inside a UV shell that stays in one piece (UV Editor and the 3D Cut and Sew tool).
+- **Blender's tabs come back cleanly after a new scene made in Maya mode** (#307): switching to Blender after
+  File > New Scene in Maya mode no longer mixes Maya and Blender workspace tabs. A new scene that was never saved
+  drops its Maya workspaces on the switch and gets your startup workspaces (else Blender's own), showing the
+  workspace you had before Maya mode. A saved file keeps its Maya workspaces.
+- **View > Select Camera works in scenes made in Blender mode** (#297): the first Select Camera in a perspective or
+  top / front / side view gives the scene the persp / top / front / side cameras every Maya scene has (one undo
+  step) and selects the view's camera; the panel toolbar's Select Camera button is no longer greyed there.
+- **No empty strip between the Status Line and the Shelf** (#305): when the Blender window gets bigger than the
+  Maya layout (for example when it is maximized), the Status Line row stays one row high and the Shelf keeps its
+  height; the extra room goes to the viewport.
 - **Space tap kept splitting the view on high-DPI screens** (#302): at a large UI scale the kit didn't find its own
   four view, so every Space tap split the panel under the mouse into four more. A Space tap now switches between one
   panel and the four view at any UI scale.
