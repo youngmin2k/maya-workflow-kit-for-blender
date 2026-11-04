@@ -3,7 +3,7 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.11.0] — 2026-11-04
 
 ### Added
 - **RMB marking menu in Sculpt Mode** (#294): RMB over the mesh while sculpting opens the same marking menu as in
