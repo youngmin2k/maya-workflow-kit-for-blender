@@ -391,17 +391,23 @@ Export / Import Settings. Display > Heads Up Display > In-View Editors controls 
 
 Ctrl+Shift+RMB offers the visible attributes of the active node. Selecting a Channel Box channel gives the next
 viewport middle-drag to that channel. A completed drag is one undo step and Esc restores its starting value.
-Bridge and Add Divisions use the same last-operation history as Extrude and Bevel. Each node is editable while its
-input snapshot and result are still valid.
+Bridge, Add Divisions, Extrude and Bevel retain an editable modeling chain in Channel Box INPUTS and the Attribute
+Editor. Recipes and one immutable input mesh travel with the `.blend` file. Changing an earlier node replays its
+downstream steps. An upstream topology change that invalidates a downstream component selection is rejected
+without changing the mesh. Direct mesh edits outside recorded commands start a new chain on the next command.
 
-Bridge supports Linear and Smooth paths between two borders with matching vertex counts. Smooth paths expose
-angular Twist and Taper, while Bridge Offset changes correspondence on closed borders. Smooth paths use cubic
-Hermite interpolation from the bordering surfaces. Further work includes explicit curve paths, taper ramps and
-smoothing-angle controls.
+Bridge supports Linear, Smooth and Smooth + Curve paths between borders with matching vertex counts. Smooth paths
+expose angular Twist and Taper. Bridge Offset changes correspondence on closed borders. Automatic and manual
+endpoint directions, smoothing angle and a Taper Curve graph are available in Bridge Options and the history UI.
+In the graph, click to add or select a point, drag to move it, X to delete, and 1–4 to choose None, Linear, Smooth
+or Spline interpolation. Enter applies one undoable edit and Esc cancels. Edit Path selects the generated NURBS
+curve for normal curve editing, which updates the Bridge. Smooth centerlines use quintic endpoint interpolation
+checked against Maya 2025. Section frames and twist can still differ from Maya's native Bridge geometry.
 
 Command Options open in modeless floating editors with the same Ctrl+mouse numeric gestures, Apply, Save Settings
 and Reset Settings. Different command options can stay open together. Commands run in the editor that opened their
-options. Editable modeling nodes use the existing last-operation snapshot backend.
+options. Numeric attributes share the same preview and commit rules across the In-View Editor, Channel Box and
+Attribute Editor.
 
 ---
 

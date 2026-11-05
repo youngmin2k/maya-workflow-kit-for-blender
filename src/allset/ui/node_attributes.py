@@ -6,7 +6,7 @@ import math
 
 import bpy
 
-from ..operators import extrude, prim_history, prim_shapes, units
+from ..operators import extrude, model_history, prim_history, prim_shapes, units
 from .attribute_edit import Field
 
 
@@ -52,24 +52,75 @@ class ModelingNode:
             raise ReferenceError('The modeling node is no longer available')
         if params == self.params:
             return
-        if self.ob.mode == 'EDIT':
-            extrude.preview(self.ob, self.record, params, units.maya_unit(context.scene))
-        else:
-            extrude.run_from_object_mode(context, self.ob, self.record, params, units.maya_unit(context.scene))
-            self.record.live = True
+        extrude.preview(self.ob, self.record, params, units.maya_unit(context.scene))
 
     def finish(self):
         if self.valid():
+            if self.record.fast_preview:
+                extrude.capture_preview(self.ob, self.record)
+            else:
+                model_history.update(self.ob, self.record)
             self.record.live = False
             self.record.fast_preview = False
 
     def commit(self, context, params):
-        rebuild = (self.spec is extrude.FACE or (self.spec.preview is not None
-                   and (self.record.fast_preview or params != self.params)))
-        if self.ob.mode == 'EDIT' and rebuild:
-            extrude.run(self.ob, self.record, params, units.maya_unit(context.scene))
-        else:
+        previous = dict(params)
+        if self.spec.prepare is not None:
+            params = self.spec.prepare(context, self.ob, self.record, params)
+        try:
             self.preview(context, params)
+            if self.record.fast_preview:
+                extrude.capture_preview(self.ob, self.record)
+        except Exception:
+            if self.spec.cleanup is not None:
+                self.spec.cleanup(self.ob, previous, params)
+            raise
+
+
+class HistoryNode(ModelingNode):
+    """An earlier node evaluated through the same recipe as its downstream nodes."""
+
+    @property
+    def params(self):
+        rec = model_history.find(self.ob, self.record.history_id)
+        return rec.params if rec is not None else {}
+
+    def valid(self):
+        try:
+            return (self.ob.data.session_uid == self.identity[1]
+                    and model_history.find(self.ob, self.record.history_id) is not None)
+        except ReferenceError:
+            return False
+
+    def preview(self, context, params):
+        if not self.valid():
+            raise ReferenceError('The modeling node is no longer available')
+        if params != self.params:
+            model_history.edit(self.ob, self.record.history_id, params)
+
+    def commit(self, context, params):
+        previous = dict(params)
+        if self.spec.prepare is not None:
+            params = self.spec.prepare(context, self.ob, self.record, params)
+        try:
+            self.preview(context, params)
+        except Exception:
+            if self.spec.cleanup is not None:
+                self.spec.cleanup(self.ob, previous, params)
+            raise
+
+    def finish(self):
+        pass
+
+
+def for_record(context, ob, record):
+    if hasattr(record, 'creation'):
+        return CreationHistoryNode(ob, ob.data, record.creation)
+    terminal = extrude.current(ob) if ob.mode == 'EDIT' else extrude.object_record(ob)
+    if (getattr(record, 'history_id', None) and terminal is not None
+            and record.history_id != getattr(terminal, 'history_id', None)):
+        return HistoryNode(ob, record)
+    return ModelingNode(ob, terminal or record)
 
 
 class PrimitiveNode:
@@ -128,13 +179,24 @@ class PrimitiveNode:
         self.preview(context, params)
 
 
+class CreationHistoryNode(PrimitiveNode):
+    def __init__(self, ob, owner, node):
+        super().__init__(ob, owner, node)
+        self.history_id = node['id']
+
+    def preview(self, context, params):
+        if params != self.params:
+            model_history.edit(self.ob, self.history_id, params)
+
+
 def target(context, ob=None):
     ob = ob or getattr(context, 'active_object', None)
     if ob is None:
         return None
     record = extrude.current(ob) if ob.mode == 'EDIT' else extrude.object_record(ob)
     if record is not None:
-        return ModelingNode(ob, record)
+        selected = model_history.selected(ob)
+        return for_record(context, ob, selected or record)
     if ob.mode == 'OBJECT':
         owner, node = prim_history.node_of(ob)
         if node is not None:

@@ -149,7 +149,13 @@ def is_valid(owner):
 def node_of(ob):
     """(owner, node dict) of ``ob``'s live creation node, or (None, None)."""
     owner = owner_of(ob)
-    if owner is None or not is_valid(owner):
+    if owner is None:
+        return None, None
+    from . import model_history
+    data = model_history.read(ob)
+    if data is not None and data.get('creation') is not None:
+        return (owner, node_dict(owner)) if model_history.ensure(ob) is not None else (None, None)
+    if not is_valid(owner):
         return None, None
     return owner, node_dict(owner)
 
@@ -314,6 +320,11 @@ def rebuild(context, ob, changes):
     for name, v in changes.items():
         if name in values:
             values[name] = prim_shapes.clamp(ntype, name, v)
+    from . import model_history
+    data = model_history.read(ob)
+    if data is not None and data.get('creation') is not None:
+        model_history.edit(ob, data['creation']['id'], values)
+        return values
     k = node.get("unit", 1.0)
     shape = prim_shapes.build(ntype, values)
     extra = {key: node[key] for key in ("createUVs",) if key in node}

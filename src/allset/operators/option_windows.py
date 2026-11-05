@@ -16,7 +16,7 @@ import json
 
 import bmesh
 import bpy
-from bpy.props import BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty
+from bpy.props import BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty, IntProperty, StringProperty
 from mathutils import Matrix, Vector
 
 from . import units
@@ -44,6 +44,8 @@ class F:
             return BoolProperty(**kw)
         if self.kind == "enum":
             return EnumProperty(items=[(i, i, "") for i in self.items], **kw)
+        if self.kind in {"curve", "ramp"}:
+            return StringProperty(**kw)
         return FloatVectorProperty(size=3, precision=4, **kw)
 
 
@@ -455,15 +457,32 @@ WINDOWS = [
         _run_bevel,
         paths=("Edit Mesh/Bevel",), missing=("Mitering / Miter Along", "Automatically fit bevel to object")),
     Window("bridge", "Bridge Options", "Bridge", None, [
-        F("curve_type", "Bridge type:", "enum", "Linear path", items=("Linear path", "Smooth path")),
+        F("curve_type", "Bridge type:", "enum", "Linear path",
+          items=("Linear path", "Smooth path", "Smooth path + curve")),
         F("divisions", "Divisions:", "int", 5, lo=0, hi=100),
         F("twist_angle", "Twist:", "float", 0, lo=-360, hi=360), F("taper", "Taper:", "float", 1, lo=0, hi=3),
-        F("twist", "Bridge offset:", "int", 0, lo=-100, hi=100)],
+        F("twist", "Bridge offset:", "int", 0, lo=-100, hi=100),
+        F("direction", "Direction:", "enum", "Automatic", items=("Automatic", "Manual")),
+        F("source_direction", "Source:", "enum", "Along normal", items=("Along normal", "Opposite normal")),
+        F("target_direction", "Target:", "enum", "Along normal", items=("Along normal", "Opposite normal")),
+        F("smoothing_angle", "Smoothing angle:", "float", 30, lo=0, hi=180),
+        F("input_curve", "Path curve:", "curve", ""),
+        F("taper_curve", "Taper curve:", "ramp", '[[0.0,1.0,1],[1.0,1.0,1]]')],
         lambda c, v: _components(c, "allset.bridge", 'EDGE', divisions=v["divisions"],
-                                 bridge_offset=v["twist"], curve_type=int(v["curve_type"] == "Smooth path"),
-                                 twist_angle=v["twist_angle"], taper=v["taper"]),
-        paths=("Edit Mesh/Bridge",), missing=("Smooth path + curve", "Taper Curve", "Smoothing angle"),
-        enabled=lambda values, name: name not in {"twist_angle", "taper"} or values["curve_type"] == "Smooth path"),
+                                 bridge_offset=v["twist"],
+                                 curve_type=("Linear path", "Smooth path", "Smooth path + curve").index(v["curve_type"]),
+                                 twist_angle=v["twist_angle"], taper=v["taper"],
+                                 direction=int(v['direction'] == 'Manual'),
+                                 source_direction=int(v['source_direction'] == 'Opposite normal'),
+                                 target_direction=int(v['target_direction'] == 'Opposite normal'),
+                                 smoothing_angle=v['smoothing_angle'], input_curve=v['input_curve'],
+                                 taper_curve=v['taper_curve']),
+        paths=("Edit Mesh/Bridge",),
+        enabled=lambda values, name: ((name not in {"twist_angle", "taper", "taper_curve"}
+                                       or values["curve_type"] != "Linear path")
+                                      and (name != 'input_curve' or values['curve_type'] == 'Smooth path + curve')
+                                      and (name not in {'source_direction', 'target_direction'}
+                                           or values['direction'] == 'Manual'))),
     Window("merge", "Merge Vertices Options", "Merge", None, [
         F("threshold", "Threshold:", "length", 0.01, lo=0.0, hi=1.0),
         F("always_two", "", "bool", True, text="Always merge for two vertices")],
@@ -812,6 +831,10 @@ def draw_fields(window, layout, holder):
             # expanded buttons without a label Blender stacks it as empty bars
             cell.row().prop(holder, f.name, text=f.label.rstrip(":") or " ",
                            expand=bool(f.label) and len(f.items) <= 4)
+        elif f.kind == "curve":
+            cell.prop_search(holder, f.name, bpy.data, 'objects', text=f.label.rstrip(':'))
+        elif f.kind == "ramp":
+            cell.operator('allset.bridge_ramp', text='Edit Taper Curve').options = True
         else:
             cell.prop(holder, f.name, text=f.label.rstrip(":"))
     if window.missing:

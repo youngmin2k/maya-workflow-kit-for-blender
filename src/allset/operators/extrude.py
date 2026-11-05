@@ -1,15 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Maya polyExtrudeFace and the "last kit modeling operation" history.
+"""Maya polyExtrudeFace and the terminal cache of persistent kit modeling history.
 
 Maya 2022: Edit Mesh > Extrude = a zero-length extrusion
 (Thickness 0, Local Translate Z 0, Offset 0, Divisions 1, Keep Faces Together on); Local Translate Z moves each face along
 its normal (a vertex shared by several extruded faces moves by the average), Thickness offsets every face plane by the
 same distance (shell), Offset shrinks the extruded faces in their plane (no new faces), Divisions = rings along the sides.
 
-Blender keeps no history in edit mode. The kit remembers the last extrusion per object:
-its node name (``polyExtrudeFaceN``), the mesh before it and the values; changing a value rebuilds the extrusion from that
-mesh (``allset.extrude_edit``), so it is one undo step and the Adjust Last Operation panel shows the same Maya names.
-The record is valid only while the mesh equals one of the states the kit made (Ctrl+Z / Ctrl+Shift+Z included).
+The terminal operation keeps its input BMesh and fast preview state. ``model_history`` stores the modeling
+recipe and one native input mesh for earlier-node replay and Save/Load recovery. The record remains valid while
+the mesh matches a recorded result, including native Undo/Redo.
 
 #70, #16: the record is one ``Spec`` per Maya node - polyExtrudeEdge / polyExtrudeVertex here (edges /
 vertices extrude at once, no drag) and polyBevel3 in operators/bevel_maya.py - each with its Maya fields, edit
@@ -22,6 +21,8 @@ Scale X / Y / Z (Maya 2022, data in tests/test_step151_extrude_manip.py): every 
 (Z does nothing on a flat face); a vertex shared by several extruded faces takes the mean of their moves (Keep Faces
 Together), the rings between take the level fraction, and Offset adds after the scale.
 """
+
+import hashlib
 
 import bmesh
 import bpy
@@ -46,7 +47,7 @@ MANIP_DEFAULTS = {"local_translate_x": 0.0, "local_translate_y": 0.0, "local_sca
 DEFAULTS.update(MANIP_DEFAULTS)
 # Maya world X / Z in Blender world (Y-up -> Z-up: Maya Z = Blender -Y)
 WORLD_X, MAYA_Z = Vector((1.0, 0.0, 0.0)), Vector((0.0, -1.0, 0.0))
-NOTICE = "Edit-mode operations have no history in Blender: only the last one can be changed here."
+NOTICE = "The recorded modeling input and result must remain valid to edit this node."
 
 
 class Spec:
@@ -59,7 +60,9 @@ class Spec:
 
     def __init__(self, kind, node, fields, labels, defaults, kinds, arrow, edit_op, build=None, node_type=None,
                  manip=(), in_view=True, object_check=None, pre_uv=False, hidden=(), with_object=False,
-                 choices=None, enabled=None, atomic=False, preview=None):
+                 choices=None, enabled=None, atomic=False, preview=None, prepare=None, cleanup=None):
+        self.prepare = prepare
+        self.cleanup = cleanup
         self.choices = choices or {}
         self.enabled = enabled
         self.atomic = atomic
@@ -677,6 +680,8 @@ class Record:
         self.dismissed = False      # Q/W/E/R picked a tool since: Maya shows that tool's manipulator (#80)
         self.preview_data = None
         self.fast_preview = False
+        self.history_id = None
+        self.history_token = None
 
     def free(self):
         self.preview_data = None
@@ -694,6 +699,8 @@ PARKED = {}    # object name -> Record dropped by Delete History
 def park(name):
     """Delete History: the object's record leaves the Channel Box but stays for an undo. Returns it (or None)."""
     rec = RECORDS.pop(name, None)
+    from . import model_history
+    model_history.drop(bpy.data.objects.get(name))
     if rec is not None:
         old = PARKED.pop(name, None)
         if old is not None and old is not rec:
@@ -725,9 +732,13 @@ def keep(context, ob, rec):
         if parked is not None and parked is not RECORDS.get(ob.name) and parked is not rec:
             parked.free()
         RECORDS[ob.name] = rec
+        from . import model_history
+        model_history.append(ob, rec, units.maya_unit(context.scene))
         return
     rec.free()
     RECORDS.pop(ob.name, None)
+    from . import model_history
+    model_history.drop(ob)
 
 
 def clear():
@@ -735,6 +746,8 @@ def clear():
         rec.free()
     RECORDS.clear()
     PARKED.clear()
+    from . import model_history
+    model_history.clear()
 
 
 def signature(bm, cap_verts):
@@ -745,6 +758,7 @@ def signature(bm, cap_verts):
 
 
 def _store(rec, bm, caps, moved, params):
+    rec.fast_preview = False
     bm.verts.index_update()
     bm.faces.index_update()
     rec.params = dict(params)
@@ -788,7 +802,7 @@ def restore_mesh(bm, source):
         bpy.data.meshes.remove(me)
 
 
-def run(ob, rec, params, unit):
+def run(ob, rec, params, unit, persist=True):
     """Rebuild the extrusion of ``rec`` on ``ob`` (edit mode) with ``params``."""
     bm = bmesh.from_edit_mesh(ob.data)
     if rec.spec is not FACE:
@@ -819,12 +833,18 @@ def run(ob, rec, params, unit):
             if rollback is not None:
                 bpy.data.meshes.remove(rollback)
         bmesh.update_edit_mesh(ob.data)
+        if persist:
+            from . import model_history
+            model_history.update(ob, rec)
         return bool(tracked)
     restore_pre(bm, rec)
     faces = [f for f in bm.faces if f.select]
     caps, moved = extrude(bm, faces, unit=unit, **params, **mesh_axes(ob))
     _store(rec, bm, caps, moved, params)
     bmesh.update_edit_mesh(ob.data)
+    if persist:
+        from . import model_history
+        model_history.update(ob, rec)
     return bool(caps)
 
 
@@ -836,33 +856,63 @@ def mesh_axes(ob):
 
 def preview(ob, rec, params, unit):
     """Show ``params`` during a drag: move the vertices when only lengths change, else rebuild."""
-    if rec.spec is not FACE:
-        if rec.spec.preview is not None and rec.spec.preview(ob, rec, params, unit):
-            rec.fast_preview = True
-            rec.live = True
-            return
-        run(ob, rec, params, unit)
-        rec.live = True
-        return
-    topo = (params["divisions"], params["keep_faces_together"])
-    bm = bmesh.from_edit_mesh(ob.data)
-    bm.verts.ensure_lookup_table()
-    if topo != rec.topology or any(i >= len(bm.verts) for i, *_r in rec.moved):
-        run(ob, rec, params, unit)
+    if rec.spec.preview is not None and rec.spec.preview(ob, rec, params, unit):
+        rec.fast_preview = True
+    elif ob.mode == 'EDIT':
+        run(ob, rec, params, unit, persist=False)
     else:
-        for i, p0, *vecs in rec.moved:
-            bm.verts[i].co = position(p0, vecs, params)
+        run_from_object_mode(bpy.context, ob, rec, params, unit, persist=False)
+    rec.live = True
+
+
+def _preview_face(ob, rec, params, unit):
+    topo = (params["divisions"], params["keep_faces_together"])
+    bm = bmesh.from_edit_mesh(ob.data) if ob.mode == 'EDIT' else None
+    vertices = bm.verts if bm is not None else ob.data.vertices
+    if topo != rec.topology or any(i >= len(vertices) for i, *_r in rec.moved):
+        return False
+    if bm is not None:
+        vertices.ensure_lookup_table()
+    for i, p0, *vecs in rec.moved:
+        vertices[i].co = position(p0, vecs, params)
+    if bm is not None:
         bm.normal_update()
         bmesh.update_edit_mesh(ob.data, loop_triangles=True, destructive=False)
-        rec.params = dict(params)
-    rec.live = True
+    else:
+        ob.data.update()
+    rec.params = dict(params)
+    return True
+
+
+FACE.preview = _preview_face
+
+
+def capture_preview(ob, rec):
+    """Commit a coordinate preview using its existing topology and native Mesh hashing."""
+    temporary = bpy.data.meshes.new('.allset_commit') if ob.mode == 'EDIT' else None
+    try:
+        mesh = temporary if temporary is not None else ob.data
+        if temporary is not None:
+            bmesh.from_edit_mesh(ob.data).to_mesh(mesh)
+        sig = mesh_signature(mesh, rec.cap_verts)
+        if sig is None:
+            raise ValueError('The preview topology changed during attribute editing')
+        rec.states.append((dict(rec.params), sig, rec.sel, mesh_coords_hash(mesh)))
+        del rec.states[:-64]
+        rec.fast_preview = rec.live = False
+        from . import model_history
+        model_history.update(ob, rec)
+    finally:
+        if temporary is not None:
+            bpy.data.meshes.remove(temporary)
 
 
 def current(ob):
     """The valid record of ``ob`` (its mesh equals a state the kit made), with that state's values; else None."""
     if ob is None or ob.type != 'MESH' or ob.mode != 'EDIT':
         return None
-    rec = RECORDS.get(ob.name)
+    from . import model_history
+    rec = model_history.ensure(ob)
     if rec is None or rec.pre is None or rec.mesh_uid != ob.data.session_uid:
         return None
     if rec.live:
@@ -884,17 +934,40 @@ def current(ob):
 
 
 def coords_hash(bm):
-    """Hash of every vertex position of ``bm`` (float32, the precision a Mesh stores)."""
-    import numpy as np
-    a = np.fromiter((c for v in bm.verts for c in v.co), dtype=np.float32, count=3 * len(bm.verts))
-    return hash(a.tobytes())
+    """Persistent native geometry signature, including connectivity and authored corner data."""
+    mesh = bpy.data.meshes.new('.allset_signature')
+    try:
+        bm.to_mesh(mesh)
+        return mesh_coords_hash(mesh)
+    finally:
+        bpy.data.meshes.remove(mesh)
 
 
 def mesh_coords_hash(me):
     import numpy as np
-    a = np.empty(3 * len(me.vertices), dtype=np.float32)
-    me.vertices.foreach_get("co", a)
-    return hash(a.tobytes())
+    digest = hashlib.blake2b(digest_size=16)
+    for collection, name, width, dtype in (
+            (me.vertices, 'co', 3, np.float32), (me.edges, 'vertices', 2, np.int32),
+            (me.loops, 'vertex_index', 1, np.int32), (me.polygons, 'loop_start', 1, np.int32),
+            (me.polygons, 'loop_total', 1, np.int32), (me.polygons, 'material_index', 1, np.int32),
+            (me.polygons, 'use_smooth', 1, np.bool_), (me.edges, 'use_edge_sharp', 1, np.bool_)):
+        values = np.empty(width*len(collection), dtype=dtype)
+        collection.foreach_get(name, values)
+        if name == 'vertices':
+            values.reshape((-1, 2)).sort(axis=1)  # An edge's endpoint order is not topology.
+        digest.update((name+str(len(collection))).encode())
+        digest.update(values)
+    for layer in sorted(me.uv_layers, key=lambda item: item.name):
+        digest.update(layer.name.encode())
+        values = np.empty(2*len(layer.data), dtype=np.float32)
+        layer.data.foreach_get('uv', values)
+        digest.update(values)
+    for layer in sorted(me.color_attributes, key=lambda item: item.name):
+        digest.update((layer.name+layer.domain).encode())
+        values = np.empty(4*len(layer.data), dtype=np.float32)
+        layer.data.foreach_get('color', values)
+        digest.update(values)
+    return digest.hexdigest()
 
 
 def mesh_signature(me, cap_verts):
@@ -938,14 +1011,17 @@ def object_record(ob):
     UVs instead)."""
     if not isinstance(ob, bpy.types.Object) or ob.type != 'MESH' or ob.mode == 'EDIT':   # a pose bone lead too
         return None
-    rec = RECORDS.get(ob.name)
+    from . import model_history
+    rec = model_history.ensure(ob)
     if rec is None or rec.pre is None or rec.mesh_uid != ob.data.session_uid:
         return None
+    if rec.live:
+        return rec
     check = rec.spec.object_check or mesh_state_ok
     return rec if check(ob, rec) else None
 
 
-def run_from_object_mode(context, ob, rec, params, unit):
+def run_from_object_mode(context, ob, rec, params, unit, persist=True):
     """Rebuild ``rec`` with ``params`` while in object mode: ``ob`` alone into edit mode, rerun, back to object mode
     with the selection as it was (the caller's operator is the undo step)."""
     view_layer = context.view_layer
@@ -957,7 +1033,7 @@ def run_from_object_mode(context, ob, rec, params, unit):
     view_layer.objects.active = ob
     bpy.ops.object.mode_set(mode='EDIT')
     try:
-        ok = run(ob, rec, params, unit)
+        ok = run(ob, rec, params, unit, persist=persist)
     finally:
         bpy.ops.object.mode_set(mode='OBJECT')
         ob.select_set(ob in sel)
@@ -1246,8 +1322,7 @@ class _ExtrudeEdit(_ExtrudeProps):
 
 @undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_extrude_edit(_ExtrudeEdit, bpy.types.Operator):
-    """Change the last extrusion (Maya: edit the polyExtrudeFace node). Blender keeps no edit-mode history,
-    so only the last one can be changed"""
+    """Change the terminal polyExtrudeFace node. Earlier nodes are editable in Channel Box and Attribute Editor"""
     bl_idname = "allset.extrude_edit"
     bl_label = "polyExtrudeFace"          # the Adjust Last Operation title = the Maya node
     _op = "extrude_edit"
@@ -1255,8 +1330,7 @@ class ALLSET_OT_extrude_edit(_ExtrudeEdit, bpy.types.Operator):
 
 @undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_extrude_edge_edit(_ExtrudeEdit, bpy.types.Operator):
-    """Change the last edge extrusion (Maya: edit the polyExtrudeEdge node). Blender keeps no edit-mode history,
-    so only the last one can be changed"""
+    """Change the terminal polyExtrudeEdge node"""
     bl_idname = "allset.extrude_edge_edit"
     bl_label = "polyExtrudeEdge"
     _op = "extrude_edge_edit"
@@ -1264,8 +1338,7 @@ class ALLSET_OT_extrude_edge_edit(_ExtrudeEdit, bpy.types.Operator):
 
 @undo_steps.no_redo_panel      # no Adjust Last Operation (Maya has none)
 class ALLSET_OT_extrude_vertex_edit(_ExtrudeEdit, bpy.types.Operator):
-    """Change the last vertex extrusion (Maya: edit the polyExtrudeVertex node). Blender keeps no edit-mode
-    history, so only the last one can be changed"""
+    """Change the terminal polyExtrudeVertex node"""
     bl_idname = "allset.extrude_vertex_edit"
     bl_label = "polyExtrudeVertex"
     _op = "extrude_vertex_edit"
@@ -1304,6 +1377,10 @@ _HANDLERS = (("load_pre", _on_load), ("undo_post", _on_undo), ("redo_post", _on_
 
 
 def register_handlers():
+    from . import bridge_curve, model_history
+    bridge_curve.register()
+    if model_history.changed not in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.append(model_history.changed)
     for name, fn in _HANDLERS:
         lst = getattr(bpy.app.handlers, name)
         if fn not in lst:
@@ -1311,6 +1388,11 @@ def register_handlers():
 
 
 def unregister_handlers():
+    from . import bridge_curve, model_history
+    bridge_curve.unregister()
+    if model_history.changed in bpy.app.handlers.depsgraph_update_post:
+        bpy.app.handlers.depsgraph_update_post.remove(model_history.changed)
+    model_history.clear()
     for name, fn in _HANDLERS:
         lst = getattr(bpy.app.handlers, name)
         if fn in lst:

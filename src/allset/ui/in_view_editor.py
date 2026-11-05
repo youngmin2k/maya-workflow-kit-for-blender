@@ -175,7 +175,7 @@ def model_target(context, fresh=False):
     if not fresh and cached is not None and cached[0] == identity and now-cached[1] < 1/120:
         return cached[2]
     record = extrude.current(ob)
-    node = (node_attributes.ModelingNode(ob, record)
+    node = (node_attributes.target(context, ob)
             if record is not None and extrude.caps_selected(ob, record) else None)
     _model_targets[key] = identity, time.perf_counter(), node
     return node
@@ -196,10 +196,9 @@ def target(context, fresh=False):
         node = model_target(context, fresh)
         if node is None:
             return None
-        record = node.record
         saved = _views.get(view_key(context))
         forced = saved is not None and saved.get('forced') and saved['identity'][0] == ob.session_uid
-        if not record.spec.in_view and not forced:
+        if not node.spec.in_view and not forced:
             return None
         return node
     saved = _views.get(view_key(context))
@@ -216,8 +215,10 @@ def show(context):
     node = node_attributes.target(context)
     if node is None:
         return False
-    if isinstance(node, node_attributes.ModelingNode):
-        node.record.dismissed = False
+    if node.ob.type == 'MESH':
+        record = (extrude.current(node.ob) if node.ob.mode == 'EDIT' else extrude.object_record(node.ob))
+        if record is not None:
+            record.dismissed = False
     current = state(context, node)
     current.update(tool=tool(context), armed=True, forced=True)
     context.area.tag_redraw()
@@ -263,7 +264,7 @@ def current_layout(context, fresh=False):
     node = target(context, fresh)
     if node is None or context.region_data is None:
         return None, None
-    if isinstance(node, node_attributes.ModelingNode):
+    if isinstance(node, node_attributes.ModelingNode) and not isinstance(node, node_attributes.HistoryNode):
         anchor = in_view.anchor(context, node.ob, node.record)
     else:
         point = location_3d_to_region_2d(context.region, context.region_data, node.ob.matrix_world.translation)
@@ -302,6 +303,9 @@ def current_layout(context, fresh=False):
 def draw():
     from ..marking import draw as marking_draw
     from . import in_view
+    from . import bridge_editor
+    if bpy.context.area is not None and bridge_editor.active(bpy.context):
+        return
     context = bpy.context
     node, lay = current_layout(context)
     if node is None or marking_draw.menu_up():
@@ -389,6 +393,9 @@ class ALLSET_OT_node_attribute_apply(bpy.types.Operator):
         params = json.loads(self.values)
         try:
             node.commit(context, params)
+        except (ValueError, RuntimeError) as error:
+            self.report({'WARNING'}, str(error))
+            return {'CANCELLED'}
         finally:
             node.finish()
         return {'FINISHED'}

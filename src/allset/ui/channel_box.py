@@ -86,15 +86,30 @@ SPEED_FACTOR = {s[0]: s[3] for s in SPEEDS}
 
 
 def model_key(record, field):
-    return f'{MODEL_PREFIX}{record.spec.kind}:{field}'
+    name = '@'+record.name if getattr(record, 'history_id', None) else ''
+    return f'{MODEL_PREFIX}{record.spec.kind}{name}:{field}'
+
+
+def model_parts(key):
+    _prefix, identity, field = key.split(':', 2)
+    kind, _separator, name = identity.partition('@')
+    return kind, name, field
 
 
 def model_node(ob, key):
     from . import node_attributes
     if not isinstance(ob, bpy.types.Object):
         return None
-    _prefix, kind, field = key.split(':', 2)
+    from ..operators import model_history
+    kind, name, field = model_parts(key)
     node = node_attributes.target(bpy.context, ob)
+    if node is not None and name:
+        rec = model_history.find(ob, name)
+        if rec is None and ob != lead():
+            rec = next((r for r in reversed(model_history.records(ob)) if r.spec.kind == kind), None)
+        if rec is not None and field in rec.params:
+            return node_attributes.for_record(bpy.context, ob, rec)
+        return None
     return node if (isinstance(node, node_attributes.ModelingNode) and node.spec.kind == kind
                     and field in node.params) else None
 
@@ -233,7 +248,11 @@ def is_locked(ob, key):
         from ..operators import prim_history
         ob = prim_history.owner_of(ob) or ob
     if key.startswith((MODEL_PREFIX, HISTORY_PREFIX)):
-        return key in _flag_list(ob, 'allset_cb_model_locked')
+        keys = _flag_list(ob, 'allset_cb_model_locked')
+        if key.startswith(MODEL_PREFIX):
+            kind, _name, field = model_parts(key)
+            return key in keys or f'{MODEL_PREFIX}{kind}:{field}' in keys
+        return key in keys
     c = MAIN_BY_KEY.get(key)
     if c is None or c[4] not in _LOCK_PROP:
         return False
@@ -247,6 +266,9 @@ def set_locked(ob, key, locked):
     if key.startswith((MODEL_PREFIX, HISTORY_PREFIX)):
         keys = set(_flag_list(ob, 'allset_cb_model_locked'))
         keys.add(key) if locked else keys.discard(key)
+        if not locked and key.startswith(MODEL_PREFIX):
+            kind, _name, field = model_parts(key)
+            keys.discard(f'{MODEL_PREFIX}{kind}:{field}')
         _set_flag_list(ob, 'allset_cb_model_locked', keys)
         return True
     c = MAIN_BY_KEY.get(key)
@@ -441,7 +463,7 @@ def nice_name(name):
 def channel_label(key):
     if key.startswith(MODEL_PREFIX):
         from ..operators import extrude
-        _prefix, kind, field = key.split(':', 2)
+        kind, _name, field = model_parts(key)
         return extrude.SPECS[kind].labels[field]
     if key.startswith(CUSTOM_PREFIX):
         return nice_name(key[len(CUSTOM_PREFIX):])
@@ -1041,6 +1063,10 @@ def apply_entry(key, text, context=None):
     for node, params in (*models.values(), *histories.values()):
         try:
             node.commit(context, params)
+        except (ValueError, RuntimeError) as error:
+            from . import notices
+            notices.show(str(error))
+            return 0
         finally:
             node.finish()
     return len(entries)
@@ -1146,6 +1172,10 @@ def is_open(ob, node):
 def set_open(ob, node, state=True):
     nodes = open_nodes(ob)
     if state:
+        from ..operators import model_history
+        if node.startswith('node:') and model_history.activate(ob, node[5:]) is not None:
+            names = {history_node(rec.name) for rec in model_history.records(ob)}
+            nodes.difference_update(names)
         nodes.add(node)
     else:
         nodes.discard(node)
@@ -3309,6 +3339,8 @@ def draw_inputs(lines, context, ob):
     cons = constraints(ob)
     from . import in_view
     last = in_view.cb_record(context, ob)    # the last kit extrusion = Maya's newest history node
+    from ..operators import model_history
+    modeled = model_history.records(ob) if last is not None else []
     from . import creation_inputs
     created = creation_inputs.has_node(ob)   # the primitive's creation node, oldest history
     key = blend_shape_key(ob)                # the mesh's blendShape node (#204)
@@ -3317,7 +3349,10 @@ def draw_inputs(lines, context, ob):
     r = lines.row()
     if r is not None:
         r.label(text="INPUTS")
-    if last is not None:
+    if modeled:
+        for record in reversed(modeled):
+            in_view.draw_cb_node(lines, context, record)
+    elif last is not None:
         in_view.draw_cb_node(lines, context, last)
     from . import attribute_editor
     for mod in inputs:

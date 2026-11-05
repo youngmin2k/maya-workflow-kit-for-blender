@@ -152,7 +152,7 @@ def test_failed_preview_preserves_the_last_geometry_and_record():
     before = fingerprint(bmesh.from_edit_mesh(ob.data))
     previous = dict(record.params)
     build = poly.BRIDGE.build
-    def fail(bm, values, unit):
+    def fail(bm, values, unit, ob=None):
         bm.verts.new((999, 999, 999))
         raise ValueError('injected bridge preview failure')
     try:

@@ -12,7 +12,10 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   attribute marking menus. T opens an editable modeling or primitive node. Bridge and Add Divisions keep editable parameters.
 - Modeless command Options editors share the numeric gestures and existing option schemas, saved settings and
   command execution. Multiple command options can stay open together.
-- Bridge offers Linear and Smooth paths, angular Twist, Taper and Bridge Offset, with cached Taper/Twist previews.
+- Bridge offers Linear, Smooth and editable curve paths, angular Twist, Taper, Bridge Offset, manual endpoint
+  directions, smoothing angle and a Taper Curve graph with four interpolation modes.
+- Modeling history retains multiple nodes and a primitive creation recipe across Save/Load. Earlier-node edits
+  replay downstream operations. Incompatible downstream component references reject an edit before changing the mesh.
 
 ### Fixed
 - Leaving component mode closes its In-View Editor. Reopening modeling nodes in Object Mode reads the Mesh
@@ -21,6 +24,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
 - Repeated In-View display queries share a short-lived validation result while edit entry points validate afresh.
 - Bridge Type menus retain integer enum values, and cancelling a Channel Box drag after a mode change restores
   the starting attributes and geometry.
+- Bridge coordinate previews retain their native BMesh lookup cache and update local normals. Confirming a
+  coordinate preview captures the displayed result without rebuilding its topology.
 
 ## [0.11.0] — 2026-11-04
 

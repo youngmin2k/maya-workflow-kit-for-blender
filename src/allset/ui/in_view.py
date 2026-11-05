@@ -670,9 +670,14 @@ def cb_record(context, ob):
     """The lead object's last extrusion for Channel Box INPUTS (any selection), or None."""
     if ob is None:
         return None
-    if ob is not getattr(context, "edit_object", None):
-        return extrude.object_record(ob)        # a node editable in object mode (UV > Automatic)
-    return extrude.current(ob)
+    rec = (extrude.object_record(ob) if ob is not getattr(context, 'edit_object', None)
+           else extrude.current(ob))
+    if rec is not None:
+        from ..operators import model_history
+        selected = model_history.selected(ob)
+        return (selected if selected is not None and not hasattr(selected, 'creation')
+                and selected.history_id != rec.history_id else rec)
+    return None
 
 
 def _lead(context):
@@ -694,7 +699,7 @@ def _text_get(field):
         if rec is None or field not in rec.params:
             return ""
         from . import node_attributes
-        node = node_attributes.ModelingNode(_lead(bpy.context), rec)
+        node = node_attributes.for_record(bpy.context, _lead(bpy.context), rec)
         return node_attributes.format_value(node, field, bpy.context.scene)
     return get
 
@@ -732,7 +737,7 @@ class ALLSET_PG_history(bpy.types.PropertyGroup):
                        for f in ALL_FIELDS}
 
 
-HISTORY_TIP = "Blender keeps no edit-mode history: only the last operation can be changed here."
+HISTORY_TIP = "Edit this recorded modeling node and replay its downstream operations."
 
 
 def draw_cb_node(layout, context, rec):
@@ -747,7 +752,7 @@ def draw_cb_node(layout, context, rec):
         return
     hist = context.window_manager.allset_history
     from . import node_attributes
-    node = node_attributes.ModelingNode(ob, rec)
+    node = node_attributes.for_record(context, ob, rec)
     for field in rec.spec.fields:
         row = lines.row()
         if row is None:
@@ -759,6 +764,11 @@ def draw_cb_node(layout, context, rec):
         values = split.row()
         values.enabled = node_attributes.editable(node, field)
         values.prop(hist, f"{field}_text", text="")
+    if rec.spec.kind == 'BRIDGE':
+        row = lines.row()
+        if row is not None:
+            from . import bridge_editor
+            bridge_editor.draw_controls(row.column(), node)
 
 
 classes = (ALLSET_OT_model_channel_entry, ALLSET_PG_history, ALLSET_GT_in_view_row, ALLSET_GGT_in_view, ALLSET_GT_extrude_handle,
