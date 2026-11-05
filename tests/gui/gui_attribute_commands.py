@@ -107,6 +107,14 @@ def scenario(kind, field):
     def prepare():
         with viewport():
             fixture(kind)
+            if kind == 'BRIDGE':
+                for curve_type in (0, 1):
+                    result = bpy.ops.allset.inview_setting(action='VALUE', field='curve_type', value=curve_type)
+                    check('BRIDGE menu retains the integer type '+str(curve_type),
+                          result == {'FINISHED'} and type(current().params['curve_type']) is int)
+                    result = bpy.ops.allset.bridge_edit('INVOKE_DEFAULT')
+                    check('BRIDGE native editing works after menu choice '+str(curve_type),
+                          result == {'FINISHED'} and current().params['curve_type'] == curve_type)
             node = current()
             mod('ui.in_view_editor').select(bpy.context, node, field)
             C['before'] = dict(node.params)

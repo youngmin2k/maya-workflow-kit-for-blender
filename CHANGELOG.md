@@ -12,12 +12,15 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   attribute marking menus. T opens an editable modeling or primitive node. Bridge and Add Divisions keep editable parameters.
 - Modeless command Options editors share the numeric gestures and existing option schemas, saved settings and
   command execution. Multiple command options can stay open together.
+- Bridge offers Linear and Smooth paths, angular Twist, Taper and Bridge Offset, with cached Taper/Twist previews.
 
 ### Fixed
 - Leaving component mode closes its In-View Editor. Reopening modeling nodes in Object Mode reads the Mesh
   anchor safely, and mode changes cancel an active attribute drag.
 - Attribute drags commit one undo step, restore on cancel and keep G on the previous modeling command.
 - Repeated In-View display queries share a short-lived validation result while edit entry points validate afresh.
+- Bridge Type menus retain integer enum values, and cancelling a Channel Box drag after a mode change restores
+  the starting attributes and geometry.
 
 ## [0.11.0] — 2026-11-04
 

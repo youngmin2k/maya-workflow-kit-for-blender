@@ -726,6 +726,12 @@ class ALLSET_OT_inview_setting(bpy.types.Operator):
             if not node_attributes.editable(node, name):
                 return {'CANCELLED'}
             value = node.spec.defaults[name] if self.action == 'DEFAULT' else self.value
+            if node.spec.kinds[name] == 'ENUM':
+                # The menu carries a float. Preserve the backend's original enum value type.
+                _labels, values = node.choices(name)
+                if value not in values:
+                    return {'CANCELLED'}
+                value = values[values.index(value)]
             return apply(context, node, dict(node.params, **{name: value}))
         if self.action == 'RESET':
             saved = {}

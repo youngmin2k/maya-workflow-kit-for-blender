@@ -257,3 +257,53 @@ def test_bridge_options_reach_the_editable_node():
     assert record.params['curve_type'] == 1 and record.params['divisions'] == 4
     assert math.isclose(record.params['taper'], .7, abs_tol=1e-5)
     assert record.params['twist_angle'] == 30
+
+
+def test_bridge_type_menu_preserves_enum_type_and_subsequent_edits():
+    _ob, record = bridge_object()
+    editor = import_module(kit.MODULE+'.ui.in_view_editor')
+    area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+    region = next(region for region in area.regions if region.type == 'WINDOW')
+    for curve_type in (0, 1):
+        with bpy.context.temp_override(area=area, region=region):
+            assert editor.show(bpy.context)
+            assert bpy.ops.allset.inview_setting(action='VALUE', field='curve_type',
+                                                 value=curve_type) == {'FINISHED'}
+        assert type(record.params['curve_type']) is int
+        assert bpy.ops.allset.bridge_edit(**record.params) == {'FINISHED'}
+        assert ex.set_params(bpy.context, divisions=4) == {'FINISHED'}
+        assert record.params['curve_type'] == curve_type
+    with bpy.context.temp_override(area=area, region=region):
+        previous = dict(record.params)
+        assert bpy.ops.allset.inview_setting(action='VALUE', field='curve_type', value=99) == {'CANCELLED'}
+        assert record.params == previous
+
+
+def test_channel_slider_mode_changes_restore_bridge_preview():
+    from types import SimpleNamespace
+    cb = import_module(kit.MODULE+'.ui.channel_box')
+    edit = import_module(kit.MODULE+'.ui.attribute_edit')
+    for start_mode in ('EDIT', 'OBJECT'):
+        ob, record = bridge_object()
+        original = fingerprint(bmesh.from_edit_mesh(ob.data))
+        if start_mode == 'OBJECT':
+            bpy.ops.object.mode_set(mode='OBJECT')
+        node = nodes.target(bpy.context)
+        previous = dict(node.params)
+        initial_mode = bpy.context.mode
+        node.preview(bpy.context, dict(previous, taper=.5))
+        operator = SimpleNamespace(
+            _finished=False, _nodes={ob: node}, _node_starts={ob: previous},
+            _starts={(ob, cb.model_key(record, 'taper')): previous['taper']},
+            _mode=initial_mode, _window=bpy.context.window.as_pointer(), _header=lambda *args: None)
+        assert edit.claim(bpy.context, operator)
+        bpy.ops.object.mode_set(mode='OBJECT' if start_mode == 'EDIT' else 'EDIT')
+        assert cb.ALLSET_OT_cb_virtual_slider._finish(operator, bpy.context, cancel=True) == {'CANCELLED'}
+        assert node.params == previous and not record.live and not record.fast_preview
+        assert not edit.busy(bpy.context)
+        if ob.mode == 'OBJECT':
+            assert ex.object_record(ob) is record
+            bpy.ops.object.mode_set(mode='EDIT')
+        assert ex.current(ob) is record
+        assert fingerprint(bmesh.from_edit_mesh(ob.data)) == original
+        assert cb.ALLSET_OT_cb_virtual_slider._finish(operator, bpy.context, cancel=True) == {'CANCELLED'}

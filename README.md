@@ -394,6 +394,11 @@ viewport middle-drag to that channel. A completed drag is one undo step and Esc 
 Bridge and Add Divisions use the same last-operation history as Extrude and Bevel. Each node is editable while its
 input snapshot and result are still valid.
 
+Bridge supports Linear and Smooth paths between two borders with matching vertex counts. Smooth paths expose
+angular Twist and Taper, while Bridge Offset changes correspondence on closed borders. Smooth paths use cubic
+Hermite interpolation from the bordering surfaces. Further work includes explicit curve paths, taper ramps and
+smoothing-angle controls.
+
 Command Options open in modeless floating editors with the same Ctrl+mouse numeric gestures, Apply, Save Settings
 and Reset Settings. Different command options can stay open together. Commands run in the editor that opened their
 options. Editable modeling nodes use the existing last-operation snapshot backend.

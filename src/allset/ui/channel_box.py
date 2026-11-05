@@ -1702,7 +1702,7 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
         try:
             for ob, node in self._nodes.items():
                 if node.valid():
-                    if cancel and context.mode == self._mode:
+                    if cancel:
                         node.preview(context, self._node_starts[ob])
                     node_changed = node.params != self._node_starts[ob]
                     changed |= node_changed
