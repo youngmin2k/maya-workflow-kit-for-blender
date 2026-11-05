@@ -25,7 +25,18 @@ def test_all_option_schemas_have_equivalent_numeric_owners():
             if field.kind in {'int', 'float', 'length'}:
                 path = 'allset_options_'+spec.key+'.'+field.name
                 numeric = fields.NumericField(bpy.context.window_manager, path, -1)
-                assert numeric.writable() and not numeric.undoable()
+                enabled = spec.enabled(values, field.name) if spec.enabled is not None else True
+                assert numeric.writable() == enabled and not numeric.undoable()
+
+
+def test_conditional_option_fields_reject_gestures_until_enabled():
+    editor.prepare('bridge')
+    owner = editor.owner(bpy.context.window_manager, 'bridge')
+    field = fields.NumericField(bpy.context.window_manager, 'allset_options_bridge.taper', -1)
+    owner.curve_type = 'Linear path'
+    assert not field.writable()
+    owner.curve_type = 'Smooth path'
+    assert field.writable()
 
 
 def test_options_ui_does_not_replace_the_repeat_command():

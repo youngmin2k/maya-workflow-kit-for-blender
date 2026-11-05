@@ -585,10 +585,14 @@ def draw_extrude_history(layout, context, rec):
         return
     hist = context.window_manager.allset_history
     col = section_body(body).column(align=True)
+    from . import node_attributes
+    node = node_attributes.target(context)
     for field in rec.spec.fields:
         split = col.split(factor=0.42, align=True)
         split.label(text=attr_label(context, rec.spec.labels[field], field))
-        split.prop(hist, f"{field}_text", text="")
+        cell = split.row()
+        cell.enabled = node is not None and node_attributes.editable(node, field)
+        cell.prop(hist, f"{field}_text", text="")
 
 
 def content_width(context):

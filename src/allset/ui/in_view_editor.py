@@ -324,16 +324,10 @@ def draw():
         params = node.params
         for name, x0, y0, x1, _y1 in lay['rows']:
             colour = in_view.HOT if name == active else in_view.TEXT
+            if not node_attributes.editable(node, name):
+                colour = (0.5, 0.5, 0.5, 1.0)
             in_view._text(x0+pad, y0+4*scale, node.spec.labels[name], colour, size)
-            kind = node.spec.kinds[name]
-            value = params[name]
-            if kind == 'ENUM':
-                labels, values = node.choices(name)
-                text = labels[values.index(value)] if value in values else str(value)
-            elif kind == 'BOOL':
-                text = 'On' if value else 'Off'
-            else:
-                text = cb_entry.format_value(node.to_entry(name, value), kind, context.scene)
+            text = node_attributes.format_value(node, name, context.scene, params)
             blf.size(0, size)
             in_view._text(x1-pad-blf.dimensions(0, text)[0], y0+4*scale, text, in_view.TEXT, size)
         x1, y0 = lay['box'][2], lay['box'][1]
@@ -514,10 +508,7 @@ def finish_drag(operator, context, cancel=False):
             context.area.tag_redraw()
     if (not cancel and not operator._moved and operator._role == 'ROW'
             and operator._type_on_click):
-        if isinstance(node, node_attributes.ModelingNode) and operator._field in node.spec.fields:
-            bpy.ops.allset.inview_type('INVOKE_DEFAULT', row=node.spec.fields.index(operator._field))
-        else:
-            bpy.ops.allset.inview_number('INVOKE_DEFAULT')
+        bpy.ops.allset.inview_number('INVOKE_DEFAULT', field=operator._field)
     return {'CANCELLED'} if cancel else {'FINISHED'}
 
 
@@ -637,16 +628,18 @@ class ALLSET_OT_inview_number(bpy.types.Operator):
     bl_label = 'Edit Attribute'
     bl_options = {'INTERNAL'}
     text: StringProperty(name='Value', options={'SKIP_SAVE'})
+    field: StringProperty(options={'SKIP_SAVE'})
 
     def invoke(self, context, event):
         node = target(context)
         if node is None:
             return {'CANCELLED'}
         self._identity = node.identity
-        self._field = state(context, node)['field']
-        self.text = cb_entry.format_value(node.to_entry(self._field, node.params[self._field]),
-                                          node.spec.kinds[self._field], context.scene)
-        return context.window_manager.invoke_props_dialog(self, title=node.spec.labels[self._field])
+        self._field = self.field or state(context, node)['field']
+        if self._field not in available_fields(node) or not node_attributes.editable(node, self._field):
+            return {'CANCELLED'}
+        select(context, node, self._field)
+        return bpy.ops.wm.call_panel(name=ALLSET_PT_inview_number.__name__, keep_open=False)
 
     def draw(self, context):
         self.layout.activate_init = True
@@ -658,13 +651,59 @@ class ALLSET_OT_inview_number(bpy.types.Operator):
             return {'CANCELLED'}
         field = self._field
         try:
-            value = cb_entry.parse_entry(self.text, node.to_entry(field, node.params[field]),
-                                         node.spec.kinds[field], context.scene)
-            value = node.descriptor(field).limit(node.from_entry(field, value))
+            value = node_attributes.parse_value(node, field, self.text, context.scene)
         except (ValueError, SyntaxError, TypeError) as error:
             self.report({'WARNING'}, str(error))
             return {'CANCELLED'}
         return apply(context, node, dict(node.params, **{field: value}))
+
+
+def _entry_target(context):
+    if context.window is None or context.area is None:
+        return None, None
+    current = _views.get(view_key(context))
+    node = node_attributes.target(context)
+    if (node is None or current is None or current['identity'] != node.identity
+            or current['mode'] != context.mode):
+        return None, None
+    field = current['field']
+    return (node, field) if field in available_fields(node) else (None, None)
+
+
+def _entry_get(_self):
+    node, field = _entry_target(bpy.context)
+    return node_attributes.format_value(node, field, bpy.context.scene) if node is not None else ''
+
+
+def _entry_set(_self, text):
+    context = bpy.context
+    node, field = _entry_target(context)
+    if node is None or not node_attributes.editable(node, field):
+        return
+    try:
+        value = node_attributes.parse_value(node, field, text, context.scene)
+        if value != node.params[field]:
+            apply(context, node, dict(node.params, **{field: value}))
+    except (ValueError, SyntaxError, TypeError) as error:
+        from . import notices
+        notices.show(str(error))
+
+
+class ALLSET_PT_inview_number(bpy.types.Panel):
+    """A single active field, using Blender's F2-style confirmation and cancellation."""
+    bl_space_type = 'TOPBAR'
+    bl_region_type = 'HEADER'
+    bl_label = 'Attribute Value'
+    bl_ui_units_x = 8
+
+    def draw(self, context):
+        node, field = _entry_target(context)
+        if node is None:
+            return
+        row = self.layout.row()
+        row.activate_init = True
+        row.enabled = node_attributes.editable(node, field)
+        row.prop(context.window_manager, 'allset_inview_entry', text='')
 
 
 class ALLSET_OT_inview_setting(bpy.types.Operator):
@@ -771,7 +810,7 @@ def clear(_dummy=None):
 
 
 classes = (ALLSET_OT_node_attribute_apply, ALLSET_OT_inview_select, ALLSET_OT_inview_cycle, ALLSET_OT_inview_scroll,
-           ALLSET_OT_inview_number,
+           ALLSET_OT_inview_number, ALLSET_PT_inview_number,
            ALLSET_OT_inview_setting, ALLSET_MT_inview_choices, ALLSET_MT_inview_visible,
            ALLSET_MT_inview_attributes)
 
@@ -779,6 +818,7 @@ classes = (ALLSET_OT_node_attribute_apply, ALLSET_OT_inview_select, ALLSET_OT_in
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
+    bpy.types.WindowManager.allset_inview_entry = StringProperty(get=_entry_get, set=_entry_set, options={'SKIP_SAVE'})
     load_layouts()
     for handler in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
         handler.append(clear)
@@ -786,6 +826,7 @@ def register():
 
 def unregister():
     clear()
+    del bpy.types.WindowManager.allset_inview_entry
     for handler in (bpy.app.handlers.load_pre, bpy.app.handlers.undo_pre, bpy.app.handlers.redo_pre):
         if clear in handler:
             handler.remove(clear)

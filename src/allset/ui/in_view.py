@@ -506,11 +506,14 @@ class ALLSET_OT_inview_type(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return extrude.active(context)[1] is not None
+        from . import node_attributes
+        return node_attributes.target(context) is not None
 
     def _field(self, context):
-        _ob, rec = extrude.active(context)
-        if rec is None or self.row >= len(rec.spec.fields):
+        from . import node_attributes
+        node = node_attributes.target(context)
+        rec = node.record if isinstance(node, node_attributes.ModelingNode) else None
+        if rec is None or not 0 <= self.row < len(rec.spec.fields):
             return rec, None
         return rec, rec.spec.fields[self.row]
 
@@ -518,11 +521,7 @@ class ALLSET_OT_inview_type(bpy.types.Operator):
         rec, field = self._field(context)
         if field is None:
             return {'CANCELLED'}
-        if field in INT_FIELDS:
-            self.count = int(rec.params[field])
-        else:
-            self.number = float(rec.params[field])
-        return context.window_manager.invoke_props_dialog(self, title=f"{rec.name}: {rec.spec.labels[field]}")
+        return bpy.ops.allset.inview_number('INVOKE_DEFAULT', field=field)
 
     def draw(self, context):
         rec, field = self._field(context)
@@ -534,8 +533,11 @@ class ALLSET_OT_inview_type(bpy.types.Operator):
         if field is None:
             return {'CANCELLED'}
         from . import node_attributes
-        value = self.count if field in INT_FIELDS else self.number
-        value = node_attributes.target(context).descriptor(field).limit(value)
+        node = node_attributes.target(context)
+        if not node_attributes.editable(node, field):
+            return {'CANCELLED'}
+        value = self.count if node.spec.kinds[field] == 'INT' else self.number
+        value = node.descriptor(field).limit(value)
         res = extrude.set_params(context, **{field: value})
         _redraw(context)
         return res
@@ -691,7 +693,9 @@ def _text_get(field):
         rec = cb_record(bpy.context, _lead(bpy.context))
         if rec is None or field not in rec.params:
             return ""
-        return cb_entry.format_value(rec.params[field], rec.spec.kinds[field], bpy.context.scene)
+        from . import node_attributes
+        node = node_attributes.ModelingNode(_lead(bpy.context), rec)
+        return node_attributes.format_value(node, field, bpy.context.scene)
     return get
 
 
@@ -742,6 +746,8 @@ def draw_cb_node(layout, context, rec):
     if not opened:
         return
     hist = context.window_manager.allset_history
+    from . import node_attributes
+    node = node_attributes.ModelingNode(ob, rec)
     for field in rec.spec.fields:
         row = lines.row()
         if row is None:
@@ -751,7 +757,7 @@ def draw_cb_node(layout, context, rec):
         split.operator('allset.cb_select_channel', text=rec.spec.labels[field], emboss=False,
                        depress=key in channel_box.selected_channels(context)).key = key
         values = split.row()
-        values.enabled = not channel_box.is_locked(ob, key)
+        values.enabled = node_attributes.editable(node, field)
         values.prop(hist, f"{field}_text", text="")
 
 

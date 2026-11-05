@@ -56,29 +56,9 @@ def apply_text(context, name, text):
     """Typed ``text`` on attribute ``name`` of the lead's creation node: every selected object with a node of the
     same type is rebuilt. Returns the number of objects changed."""
     from . import channel_box
-    lead = _lead(context)
-    _owner, node = prim_history.node_of(lead)
-    if node is None:
+    if prim_history.node_of(_lead(context))[1] is None:
         return 0
-    count = 0
-    done = set()
-    for ob in channel_box.targets(context):
-        if not isinstance(ob, bpy.types.Object):
-            continue
-        owner, other = prim_history.node_of(ob)
-        if other is None or other["type"] != node["type"] or owner.as_pointer() in done:
-            continue
-        done.add(owner.as_pointer())   # instances share the node (Maya: one shape, one history)
-        old = prim_history.attrs(owner)[name]
-        try:
-            value = parse_attr(other, name, text, old, context.scene)
-        except (ValueError, TypeError, SyntaxError, NameError):
-            return count
-        if prim_shapes.clamp(other["type"], name, value) == old:
-            continue
-        prim_history.rebuild(context, ob, {name: value})
-        count += 1
-    return count
+    return channel_box.apply_entry(channel_box.HISTORY_PREFIX+name, text, context)
 
 
 def _text_get(name):
@@ -144,17 +124,22 @@ def draw_cb(layout, context, ob):
         split = row.split(factor=0.5, align=True)
         selected = channel_box.HISTORY_PREFIX + name in channel_box.selected_channels(context)
         split.prop(props, f"{name}_sel", text=prim_shapes.spec(node["type"], name)[1], toggle=True, emboss=selected)
-        split.prop(props, f"{name}_text", text="")
+        cell = split.row()
+        cell.enabled = not channel_box.is_locked(ob, channel_box.HISTORY_PREFIX+name)
+        cell.prop(props, f"{name}_text", text="")
     return True
 
 
 def _rows(col, context, node, factor):
+    from . import channel_box
     props = context.scene.allset_creation
     for name in node_rows(node["type"]):
         label = prim_shapes.spec(node["type"], name)[1]
         split = col.row(align=True).split(factor=factor, align=True)
         split.label(text=label)
-        split.prop(props, f"{name}_text", text="")
+        cell = split.row()
+        cell.enabled = not channel_box.is_locked(_lead(context), channel_box.HISTORY_PREFIX+name)
+        cell.prop(props, f"{name}_text", text="")
 
 
 def nice_type(node_type):

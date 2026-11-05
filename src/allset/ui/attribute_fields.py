@@ -58,6 +58,13 @@ class NumericField:
             return False
         if id_data is not None and not id_data.is_editable:
             return False
+        if isinstance(id_data, bpy.types.WindowManager) and self.path.startswith('allset_options_'):
+            from ..operators import option_windows
+            key = self.path.split('.', 1)[0][len('allset_options_'):]
+            spec = option_windows._BY_KEY.get(key)
+            if spec is not None and spec.enabled is not None:
+                if not spec.enabled(option_windows.values_of(spec, self.owner), self.name):
+                    return False
         animation = getattr(id_data, 'animation_data', None)
         if animation is not None:
             path = self.owner.path_from_id(self.name)
@@ -114,10 +121,7 @@ class NodeField:
         return self.node.to_entry(self.name, self.node.params[self.name])
 
     def writable(self):
-        from . import channel_box
-        key = (channel_box.model_key(self.node.record, self.name) if hasattr(self.node, 'record') else
-               channel_box.HISTORY_PREFIX+self.name)
-        return self.node.valid() and not channel_box.is_locked(self.node.ob, key)
+        return self.node.valid() and node_attributes.editable(self.node, self.name)
 
     def descriptor(self, context):
         return node_attributes.display_descriptor(self.node, self.name, context)

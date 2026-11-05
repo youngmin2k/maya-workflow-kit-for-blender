@@ -161,3 +161,62 @@ def test_persisted_layout_load_keeps_valid_nodes_and_discards_damaged_nodes():
             path.unlink(missing_ok=True)
         else:
             path.write_text(previous_file, encoding='utf-8')
+
+
+def test_creation_channel_entry_groups_attributes_and_honors_locks():
+    object_mode()
+    scene = bpy.context.scene
+    scene.unit_settings.system = 'NONE'
+    first = primitives.create_object(bpy.context, 'CUBE')
+    second = primitives.create_object(bpy.context, 'CUBE')
+    first.select_set(True)
+    keys = [cb.HISTORY_PREFIX+name for name in ('width', 'height')]
+    cb.set_selected_channels(keys)
+    original = primitives.rebuild
+    calls = []
+    def rebuild(context, ob, values):
+        calls.append(ob.name)
+        return original(context, ob, values)
+    try:
+        primitives.rebuild = rebuild
+        assert cb.apply_entry(keys[0], '2') == 4
+        assert len(calls) == 2
+        assert all(nodes.target(bpy.context, ob).params['height'] == 2 for ob in (first, second))
+        cb.set_locked(first, keys[1], True)
+        assert cb.apply_entry(keys[0], '+=1') == 3
+        assert nodes.target(bpy.context, first).params['height'] == 2
+        assert nodes.target(bpy.context, second).params['height'] == 3
+        assert not nodes.editable(nodes.target(bpy.context, first), 'height')
+    finally:
+        primitives.rebuild = original
+        cb.set_locked(first, keys[1], False)
+        cb.set_selected_channels([])
+
+
+def test_instanced_creation_history_is_rebuilt_once_per_field_group():
+    object_mode()
+    first = primitives.create_object(bpy.context, 'CUBE')
+    second = first.copy()
+    bpy.context.scene.collection.objects.link(second)
+    second.select_set(True)
+    bpy.context.view_layer.objects.active = second
+    assert cb.apply_entry(cb.HISTORY_PREFIX+'width', '+=1') == 1
+    assert nodes.target(bpy.context, first).params['width'] == 2
+    assert nodes.target(bpy.context, second).params['width'] == 2
+
+
+def test_instanced_creation_node_locks_are_shared_with_the_shape():
+    object_mode()
+    first = primitives.create_object(bpy.context, 'CUBE')
+    second = first.copy()
+    bpy.context.scene.collection.objects.link(second)
+    second.select_set(True)
+    bpy.context.view_layer.objects.active = second
+    key = cb.HISTORY_PREFIX+'width'
+    cb.set_locked(first, key, True)
+    assert cb.is_locked(second, key)
+    assert not nodes.editable(nodes.target(bpy.context, second), 'width')
+    assert cb.apply_entry(key, '+=1') == 0
+    cb.set_locked(second, key, False)
+    assert not cb.is_locked(first, key)
+    assert cb.apply_entry(key, '+=1') == 1

@@ -58,7 +58,12 @@ class Spec:
     values (one undo step); ``build(bm, params, unit)`` (not FACE) -> the vertices to track."""
 
     def __init__(self, kind, node, fields, labels, defaults, kinds, arrow, edit_op, build=None, node_type=None,
-                 manip=(), in_view=True, object_check=None, pre_uv=False, hidden=(), with_object=False):
+                 manip=(), in_view=True, object_check=None, pre_uv=False, hidden=(), with_object=False,
+                 choices=None, enabled=None, atomic=False, preview=None):
+        self.choices = choices or {}
+        self.enabled = enabled
+        self.atomic = atomic
+        self.preview = preview
         self.hidden = tuple(hidden)            # values build reads that have no row (an option-window setting)
         self.with_object = with_object         # build(bm, params, unit, ob=...) also gets the object
         self.pre_uv = pre_uv                   # a rerun on the same mesh also needs the same UVs (UV projections)
@@ -80,6 +85,13 @@ class Spec:
 
 
 SPECS = {}
+
+
+class BuildResult(list):
+    """Tracked vertices with optional backend data for coordinate-only previews."""
+    def __init__(self, vertices, preview_data):
+        super().__init__(vertices)
+        self.preview_data = preview_data
 
 
 def add_spec(spec):
@@ -663,8 +675,11 @@ class Record:
         self.live = False           # a drag is previewing values
         self.mesh_uid = None        # session_uid of the mesh it was made on
         self.dismissed = False      # Q/W/E/R picked a tool since: Maya shows that tool's manipulator (#80)
+        self.preview_data = None
+        self.fast_preview = False
 
     def free(self):
+        self.preview_data = None
         if self.pre is not None:
             self.pre.free()
             self.pre = None
@@ -743,13 +758,16 @@ def _store(rec, bm, caps, moved, params):
     rec.live = False
 
 
-def _store_generic(rec, bm, tracked, params):
+def _store_generic(rec, bm, tracked, params, full_hash=None, preview_data=None):
     bm.verts.index_update()
     rec.params = dict(params)
+    rec.preview_data = preview_data if preview_data is not None else getattr(tracked, 'preview_data', None)
+    rec.fast_preview = False
     rec.cap_verts = sorted({v.index for v in tracked if v.is_valid})
     rec.cap_faces = []
     rec.sel = selection_signature(bm)
-    rec.states.append((dict(params), signature(bm, rec.cap_verts), rec.sel, coords_hash(bm)))
+    rec.states.append((dict(params), signature(bm, rec.cap_verts), rec.sel,
+                       coords_hash(bm) if full_hash is None else full_hash))
     del rec.states[:-64]
     rec.live = False
 
@@ -773,13 +791,36 @@ def restore_mesh(bm, source):
 def run(ob, rec, params, unit):
     """Rebuild the extrusion of ``rec`` on ``ob`` (edit mode) with ``params``."""
     bm = bmesh.from_edit_mesh(ob.data)
-    restore_pre(bm, rec)
     if rec.spec is not FACE:
-        values = {k: params[k] for k in rec.spec.fields + rec.spec.hidden if k in params}
-        tracked = rec.spec.build(bm, values, unit, **({"ob": ob} if rec.spec.with_object else {}))
-        _store_generic(rec, bm, tracked, params)
+        rollback = bpy.data.meshes.new('.allset_preview') if rec.spec.atomic else None
+        full_hash = None
+        try:
+            if rollback is not None:
+                bm.to_mesh(rollback)
+            try:
+                restore_pre(bm, rec)
+                values = {k: params[k] for k in rec.spec.fields + rec.spec.hidden if k in params}
+                tracked = rec.spec.build(bm, values, unit, **({"ob": ob} if rec.spec.with_object else {}))
+                if rec.spec.atomic and not tracked:
+                    raise ValueError('The attributes do not produce a valid '+rec.spec.node_type)
+            except Exception:
+                if rollback is not None:
+                    bm.clear()
+                    bm.from_mesh(rollback)
+                    bmesh.update_edit_mesh(ob.data)
+                raise
+            preview_data = getattr(tracked, 'preview_data', None)
+            if rollback is not None:
+                # The build succeeded. Reuse its compact rollback mesh for the native coordinate hash.
+                bm.to_mesh(rollback)
+                full_hash = mesh_coords_hash(rollback)
+            _store_generic(rec, bm, tracked, params, full_hash, preview_data)
+        finally:
+            if rollback is not None:
+                bpy.data.meshes.remove(rollback)
         bmesh.update_edit_mesh(ob.data)
         return bool(tracked)
+    restore_pre(bm, rec)
     faces = [f for f in bm.faces if f.select]
     caps, moved = extrude(bm, faces, unit=unit, **params, **mesh_axes(ob))
     _store(rec, bm, caps, moved, params)
@@ -796,6 +837,10 @@ def mesh_axes(ob):
 def preview(ob, rec, params, unit):
     """Show ``params`` during a drag: move the vertices when only lengths change, else rebuild."""
     if rec.spec is not FACE:
+        if rec.spec.preview is not None and rec.spec.preview(ob, rec, params, unit):
+            rec.fast_preview = True
+            rec.live = True
+            return
         run(ob, rec, params, unit)
         rec.live = True
         return
@@ -941,11 +986,25 @@ def caps_selected(ob, rec):
     """Maya's extrude manipulator / In-View Editor stay while the extruded faces are the selection (edge / vertex
     extrusion, bevel: while the selection is the one the operation left)."""
     bm = bmesh.from_edit_mesh(ob.data)
-    if rec.spec is not FACE:
-        return selection_signature(bm) == rec.sel
-    bm.faces.ensure_lookup_table()
-    sel = {f.index for f in bm.faces if f.select}
-    return bool(sel) and sel == set(rec.cap_faces)
+    selected = (None, None, rec.cap_faces) if rec.spec is FACE else rec.sel
+    if selected is None or (rec.spec is FACE and not rec.cap_faces):
+        return False
+    return _selection_matches(ob, bm, selected)
+
+
+def _selection_matches(ob, bm, selected):
+    if selected is None:
+        return False
+    for sequence, indices, count in zip((bm.verts, bm.edges, bm.faces), selected,
+                                        ('total_vert_sel', 'total_edge_sel', 'total_face_sel')):
+        if indices is None:
+            continue
+        if getattr(ob.data, count) != len(indices):
+            return False
+        sequence.ensure_lookup_table()
+        if any(index >= len(sequence) or not sequence[index].select for index in indices):
+            return False
+    return True
 
 
 def active(context):

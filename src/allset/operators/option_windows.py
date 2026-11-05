@@ -49,7 +49,7 @@ class F:
 
 class Window:
     def __init__(self, key, title, action, match, fields, run, paths=(), missing=(), width=440, apply_text="Apply",
-                 click_saved=True, pref_fields=None):
+                 click_saved=True, pref_fields=None, enabled=None):
         self.key, self.title, self.action = key, title, action
         # field -> add-on preference that keeps its value (shown and set elsewhere too), not the saved option values
         self.pref_fields = dict(pref_fields or {})
@@ -61,6 +61,7 @@ class Window:
         self.fields, self.run, self.paths = fields, run, tuple(paths)
         self.missing = tuple(missing)   # Maya fields Blender has no equivalent for (drawn greyed, one line)
         self.width = width
+        self.enabled = enabled
 
     @property
     def idname(self):
@@ -454,10 +455,15 @@ WINDOWS = [
         _run_bevel,
         paths=("Edit Mesh/Bevel",), missing=("Mitering / Miter Along", "Automatically fit bevel to object")),
     Window("bridge", "Bridge Options", "Bridge", None, [
-        F("divisions", "Divisions:", "int", 5, lo=0, hi=100), F("twist", "Twist:", "int", 0, lo=-100, hi=100)],
+        F("curve_type", "Bridge type:", "enum", "Linear path", items=("Linear path", "Smooth path")),
+        F("divisions", "Divisions:", "int", 5, lo=0, hi=100),
+        F("twist_angle", "Twist:", "float", 0, lo=-360, hi=360), F("taper", "Taper:", "float", 1, lo=0, hi=3),
+        F("twist", "Bridge offset:", "int", 0, lo=-100, hi=100)],
         lambda c, v: _components(c, "allset.bridge", 'EDGE', divisions=v["divisions"],
-                                 twist=v["twist"]),
-        paths=("Edit Mesh/Bridge",), missing=("Bridge type: Smooth path / curve", "Taper", "Smoothing angle")),
+                                 bridge_offset=v["twist"], curve_type=int(v["curve_type"] == "Smooth path"),
+                                 twist_angle=v["twist_angle"], taper=v["taper"]),
+        paths=("Edit Mesh/Bridge",), missing=("Smooth path + curve", "Taper Curve", "Smoothing angle"),
+        enabled=lambda values, name: name not in {"twist_angle", "taper"} or values["curve_type"] == "Smooth path"),
     Window("merge", "Merge Vertices Options", "Merge", None, [
         F("threshold", "Threshold:", "length", 0.01, lo=0.0, hi=1.0),
         F("always_two", "", "bool", True, text="Always merge for two vertices")],
@@ -779,6 +785,7 @@ def draw_fields(window, layout, holder):
     layout.use_property_split = True
     layout.use_property_decorate = False
     fields = list(window.fields)
+    values = values_of(window, holder) if window.enabled is not None else None
     i = 0
     while i < len(fields):
         f = fields[i]
@@ -793,16 +800,20 @@ def draw_fields(window, layout, holder):
                 i += 1
             continue
         i += 1
+        cell = layout
+        if window.enabled is not None:
+            cell = layout.column()
+            cell.enabled = window.enabled(values, f.name)
         if f.kind == "bool":
-            layout.column(heading=f.label.rstrip(":")).prop(holder, f.name, text=f.text or "")
+            cell.column(heading=f.label.rstrip(":")).prop(holder, f.name, text=f.text or "")
             continue
         elif f.kind == "enum":
             # an enum without a label is Maya's combo beside the row above (Joint Tool " + "): a drop-down, as
             # expanded buttons without a label Blender stacks it as empty bars
-            layout.row().prop(holder, f.name, text=f.label.rstrip(":") or " ",
+            cell.row().prop(holder, f.name, text=f.label.rstrip(":") or " ",
                            expand=bool(f.label) and len(f.items) <= 4)
         else:
-            layout.prop(holder, f.name, text=f.label.rstrip(":"))
+            cell.prop(holder, f.name, text=f.label.rstrip(":"))
     if window.missing:
         sub = layout.column(align=True)
         sub.enabled = False

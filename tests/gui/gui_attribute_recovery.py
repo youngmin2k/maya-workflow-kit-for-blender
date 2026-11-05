@@ -56,11 +56,6 @@ def click_width():
 def type_width(): text('5')
 
 @step
-def confirm_width():
-    # Blender confirms the active text field first, then the numeric dialog.
-    tap('RET')
-
-@step
 def width_result():
     with viewport():
         node=mod('ui.node_attributes').target(bpy.context)

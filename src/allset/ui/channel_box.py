@@ -229,7 +229,10 @@ def is_keyable(ob, key):
 
 
 def is_locked(ob, key):
-    if key.startswith(MODEL_PREFIX):
+    if key.startswith(HISTORY_PREFIX):
+        from ..operators import prim_history
+        ob = prim_history.owner_of(ob) or ob
+    if key.startswith((MODEL_PREFIX, HISTORY_PREFIX)):
         return key in _flag_list(ob, 'allset_cb_model_locked')
     c = MAIN_BY_KEY.get(key)
     if c is None or c[4] not in _LOCK_PROP:
@@ -238,7 +241,10 @@ def is_locked(ob, key):
 
 
 def set_locked(ob, key, locked):
-    if key.startswith(MODEL_PREFIX):
+    if key.startswith(HISTORY_PREFIX):
+        from ..operators import prim_history
+        ob = prim_history.owner_of(ob) or ob
+    if key.startswith((MODEL_PREFIX, HISTORY_PREFIX)):
         keys = set(_flag_list(ob, 'allset_cb_model_locked'))
         keys.add(key) if locked else keys.discard(key)
         _set_flag_list(ob, 'allset_cb_model_locked', keys)
@@ -964,7 +970,7 @@ def entry_kind(ob, key):
         from ..operators import prim_history
         _owner, node = history_node_of(ob, key)
         kind = prim_history.entry_kind(node["type"], key[len(HISTORY_PREFIX):])
-        return None if kind == "ENUM" else kind
+        return kind
     if is_blend_key(key):
         return "NONE"
     return _KIND_ENTRY[MAIN_BY_KEY[key][4]]
@@ -984,6 +990,8 @@ def apply_entry(key, text, context=None):
     autokey = auto_key.enabled(scene)
     entries = []
     models = {}
+    histories = {}
+    history_fields = set()
     for k in entry_keys(key, context):
         for ob in targets(context):
             if not has_channel(ob, k) or is_locked(ob, k):
@@ -992,27 +1000,45 @@ def apply_entry(key, text, context=None):
             if kind is None:
                 continue
             try:
-                value = cb_entry.parse_entry(text, get_value(ob, k), kind, scene)
                 if k.startswith(MODEL_PREFIX):
+                    from . import node_attributes
                     node = model_node(ob, k)
                     field = k.rsplit(':', 1)[1]
-                    if kind != 'BOOL':
-                        value = node.descriptor(field).limit(value)
+                    if not node_attributes.editable(node, field):
+                        continue
+                    value = node_attributes.parse_value(node, field, text, scene)
                     if ob not in models:
                         models[ob] = node, dict(node.params)
                     models[ob][1][field] = value
+                elif is_history_key(k):
+                    from . import node_attributes
+                    owner, history = history_node_of(ob, k)
+                    field = k[len(HISTORY_PREFIX):]
+                    pair = owner.as_pointer(), field
+                    if pair in history_fields:
+                        continue
+                    history_fields.add(pair)
+                    node = node_attributes.PrimitiveNode(ob, owner, history)
+                    value = node_attributes.parse_value(node, field, text, scene)
+                    if value == node.params[field]:
+                        continue
+                    if pair[0] not in histories:
+                        histories[pair[0]] = node, dict(node.params)
+                    histories[pair[0]][1][field] = value
+                else:
+                    value = cb_entry.parse_entry(text, get_value(ob, k), kind, scene)
             except (ValueError, TypeError, SyntaxError):
                 return 0
             entries.append((ob, k, value))
     for ob, k, value in entries:
-        if k.startswith(MODEL_PREFIX):
+        if k.startswith(MODEL_PREFIX) or is_history_key(k):
             for hook in WRITE_HOOKS:
                 hook(ob, k)
         else:
             set_value(ob, k, value)
         if autokey and auto_keys(ob, k, context):
             keyframe(ob, k)
-    for node, params in models.values():
+    for node, params in (*models.values(), *histories.values()):
         try:
             node.commit(context, params)
         finally:
@@ -1515,8 +1541,12 @@ def slider_targets(context):
                 value = get_value(ob, key)
                 if isinstance(value, bool) or not isinstance(value, (int, float)):
                     continue
-                if is_history_key(key) and entry_kind(ob, key) is None:
+                if entry_kind(ob, key) in {None, 'ENUM'}:
                     continue     # an enum attribute (Maya's slider skips it)
+                if key.startswith(MODEL_PREFIX):
+                    from . import node_attributes
+                    if not node_attributes.editable(model_node(ob, key), key.rsplit(':', 1)[1]):
+                        continue
                 out.append((ob, key))
     return out
 
