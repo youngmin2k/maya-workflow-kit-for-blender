@@ -14,6 +14,7 @@ RAMP_DEFAULT = '[[0.0,1.0,1],[1.0,1.0,1]]'
 REFERENCE = 'allset_bridge_path_'
 _dirty = set()
 _updating = False
+_revisions = {}
 
 
 def reference_key(name):
@@ -118,6 +119,8 @@ def taper_value(taper, t):
 
 
 def deform(vertices, source, params, ob=None):
+    if params.get('evaluation_version', 0):
+        return deform_transport(vertices, source, params, ob)
     if hasattr(vertices, 'ensure_lookup_table'):
         vertices.ensure_lookup_table()
     smooth = bool(params.get('curve_type', 0))
@@ -142,6 +145,115 @@ def deform(vertices, source, params, ob=None):
             if smooth:
                 offset = twist @ offset
             vertices[index].co = centre+offset*scale
+
+
+def transported_frames(source, params, ob):
+    fields = ('curve_type', 'direction', 'source_direction', 'target_direction', 'input_curve')
+    key = tuple(params.get(field) for field in fields)
+    if params.get('curve_type') == 2:
+        curve = curve_object(ob, params)
+        relative = ob.matrix_world.inverted() @ curve.matrix_world
+        key += (curve.data.session_uid, _revisions.get(curve.data.session_uid, 0),
+                tuple(value for row in relative for value in row))
+    cached = source.get('frames')
+    if cached is not None and cached[0] == key:
+        return cached[1]
+    path = path_evaluator(ob, source, params)
+    start, end = directions(source, params)
+    step = 1/(len(source['rows'])+1)
+    times = sorted({0.0, 1.0, *(index/32 for index in range(1,32)), *(t for t, _row in source['rows'])})
+    axes = []
+    for t in times:
+        axis = path(min(1,t+step))-path(max(0,t-step))
+        if axis.length_squared < 1e-16:
+            axis = source['b']-source['a']
+        axes.append(axis.normalized())
+    forward, backward = {}, {}
+    rotation, previous = Quaternion(), start.normalized()
+    for t, axis in zip(times, axes):
+        rotation = previous.rotation_difference(axis) @ rotation
+        forward[t] = rotation.copy()
+        previous = axis
+    rotation, previous = Quaternion(), end.normalized()
+    for t, axis in reversed(list(zip(times, axes))):
+        rotation = previous.rotation_difference(axis) @ rotation
+        backward[t] = rotation.copy()
+        previous = axis
+    frames = {t:(path(t), axis, forward[t], backward[t]) for t,axis in zip(times,axes)}
+    source['frames'] = key, frames
+    return frames
+
+
+def deform_transport(vertices, source, params, ob):
+    if hasattr(vertices, 'ensure_lookup_table'):
+        vertices.ensure_lookup_table()
+    frames = transported_frames(source, params, ob)
+    smooth = bool(params.get('curve_type'))
+    ramp = ramp_points(params.get('taper_curve', RAMP_DEFAULT))
+    angle = math.radians(float(params.get('twist_angle', 0))) if smooth else 0
+    identity = Matrix.Identity(3)
+    for t, row in source['rows']:
+        centre, axis, start, end = frames[t]
+        blend = math.sin(math.pi*t)**1.5 if smooth else 0
+        scale = taper_value(float(params.get('taper',1)),t)*ramp_value(ramp,t) if smooth else 1
+        source_twist, target_twist = Quaternion(axis,angle*t), Quaternion(axis,-angle*(1-t))
+        # Compose per-section transforms once instead of rotating every endpoint separately.
+        source_frame = identity*(1-blend)+start.to_matrix()*blend
+        target_frame = identity*(1-blend)+end.to_matrix()*blend
+        source_transform = (source_twist.to_matrix() @ source_frame)*((1-t)*scale)
+        target_transform = (target_twist.to_matrix() @ target_frame)*(t*scale)
+        for index,a,b in row:
+            vertices[index].co = centre+source_transform @ (a-source['a'])+target_transform @ (b-source['b'])
+
+
+def match_offset(data, params):
+    if data is None:
+        return int(params.get('bridge_offset', 0))
+    source, targets, step, path = data
+    raw_offset = int(params.get('bridge_offset',0))
+    manual_offset = raw_offset+1 if raw_offset else 0
+    if not params.get('curve_type'):
+        return manual_offset%len(targets)
+    key = tuple(params.get(field) for field in ('twist_angle','divisions','direction',
+                                               'source_direction','target_direction','bridge_offset'))
+    cached = path.get('match_cache')
+    if cached is not None and cached[0] == key:
+        return cached[1]
+    import numpy as np
+    buffers = path.get('match_buffers')
+    if buffers is None:
+        order, seen, index = [], set(), 0
+        while index not in seen:
+            order.append(index)
+            seen.add(index)
+            index = step[index]
+        if len(order) != len(targets):
+            raise ValueError('The Bridge borders do not have a cyclic correspondence')
+        source_array = np.array([tuple(source[index]) for index in order], dtype=np.float64)
+        target_array = np.array([tuple(targets[index]) for index in order], dtype=np.float64)
+        buffers = source_array, target_array, np.fft.fft(target_array, axis=0)
+        path['match_buffers'] = buffers
+    source_array, target_array, target_fft = buffers
+    start, end = directions(path, params)
+    normal = end.normalized()
+    alignment = start.normalized().rotation_difference(normal)
+    angle = math.radians(float(params.get('twist_angle',0)))*int(params['divisions'])
+    axis = np.array(normal, dtype=np.float64)
+    axis /= np.linalg.norm(axis)
+    aligned = source_array @ np.array(alignment.to_matrix(), dtype=np.float64).T
+    cosine, sine = math.cos(angle), math.sin(angle)
+    rotated = cosine*aligned+sine*np.cross(axis, aligned)+(1-cosine)*np.outer(aligned @ axis, axis)
+    scores = np.fft.ifft(np.conj(np.fft.fft(rotated, axis=0))*target_fft, axis=0).real.sum(axis=1)
+    tolerance = max(1.0, float((aligned*aligned).sum()))*1e-7
+    choices = np.flatnonzero(scores >= scores.max()-tolerance)
+    def phase(index):
+        left, right = aligned[0], target_array[index]
+        value = math.atan2(float(np.dot(axis,np.cross(left,right))), float(np.dot(left,right)))%(2*math.pi)
+        return 0.0 if min(value,2*math.pi-value) < 1e-8 else value
+    best = min((int(index) for index in choices), key=phase)
+    offset = (best+manual_offset)%len(targets)
+    path['match_cache'] = key, offset
+    return offset
 
 
 def prepare(context, ob, record, params):
@@ -204,8 +316,10 @@ def changed(_scene, depsgraph):
         data = update.id.original
         if isinstance(data, bpy.types.Curve):
             _dirty.add(data.session_uid)
+            _revisions[data.session_uid] = _revisions.get(data.session_uid, 0)+1
         elif isinstance(data, bpy.types.Object) and data.type == 'CURVE':
             _dirty.add(data.data.session_uid)
+            _revisions[data.data.session_uid] = _revisions.get(data.data.session_uid, 0)+1
 
 
 def refresh():
@@ -216,6 +330,8 @@ def refresh():
     _updating = True
     changed_curves = set(_dirty)
     _dirty.clear()
+    for uid in changed_curves:
+        _revisions[uid] = _revisions.get(uid, 0)+1
     try:
         for ob in tuple(bpy.data.objects):
             data = model_history.read(ob)
@@ -251,6 +367,7 @@ def save(_dummy=None):
 @bpy.app.handlers.persistent
 def clear(_dummy=None):
     _dirty.clear()
+    _revisions.clear()
 
 
 def register():
@@ -258,12 +375,14 @@ def register():
         bpy.app.handlers.depsgraph_update_post.append(changed)
     if not bpy.app.timers.is_registered(refresh):
         bpy.app.timers.register(refresh, first_interval=.1, persistent=True)
-    bpy.app.handlers.save_pre.append(save)
-    bpy.app.handlers.load_pre.append(clear)
+    for handlers, callback in ((bpy.app.handlers.save_pre, save), (bpy.app.handlers.load_pre, clear)):
+        if callback not in handlers:
+            handlers.append(callback)
 
 
 def unregister():
     _dirty.clear()
+    _revisions.clear()
     if changed in bpy.app.handlers.depsgraph_update_post:
         bpy.app.handlers.depsgraph_update_post.remove(changed)
     if bpy.app.timers.is_registered(refresh):

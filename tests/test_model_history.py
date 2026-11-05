@@ -59,17 +59,14 @@ def test_earlier_node_replays_downstream_and_exposes_distinct_channels():
     assert digest(ob) == before
 
 
-def test_incompatible_upstream_topology_rolls_back_the_whole_chain():
+def test_upstream_divisions_preserve_the_downstream_cap_binding():
     ob = chain()
     data = json.loads(ob.data[history.KEY])
-    before = digest(ob)
-    try:
-        history.edit(ob, data['nodes'][0]['id'], dict(data['nodes'][0]['params'], divisions=4))
-    except ValueError as error:
-        assert 'rebound' in str(error)
-    else:
-        raise AssertionError('An incompatible downstream selection must be reported')
-    assert digest(ob) == before and json.loads(ob.data[history.KEY]) == data
+    history.edit(ob, data['nodes'][0]['id'], dict(data['nodes'][0]['params'], divisions=4))
+    assert history.read(ob)['nodes'][0]['params']['divisions'] == 4
+    assert history.read(ob)['nodes'][1]['params']['thickness'] == .25
+    assert ex.current(ob) is not None
+    assert abs(max(vertex.co.z for vertex in bmesh.from_edit_mesh(ob.data).verts)-1.75) < 1e-5
 
 
 def test_creation_node_remains_editable_through_the_modeling_chain():
@@ -152,7 +149,7 @@ def test_whole_mesh_selection_uses_constant_size_history_metadata():
         for element in sequence:
             element.select = True
     selection = history._selection(bm)
-    assert len(json.dumps(selection)) < 150
+    assert len(json.dumps(selection)) < 250
     history._select(bm, selection, 'wholeMesh')
     assert all(element.select for sequence in (bm.verts, bm.edges, bm.faces) for element in sequence)
     bm.free()

@@ -393,8 +393,16 @@ Ctrl+Shift+RMB offers the visible attributes of the active node. Selecting a Cha
 viewport middle-drag to that channel. A completed drag is one undo step and Esc restores its starting value.
 Bridge, Add Divisions, Extrude and Bevel retain an editable modeling chain in Channel Box INPUTS and the Attribute
 Editor. Recipes and one immutable input mesh travel with the `.blend` file. Changing an earlier node replays its
-downstream steps. An upstream topology change that invalidates a downstream component selection is rejected
-without changing the mesh. Direct mesh edits outside recorded commands start a new chain on the next command.
+downstream steps. Component identities preserve surviving selections across topology edits, including Extrude
+caps when Divisions changes. If a target was removed, split or merged, **Rebind Selection** appears in the
+Attribute Editor and Channel Box INPUTS. Choose replacement components on the proposed input, then Enter to
+apply or Esc to cancel. The original mesh stays intact until the entire chain can replay. Other generated
+topology can require an explicit replacement. Direct mesh edits outside recorded commands start a new chain
+on the next command. Older recipes migrate to schema 2 on editing.
+
+Inactive BMesh history caches use a 256 MiB estimated budget and reconstruct from the saved recipe after eviction.
+Selected objects and live edits stay resident, so total process memory can exceed this budget. Native input
+meshes, visible geometry and Blender's undo storage also use memory.
 
 Bridge supports Linear, Smooth and Smooth + Curve paths between borders with matching vertex counts. Smooth paths
 expose angular Twist and Taper. Bridge Offset changes correspondence on closed borders. Automatic and manual
@@ -402,7 +410,9 @@ endpoint directions, smoothing angle and a Taper Curve graph are available in Br
 In the graph, click to add or select a point, drag to move it, X to delete, and 1–4 to choose None, Linear, Smooth
 or Spline interpolation. Enter applies one undoable edit and Esc cancels. Edit Path selects the generated NURBS
 curve for normal curve editing, which updates the Bridge. Smooth centerlines use quintic endpoint interpolation
-checked against Maya 2025. Section frames and twist can still differ from Maya's native Bridge geometry.
+checked against Maya 2025. New Bridges use transported section frames and twist-dependent border correspondence.
+Existing Bridges keep their saved evaluation until **Update Bridge Evaluation** is chosen in the history UI.
+Offset or tilted borders and Taper can still differ from Maya's native Bridge geometry.
 
 Command Options open in modeless floating editors with the same Ctrl+mouse numeric gestures, Apply, Save Settings
 and Reset Settings. Different command options can stay open together. Commands run in the editor that opened their

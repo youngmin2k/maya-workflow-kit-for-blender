@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Versioned modeling recipes with one immutable input mesh and transactional replay."""
 
+from collections import OrderedDict
 from copy import deepcopy
 import json
 from types import SimpleNamespace
@@ -9,14 +10,72 @@ from uuid import uuid4
 import bmesh
 import bpy
 
+from . import history_references as references
+
 KEY = 'allset_model_history'
 BASE = 'allset_model_history_base'
-VERSION = 1
+VERSION = 2
 OWNED = 'allset_history_input'
 _cache = {}
 _active = {}
 _busy = set()
 _valid = {}
+CACHE_BUDGET = 256*1024*1024
+_recent = OrderedDict()
+_pending = {}
+
+
+def primitive_topology(creation):
+    from . import prim_history
+    return [[name,value] for name,value in sorted(creation['attrs'].items()) if name != 'createUVs'
+            and prim_history.entry_kind(creation['type'],name) in {'INT','BOOL','ENUM'}]
+
+
+def seed_references(bm, creation=None):
+    handles = references.layers(bm)
+    if creation is not None:
+        topology = primitive_topology(creation)
+        original = creation.setdefault('topology', topology)
+        if topology != original:
+            for index, vertex in enumerate(bm.verts):
+                references.assign(vertex, handles, references.generated(creation['id'], ('PRIMITIVE',topology,index)))
+
+
+def trim_cache(protect=()):
+    """Bound estimated inactive BMesh memory. Active selections and live edits remain resident."""
+    from . import extrude
+    protected = set(protect)
+    protected.update(ob.name for ob in getattr(bpy.context, 'selected_objects', ()))
+    live = {mesh.session_uid for mesh in bpy.data.meshes if mesh.users}
+    for uid in set(_cache)-live:
+        _cache.pop(uid, None)
+        _active.pop(uid, None)
+        _valid.pop(uid, None)
+        _pending.pop(uid, None)
+    costs = {}
+    for name, rec in tuple(extrude.RECORDS.items()):
+        ob = bpy.data.objects.get(name)
+        if ob is None or ob.type != 'MESH' or ob.data.session_uid != rec.mesh_uid:
+            rec.free()
+            extrude.RECORDS.pop(name, None)
+            _recent.pop(name, None)
+            continue
+        if rec.pre is None or rec.history_id is None:
+            continue
+        costs[name] = (len(rec.pre.verts)*96+len(rec.pre.edges)*80+len(rec.pre.faces)*352
+                       +len(rec.moved)*640)
+        _recent.setdefault(name, None)
+    total = sum(costs.values())
+    for name in tuple(_recent):
+        rec = extrude.RECORDS.get(name)
+        if rec is None:
+            _recent.pop(name, None)
+        elif total > CACHE_BUDGET and name not in protected and not rec.live and name in costs:
+            total -= costs[name]
+            rec.free()
+            extrude.RECORDS.pop(name, None)
+            _recent.pop(name, None)
+    return total
 
 
 def read(ob):
@@ -32,7 +91,7 @@ def read(ob):
     _valid.pop(uid, None)
     try:
         data = json.loads(text)
-        if (data['version'] != VERSION or not isinstance(data['nodes'], list)
+        if (data['version'] not in (1, VERSION) or not isinstance(data['nodes'], list)
                 or not data['nodes'] or not isinstance(ob.data.get(BASE), bpy.types.Mesh)):
             return None
         from . import extrude
@@ -40,23 +99,35 @@ def read(ob):
             if (node['kind'] not in extrude.SPECS or not isinstance(node['params'], dict)
                     or not isinstance(node['selection'], dict)):
                 return None
+            if node['kind'] == 'BRIDGE':
+                node['params'].setdefault('evaluation_version', 0)
     except (KeyError, TypeError, ValueError):
         return None
     _cache[uid] = text, data
     return data
 
 
-def write(ob, data):
-    text = json.dumps(data, separators=(',', ':'), allow_nan=False)
+def encode(data):
+    data['version'] = VERSION
+    for node in data['nodes']:
+        node['selection'] = references.pack(node['selection'])
+    return json.dumps(data, separators=(',', ':'), allow_nan=False)
+
+
+def write(ob, data, text=None):
+    text = encode(data) if text is None else text
     ob.data[KEY] = text
     _cache[ob.data.session_uid] = text, data
     _valid[ob.data.session_uid] = True
 
 
 def token(data):
-    upstream = [(node['id'], node['kind'], node['params'], node['unit'], node['input_hash'])
+    upstream = [(node['id'], node['kind'], node['params'], node['unit'], node['input_hash'],
+                 node.get('binding_revision',''))
                 for node in data['nodes'][:-1]]
-    return json.dumps((data.get('creation'), upstream), sort_keys=True, separators=(',', ':'))
+    last = data['nodes'][-1]
+    return json.dumps((data.get('creation'), upstream, last['input_hash'], last.get('binding_revision','')),
+                      sort_keys=True, separators=(',', ':'))
 
 
 def _selection(bm):
@@ -66,14 +137,17 @@ def _selection(bm):
     vertices = [v for v in bm.verts if v.select]
     edges = [e for e in bm.edges if e.select]
     faces = [f for f in bm.faces if f.select]
-    return dict(vertices=None if len(vertices) == len(bm.verts) else [v.index for v in vertices],
+    selection = dict(vertices=None if len(vertices) == len(bm.verts) else [v.index for v in vertices],
                 edges=None if len(edges) == len(bm.edges) else [[e.index, [v.index for v in e.verts]] for e in edges],
                 faces=None if len(faces) == len(bm.faces) else [[f.index, [v.index for v in f.verts]] for f in faces],
                 counts=[len(bm.verts), len(bm.edges), len(bm.faces)], mode=sorted(bm.select_mode))
+    selection['references'] = references.capture(bm, selection)
+    return selection
 
 
-def _select(bm, selection, name):
+def _select(bm, selection, name, node_id=None):
     from . import extrude
+    selection = references.unpack(selection)
     bm.select_mode = set(selection['mode'])
     bm.verts.index_update()
     bm.edges.index_update()
@@ -81,6 +155,13 @@ def _select(bm, selection, name):
     bm.verts.ensure_lookup_table()
     bm.edges.ensure_lookup_table()
     bm.faces.ensure_lookup_table()
+    if 'references' in selection:
+        resolved = references.resolve(bm, selection, node_id, name)
+        extrude.deselect_all(bm)
+        for field, sequence in (('vertices', bm.verts), ('edges', bm.edges), ('faces', bm.faces)):
+            for element in sequence if resolved[field] is None else resolved[field]:
+                element.select = True
+        return
     counts = [len(bm.verts), len(bm.edges), len(bm.faces)]
     # References to generated components need an explicit rebind after upstream topology changes.
     if counts != selection['counts']:
@@ -102,29 +183,71 @@ def _select(bm, selection, name):
         if entries is None:
             for element in sequence:
                 element.select = True
+    selection['references'] = references.capture(bm, selection)
 
 
-def _build(bm, spec, params, unit, ob):
+def _build(bm, spec, params, unit, ob, node_id=None):
     from . import extrude
     if spec is extrude.FACE:
         caps, moved = extrude.extrude(bm, [f for f in bm.faces if f.select], unit=unit,
-                                      **params, **extrude.mesh_axes(ob))
+                                      history_id=node_id, **params, **extrude.mesh_axes(ob))
         return caps, moved
     values = {key: params[key] for key in spec.fields+spec.hidden if key in params}
+    values['_history_id'] = node_id
     tracked = spec.build(bm, values, unit, **({'ob': ob} if spec.with_object else {}))
     if not tracked:
         raise ValueError(spec.node_type+' did not produce valid geometry')
+    references.tag_generic(bm, spec, params, node_id, tracked)
     return tracked, None
+
+
+def prepare_input(ob, bm):
+    """Capture once for input validation and persistence. Migrate identities before the next operation."""
+    from . import extrude
+    import numpy as np
+    snapshot = bpy.data.meshes.new('.allset_history_input')
+    try:
+        bm.to_mesh(snapshot)
+        input_hash = extrude.mesh_coords_hash(snapshot)
+        data = read(ob)
+        replacing = (data is not None and data['nodes'][-1].get('input_hash') == input_hash)
+        new_base = data is None or (data.get('result_hash') != input_hash and not replacing)
+        if new_base:
+            references.layers(bm, reset=True)
+            references.write_arrays(snapshot, (np.zeros(len(bm.verts), dtype=np.int32),
+                                               np.arange(1, len(bm.verts)+1, dtype=np.int32)))
+        elif bm.verts.layers.int.get(references.HIGH) is None:
+            evaluated, checkpoint, _result, _moved = _evaluate(ob, data)
+            try:
+                if extrude.coords_hash(evaluated) != input_hash:
+                    raise ValueError('The saved modeling recipe does not match its visible result')
+                values = references.arrays(evaluated)
+                handles = references.layers(bm)
+                for vertex, high, low in zip(bm.verts, *values):
+                    vertex[handles[0]], vertex[handles[1]] = int(high), int(low)
+                references.write_arrays(snapshot, values)
+            finally:
+                evaluated.free()
+                bpy.data.meshes.remove(checkpoint)
+        return snapshot, input_hash
+    except Exception:
+        bpy.data.meshes.remove(snapshot)
+        raise
 
 
 def append(ob, rec, unit):
     """Record the already successful operation. Existing unsupported edits become a new input base."""
     from . import extrude
     data = read(ob)
-    snapshot = bpy.data.meshes.new('.allset_history_input')
+    snapshot = getattr(rec, 'input_snapshot', None)
+    rec.input_snapshot = None
     try:
-        rec.pre.to_mesh(snapshot)
-        input_hash = extrude.mesh_coords_hash(snapshot)
+        if snapshot is None:
+            snapshot = bpy.data.meshes.new('.allset_history_input')
+            rec.pre.to_mesh(snapshot)
+            input_hash = extrude.mesh_coords_hash(snapshot)
+        else:
+            input_hash = rec.input_hash
         replacing = (data is not None and data['nodes'][-1]['name'] == rec.name
                      and data['nodes'][-1].get('input_hash') == input_hash)
         if data is None or (data.get('result_hash') != input_hash and not replacing):
@@ -133,6 +256,7 @@ def append(ob, rec, unit):
             if (creation is not None and creation['type'] in prim_shapes.POLY
                     and prim_history._sig_mesh(snapshot) == creation.get('sig')):
                 creation['id'] = uuid4().hex
+                creation['topology'] = primitive_topology(creation)
             else:
                 creation = None
             for material in ob.data.materials:
@@ -147,11 +271,13 @@ def append(ob, rec, unit):
             data = dict(version=VERSION, nodes=[], creation=creation)
         else:
             data = deepcopy(data)
-        node = dict(id=uuid4().hex, name=rec.name, kind=rec.spec.kind, params=dict(rec.params),
-                    selection=_selection(rec.pre), unit=unit, input_hash=input_hash)
+        node = dict(id=rec.history_id or uuid4().hex, name=rec.name, kind=rec.spec.kind, params=dict(rec.params),
+                    selection=_selection(rec.pre), unit=unit, input_hash=input_hash,
+                    binding_revision=uuid4().hex)
         # Re-running an operator on the same original input updates its node.
         if data['nodes'] and data['nodes'][-1]['name'] == rec.name:
             node['id'] = data['nodes'][-1]['id']
+            node['binding_revision'] = data['nodes'][-1].get('binding_revision','')
             data['nodes'][-1] = node
         else:
             data['nodes'].append(node)
@@ -160,6 +286,9 @@ def append(ob, rec, unit):
         rec.history_id = node['id']
         rec.history_token = token(data)
         _active[ob.data.session_uid] = node['id']
+        _recent[ob.name] = None
+        _recent.move_to_end(ob.name)
+        trim_cache((ob.name,))
     finally:
         if snapshot is not None:
             bpy.data.meshes.remove(snapshot)
@@ -225,6 +354,7 @@ def selected(ob):
 def drop(ob):
     if not isinstance(ob, bpy.types.Object) or ob.type != 'MESH':
         return
+    references.drop(ob)
     base = ob.data.get(BASE)
     for key in (KEY, BASE):
         if key in ob.data:
@@ -234,6 +364,7 @@ def drop(ob):
     _cache.pop(ob.data.session_uid, None)
     _active.pop(ob.data.session_uid, None)
     _valid.pop(ob.data.session_uid, None)
+    _pending.pop(ob.data.session_uid, None)
 
 
 def _evaluate(ob, data):
@@ -250,11 +381,13 @@ def _evaluate(ob, data):
                                     creation.get('unit', 1.0), prim_history.uvs_on(values, creation))
         else:
             bm.from_mesh(ob.data[BASE])
+        seed_references(bm, creation)
         for index, node in enumerate(data['nodes']):
-            _select(bm, node['selection'], node['name'])
+            _select(bm, node['selection'], node['name'], node['id'])
             if index == len(data['nodes'])-1:
                 bm.to_mesh(checkpoint)
-            result, moved = _build(bm, extrude.SPECS[node['kind']], node['params'], node['unit'], ob)
+                node['input_hash'] = extrude.mesh_coords_hash(checkpoint)
+            result, moved = _build(bm, extrude.SPECS[node['kind']], node['params'], node['unit'], ob, node['id'])
         return bm, checkpoint, result, moved
     except Exception:
         bm.free()
@@ -278,11 +411,12 @@ def input_mesh(ob, node_id):
             values = {**prim_shapes.defaults(creation['type']), **creation['attrs']}
             prim_history.fill_bmesh(bm, prim_shapes.build(creation['type'], values),
                                     creation.get('unit', 1), prim_history.uvs_on(values, creation))
+        seed_references(bm, creation)
         for node in data['nodes']:
-            _select(bm, node['selection'], node['name'])
+            _select(bm, node['selection'], node['name'], node['id'])
             if node['id'] == node_id:
                 return bm
-            _build(bm, extrude.SPECS[node['kind']], node['params'], node['unit'], ob)
+            _build(bm, extrude.SPECS[node['kind']], node['params'], node['unit'], ob, node['id'])
         raise ValueError('The modeling node is no longer available')
     except Exception:
         bm.free()
@@ -299,13 +433,16 @@ def _record(ob, data, bm, checkpoint, result, moved):
     rec.history_id = last['id']
     rec.history_token = token(data)
     if rec.spec is extrude.FACE:
-        extrude._store(rec, bm, result, moved, last['params'])
+        extrude._store(rec, bm, result, moved, last['params'], data['result_hash'])
     else:
-        extrude._store_generic(rec, bm, result, last['params'])
+        extrude._store_generic(rec, bm, result, last['params'], data['result_hash'])
     old = extrude.RECORDS.get(ob.name)
     if old is not None:
         old.free()
     extrude.RECORDS[ob.name] = rec
+    _recent[ob.name] = None
+    _recent.move_to_end(ob.name)
+    trim_cache((ob.name,))
     return rec
 
 
@@ -327,7 +464,10 @@ def ensure(ob):
             return None
     if (rec is not None and rec.pre is not None and rec.mesh_uid == ob.data.session_uid
             and getattr(rec, 'history_id', None) == data['nodes'][-1]['id']
+            and (rec.live or rec.params == data['nodes'][-1]['params'])
             and getattr(rec, 'history_token', None) == token(data)):
+        if ob.name in _recent:
+            _recent.move_to_end(ob.name)
         return rec
     _busy.add(ob.data.session_uid)
     try:
@@ -355,16 +495,35 @@ def edit(ob, node_id, params):
     creation = data.get('creation')
     editing_creation = creation is not None and creation['id'] == node_id
     if editing_creation:
+        creation.setdefault('topology', primitive_topology(creation))
         creation['attrs'] = dict(params)
     elif node is None:
         raise ValueError('The modeling node is no longer available')
     else:
         node['params'] = dict(params)
+    return apply_recipe(ob, data, node_id)
+
+
+def apply_recipe(ob, data, origin_id):
+    from . import extrude
+    json.dumps((data.get('creation'), [node['params'] for node in data['nodes']]), allow_nan=False)
     _busy.add(ob.data.session_uid)
     try:
-        bm, checkpoint, result, moved = _evaluate(ob, data)
+        try:
+            bm, checkpoint, result, moved = _evaluate(ob, data)
+        except references.BindingError as error:
+            _pending[ob.data.session_uid] = dict(data=data, node_id=error.node_id,
+                                                origin_id=origin_id, original=ob.data[KEY], message=str(error))
+            raise
         try:
             data['result_hash'] = extrude.coords_hash(bm)
+            text = encode(data)
+            creation = data.get('creation')
+            legacy_creation = None
+            if creation is not None:
+                from . import prim_history
+                legacy_creation = {key:value for key,value in creation.items() if key not in {'id','topology'}}
+                checkpoint[prim_history.KEY] = legacy_creation
             if ob.mode == 'EDIT':
                 extrude.restore_mesh(bmesh.from_edit_mesh(ob.data), bm)
                 bmesh.update_edit_mesh(ob.data)
@@ -372,10 +531,11 @@ def edit(ob, node_id, params):
                 bm.to_mesh(ob.data)
                 ob.data.update()
             rec = _record(ob, data, bm, checkpoint, result, moved)
-            write(ob, data)
-            if editing_creation:
+            write(ob, data, text)
+            _pending.pop(ob.data.session_uid, None)
+            if creation is not None:
                 from . import prim_history
-                ob.data[prim_history.KEY] = {key: value for key, value in creation.items() if key != 'id'}
+                ob.data[prim_history.KEY] = legacy_creation
             return rec
         finally:
             bm.free()
@@ -384,11 +544,75 @@ def edit(ob, node_id, params):
         _busy.discard(ob.data.session_uid)
 
 
+def pending(ob):
+    if not isinstance(ob, bpy.types.Object) or ob.type != 'MESH':
+        return None
+    info = _pending.get(ob.data.session_uid)
+    if info is not None and ob.data.get(KEY) != info['original']:
+        _pending.pop(ob.data.session_uid, None)
+        return None
+    return info
+
+
+def binding_input(ob):
+    """The proposed input of the first unresolved node, detached from the visible object."""
+    info = pending(ob)
+    if info is None:
+        raise ValueError('There is no pending component binding')
+    data = deepcopy(info['data'])
+    from . import extrude
+    bm = bmesh.new()
+    try:
+        creation = data.get('creation')
+        if creation is None:
+            bm.from_mesh(ob.data[BASE])
+        else:
+            from . import prim_history, prim_shapes
+            values = {**prim_shapes.defaults(creation['type']), **creation['attrs']}
+            prim_history.fill_bmesh(bm, prim_shapes.build(creation['type'], values),
+                                    creation.get('unit', 1), prim_history.uvs_on(values, creation))
+        seed_references(bm, creation)
+        for node in data['nodes']:
+            if node['id'] == info['node_id']:
+                extrude.deselect_all(bm)
+                bm.select_mode = set(node['selection']['mode'])
+                return bm, node
+            _select(bm, node['selection'], node['name'], node['id'])
+            _build(bm, extrude.SPECS[node['kind']], node['params'], node['unit'], ob, node['id'])
+        raise ValueError('The pending history node is no longer available')
+    except Exception:
+        bm.free()
+        raise
+
+
+def rebind(ob, selection):
+    info = pending(ob)
+    if info is None:
+        raise ValueError('The pending edit is no longer available')
+    from . import extrude
+    actual = (extrude.coords_hash(bmesh.from_edit_mesh(ob.data)) if ob.mode == 'EDIT'
+              else extrude.mesh_coords_hash(ob.data))
+    if actual != read(ob)['result_hash']:
+        _pending.pop(ob.data.session_uid, None)
+        raise ValueError('The original mesh changed while its replacement selection was being prepared')
+    data = deepcopy(info['data'])
+    node = next(node for node in data['nodes'] if node['id'] == info['node_id'])
+    node['selection'] = selection
+    node['binding_revision'] = uuid4().hex
+    return apply_recipe(ob, data, info['origin_id'])
+
+
 @bpy.app.handlers.persistent
 def clear(_dummy=None):
     _cache.clear()
     _active.clear()
     _busy.clear()
+    _valid.clear()
+    _recent.clear()
+    _pending.clear()
+
+
+def invalidate():
     _valid.clear()
 
 
@@ -397,5 +621,5 @@ def changed(_scene, depsgraph):
     for update in depsgraph.updates:
         data = update.id.original
         if isinstance(data, bpy.types.Mesh) and update.is_updated_geometry and KEY in data:
-            if data.session_uid not in _busy:
+            if data.session_uid not in _busy and _valid.get(data.session_uid) is not False:
                 _valid.pop(data.session_uid, None)

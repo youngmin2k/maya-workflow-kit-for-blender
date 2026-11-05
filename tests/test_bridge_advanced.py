@@ -120,3 +120,15 @@ def test_invalid_curve_rolls_back_without_leaving_generated_objects():
     assert fingerprint(bmesh.from_edit_mesh(ob.data)) == before
     assert set(bpy.data.objects) == objects
     assert ex.current(ob) is record
+
+
+def test_legacy_bridge_evaluation_is_preserved_until_explicit_upgrade():
+    ob, record = bridge_object()
+    node = nodes.target(bpy.context)
+    node.commit(bpy.context, dict(node.params, evaluation_version=0, twist_angle=45))
+    node.finish()
+    before = fingerprint(bmesh.from_edit_mesh(ob.data))
+    assert history.read(ob)['nodes'][-1]['params']['evaluation_version'] == 0
+    assert bpy.ops.allset.bridge_upgrade() == {'FINISHED'}
+    assert record.params['evaluation_version'] == 1
+    assert fingerprint(bmesh.from_edit_mesh(ob.data)) != before

@@ -744,6 +744,8 @@ def draw(layout, context, ob):
         draw_sections(layout, context, ob, target, sections, layout_id or "data")
         if isinstance(target, (bpy.types.ID, bpy.types.PoseBone)):
             draw_extra(layout, target, layout_id or "data")
+    from . import history_rebind
+    history_rebind.draw_controls(layout, ob)
     draw_notes(layout, context, ob, key, entry)
     draw_bottom(layout, context)
 

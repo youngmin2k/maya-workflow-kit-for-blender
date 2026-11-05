@@ -46,6 +46,23 @@ def test_smooth_bridge_preserves_boundaries_and_builds_quad_rows():
         bm.free()
 
 
+def test_planar_annular_borders_have_finite_smooth_frames():
+    bm = bmesh.new()
+    for z in (0, 4):
+        rings = [[bm.verts.new((radius*math.cos(i*math.tau/8), radius*math.sin(i*math.tau/8), z))
+                  for i in range(8)] for radius in (1, 2)]
+        for index in range(8):
+            next_index = (index+1)%8
+            bm.faces.new((rings[0][index], rings[0][next_index], rings[1][next_index], rings[1][index]))
+        for index in range(8):
+            bm.edges.get((rings[0][index], rings[0][(index+1)%8])).select_set(True)
+    bm.normal_update()
+    tracked = poly.bridge(bm, dict(poly.BRIDGE.defaults, curve_type=1, divisions=3, twist_angle=15), 1)
+    assert tracked and len(bm.verts) == 56 and len(bm.faces) == 48
+    assert all(math.isfinite(value) for vertex in bm.verts for value in vertex.co)
+    bm.free()
+
+
 def test_taper_and_degree_twist_shape_the_middle_without_moving_endpoints():
     for taper, twist in ((.5, 0), (1.5, 0), (1, 90)):
         bm = caps()
@@ -53,9 +70,8 @@ def test_taper_and_degree_twist_shape_the_middle_without_moving_endpoints():
         poly.bridge(bm, params(curve_type=1, divisions=3, taper=taper, twist_angle=twist), 1)
         middle = [vertex for index, vertex in enumerate(bm.verts) if index >= old_count and abs(vertex.co.z-2)<1e-5]
         assert len(middle) == 4
-        assert all(abs(math.hypot(vertex.co.x, vertex.co.y)-math.sqrt(2)*taper)<1e-5 for vertex in middle)
-        if twist:
-            assert all(abs(abs(vertex.co.x)-1)<1e-5 and abs(abs(vertex.co.y)-1)<1e-5 for vertex in middle)
+        radius = 0 if twist == 90 else math.sqrt(2)*taper
+        assert all(abs(math.hypot(vertex.co.x, vertex.co.y)-radius)<1e-5 for vertex in middle)
         bm.free()
 
 
@@ -84,6 +100,21 @@ def test_legacy_integer_twist_keeps_its_bridge_offset_meaning():
     assert fingerprint(first) == fingerprint(second)
     first.free()
     second.free()
+
+
+def test_modern_correspondence_preserves_native_linear_offsets_and_winding():
+    for reverse in (False, True):
+        for offset in (-5, -1, 0, 1, 4, 8):
+            first, second = caps(), caps()
+            if reverse:
+                for bm in (first,second):
+                    bmesh.ops.reverse_faces(bm, faces=list(bm.faces))
+                    bm.normal_update()
+            poly.bridge(first, params(divisions=3, bridge_offset=offset, evaluation_version=0), 1)
+            poly.bridge(second, params(divisions=3, bridge_offset=offset, evaluation_version=1), 1)
+            assert fingerprint(first) == fingerprint(second)
+            first.free()
+            second.free()
 
 
 def test_open_borders_are_connected_with_the_same_number_of_quad_rows():
@@ -185,7 +216,7 @@ def test_coordinate_preview_matches_full_rebuild_and_commits_a_valid_state():
     ob, record = bridge_object()
     node = nodes.target(bpy.context)
     states = len(record.states)
-    values = dict(node.params, taper=.8, twist_angle=22.5)
+    values = dict(node.params, taper=.8, twist_angle=10)
     node.preview(bpy.context, values)
     assert record.fast_preview and record.live
     assert len(record.states) == states

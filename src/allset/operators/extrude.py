@@ -23,6 +23,7 @@ Together), the rings between take the level fraction, and Offset adds after the 
 """
 
 import hashlib
+from uuid import uuid4
 
 import bmesh
 import bpy
@@ -312,10 +313,21 @@ def place(moved, thickness=0.0, ltz=0.0, offset=0.0, **manip):
 
 
 def extrude(bm, faces, thickness=0.0, local_translate_z=0.0, offset=0.0, divisions=1, keep_faces_together=True,
-            unit=1.0, direction=WORLD_X, fallback=MAYA_Z, **manip):
+            unit=1.0, direction=WORLD_X, fallback=MAYA_Z, history_id=None, **manip):
     """Maya polyExtrudeFace on ``faces`` (bmesh). Returns (caps, moved); the caps end up selected. ``manip`` =
     Local Translate X / Y and Local Scale X / Y / Z (MANIP_FIELDS); ``direction`` / ``fallback`` = world X / Z
     in mesh space (the faces' local X)."""
+    lineage = None
+    if history_id:
+        from . import history_references as references
+        handles = references.layers(bm)
+        bm.verts.index_update()
+        bm.faces.index_update()
+        # Refresh after adding custom data layers, which invalidates BMesh element wrappers.
+        faces = [face for face in bm.faces if face.select]
+        parents = {v.index: references.identity(v, handles) for face in faces for v in face.verts}
+        face_keys = {face.index: sorted(references.identity(v, handles) for v in face.verts) for face in faces}
+        lineage = (history_id, parents, face_keys, handles)
     bm.faces.index_update()
     picked = sorted({f.index for f in faces if f.is_valid})
     plan = maya_plan(bm, picked, divisions, keep_faces_together)
@@ -337,7 +349,7 @@ def extrude(bm, faces, thickness=0.0, local_translate_z=0.0, offset=0.0, divisio
         v.select = False
     for f in caps:
         f.select_set(True)
-    caps, moved = renumber(bm, plan, levels, src, caps, moved)
+    caps, moved = renumber(bm, plan, levels, src, caps, moved, lineage)
     bm.verts.index_update()
     bm.faces.index_update()
     cap_ids = [f.index for f in caps]
@@ -443,7 +455,7 @@ def maya_plan(bm, picked, divisions=1, together=True):
             "faces": out_faces + side_faces, "div": div}
 
 
-def renumber(bm, plan, levels, src, caps, moved):
+def renumber(bm, plan, levels, src, caps, moved, lineage=None):
     """Sort the extruded mesh's vertices, edges and faces into ``plan``'s (Maya's) order; caps / moved come back as
     fresh references (a bmesh sort moves the data under existing ones). Left as it is when the kit's result doesn't
     match the plan element for element."""
@@ -473,6 +485,21 @@ def renumber(bm, plan, levels, src, caps, moved):
     if not (len(vrank) == len(bm.verts) == len(plan["verts"]) and len(erank) == len(bm.edges) == len(plan["edges"])
             and len(frank) == len(bm.faces) == len(plan["faces"])):
         return caps, moved
+    if lineage is not None:
+        from . import history_references as references
+        node_id, parents, face_keys, handles = lineage
+        for descriptor in plan['verts']:
+            if descriptor[0] != 'n':
+                continue
+            _kind, source, level = descriptor
+            if isinstance(source, tuple):
+                face_index, vertex_index = source
+                parent = (face_keys[face_index], parents[vertex_index])
+            else:
+                parent = parents[source]
+            part = references.fraction(level/plan['div']) if level else (1, 1)
+            references.assign(elem[descriptor], handles,
+                              references.generated(node_id, ('FACE', parent, part)))
     cap_ids = [frank[f] for f in caps]
     moved_ids = [(vrank[v], rest) for v, *rest in moved]
     bm.verts.sort(key=lambda v: vrank[v])
@@ -682,12 +709,23 @@ class Record:
         self.fast_preview = False
         self.history_id = None
         self.history_token = None
+        self.input_snapshot = None
+        self.input_hash = None
 
     def free(self):
         self.preview_data = None
+        self.moved.clear()
+        self.states.clear()
+        self.cap_verts.clear()
+        self.cap_faces.clear()
+        self.sel = None
+        self.live = self.fast_preview = False
         if self.pre is not None:
             self.pre.free()
             self.pre = None
+        if self.input_snapshot is not None:
+            bpy.data.meshes.remove(self.input_snapshot)
+            self.input_snapshot = None
 
 
 RECORDS = {}   # object name -> Record
@@ -705,18 +743,25 @@ def park(name):
         old = PARKED.pop(name, None)
         if old is not None and old is not rec:
             old.free()
+        if rec.history_id is not None:
+            rec.free()  # Native Undo restores the persistent recipe and its input mesh.
+            return rec
         PARKED[name] = rec
     return rec
 
 
 @bpy.app.handlers.persistent
 def _on_undo(*_args):
+    from . import model_history
+    model_history.invalidate()
     for name, rec in PARKED.items():
         RECORDS.setdefault(name, rec)
 
 
 @bpy.app.handlers.persistent
 def _on_redo(*_args):
+    from . import model_history
+    model_history.invalidate()
     for name, rec in PARKED.items():
         if RECORDS.get(name) is rec:
             del RECORDS[name]
@@ -757,7 +802,7 @@ def signature(bm, cap_verts):
     return (len(bm.verts), len(bm.faces), tuple(cap_verts), tuple(_key(bm.verts[i].co) for i in cap_verts))
 
 
-def _store(rec, bm, caps, moved, params):
+def _store(rec, bm, caps, moved, params, full_hash=None):
     rec.fast_preview = False
     bm.verts.index_update()
     bm.faces.index_update()
@@ -767,7 +812,8 @@ def _store(rec, bm, caps, moved, params):
     rec.cap_faces = [f.index for f in caps]
     cap_verts = sorted({v.index for f in caps for v in f.verts})
     rec.cap_verts = cap_verts
-    rec.states.append((dict(params), signature(bm, cap_verts), None, coords_hash(bm)))
+    rec.states.append((dict(params), signature(bm, cap_verts), None,
+                       coords_hash(bm) if full_hash is None else full_hash))
     del rec.states[:-64]
     rec.live = False
 
@@ -814,7 +860,10 @@ def run(ob, rec, params, unit, persist=True):
             try:
                 restore_pre(bm, rec)
                 values = {k: params[k] for k in rec.spec.fields + rec.spec.hidden if k in params}
+                values['_history_id'] = rec.history_id
                 tracked = rec.spec.build(bm, values, unit, **({"ob": ob} if rec.spec.with_object else {}))
+                from . import history_references
+                history_references.tag_generic(bm, rec.spec, params, rec.history_id, tracked)
                 if rec.spec.atomic and not tracked:
                     raise ValueError('The attributes do not produce a valid '+rec.spec.node_type)
             except Exception:
@@ -839,7 +888,7 @@ def run(ob, rec, params, unit, persist=True):
         return bool(tracked)
     restore_pre(bm, rec)
     faces = [f for f in bm.faces if f.select]
-    caps, moved = extrude(bm, faces, unit=unit, **params, **mesh_axes(ob))
+    caps, moved = extrude(bm, faces, unit=unit, history_id=rec.history_id, **params, **mesh_axes(ob))
     _store(rec, bm, caps, moved, params)
     bmesh.update_edit_mesh(ob.data)
     if persist:
@@ -919,6 +968,8 @@ def current(ob):
         return rec
     bm = bmesh.from_edit_mesh(ob.data)
     for params, sig, sel, *_full in reversed(rec.states):
+        if rec.history_id and params != rec.params:
+            continue
         cap_verts = list(sig[2]) if sig else []
         if sig is not None and signature(bm, cap_verts) == sig:
             if rec.spec is not FACE:
@@ -984,6 +1035,8 @@ def mesh_state_ok(ob, rec):
     me = ob.data
     full = None
     for params, sig, sel, *rest in reversed(rec.states):
+        if rec.history_id and params != rec.params:
+            continue
         if sig is None:
             continue
         cap_verts = list(sig[2])
@@ -1165,22 +1218,33 @@ def _record_bm(context, ob, bm, spec, params, unit):
             and _pre_signature(old.pre) == _pre_signature(bm)
             and (not spec.pre_uv or _uv_signature(old.pre) == _uv_signature(bm))):
         name = old.name
+    from . import history_references, model_history, prim_history
+    recorded = prim_history.history_on(context)
+    node_id = (old.history_id if name and old.history_id else uuid4().hex) if recorded else None
+    snapshot, input_hash = model_history.prepare_input(ob, bm) if recorded else (None, None)
     pre = bm.copy()
     try:
-        tracked = spec.build(bm, params, unit, **({"ob": ob} if spec.with_object else {}))
+        values = dict(params, _history_id=node_id)
+        tracked = spec.build(bm, values, unit, **({"ob": ob} if spec.with_object else {}))
+        history_references.tag_generic(bm, spec, params, node_id, tracked)
     except Exception:
         try:
             restore_mesh(bm, pre)
         finally:
             pre.free()
+            if snapshot is not None:
+                bpy.data.meshes.remove(snapshot)
         raise
     if not tracked:
         restore_mesh(bm, pre)
         pre.free()
+        if snapshot is not None:
+            bpy.data.meshes.remove(snapshot)
         return None
     if old is not None:
         old.free()
     rec = Record(name or next_name(context.scene, spec), pre, params, spec)
+    rec.history_id, rec.input_snapshot, rec.input_hash = node_id, snapshot, input_hash
     rec.mesh_uid = ob.data.session_uid
     _store_generic(rec, bm, tracked, params)
     keep(context, ob, rec)
@@ -1261,19 +1325,28 @@ class ALLSET_OT_extrude(_ExtrudeProps, bpy.types.Operator):
                     done += 1
                 continue
             params = _params(self)
-            faces = [f for f in bm.faces if f.select]
             old = RECORDS.get(ob.name)
             name = None
             if (old is not None and old.spec is FACE and old.pre is not None and old.mesh_uid == ob.data.session_uid
                     and _pre_signature(old.pre) == _pre_signature(bm)):
                 name = old.name          # Adjust Last Operation re-runs the same extrusion
+            from . import model_history, prim_history
+            recorded = prim_history.history_on(context)
+            node_id = (old.history_id if name and old.history_id else uuid4().hex) if recorded else None
+            snapshot, input_hash = model_history.prepare_input(ob, bm) if recorded else (None, None)
             if old is not None:
                 old.free()
             rec = Record(name or next_name(context.scene), bm.copy(), params)
+            rec.history_id, rec.input_snapshot, rec.input_hash = node_id, snapshot, input_hash
             rec.mesh_uid = ob.data.session_uid
-            caps, moved = extrude(bm, faces, unit=unit, **params, **mesh_axes(ob))
-            _store(rec, bm, caps, moved, params)
-            keep(context, ob, rec)
+            try:
+                faces = [f for f in bm.faces if f.select]
+                caps, moved = extrude(bm, faces, unit=unit, history_id=node_id, **params, **mesh_axes(ob))
+                _store(rec, bm, caps, moved, params)
+                keep(context, ob, rec)
+            except Exception:
+                rec.free()
+                raise
             bmesh.update_edit_mesh(ob.data)
             done += 1
         return {'FINISHED'} if done else {'CANCELLED'}

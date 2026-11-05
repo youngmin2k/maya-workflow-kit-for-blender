@@ -3349,6 +3349,11 @@ def draw_inputs(lines, context, ob):
     r = lines.row()
     if r is not None:
         r.label(text="INPUTS")
+    if model_history.pending(ob) is not None:
+        row = lines.row()
+        if row is not None:
+            from . import history_rebind
+            history_rebind.draw_controls(row.column(), ob)
     if modeled:
         for record in reversed(modeled):
             in_view.draw_cb_node(lines, context, record)

@@ -80,15 +80,30 @@ def path_source(bm, params):
     if chord.length_squared <= 1e-16:
         return None
     tangents = _border_tangents(edges, faces)
-    start = sum((tangents.get(v, chord.normalized()) for v in groups[0]), Vector()).normalized()
-    end = -sum((tangents.get(v, -chord.normalized()) for v in groups[1]), Vector()).normalized()
-    return dict(a=a, b=b, start=start*chord.length*1.25, end=end*chord.length*1.25, rows=[])
+    start = sum((tangents.get(v, chord.normalized()) for v in groups[0]), Vector())
+    end = -sum((tangents.get(v, -chord.normalized()) for v in groups[1]), Vector())
+    if params.get('evaluation_version',0):
+        directions = []
+        for group, tangent, sign in zip(groups, (start,end), (1,-1)):
+            if tangent.length_squared < 1e-10:
+                neighbors = {face for vertex in group for face in vertex.link_faces if face not in faces}
+                tangent = sum((face.normal for face in neighbors), Vector())*sign
+            if tangent.length_squared < 1e-10:
+                tangent = chord.copy()
+            directions.append(tangent)
+        start, end = directions
+    return dict(a=a, b=b, start=start.normalized()*chord.length*1.25,
+                end=end.normalized()*chord.length*1.25, rows=[])
 
 
 def _shape_bridge(bm, connectors, groups, source, cuts, params, ob):
     """Track native longitudinal rows independently of their path and profile parameters."""
     pairs = []
     bm.verts.index_update()
+    from . import history_references as references
+    node_id = params.get('_history_id')
+    handles = references.layers(bm) if node_id else None
+    parent_ids = {}
     for edge in connectors:
         a, b = edge.verts
         if a not in groups[0]:
@@ -96,6 +111,8 @@ def _shape_bridge(bm, connectors, groups, source, cuts, params, ob):
         if (b.co-a.co).length <= 1e-12:
             raise ValueError('Bridge borders contain coincident matching vertices')
         pairs.append((a.index, b.index, a.co.copy(), b.co.copy()))
+        if handles is not None:
+            parent_ids[a.index, b.index] = references.identity(a, handles), references.identity(b, handles)
     result = bmesh.ops.subdivide_edges(bm, edges=connectors, cuts=cuts, use_grid_fill=True)
     bm.verts.ensure_lookup_table()
     bm.verts.index_update()
@@ -116,6 +133,9 @@ def _shape_bridge(bm, connectors, groups, source, cuts, params, ob):
             previous, vertex = vertex, following[0]
             t = row/(cuts+1)
             rows.setdefault(row, []).append((vertex.index, a, b))
+            if handles is not None:
+                role = ('BRIDGE', parent_ids[first_index, last_index], references.fraction(t))
+                references.assign(vertex, handles, references.generated(node_id, role))
         if last not in adjacent.get(vertex, ()):
             raise ValueError('Incomplete Bridge subdivision path')
     source['rows'] = [(row/(cuts+1), vertices) for row, vertices in sorted(rows.items())]
@@ -154,13 +174,15 @@ def _smooth_bridge(mesh, cache, params):
 
 
 def _bridge_topology(params):
-    return (params['divisions'],
+    return (params.get('evaluation_version',0), params['divisions'],
             params.get('bridge_offset', params.get('twist', 0)), bool(params.get('use_faces')))
 
 
 def _preview_bridge(ob, record, params, unit):
     cache = record.preview_data
     if cache is None or cache['topology'] != _bridge_topology(params):
+        return False
+    if cache.get('matching') is not None and bridge_curve.match_offset(cache['matching'], params) != cache['match_offset']:
         return False
     bm = bmesh.from_edit_mesh(ob.data) if ob.mode == 'EDIT' else ob.data
     counts = ((len(bm.verts), len(bm.faces)) if ob.mode == 'EDIT'
@@ -178,8 +200,52 @@ def _preview_bridge(ob, record, params, unit):
     return True
 
 
+def _connect_bridge(bm, edges, groups, source, params, old_edges):
+    """Read native face winding once, then choose angular endpoint correspondence."""
+    def connect(offset):
+        result = bmesh.ops.bridge_loops(bm, edges=edges, use_pairs=False, twist_offset=offset)
+        faces = list(result.get('faces', ()))
+        pairs = {}
+        for face in faces:
+            for edge in face.edges:
+                a,b = edge.verts
+                if a in groups[1]:
+                    a,b = b,a
+                if a in groups[0] and b in groups[1]:
+                    pairs[a] = b
+        return faces, pairs
+    def remove(faces):
+        connectors = {edge for face in faces for edge in face.edges if edge not in old_edges}
+        bmesh.ops.delete(bm, geom=faces, context='FACES_ONLY')
+        if connectors:
+            bmesh.ops.delete(bm, geom=list(connectors), context='EDGES')
+    faces, first = connect(0)
+    if len(first) != len(groups[0]):
+        return faces, None, 0
+    order = sorted(first, key=lambda vertex:vertex.index)
+    targets = [first[vertex] for vertex in order]
+    count = len(groups[0])
+    lookup = {vertex:index for index,vertex in enumerate(targets)}
+    # Native positive offsets step against the generated target border's face winding.
+    previous = {loop.link_loop_next.vert:loop.vert for face in faces for loop in face.loops
+                if loop.vert in groups[1] and loop.link_loop_next.vert in groups[1]}
+    if set(previous) != set(targets):
+        raise ValueError('Unable to identify the Bridge border winding')
+    step = [lookup[previous[vertex]] for vertex in targets]
+    matching = ([vertex.co-source['a'] for vertex in order],
+                [vertex.co-source['b'] for vertex in targets], step, source)
+    offset = bridge_curve.match_offset(matching, params)
+    if offset:
+        remove(faces)
+        # Native zero bypasses list rotation, while a full turn addresses its last entry.
+        native_offset = count if offset == 1 else offset-1
+        faces, _pairs = connect(native_offset)
+    return faces, matching, offset
+
+
 def bridge(bm, params, unit, ob=None):
     profiles = None
+    matching, match_offset = None, 0
     face_edges = None
     if params.get('use_faces'):
         faces = {face for face in bm.faces if face.select}
@@ -208,9 +274,12 @@ def bridge(bm, params, unit, ob=None):
     bm.normal_update()
     before = set(bm.faces)
     old_edges = set(bm.edges)
-    result = bmesh.ops.bridge_loops(bm, edges=edges, use_pairs=False,
-                                    twist_offset=offset)
-    faces = result.get('faces', ())
+    closed = len(edges) == sum(map(len, groups))
+    if params.get('evaluation_version',0) and closed:
+        faces, matching, match_offset = _connect_bridge(bm, edges, groups, source, params, old_edges)
+    else:
+        result = bmesh.ops.bridge_loops(bm, edges=edges, use_pairs=False, twist_offset=offset)
+        faces = result.get('faces', ())
     if not faces:
         return []
     if params['divisions']:
@@ -224,7 +293,7 @@ def bridge(bm, params, unit, ob=None):
     cache = dict(topology=_bridge_topology(params), profiles=profiles, counts=(len(bm.verts), len(bm.faces)),
                  faces=[face.index for face in new_faces],
                  edges=[(edge.index, [face.index for face in edge.link_faces]) for edge in touched],
-                 bm=bm, bm_faces=new_faces, bm_edges=list(touched))
+                 bm=bm, bm_faces=new_faces, bm_edges=list(touched), matching=matching, match_offset=match_offset)
     _smooth_bridge(bm, cache, params)
     return extrude.BuildResult(tracked, cache if profiles is not None else None)
 
@@ -254,12 +323,13 @@ BRIDGE = extrude.add_spec(extrude.Spec(
      'source_direction': 'Source', 'target_direction': 'Target', 'smoothing_angle': 'Smoothing Angle'},
     {'curve_type': 0, 'divisions': 5, 'twist_angle': 0.0, 'taper': 1.0, 'bridge_offset': 0, 'use_faces': False,
      'direction': 0, 'source_direction': 0, 'target_direction': 0, 'smoothing_angle': 30.0,
-     'input_curve': '', 'taper_curve': bridge_curve.RAMP_DEFAULT},
+     'input_curve': '', 'taper_curve': bridge_curve.RAMP_DEFAULT, 'evaluation_version': 1},
     {'curve_type': 'ENUM', 'divisions': 'INT', 'twist_angle': 'ROTATION', 'taper': 'NONE',
      'bridge_offset': 'INT', 'use_faces': 'BOOL', 'direction': 'ENUM', 'source_direction': 'ENUM',
-     'target_direction': 'ENUM', 'smoothing_angle': 'ROTATION', 'input_curve': 'STRING', 'taper_curve': 'STRING'},
-    None, 'bridge_edit', bridge, hidden=('use_faces', 'input_curve', 'taper_curve'),
-    manip=('use_faces', 'input_curve', 'taper_curve'),
+     'target_direction': 'ENUM', 'smoothing_angle': 'ROTATION', 'input_curve': 'STRING', 'taper_curve': 'STRING',
+     'evaluation_version': 'INT'},
+    None, 'bridge_edit', bridge, hidden=('use_faces', 'input_curve', 'taper_curve', 'evaluation_version'),
+    manip=('use_faces', 'input_curve', 'taper_curve', 'evaluation_version'),
     choices={'curve_type': (('Linear path', 'Smooth path', 'Smooth path + curve'), (0, 1, 2)),
              'direction': (('Automatic', 'Manual'), (0, 1)),
              'source_direction': (('Along normal', 'Opposite normal'), (0, 1)),
@@ -290,6 +360,7 @@ class _BridgeProperties:
     smoothing_angle: FloatProperty(name='Smoothing Angle', default=30, min=0, max=180)
     input_curve: StringProperty(name='Path Curve', options={'SKIP_SAVE'})
     taper_curve: StringProperty(name='Taper Curve', default=bridge_curve.RAMP_DEFAULT, options={'SKIP_SAVE'})
+    evaluation_version: IntProperty(default=1, min=0, max=1, options={'HIDDEN'})
 
 
 class _SubdivideProperties:

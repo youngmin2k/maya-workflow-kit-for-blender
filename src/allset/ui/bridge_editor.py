@@ -20,6 +20,8 @@ def active(context):
 
 
 def draw_controls(layout, node):
+    if not node.params.get('evaluation_version',0):
+        layout.operator('allset.bridge_upgrade', text='Update Bridge Evaluation')
     column = layout.column(align=True)
     column.enabled = bool(node.params.get('curve_type'))
     column.operator('allset.bridge_ramp', text='Edit Taper Curve')
@@ -27,6 +29,19 @@ def draw_controls(layout, node):
         row = column.row(align=True)
         row.operator('allset.bridge_path', text='Choose Path').edit = False
         row.operator('allset.bridge_path', text='Edit Path').edit = True
+
+
+class ALLSET_OT_bridge_upgrade(bpy.types.Operator):
+    """Reevaluate this recorded Bridge with the current section and twist model"""
+    bl_idname = 'allset.bridge_upgrade'
+    bl_label = 'Update Bridge Evaluation'
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context):
+        node = node_attributes.target(context)
+        if node is None or node.spec.kind != 'BRIDGE':
+            return {'CANCELLED'}
+        return in_view_editor.apply(context, node, dict(node.params, evaluation_version=1))
 
 
 class ALLSET_OT_bridge_path(bpy.types.Operator):
@@ -255,7 +270,7 @@ def clear(_dummy=None):
         editor.finish(bpy.context, cancel=True)
 
 
-classes = (ALLSET_OT_bridge_path, ALLSET_OT_bridge_ramp)
+classes = (ALLSET_OT_bridge_path, ALLSET_OT_bridge_ramp, ALLSET_OT_bridge_upgrade)
 
 
 def register():

@@ -43,6 +43,8 @@ NON_COMMANDS = frozenset({
     "ALLSET_OT_pivot_translate", "ALLSET_OT_pivot_rotate", "ALLSET_OT_pivot_pick",
     "ALLSET_OT_pivot_exit", "ALLSET_OT_pivot_option", "ALLSET_OT_menu_tool", "ALLSET_OT_last_tool",
     "ALLSET_OT_bridge_ramp", "ALLSET_OT_bridge_path",
+    "ALLSET_OT_bridge_upgrade",
+    "ALLSET_OT_history_rebind", "ALLSET_OT_history_rebind_apply",
 })
 
 
