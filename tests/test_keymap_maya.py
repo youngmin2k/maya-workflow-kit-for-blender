@@ -154,6 +154,8 @@ _VIEW3D_STACK = ("Window", "Screen", "Frames", "3D View", "3D View Generic", "Ob
 _OBJECT_MODE_STACK = ("Window", "Screen", "Frames", "3D View", "3D View Generic",
                       "Object Mode", "Object Non-modal")
 _STACKS = {"3D View": _VIEW3D_STACK, "Object Mode": _OBJECT_MODE_STACK,
+           # UI buttons can live in any editor, hover tracking always passes through.
+           "User Interface": None,
            "Object Non-modal": _VIEW3D_STACK,
            # the Maya dock is a Properties editor (Channel Box row hover / drag)
            "Property Editor": ("Window", "Screen", "Property Editor", "View2D Buttons List"),

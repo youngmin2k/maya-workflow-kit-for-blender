@@ -2,10 +2,13 @@
 """In-View attribute selection, editor layout and transactional viewport dragging."""
 
 import json
+import math
 import os
 import tempfile
 import time
 from pathlib import Path
+from copy import deepcopy
+from functools import lru_cache
 
 import bpy
 from bpy.props import BoolProperty, FloatProperty, IntProperty, StringProperty
@@ -47,12 +50,60 @@ def state(context, node):
     return current
 
 
-def settings(context, node):
+def validate_layouts(text):
+    """Validate saved layouts once at their input boundary, including partial layouts."""
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError('In-View Editor layouts must be an object')
+    for node_type, layout in data.items():
+        _validate_layout(layout)
+    return data
+
+
+def _number(value):
+    return (isinstance(value, (int, float)) and not isinstance(value, bool)
+            and abs(value) <= 1e308 and math.isfinite(value))
+
+
+def _validate_layout(layout):
+    if not isinstance(layout, dict):
+        raise ValueError('An In-View Editor layout must be an object')
+    position = layout.get('position')
+    if position is not None and (not isinstance(position, list) or len(position) != 2
+                                 or not all(_number(value) for value in position)):
+        raise ValueError('Editor position must contain two finite numbers')
+    for name in ('width', 'height'):
+        value = layout.get(name)
+        if name not in layout or (name == 'height' and value is None):
+            continue
+        if not _number(value) or not 0 < value <= 10000:
+            raise ValueError('Editor dimensions must be positive finite numbers up to 10000')
+    for name in ('order', 'hidden'):
+        if name in layout and (not isinstance(layout[name], list)
+                               or not all(isinstance(value, str) for value in layout[name])):
+            raise ValueError('Editor attribute lists must contain strings')
+
+
+@lru_cache(maxsize=8)
+def _layouts(text):
     try:
-        saved = json.loads(preferences.get(context).inview_layouts).get(node.spec.node_type, {})
-        return saved if isinstance(saved, dict) else {}
-    except (ValueError, TypeError, AttributeError):
+        data = json.loads(text)
+    except (ValueError, TypeError):
         return {}
+    if not isinstance(data, dict):
+        return {}
+    valid = {}
+    for node_type, layout in data.items():
+        try:
+            _validate_layout(layout)
+        except ValueError:
+            continue
+        valid[node_type] = layout
+    return valid
+
+
+def settings(context, node):
+    return deepcopy(_layouts(preferences.get(context).inview_layouts).get(node.spec.node_type, {}))
 
 
 def layout_file(create=False):
@@ -83,14 +134,11 @@ def persist_layouts(context, prefs=None):
 
 def save_settings(context, node, values):
     prefs = preferences.get(context)
-    try:
-        all_settings = json.loads(prefs.inview_layouts)
-        if not isinstance(all_settings, dict):
-            all_settings = {}
-    except (ValueError, TypeError):
-        all_settings = {}
+    all_settings = dict(_layouts(prefs.inview_layouts))
     all_settings[node.spec.node_type] = values
-    prefs.inview_layouts = json.dumps(all_settings)
+    text = json.dumps(all_settings)
+    validate_layouts(text)
+    prefs.inview_layouts = text
     try:
         persist_layouts(context)
     except OSError as error:
@@ -285,7 +333,7 @@ def draw():
             elif kind == 'BOOL':
                 text = 'On' if value else 'Off'
             else:
-                text = cb_entry.fmt_number(value)
+                text = cb_entry.format_value(node.to_entry(name, value), kind, context.scene)
             blf.size(0, size)
             in_view._text(x1-pad-blf.dimensions(0, text)[0], y0+4*scale, text, in_view.TEXT, size)
         x1, y0 = lay['box'][2], lay['box'][1]
@@ -353,6 +401,9 @@ class ALLSET_OT_node_attribute_apply(bpy.types.Operator):
 
 
 def invoke_drag(operator, context, event):
+    from ..operators.view import emulated_alt_drag
+    if getattr(event, 'type', None) == 'MIDDLEMOUSE' and emulated_alt_drag(context):
+        return {'PASS_THROUGH'}
     node, lay = current_layout(context, fresh=True)
     if node is None or attribute_edit.busy(context) or event.alt or event.oskey:
         return {'PASS_THROUGH'}
@@ -410,7 +461,8 @@ def invoke_drag(operator, context, event):
         if kind == 'ENUM':
             bpy.ops.wm.call_menu(name=ALLSET_MT_inview_choices.__name__)
             return {'CANCELLED'}
-        operator._drag = attribute_edit.Drag(node.params[field], node.descriptor(field, soft=True))
+        value = cb_entry.to_display(node.to_entry(field, node.params[field]), kind, context.scene)
+        operator._drag = attribute_edit.Drag(value, node_attributes.display_descriptor(node, field, context, soft=True))
         operator._type_on_click = (event.type == 'LEFTMOUSE' and
                                   event.mouse_region_x > (lay['box'][0]+lay['box'][2])*0.5)
     if not attribute_edit.claim(context, operator):
@@ -489,7 +541,10 @@ def modal_drag(operator, context, event):
                 from .channel_box import SPEED_FACTOR
                 value = operator._drag.move(dx/scale, SPEED_FACTOR[prefs.cb_speed], event.ctrl,
                                             event.shift, prefs.cb_hyperbolic)
-                operator._pending[operator._field] = value
+                node = operator._node
+                field = operator._field
+                entry = cb_entry.from_display(value, node.spec.kinds[field], context.scene)
+                operator._pending[field] = node.descriptor(field).limit(node.from_entry(field, entry))
                 if operator._moved and time.perf_counter()-operator._last_preview >= 1/30:
                     _preview(operator, context)
             else:
@@ -589,8 +644,13 @@ class ALLSET_OT_inview_number(bpy.types.Operator):
             return {'CANCELLED'}
         self._identity = node.identity
         self._field = state(context, node)['field']
-        self.text = str(node.params[self._field])
+        self.text = cb_entry.format_value(node.to_entry(self._field, node.params[self._field]),
+                                          node.spec.kinds[self._field], context.scene)
         return context.window_manager.invoke_props_dialog(self, title=node.spec.labels[self._field])
+
+    def draw(self, context):
+        self.layout.activate_init = True
+        self.layout.prop(self, 'text')
 
     def execute(self, context):
         node = target(context)
@@ -598,8 +658,9 @@ class ALLSET_OT_inview_number(bpy.types.Operator):
             return {'CANCELLED'}
         field = self._field
         try:
-            value = cb_entry.parse_entry(self.text, node.params[field], node.spec.kinds[field], context.scene)
-            value = node.descriptor(field).limit(value)
+            value = cb_entry.parse_entry(self.text, node.to_entry(field, node.params[field]),
+                                         node.spec.kinds[field], context.scene)
+            value = node.descriptor(field).limit(node.from_entry(field, value))
         except (ValueError, SyntaxError, TypeError) as error:
             self.report({'WARNING'}, str(error))
             return {'CANCELLED'}
@@ -737,7 +798,6 @@ def load_layouts():
         path = layout_file()
         if path.is_file():
             text = path.read_text(encoding='utf-8')
-            if isinstance(json.loads(text), dict):
-                preferences.get().inview_layouts = text
+            preferences.get().inview_layouts = json.dumps(_layouts(text))
     except (OSError, ValueError):
         pass

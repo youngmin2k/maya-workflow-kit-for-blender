@@ -701,19 +701,24 @@ def _text_set(field):
         rec = cb_record(context, _lead(context))
         if rec is None or field not in rec.params:
             return
-        from . import node_attributes
-        node = node_attributes.target(context)
-        if node is None or not node_attributes.editable(node, field):
-            return
-        try:
-            value = cb_entry.parse_entry(text, rec.params[field], rec.spec.kinds[field], context.scene)
-        except (ValueError, TypeError, SyntaxError, NameError):
-            return
-        if field not in BOOL_FIELDS:
-            value = node.descriptor(field).limit(value)
-        if value != rec.params[field]:
-            extrude.set_params(context, **{field: value})
+        from . import channel_box
+        bpy.ops.allset.model_channel_entry('EXEC_DEFAULT', True,
+                                           key=channel_box.model_key(rec, field), text=text)
     return set_
+
+
+class ALLSET_OT_model_channel_entry(bpy.types.Operator):
+    """Apply typed modeling channels and compatible selected channels as one undo step"""
+    bl_idname = 'allset.model_channel_entry'
+    bl_label = 'Edit Node Attributes'
+    bl_options = {'INTERNAL', 'UNDO'}
+    key: StringProperty(options={'SKIP_SAVE'})
+    text: StringProperty(options={'SKIP_SAVE'})
+
+    def execute(self, context):
+        from . import channel_box
+        count = channel_box.apply_entry(self.key, self.text, context)
+        return {'FINISHED'} if count else {'CANCELLED'}
 
 
 class ALLSET_PG_history(bpy.types.PropertyGroup):
@@ -750,7 +755,7 @@ def draw_cb_node(layout, context, rec):
         values.prop(hist, f"{field}_text", text="")
 
 
-classes = (ALLSET_PG_history, ALLSET_GT_in_view_row, ALLSET_GGT_in_view, ALLSET_GT_extrude_handle,
+classes = (ALLSET_OT_model_channel_entry, ALLSET_PG_history, ALLSET_GT_in_view_row, ALLSET_GGT_in_view, ALLSET_GT_extrude_handle,
            ALLSET_GGT_extrude,
            ALLSET_OT_inview_drag, ALLSET_OT_inview_type, ALLSET_OT_extrude_drag)
 

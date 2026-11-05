@@ -73,8 +73,9 @@ def import_preferences(prefs, data):
             continue
         value = data[name]
         try:
-            if name == 'inview_layouts' and not isinstance(json.loads(value), dict):
-                raise ValueError('In-View Editor layouts must be an object')
+            if name == 'inview_layouts':
+                from .ui.in_view_editor import validate_layouts
+                validate_layouts(value)
             flag = getattr(prefs.bl_rna.properties[name], "is_enum_flag", False)
             setattr(prefs, name, set(value) if flag else value)
             done.append(name)

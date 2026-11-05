@@ -41,7 +41,7 @@ class NumericField:
         if self.property.is_array and (index < 0 or index >= self.property.array_length):
             raise ValueError('Choose a numeric vector component')
         self.kind = ('INT' if self.property.type == 'INT' else
-                     'ROTATION' if self.property.subtype == 'ANGLE' else
+                     'ROTATION' if self.property.subtype in {'ANGLE', 'EULER'} else
                      'LENGTH' if self.property.subtype in {'DISTANCE', 'TRANSLATION'} else 'NONE')
 
     def read(self):
@@ -63,7 +63,7 @@ class NumericField:
             path = self.owner.path_from_id(self.name)
             if animation.drivers.find(path, index=max(self.index, 0)) is not None:
                 return False
-        if isinstance(self.owner, bpy.types.Object):
+        if isinstance(self.owner, (bpy.types.Object, bpy.types.PoseBone)):
             locks = {'location': 'lock_location', 'rotation_euler': 'lock_rotation', 'scale': 'lock_scale'}
             if self.name in locks and self.index >= 0:
                 return not getattr(self.owner, locks[self.name])[self.index]
@@ -111,12 +111,7 @@ class NodeField:
         self.kind = self.node.spec.kinds[name]
 
     def read(self):
-        value = self.node.params[self.name]
-        if isinstance(self.node, node_attributes.PrimitiveNode):
-            from ..operators import prim_history
-            owner = prim_history.owner_of(self.node.ob)
-            value = prim_history.to_entry(prim_history.node_dict(owner), self.name, value)
-        return value
+        return self.node.to_entry(self.name, self.node.params[self.name])
 
     def writable(self):
         from . import channel_box
@@ -125,23 +120,10 @@ class NodeField:
         return self.node.valid() and not channel_box.is_locked(self.node.ob, key)
 
     def descriptor(self, context):
-        field = self.node.descriptor(self.name)
-        if isinstance(self.node, node_attributes.PrimitiveNode):
-            from ..operators import prim_history
-            node = prim_history.node_dict(prim_history.owner_of(self.node.ob))
-            def display(value):
-                entry = prim_history.to_entry(node, self.name, value)
-                return cb_entry.to_display(entry, self.kind, context.scene)
-            return attribute_edit.Field(self.kind, display(field.step),
-                                        display(field.minimum) if field.minimum is not None else None,
-                                        display(field.maximum) if field.maximum is not None else None)
-        return field
+        return node_attributes.display_descriptor(self.node, self.name, context)
 
     def write(self, value):
-        if isinstance(self.node, node_attributes.PrimitiveNode):
-            from ..operators import prim_history
-            node = prim_history.node_dict(prim_history.owner_of(self.node.ob))
-            value = prim_history.from_entry(node, self.name, value)
+        value = self.node.from_entry(self.name, value)
         self.node.preview(bpy.context, dict(self.node.params, **{self.name: value}))
 
 
@@ -154,8 +136,18 @@ def under_pointer(context):
     from . import channel_box, maya_dock
     role = maya_dock.area_role(context)
     channel_box_area = role == 'CHANNEL_BOX' or (role == 'STACK' and context.window_manager.allset_dock == 'CHANNEL_BOX')
-    if channel_box_area and isinstance(root, bpy.types.Scene) and channel_box.cell_key(path, root) is not None:
-        return None
+    cell = channel_box.cell_key(path, root) if isinstance(root, bpy.types.Scene) else None
+    if cell is not None:
+        if channel_box_area:
+            return None
+        key, role = cell
+        if role == 'VALUE' and key in channel_box.MAIN_BY_KEY:
+            ob = channel_box.lead(context)
+            data_path, component, kind = channel_box.channel_path(key)
+            if ob is not None and kind in {'LOC', 'ROT', 'SCALE'}:
+                if channel_box.is_locked(ob, key) or channel_box._non_euler_rot(ob, kind):
+                    return None
+                return NumericField(ob, data_path, component)
     if path.startswith(('allset_history.', 'allset_creation.')) and path.endswith('_text'):
         return NodeField(context, path.rsplit('.', 1)[1][:-5])
     return NumericField(root, path, index)

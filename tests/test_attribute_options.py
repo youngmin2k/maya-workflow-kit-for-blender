@@ -33,6 +33,18 @@ def test_options_ui_does_not_replace_the_repeat_command():
     assert not repeat.repeatable('ALLSET_OT_option_editor_action')
 
 
+def test_changed_origin_editor_is_not_used_as_a_viewport():
+    window = bpy.context.window
+    area = next(a for a in window.screen.areas if a.type == 'VIEW_3D')
+    data = dict(window=window.as_pointer(), area=area.as_pointer(), area_type='VIEW_3D')
+    try:
+        area.type = 'IMAGE_EDITOR'
+        _window, source, _region = editor.origin(data)
+        assert source is None or source.type == 'VIEW_3D'
+    finally:
+        area.type = 'VIEW_3D'
+
+
 def test_disable_releases_lazy_option_schemas():
     keys = list(editor._groups)
     kit.disable()

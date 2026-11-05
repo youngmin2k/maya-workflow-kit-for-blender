@@ -11,6 +11,7 @@ from ..operators import menu_extras, option_windows
 from . import marked_window, window_places
 
 KIND = 'COMMAND_OPTIONS'
+SESSION_PROP = 'allset_command_options'
 _sessions = {}
 _groups = {}
 
@@ -47,15 +48,77 @@ def find(context, key):
 
 def origin(data):
     window, area = live_refs.find_area(data['area'], data['window'])
-    if area is None:
+    if area is None or area.type != data['area_type']:
         window = live_refs.window(data['window'])
-        if window is not None:
-            area = max((a for a in window.screen.areas if a.type == data['area_type']),
-                       key=lambda a: a.width*a.height, default=None)
+        area = (max((a for a in window.screen.areas if a.type == data['area_type']),
+                    key=lambda a: a.width*a.height, default=None) if window is not None else None)
     if area is None:
         return None, None, None
     region = next((r for r in area.regions if r.type == 'WINDOW'), None)
     return window, area, region
+
+
+def remember(window, data):
+    """Screen metadata survives saved UI without retaining Window or Area RNA references."""
+    source, area, _region = origin(data)
+    spec = option_windows._BY_KEY[data['key']]
+    payload = dict(key=spec.key, area_type=data['area_type'],
+                   source_screen=source.screen.name if source is not None else '',
+                   area_index=list(source.screen.areas).index(area) if area is not None else -1,
+                   values=option_windows.values_of(spec, owner(bpy.context.window_manager, spec.key)))
+    window.screen[SESSION_PROP] = json.dumps(payload)
+
+
+@bpy.app.handlers.persistent
+def save_sessions(_dummy=None):
+    for pointer, data in list(_sessions.items()):
+        window = live_refs.window(pointer)
+        if window is not None:
+            remember(window, data)
+
+
+@bpy.app.handlers.persistent
+def restore_sessions(_dummy=None):
+    wm = bpy.context.window_manager
+    if wm is None:
+        return
+    for window in wm.windows:
+        if window.as_pointer() in _sessions or not any(marked_window.kind_of(a) == KIND for a in window.screen.areas):
+            continue
+        try:
+            data = json.loads(window.screen.get(SESSION_PROP, '{}'))
+            spec = option_windows._BY_KEY.get(data.get('key'))
+            if spec is None:
+                continue
+            prepare(spec.key)
+            holder = owner(wm, spec.key)
+            values = {**spec.defaults(), **data.get('values', {})}
+            for field in spec.fields:
+                try:
+                    setattr(holder, field.name, values[field.name])
+                except (TypeError, ValueError):
+                    setattr(holder, field.name, field.default)
+            sources = [w for w in wm.windows if w != window
+                       and not any(marked_window.kind_of(a) == KIND for a in w.screen.areas)]
+            sources.sort(key=lambda w: w.screen.name != data.get('source_screen'))
+            source, area = None, None
+            for candidate in sources:
+                areas = list(candidate.screen.areas)
+                index = data.get('area_index', -1)
+                area = areas[index] if isinstance(index, int) and 0 <= index < len(areas) else None
+                if area is None or area.type != data['area_type']:
+                    area = max((a for a in areas if a.type == data['area_type']),
+                               key=lambda a: a.width*a.height, default=None)
+                if area is not None:
+                    source = candidate
+                    break
+            _sessions[window.as_pointer()] = dict(key=spec.key, area_type=data['area_type'],
+                                                  window=source.as_pointer() if source else 0,
+                                                  area=area.as_pointer() if area else 0)
+            for area in window.screen.areas:
+                area.tag_redraw()
+        except (ValueError, TypeError, AttributeError, KeyError):
+            continue
 
 
 class ALLSET_OT_option_editor_open(bpy.types.Operator):
@@ -97,6 +160,7 @@ class ALLSET_OT_option_editor_open(bpy.types.Operator):
             if name in defaults:
                 setattr(holder, name, value)
         _sessions[window.as_pointer()] = origin_data
+        remember(window, origin_data)
         area = window.screen.areas[0]
         area.type = 'PROPERTIES'
         if not marked_window.set_kind(area, KIND, window):
@@ -118,6 +182,7 @@ class ALLSET_OT_option_editor_action(bpy.types.Operator):
         holder = owner(context.window_manager, spec.key)
         if self.action == 'CLOSE':
             _sessions.pop(context.window.as_pointer(), None)
+            context.window.screen.pop(SESSION_PROP, None)
             marked_window.close_later(context.window)
         elif self.action == 'RESET':
             for field in spec.fields:
@@ -148,6 +213,7 @@ class ALLSET_OT_option_editor_action(bpy.types.Operator):
                 return result
             if self.action == 'RUN':
                 _sessions.pop(context.window.as_pointer(), None)
+                context.window.screen.pop(SESSION_PROP, None)
                 marked_window.close_later(context.window)
         else:
             return {'CANCELLED'}
@@ -178,11 +244,16 @@ class ALLSET_PT_command_options(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return marked_window.context_kind(context) == KIND and session(context) is not None
+        return marked_window.context_kind(context) == KIND
 
     def draw(self, context):
-        spec = option_windows._BY_KEY[session(context)['key']]
         layout = self.layout
+        data = session(context)
+        if data is None:
+            layout.label(text='Reopen command options from its menu.')
+            layout.operator('allset.marked_window_close', text='Close')
+            return
+        spec = option_windows._BY_KEY[data['key']]
         layout.label(text=spec.title)
         row = layout.row(align=True)
         row.operator('allset.option_editor_action', text='Save Settings').action = 'SAVE'
@@ -197,6 +268,7 @@ class ALLSET_PT_command_options(bpy.types.Panel):
 
 @bpy.app.handlers.persistent
 def clear(_dummy=None):
+    save_sessions()
     _sessions.clear()
 
 
@@ -208,12 +280,21 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.app.handlers.load_pre.append(clear)
+    bpy.app.handlers.save_pre.append(save_sessions)
+    bpy.app.handlers.load_post.append(restore_sessions)
+    bpy.app.timers.register(restore_sessions, first_interval=0.1)
 
 
 def unregister():
     clear()
     if clear in bpy.app.handlers.load_pre:
         bpy.app.handlers.load_pre.remove(clear)
+    if save_sessions in bpy.app.handlers.save_pre:
+        bpy.app.handlers.save_pre.remove(save_sessions)
+    if restore_sessions in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(restore_sessions)
+    if bpy.app.timers.is_registered(restore_sessions):
+        bpy.app.timers.unregister(restore_sessions)
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
     for key, group in reversed(list(_groups.items())):

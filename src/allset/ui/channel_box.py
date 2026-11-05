@@ -982,7 +982,8 @@ def apply_entry(key, text, context=None):
     context = context or bpy.context
     scene = context.scene
     autokey = auto_key.enabled(scene)
-    count = 0
+    entries = []
+    models = {}
     for k in entry_keys(key, context):
         for ob in targets(context):
             if not has_channel(ob, k) or is_locked(ob, k):
@@ -992,13 +993,31 @@ def apply_entry(key, text, context=None):
                 continue
             try:
                 value = cb_entry.parse_entry(text, get_value(ob, k), kind, scene)
+                if k.startswith(MODEL_PREFIX):
+                    node = model_node(ob, k)
+                    field = k.rsplit(':', 1)[1]
+                    if kind != 'BOOL':
+                        value = node.descriptor(field).limit(value)
+                    if ob not in models:
+                        models[ob] = node, dict(node.params)
+                    models[ob][1][field] = value
             except (ValueError, TypeError, SyntaxError):
-                return count
+                return 0
+            entries.append((ob, k, value))
+    for ob, k, value in entries:
+        if k.startswith(MODEL_PREFIX):
+            for hook in WRITE_HOOKS:
+                hook(ob, k)
+        else:
             set_value(ob, k, value)
-            count += 1
-            if autokey and auto_keys(ob, k, context):
-                keyframe(ob, k)
-    return count
+        if autokey and auto_keys(ob, k, context):
+            keyframe(ob, k)
+    for node, params in models.values():
+        try:
+            node.commit(context, params)
+        finally:
+            node.finish()
+    return len(entries)
 
 
 def _text_get(key):

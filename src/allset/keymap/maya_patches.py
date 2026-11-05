@@ -1524,13 +1524,13 @@ def patch_global_set_key(kd):
 # "3D View" (tool keymaps: Maya's middle drag on the manipulator; Object Mode / Pose: the Channel Box slider), so
 # this patch runs last.
 
-EMULATED_TUMBLE_KEYMAPS = SLIDER_TOOL_KEYMAPS + ("Object Mode", "Pose", "3D View")
+EMULATED_TUMBLE_KEYMAPS = SLIDER_TOOL_KEYMAPS + ("Object Mode", "Mesh", "Pose", "3D View")
 
 
 def patch_emulated_tumble(kd):
     for km in EMULATED_TUMBLE_KEYMAPS:
         _add(kd, km, "allset.emulated_tumble", make_event("MIDDLEMOUSE"), first=True,
-             shadows=("Image Paint", "Object Mode", "Pose") if km == "3D View" else (km, "3D View"))
+             shadows=("3D View", "Image Paint", "Object Mode", "Mesh", "Pose") if km == "3D View" else (km, "3D View"))
 
 
 # --- w / e / r over the whole Graph Editor ------------------------------------------------------------------------
@@ -1548,7 +1548,7 @@ def patch_graph_key_tool_everywhere(kd):
         _add(kd, "Screen", "allset.graph_key_tool", ev, {"tool": tool}, shadows=under)
 
 
-PATCHES += (patch_weight_paint_exit, patch_global_set_key, patch_graph_key_tool_everywhere, patch_emulated_tumble)
+PATCHES += (patch_weight_paint_exit, patch_global_set_key, patch_graph_key_tool_everywhere)
 
 
 # --- Edge slide with the Move tool (#262) ----------------------------------------------------------------------
@@ -1627,10 +1627,30 @@ def patch_attribute_edit(kd):
         _remove_where(kd, km, lambda item: item[0] == 'wm.tool_set_by_id', type='T')
         _add(kd, km, 'allset.show_manipulator', make_event('T'), first=True, shadows=(km,))
 
+    # These contextual handlers deliberately share events with the editor/mode stack.
+    # Outside their own UI they pass through (Options also has a window-scoped poll).
+    # Record the handoff on both bindings so the shadow check covers every other pair.
+    views = ('Screen', '3D View', 'Object Mode', 'Object Non-modal', 'Mesh', 'Curve', 'Curves',
+             'Pose', 'Armature', 'Metaball', 'Lattice', 'Particle', 'Font', 'Sculpt',
+             'Image Paint', 'Vertex Paint', 'Weight Paint', *SLIDER_TOOL_KEYMAPS)
+    contexts = {'allset.inview_drag': views, 'allset.inview_cycle': views,
+                'allset.inview_scroll': views, 'allset.show_manipulator': views,
+                'allset.attribute_field_hover': ('Property Editor', 'View2D Buttons List', 'User Interface',
+                                                 'Outliner', UV_KM, 'File Browser Main', 'Weight Paint'),
+                'allset.option_editor_key': ('Property Editor', 'Screen')}
+    handlers = [(km, patch.event_key(event), contexts[idname])
+                for km, idname, event, _props, _shadows in ADDED if idname in contexts]
+    for i, (km, idname, event, props, shadows) in enumerate(ADDED):
+        event_key = patch.event_key(event)
+        shared = {other for other, key, stack in handlers if km in stack and key == event_key}
+        if idname in contexts:
+            shared.update(contexts[idname])
+        ADDED[i] = km, idname, event, props, tuple(dict.fromkeys((*shadows, *sorted(shared))))
 
-PATCHES += (patch_attribute_edit,)
+
+PATCHES += (patch_attribute_edit, patch_emulated_tumble)
 PASS_THROUGH_FIRST += ('allset.inview_drag', 'allset.inview_cycle', 'allset.inview_scroll',
-                       'allset.attribute_field_hover')
+                       'allset.attribute_field_hover', 'allset.option_editor_key')
 
 
 def apply(data):

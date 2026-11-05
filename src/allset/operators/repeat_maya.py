@@ -27,7 +27,7 @@ SKIP_PREFIXES = ("TRANSFORM_OT_", "VIEW3D_OT_view", "VIEW3D_OT_zoom", "VIEW3D_OT
                  "ED_OT_", "SCREEN_OT_", "WM_OT_", "OUTLINER_OT_", "UI_OT_", "IMAGE_OT_view", "GRAPH_OT_view",
                  "ACTION_OT_view", "ALLSET_OT_repeat", "ALLSET_OT_hotbox", "ALLSET_OT_mm_", "ALLSET_OT_smart_extrude",
                  "ALLSET_OT_inview_", "ALLSET_OT_attribute_field_", "ALLSET_OT_node_attribute_apply",
-                 "ALLSET_OT_cb_virtual_slider", "ALLSET_OT_option_editor_")
+                 "ALLSET_OT_cb_virtual_slider", "ALLSET_OT_option_editor_", "ALLSET_OT_model_channel_entry")
 NO_RECORD = {"Edit/Repeat", "Edit/Recent Commands List", "Edit/Undo", "Edit/Redo"}
 # These kit operators implement selection/display or manipulator drags, just like
 # the native operators excluded above. They are UI state, not another modeling command.

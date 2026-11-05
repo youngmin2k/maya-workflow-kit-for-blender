@@ -37,6 +37,12 @@ class ModelingNode:
         return Field(kind, 0.05 if kind == 'INT' else 0.01, minimum, maximum,
                      self.spec.defaults[name])
 
+    def to_entry(self, name, value):
+        return value
+
+    def from_entry(self, name, value):
+        return value
+
     def preview(self, context, params):
         if not self.valid():
             raise ReferenceError('The modeling node is no longer available')
@@ -89,6 +95,14 @@ class PrimitiveNode:
         kind = self.spec.kinds[name]
         return Field(kind, 0.05 if kind == 'INT' else 0.01, minimum, maximum, default)
 
+    def to_entry(self, name, value):
+        node = prim_history.node_dict(prim_history.owner_of(self.ob))
+        return prim_history.to_entry(node, name, value)
+
+    def from_entry(self, name, value):
+        node = prim_history.node_dict(prim_history.owner_of(self.ob))
+        return prim_history.from_entry(node, name, value)
+
     def choices(self, name):
         return prim_history.enum_labels(self.node_type, name)
 
@@ -126,3 +140,14 @@ def editable(node, field):
     key = (channel_box.model_key(node.record, field) if isinstance(node, ModelingNode)
            else channel_box.HISTORY_PREFIX+field)
     return not channel_box.is_locked(node.ob, key)
+
+
+def display_descriptor(node, name, context, soft=False):
+    """Use the same stored units, bounds and sensitivity in every attribute UI."""
+    from . import cb_entry
+    field = node.descriptor(name, soft)
+    def display(value):
+        return cb_entry.to_display(node.to_entry(name, value), field.kind, context.scene)
+    return Field(field.kind, display(field.step),
+                 display(field.minimum) if field.minimum is not None else None,
+                 display(field.maximum) if field.maximum is not None else None)
