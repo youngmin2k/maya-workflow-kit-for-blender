@@ -152,6 +152,8 @@ class ALLSET_OT_show_manipulator(bpy.types.Operator):
 
     def execute(self, context):
         bpy.ops.wm.tool_set_by_id(name=show_manip_tool(context.view_layer.objects.active))
+        from ..ui import in_view_editor
+        in_view_editor.show(context)
         return {'FINISHED'}
 
 

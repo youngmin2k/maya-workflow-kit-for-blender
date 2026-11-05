@@ -1599,6 +1599,40 @@ def patch_numpad_digits(kd):
 PATCHES += (patch_numpad_digits,)
 
 
+def patch_attribute_edit(kd):
+    """In-View attribute gestures before tool transforms, with pass-through outside an armed editor."""
+    for key, action in (('RET', 'RUN'), ('NUMPAD_ENTER', 'RUN'), ('ESC', 'CLOSE')):
+        _add(kd, 'Property Editor', 'allset.option_editor_key', make_event(key), {'action': action},
+             first=True, shadows=('Property Editor',))
+    for km in ('Property Editor', 'View2D Buttons List', 'User Interface'):
+        _add(kd, km, 'allset.attribute_field_hover', make_event('MOUSEMOVE', 'ANY', any=True),
+             first=True, shadows=(km,))
+    maps = ('3D View', 'Object Mode', 'Mesh', *SLIDER_TOOL_KEYMAPS)
+    _add(kd, 'Mesh', 'allset.cb_virtual_slider', make_event('MIDDLEMOUSE'),
+         first=True, shadows=('Mesh',))
+    for km in maps:
+        for wheel, direction in (('WHEELUPMOUSE', -1), ('WHEELDOWNMOUSE', 1)):
+            _add(kd, km, 'allset.inview_scroll', make_event(wheel), {'direction': direction},
+                 first=True, shadows=(km,))
+        for button in ('LEFTMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE'):
+            for ctrl, shift in ((False, False), (True, False), (False, True), (True, True)):
+                if button == 'RIGHTMOUSE' and (ctrl or shift):
+                    continue
+                _add(kd, km, 'allset.inview_drag', make_event(button, ctrl=ctrl, shift=shift),
+                     first=True, shadows=(km,))
+        for reverse in (False, True):
+            _add(kd, km, 'allset.inview_cycle', make_event('TAB', ctrl=True, shift=reverse),
+                 {'reverse': reverse}, first=True, shadows=(km,))
+    for km in ('3D View', 'Object Mode', 'Mesh'):
+        _remove_where(kd, km, lambda item: item[0] == 'wm.tool_set_by_id', type='T')
+        _add(kd, km, 'allset.show_manipulator', make_event('T'), first=True, shadows=(km,))
+
+
+PATCHES += (patch_attribute_edit,)
+PASS_THROUGH_FIRST += ('allset.inview_drag', 'allset.inview_cycle', 'allset.inview_scroll',
+                       'allset.attribute_field_hover')
+
+
 def apply(data):
     """Apply all patches to IC data in place and return it."""
     ADDED.clear()

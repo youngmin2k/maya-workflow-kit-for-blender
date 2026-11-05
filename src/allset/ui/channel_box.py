@@ -72,16 +72,31 @@ HIDDEN_PROP = "allset_cb_hidden"
 NONKEYABLE_PROP = "allset_cb_nonkeyable"
 CUSTOM_PREFIX = "cp:"
 HISTORY_PREFIX = "ph:"   # an attribute of the creation node (polyCube1 ...): "ph:<attribute>"
+MODEL_PREFIX = "mh:"     # a parameter of the active modeling node, identified by node kind and field
 INPUT_PREFIX = "in:"     # an INPUTS row as a channel: "in:<modifier type>:<nth of that type>:<property>"
 SHAPE_PREFIX = "sh:"     # a SHAPES row as a channel: light Intensity / Color, camera Focal Length ...
 BLEND_PREFIX = "bw:"     # a blendShape target weight in INPUTS: "bw:<target name>" (the shape key's value)
 
 # MMB slider: value change per pixel at speed Medium (a custom attribute moves 0.1 per px, like Maya).
 SLIDER_STEP = {"LOC": 0.01, "ROT": math.radians(0.5), "SCALE": 0.01, "CUSTOM": 0.1, "SHAPE": 0.01, "INPUT": 0.01,
-               "HISTORY": 0.01, "BLEND": 0.01}
+               "HISTORY": 0.01, "BLEND": 0.01, "MODEL": 0.01}
 SPEEDS = (("SLOWEST", "Slowest", "x0.01", 0.01), ("SLOW", "Slow", "x0.1", 0.1),
           ("MEDIUM", "Medium", "x1", 1.0), ("FAST", "Fast", "x10", 10.0))
 SPEED_FACTOR = {s[0]: s[3] for s in SPEEDS}
+
+
+def model_key(record, field):
+    return f'{MODEL_PREFIX}{record.spec.kind}:{field}'
+
+
+def model_node(ob, key):
+    from . import node_attributes
+    if not isinstance(ob, bpy.types.Object):
+        return None
+    _prefix, kind, field = key.split(':', 2)
+    node = node_attributes.target(bpy.context, ob)
+    return node if (isinstance(node, node_attributes.ModelingNode) and node.spec.kind == kind
+                    and field in node.params) else None
 
 
 # --- nodes: objects or pose bones -------------------------------------------------
@@ -206,12 +221,16 @@ def is_hidden(ob, key):
 
 
 def is_keyable(ob, key):
+    if key.startswith(MODEL_PREFIX):
+        return False
     if key == "v" and is_bone(ob):
         return False   # Bone.hide lives on the armature data, not in the object's action
     return key not in _flag_list(ob, NONKEYABLE_PROP)
 
 
 def is_locked(ob, key):
+    if key.startswith(MODEL_PREFIX):
+        return key in _flag_list(ob, 'allset_cb_model_locked')
     c = MAIN_BY_KEY.get(key)
     if c is None or c[4] not in _LOCK_PROP:
         return False
@@ -219,6 +238,11 @@ def is_locked(ob, key):
 
 
 def set_locked(ob, key, locked):
+    if key.startswith(MODEL_PREFIX):
+        keys = set(_flag_list(ob, 'allset_cb_model_locked'))
+        keys.add(key) if locked else keys.discard(key)
+        _set_flag_list(ob, 'allset_cb_model_locked', keys)
+        return True
     c = MAIN_BY_KEY.get(key)
     if c is None or c[4] not in _LOCK_PROP:
         return False
@@ -384,6 +408,8 @@ def curve_owner(ob, key):
 
 def channel_path(key):
     """(data path, index, kind) for a channel key."""
+    if key.startswith(MODEL_PREFIX):
+        return key.rsplit(':', 1)[1], -1, 'MODEL'
     if key.startswith(CUSTOM_PREFIX):
         return f'["{key[len(CUSTOM_PREFIX):]}"]', -1, "CUSTOM"
     if is_shape_key(key):
@@ -407,6 +433,10 @@ def nice_name(name):
 
 
 def channel_label(key):
+    if key.startswith(MODEL_PREFIX):
+        from ..operators import extrude
+        _prefix, kind, field = key.split(':', 2)
+        return extrude.SPECS[kind].labels[field]
     if key.startswith(CUSTOM_PREFIX):
         return nice_name(key[len(CUSTOM_PREFIX):])
     if is_shape_key(key):
@@ -429,6 +459,8 @@ def channel_label(key):
 
 
 def has_channel(ob, key):
+    if key.startswith(MODEL_PREFIX):
+        return model_node(ob, key) is not None
     if key.startswith(CUSTOM_PREFIX):
         return key[len(CUSTOM_PREFIX):] in ob.keys()
     if is_shape_key(key):
@@ -449,6 +481,8 @@ def _non_euler_rot(ob, kind):
 
 def get_value(ob, key):
     path, idx, kind = channel_path(key)
+    if kind == 'MODEL':
+        return model_node(ob, key).params[path]
     if kind == "SHAPE":
         return _row_read(shape_owner(ob, key), "SHAPE", path)
     if kind == "INPUT":
@@ -478,6 +512,10 @@ def set_value(ob, key, value):
     for hook in WRITE_HOOKS:
         hook(ob, key)
     path, idx, kind = channel_path(key)
+    if kind == 'MODEL':
+        node = model_node(ob, key)
+        node.preview(bpy.context, dict(node.params, **{path: node.descriptor(path).limit(value)}))
+        return
     if kind == "SHAPE":
         _row_write(shape_owner(ob, key), "SHAPE", path, value)
         return
@@ -524,7 +562,7 @@ def set_value(ob, key, value):
 
 def keyframe(ob, key, keytype='KEYFRAME'):
     path, idx, kind = channel_path(key)
-    if kind == "HISTORY":
+    if kind in {"HISTORY", "MODEL"}:
         return False
     if kind == "VIS" and is_bone(ob):
         return False
@@ -623,7 +661,7 @@ def blend_fcurves(ob, key):
 
 
 def fcurve(ob, key):
-    if is_history_key(key):
+    if is_history_key(key) or key.startswith(MODEL_PREFIX):
         return None
     if is_blend_key(key):
         fcs = blend_fcurves(ob, key)
@@ -654,7 +692,7 @@ def channel_fcurves(ob, key):
         return input_fcurves(ob, key)
     if is_blend_key(key):
         return blend_fcurves(ob, key)
-    if is_history_key(key):
+    if is_history_key(key) or key.startswith(MODEL_PREFIX):
         return []
     if _non_euler_rot(ob, MAIN_BY_KEY.get(key, ("", "", "", 0, ""))[4]):
         from .. import rotation_display
@@ -675,7 +713,7 @@ def remove_channel_curves(ob, key):
 
 
 def driver(ob, key):
-    if is_shape_key(key) or is_history_key(key):
+    if is_shape_key(key) or is_history_key(key) or key.startswith(MODEL_PREFIX):
         return None
     if is_blend_key(key):
         kb = blend_target(ob, key)
@@ -766,6 +804,8 @@ def _view3d_tool(context=None):
 
 
 def arm_slider(context=None):
+    from . import in_view_editor
+    in_view_editor.disarm_window(context or bpy.context)
     _slider["armed"] = True
     _slider["tool"] = _view3d_tool(context)
 
@@ -776,7 +816,9 @@ def disarm_slider():
 
 def slider_armed(context=None):
     """A middle drag in a view drives the selected channels: channels were picked since the last tool change."""
-    return _slider["armed"] and _view3d_tool(context) == _slider["tool"]
+    from .. import preferences
+    return (_slider["armed"] and _view3d_tool(context) == _slider["tool"]
+            and preferences.get(context or bpy.context).cb_manipulators != 'NONE')
 
 
 def select_channel(key, mode="SET", context=None):
@@ -909,6 +951,9 @@ _KIND_ENTRY = {"LOC": "LENGTH", "ROT": "ROTATION", "SCALE": "NONE", "VIS": "BOOL
 
 
 def entry_kind(ob, key):
+    if key.startswith(MODEL_PREFIX):
+        node = model_node(ob, key)
+        return node.spec.kinds[key.rsplit(':', 1)[1]] if node is not None else None
     if key.startswith(CUSTOM_PREFIX):
         return cb_entry.kind_of_value(ob.get(key[len(CUSTOM_PREFIX):]))
     if is_shape_key(key):
@@ -1436,11 +1481,8 @@ ALLSET_PG_channel_box = type("ALLSET_PG_channel_box", (bpy.types.PropertyGroup,)
 # --- MMB virtual slider ---------------------------------------------------------------------------
 
 def slider_delta(dx, kind, speed=1.0, ctrl=False, shift=False, hyperbolic=False):
-    d = float(dx)
-    if hyperbolic:
-        d = d * abs(d) / 50.0
-    factor = speed * (0.1 if ctrl else 1.0) * (10.0 if shift else 1.0)
-    return d * SLIDER_STEP[kind] * factor
+    from . import attribute_edit
+    return attribute_edit.delta(dx, SLIDER_STEP[kind], speed, ctrl, shift, hyperbolic)
 
 
 def slider_targets(context):
@@ -1463,6 +1505,9 @@ def slider_targets(context):
 def drag_limit(ob, key, value):
     """A dragged INPUTS value stays in the property's soft range, like Blender's own field drag (a Subdivision's
     Levels stops at 6; typing can go to the hard limit)."""
+    if key.startswith(MODEL_PREFIX):
+        node = model_node(ob, key)
+        return node.descriptor(key.rsplit(':', 1)[1], soft=True).limit(value)
     if not is_input_key(key):
         return value
     owner = input_owner(ob, key)
@@ -1541,41 +1586,57 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
     """MMB-drag in the viewport changes the channels selected in the Channel Box"""
     bl_idname = "allset.cb_virtual_slider"
     bl_label = "Channel Box Virtual Slider"
-    bl_options = {'REGISTER', 'UNDO', 'GRAB_CURSOR', 'BLOCKING'}
+    bl_options = {'REGISTER', 'GRAB_CURSOR', 'BLOCKING'}
 
     def invoke(self, context, event):
-        if context.mode not in {'OBJECT', 'POSE'}:
-            return {'PASS_THROUGH'}
-        if not slider_armed(context):
-            return {'PASS_THROUGH'}  # another tool was picked after the channels: its own middle drag
-        pairs = slider_targets(context)
-        if not pairs:
-            return {'PASS_THROUGH'}  # let the tool's MMB drag run
-        self._starts = {(ob, key): get_value(ob, key) for ob, key in pairs}
-        self._dx = self._dy = 0
-        self._last = (event.mouse_x, event.mouse_y)
-        # translate channels follow their axis as drawn in this view (Maya's channel manipulator); rotate channels
-        # turn with right / down moves; the rest are a sideways slider
-        self._axes = {}
-        region, rv3d = context.region, context.region_data
-        if rv3d is not None and context.area is not None and context.area.type == 'VIEW_3D':
-            for ob, key in pairs:
-                kind = channel_path(key)[2]
-                if kind == "ROT" and not _non_euler_rot(ob, kind):
-                    self._axes[(ob, key)] = "ROT"
-                    continue
-                axes = node_axes(ob, key)
-                if axes is None:
-                    continue
-                px = screen_axis(region, rv3d, *axes)
-                longest = max((v.length for v in (screen_axis(region, rv3d, axes[0], d) for d in
-                                                   _unit_dirs(axes[1])) if v is not None), default=0.0)
-                if px is not None and px.length > AXIS_MIN_SHARE * longest > 0.0:
-                    self._axes[(ob, key)] = (px.x, px.y)
+        from . import attribute_edit
         from .. import preferences
-        prefs = preferences.get(context)
-        self._speed = SPEED_FACTOR[prefs.cb_speed]
-        self._hyper = prefs.cb_hyperbolic
+        if (_slider['armed'] and _view3d_tool(context) == _slider['tool']
+                and preferences.get(context).cb_manipulators == 'NONE'):
+            return {'CANCELLED'}
+        if context.mode not in {'OBJECT', 'POSE', 'EDIT_MESH'} or not slider_armed(context):
+            return {'PASS_THROUGH'}
+        pairs = slider_targets(context)
+        if context.mode == 'EDIT_MESH':
+            pairs = [(ob, key) for ob, key in pairs if key.startswith(MODEL_PREFIX)]
+        if not pairs or attribute_edit.busy(context):
+            return {'PASS_THROUGH'}
+        self._starts = {(ob, key): get_value(ob, key) for ob, key in pairs}
+        self._nodes = {ob: model_node(ob, key) for ob, key in pairs if key.startswith(MODEL_PREFIX)}
+        self._node_starts = {ob: dict(node.params) for ob, node in self._nodes.items()}
+        self._drags = {}
+        self._axes = {}
+        self._dx = self._dy = 0
+        self._last = event.mouse_x, event.mouse_y
+        self._scene, self._frame = context.scene, context.scene.frame_current
+        self._object = context.active_object
+        self._window = context.window.as_pointer()
+        self._mode = context.mode
+        self._tool = _view3d_tool(context)
+        region, rv3d = context.region, context.region_data
+        for ob, key in pairs:
+            kind = channel_path(key)[2]
+            if key.startswith(MODEL_PREFIX):
+                descriptor = self._nodes[ob].descriptor(channel_path(key)[0], soft=True)
+            else:
+                descriptor = attribute_edit.Field(entry_kind(ob, key), SLIDER_STEP[kind])
+            self._drags[(ob, key)] = attribute_edit.Drag(self._starts[(ob, key)], descriptor)
+            if rv3d is None or context.area.type != 'VIEW_3D':
+                continue
+            if kind == "ROT" and not _non_euler_rot(ob, kind):
+                self._axes[(ob, key)] = "ROT"
+                continue
+            axes = node_axes(ob, key)
+            if axes is None:
+                continue
+            px = screen_axis(region, rv3d, *axes)
+            longest = max((v.length for v in (screen_axis(region, rv3d, axes[0], d) for d in
+                                               _unit_dirs(axes[1])) if v is not None), default=0.0)
+            if px is not None and px.length > AXIS_MIN_SHARE * longest > 0.0:
+                self._axes[(ob, key)] = (px.x, px.y)
+        if not attribute_edit.claim(context, self):
+            return {'CANCELLED'}
+        self._finished = False
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 
@@ -1583,39 +1644,96 @@ class ALLSET_OT_cb_virtual_slider(bpy.types.Operator):
         if context.area:
             context.area.header_text_set(text)
 
-    def modal(self, context, event):
-        if event.type == 'MOUSEMOVE':
-            sx, sy = event.mouse_x - self._last[0], event.mouse_y - self._last[1]
-            self._last = (event.mouse_x, event.mouse_y)
-            if context.region and abs(sx) > context.region.width // 2:
-                sx = 0  # cursor wrapped by GRAB_CURSOR: not a real move
-            if context.region and abs(sy) > context.region.height // 2:
-                sy = 0
-            self._dx += sx
-            self._dy += sy
-            rest = {}
-            for pair, start in self._starts.items():
-                how = self._axes.get(pair)
-                if how is None:
-                    rest[pair] = start
-                    continue
-                ob, key = pair
-                d = rotate_delta(self._dx, self._dy) if how == "ROT" else projected_delta(how, self._dx, self._dy)
-                set_value(ob, key, start + d)
-            slider_apply(rest, self._dx, self._speed, event.ctrl, event.shift, self._hyper)
-            ob, key = next(iter(self._starts))
-            self._header(context, f"{channel_label(key)}: {get_value(ob, key):.3f}  "
-                                  "(Ctrl slower, Shift faster, Esc cancel)")
-            return {'RUNNING_MODAL'}
-        if event.type == 'MIDDLEMOUSE' and event.value == 'RELEASE':
-            self._header(context, None)
-            return {'FINISHED'}
-        if event.type in {'ESC', 'RIGHTMOUSE'} and event.value == 'PRESS':
-            for (ob, key), start in self._starts.items():
-                set_value(ob, key, start)
-            self._header(context, None)
+    def _finish(self, context, cancel=False):
+        from . import attribute_edit
+        if getattr(self, '_finished', True):
             return {'CANCELLED'}
+        self._finished = True
+        changed = False
+        try:
+            for ob, node in self._nodes.items():
+                if node.valid():
+                    if cancel and context.mode == self._mode:
+                        node.preview(context, self._node_starts[ob])
+                    node_changed = node.params != self._node_starts[ob]
+                    changed |= node_changed
+                    if not cancel and node_changed:
+                        node.commit(context, node.params)
+                    node.finish()
+            for (ob, key), start in self._starts.items():
+                if key.startswith(MODEL_PREFIX):
+                    continue
+                try:
+                    changed |= get_value(ob, key) != start
+                    if cancel:
+                        set_value(ob, key, start)
+                    elif (get_value(ob, key) != start and auto_key.enabled(context.scene)
+                          and auto_keys(ob, key, context)):
+                        keyframe(ob, key)
+                except (ReferenceError, RuntimeError, AttributeError):
+                    pass
+        finally:
+            self._header(context, None)
+            attribute_edit.release(self._window, self)
+        if not cancel and changed:
+            from .. import undo_steps
+            undo_steps.push('Edit Channel Attributes')
+        return {'CANCELLED'} if cancel or not changed else {'FINISHED'}
+
+    def modal(self, context, event):
+        try:
+            if (context.scene != self._scene or context.scene.frame_current != self._frame
+                    or context.active_object != self._object or context.mode != self._mode
+                    or _view3d_tool(context) != self._tool):
+                return self._finish(context, cancel=True)
+            if event.type == 'MOUSEMOVE':
+                sx, sy = event.mouse_x-self._last[0], event.mouse_y-self._last[1]
+                self._last = event.mouse_x, event.mouse_y
+                if context.region and abs(sx) > context.region.width//2:
+                    sx = 0
+                if context.region and abs(sy) > context.region.height//2:
+                    sy = 0
+                self._dx += sx
+                self._dy += sy
+                from .. import preferences
+                prefs = preferences.get(context)
+                pending = {ob: dict(node.params) for ob, node in self._nodes.items()}
+                for pair, start in self._starts.items():
+                    ob, key = pair
+                    how = self._axes.get(pair)
+                    if how == 'ROT':
+                        value = start+rotate_delta(self._dx, self._dy)
+                    elif how is not None:
+                        value = start+projected_delta(how, self._dx, self._dy)
+                    else:
+                        value = self._drags[pair].move(sx/(context.preferences.system.ui_scale or 1.0),
+                                                      SPEED_FACTOR[prefs.cb_speed], event.ctrl,
+                                                      event.shift, prefs.cb_hyperbolic)
+                        value = drag_limit(ob, key, value)
+                    if key.startswith(MODEL_PREFIX):
+                        pending[ob][channel_path(key)[0]] = value
+                    elif get_value(ob, key) != value:
+                        set_value(ob, key, value)
+                for ob, params in pending.items():
+                    if self._nodes[ob].params != params:
+                        self._nodes[ob].preview(context, params)
+                ob, key = next(iter(self._starts))
+                self._header(context, f"{channel_label(key)}: {get_value(ob, key):.3f}")
+                context.area.tag_redraw()
+            elif event.type == 'MIDDLEMOUSE' and event.value == 'RELEASE':
+                return self._finish(context)
+            elif event.type in {'ESC', 'RIGHTMOUSE', 'WINDOW_DEACTIVATE'}:
+                return self._finish(context, cancel=True)
+            elif event.value == 'PRESS' and event.type in {'Q', 'W', 'E', 'R', 'T', 'Z'}:
+                self._finish(context, cancel=True)
+                return {'CANCELLED', 'PASS_THROUGH'}
+        except (ReferenceError, RuntimeError, AttributeError, TypeError, ValueError) as error:
+            self.report({'WARNING'}, str(error))
+            return self._finish(context, cancel=True)
         return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        self._finish(context, cancel=True)
 
 
 # --- operators: selection, Channels menu ----------------------------------------------------------
@@ -2352,6 +2470,7 @@ class ALLSET_MT_cb_settings(bpy.types.Menu):
         lay.label(text="Virtual slider speed")
         lay.prop(prefs, "cb_speed", expand=True)
         lay.prop(prefs, "cb_hyperbolic")
+        lay.prop(prefs, 'cb_manipulators', text='Manipulators')
 
 
 class ALLSET_MT_cb_edit(bpy.types.Menu):

@@ -5,9 +5,8 @@ Maya opens a window per command with its fields (labels right-aligned, field + s
 Reset Settings) and three buttons: the command ("Create", "Extrude", ...), Apply (run, keep the window) and Close; the
 values are kept between sessions. Fields, labels and defaults below follow Maya's windows.
 
-Each ``Window`` becomes one operator ``allset.opt_<key>`` drawn with ``invoke_props_dialog`` (confirm = the
-command's button, Blender's cancel = Close); Apply / Save Settings / Reset Settings are toggle buttons inside the
-dialog whose update callbacks act at once and spring back. ``Window.run`` maps the Maya values onto the kit or
+Each ``Window`` becomes one operator ``allset.opt_<key>`` and a modeless editor with command, Apply, Close,
+Save Settings and Reset Settings controls. ``Window.run`` maps the Maya values onto the kit or
 Blender operator. ``find(action)`` ties a window to a menu / marking menu / shelf action, so every option box of
 that action opens it, and a plain click uses the saved values once the user has applied or saved them (Maya runs a
 menu item with its option values).
@@ -456,8 +455,8 @@ WINDOWS = [
         paths=("Edit Mesh/Bevel",), missing=("Mitering / Miter Along", "Automatically fit bevel to object")),
     Window("bridge", "Bridge Options", "Bridge", None, [
         F("divisions", "Divisions:", "int", 5, lo=0, hi=100), F("twist", "Twist:", "int", 0, lo=-100, hi=100)],
-        lambda c, v: _components(c, "mesh.bridge_edge_loops", 'EDGE', number_cuts=v["divisions"],
-                                 twist_offset=v["twist"]),
+        lambda c, v: _components(c, "allset.bridge", 'EDGE', divisions=v["divisions"],
+                                 twist=v["twist"]),
         paths=("Edit Mesh/Bridge",), missing=("Bridge type: Smooth path / curve", "Taper", "Smoothing angle")),
     Window("merge", "Merge Vertices Options", "Merge", None, [
         F("threshold", "Threshold:", "length", 0.01, lo=0.0, hi=1.0),
@@ -638,7 +637,7 @@ def values_of(window, holder):
     out = {}
     for f in window.fields:
         val = getattr(holder, f.name)
-        out[f.name] = tuple(val) if f.kind.startswith("vec") else val
+        out[f.name] = tuple(val) if f.kind.startswith("vec") or f.kind == 'angle3' else val
     return out
 
 
@@ -741,8 +740,7 @@ def _make(window):
                     setattr(self, name, val)
                 except (TypeError, ValueError):
                     pass
-        return context.window_manager.invoke_props_dialog(self, width=window.width, title=window.title,
-                                                          confirm_text=window.action)
+        return bpy.ops.allset.option_editor_open(key=window.key, values=json.dumps(values_of(window, self)))
 
     def draw(self, context):
         layout = self.layout
@@ -753,54 +751,64 @@ def _make(window):
         col = layout.column()
         col.use_property_split = True
         col.use_property_decorate = False
-        fields = list(window.fields)
-        i = 0
-        while i < len(fields):
-            f = fields[i]
-            if f.kind == "bool" and f.text in ("X", "Y", "Z"):
-                # Maya puts the X / Y / Z check boxes of a constraint on one line
-                split = col.split(factor=0.4)       # Blender's property split: label column 40 %
-                split.label(text="")
-                row = split.row()
-                row.use_property_split = False
-                while i < len(fields) and fields[i].kind == "bool" and fields[i].text in ("X", "Y", "Z"):
-                    row.prop(self, fields[i].name, text=fields[i].text)
-                    i += 1
-                continue
-            i += 1
-            if f.kind == "bool":
-                col.column(heading=f.label.rstrip(":")).prop(self, f.name, text=f.text or "")
-                continue
-            elif f.kind == "enum":
-                # an enum without a label is Maya's combo beside the row above (Joint Tool " + "): a drop-down, as
-                # expanded buttons without a label Blender stacks it as empty bars
-                col.row().prop(self, f.name, text=f.label.rstrip(":") or " ",
-                               expand=bool(f.label) and len(f.items) <= 4)
-            else:
-                col.prop(self, f.name, text=f.label.rstrip(":"))
-        if window.missing:
-            sub = layout.column(align=True)
-            sub.enabled = False
-            sub.label(text="Not in Blender:")
-            for name in window.missing:
-                sub.label(text="    " + name)
+        draw_fields(window, col, self)
         layout.separator()
         layout.prop(self, "apply_now", toggle=True, text=window.apply_text)
 
     def execute(self, context):
-        values = values_of(window, self)
-        store(window.key, values)        # Maya keeps the option values of a command that ran
-        res = run(window, context, values)
-        if isinstance(res, str):
-            self.report({'WARNING'}, res)
-            return {'CANCELLED'}
-        _record(window, context, res)
-        return {'FINISHED'} if res is None or 'FINISHED' in res else {'CANCELLED'}
+        from .. import undo_steps
+        def command():
+            values = values_of(window, self)
+            store(window.key, values)        # Maya keeps the option values of a command that ran
+            res = run(window, context, values)
+            if isinstance(res, str):
+                self.report({'WARNING'}, res)
+                return {'CANCELLED'}
+            _record(window, context, res)
+            return {'FINISHED'} if res is None or 'FINISHED' in res else {'CANCELLED'}
+        return undo_steps.command(window.title, command)
 
     return type(f"ALLSET_OT_opt_{window.key}", (bpy.types.Operator,), {
         "__annotations__": ann, "bl_idname": window.idname, "bl_label": window.title,
-        "bl_description": f"Maya {window.title}", "bl_options": {'UNDO'},    # no redo panel
+        "bl_description": f"Maya {window.title}", "bl_options": {'INTERNAL'},
         "invoke": invoke, "draw": draw, "execute": execute})
+
+
+def draw_fields(window, layout, holder):
+    """The same field schema drives command operators and their modeless option editors."""
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+    fields = list(window.fields)
+    i = 0
+    while i < len(fields):
+        f = fields[i]
+        if f.kind == "bool" and f.text in ("X", "Y", "Z"):
+            # Maya puts the X / Y / Z check boxes of a constraint on one line
+            split = layout.split(factor=0.4)       # Blender's property split: label column 40 %
+            split.label(text="")
+            row = split.row()
+            row.use_property_split = False
+            while i < len(fields) and fields[i].kind == "bool" and fields[i].text in ("X", "Y", "Z"):
+                row.prop(holder, fields[i].name, text=fields[i].text)
+                i += 1
+            continue
+        i += 1
+        if f.kind == "bool":
+            layout.column(heading=f.label.rstrip(":")).prop(holder, f.name, text=f.text or "")
+            continue
+        elif f.kind == "enum":
+            # an enum without a label is Maya's combo beside the row above (Joint Tool " + "): a drop-down, as
+            # expanded buttons without a label Blender stacks it as empty bars
+            layout.row().prop(holder, f.name, text=f.label.rstrip(":") or " ",
+                           expand=bool(f.label) and len(f.items) <= 4)
+        else:
+            layout.prop(holder, f.name, text=f.label.rstrip(":"))
+    if window.missing:
+        sub = layout.column(align=True)
+        sub.enabled = False
+        sub.label(text="Not in Blender:")
+        for name in window.missing:
+            sub.label(text="    " + name)
 
 
 class ALLSET_OT_option_generic(bpy.types.Operator):

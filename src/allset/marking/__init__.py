@@ -262,6 +262,9 @@ def resolve(trigger, context, picked=None):
     mode = context.mode
     ob = picked or context.active_object
     if trigger == "TOOL_OPTIONS":
+        from ..ui import in_view_editor
+        if in_view_editor.attribute_menu(context):
+            return ('pie', idname('INVIEW_ATTRIBUTES'))
         tool = context.workspace.tools.from_space_view3d_mode(mode, create=False)
         tid = tool.idname if tool else ""
         name = mm.SELECT_OPTIONS if tid.startswith("builtin.select") else mm.TOOL_OPTIONS.get(tid)

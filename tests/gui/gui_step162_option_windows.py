@@ -19,7 +19,10 @@ NONDEF = "Edit/Delete by Type/Non-Deformer History"
 
 def shot(name):
     if SHOTS:
-        screenshot(os.path.join(SHOTS, name))
+        window = next((w for w in bpy.context.window_manager.windows
+                       if w.as_pointer() in mod('ui.option_editor')._sessions), win())
+        with bpy.context.temp_override(window=window):
+            bpy.ops.screen.screenshot(filepath=os.path.join(SHOTS, name))
 
 
 def mod(name):
@@ -27,6 +30,14 @@ def mod(name):
 
 
 def key(k):
+    editor = mod('ui.option_editor')
+    window = next((w for w in bpy.context.window_manager.windows if w.as_pointer() in editor._sessions), None)
+    if window is not None:
+        area = window.screen.areas[0]
+        region = next(r for r in area.regions if r.type == 'WINDOW')
+        for value in ('PRESS', 'RELEASE'):
+            window.event_simulate(type=k, value=value, x=region.x+region.width//2, y=region.y+region.height//2)
+        return
     ev(k, 'PRESS')
     ev(k, 'RELEASE')
 

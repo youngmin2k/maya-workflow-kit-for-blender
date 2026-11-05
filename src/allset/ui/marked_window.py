@@ -25,6 +25,7 @@ KINDS = {
     "MARKING_MENU_EDITOR": ("show_properties_bone", "show_properties_data"),   # marking/menu_editor.py
     "HYPERGRAPH": ("show_properties_scene", "show_properties_collection"),   # ui/hypergraph.py
     "SKIN_TOOLS": ("show_properties_bone", "show_properties_modifiers"),   # ui/skin_tools.py
+    "COMMAND_OPTIONS": ("show_properties_scene", "show_properties_material"),
 }
 
 

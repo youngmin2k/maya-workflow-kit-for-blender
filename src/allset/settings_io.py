@@ -73,12 +73,20 @@ def import_preferences(prefs, data):
             continue
         value = data[name]
         try:
+            if name == 'inview_layouts' and not isinstance(json.loads(value), dict):
+                raise ValueError('In-View Editor layouts must be an object')
             flag = getattr(prefs.bl_rna.properties[name], "is_enum_flag", False)
             setattr(prefs, name, set(value) if flag else value)
             done.append(name)
         except (TypeError, ValueError, AttributeError):
             skipped.append(name)                # changed type or lost an enum item since the file was written
     skipped += [n for n in data if n not in done and n not in skipped and n not in SKIP_PREFS]
+    from .ui import in_view_editor
+    try:
+        in_view_editor.persist_layouts(bpy.context, prefs=prefs)
+        in_view_editor.clear()
+    except OSError:
+        skipped.append('inview_layouts')
     return done, skipped
 
 

@@ -281,7 +281,8 @@ def test_slider_keymap_in_front_of_tool_mmb():
     for km_name in maya_patches.SLIDER_TOOL_KEYMAPS:
         # the emulated Alt+LMB tumble (#242) leads and passes through otherwise
         first_mmb = next(k for k in kc.keymaps[km_name].keymap_items
-                         if k.type == 'MIDDLEMOUSE' and k.idname != "allset.emulated_tumble")
+                         if k.type == 'MIDDLEMOUSE' and k.idname not in
+                         {"allset.emulated_tumble", "allset.inview_drag"})
         assert first_mmb.idname == "allset.cb_virtual_slider", km_name
     assert any(k.idname == "allset.cb_virtual_slider"
                for k in kc.keymaps["Object Mode"].keymap_items)

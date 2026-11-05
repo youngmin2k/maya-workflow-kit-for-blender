@@ -3,6 +3,20 @@
 All notable changes to Maya Workflow Kit (earlier versions were called Allset for Maya Users and, before that, Maya Kit). Format: [Keep a Changelog](https://keepachangelog.com/), versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- Shared attribute dragging for the In-View Editor, Channel Box history and kit editor numeric fields. Pick an attribute,
+  middle-drag in the viewport, and use Ctrl / Shift or the shared slider speed to adjust it.
+- Movable, resizable In-View Editors with displayed-attribute controls, scrolling, saved layouts and context
+  attribute marking menus. T opens an editable modeling or primitive node. Bridge and Add Divisions keep editable parameters.
+- Modeless command Options editors share the numeric gestures and existing option schemas, saved settings and
+  command execution. Multiple command options can stay open together.
+
+### Fixed
+- Attribute drags commit one undo step, restore on cancel and keep G on the previous modeling command.
+- Repeated In-View display queries share a short-lived validation result while edit entry points validate afresh.
+
 ## [0.11.0] — 2026-11-04
 
 ### Added

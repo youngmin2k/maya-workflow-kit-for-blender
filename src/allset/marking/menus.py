@@ -595,8 +595,8 @@ SHIFT_EDGE = MarkingMenu(
         ("Circularize Components", CIRCULARIZE),
         ("Edit Edge Flow", _item("Edit Mesh/Edit Edge Flow")),
         DIVIDER,
-        ("Add Divisions To Edge", "mesh.subdivide"),
-        ("Bridge", "mesh.bridge_edge_loops"),
+        ("Add Divisions To Edge", "allset.subdivide"),
+        ("Bridge", "allset.bridge"),
         ("Fill Hole", "mesh.fill_holes"),
         DIVIDER,
         ("Connect Components", _item("Edit Mesh/Connect")),
@@ -634,7 +634,7 @@ SHIFT_FACE = MarkingMenu(
         ("Smart Extrude", _item("Edit Mesh/Smart Extrude")),
         ("Smooth Faces", ("mesh.subdivide", {"smoothness": 1.0})),
         ("Assign Invisible Faces", None),
-        ("Add Divisions To Faces", "mesh.subdivide"),
+        ("Add Divisions To Faces", "allset.subdivide"),
         ("Circularize Components", CIRCULARIZE),
         ("Connect Components", _item("Edit Mesh/Connect")),
         ("Detach Components", _item("Edit Mesh/Detach")),
@@ -642,7 +642,7 @@ SHIFT_FACE = MarkingMenu(
         ("Quadrangulate Faces", _item("Mesh/Quadrangulate")),
         ("Reduce Faces", _item("Mesh/Reduce")),
         ("Remesh", _item("Mesh/Remesh")),
-        ("Bridge Faces", "mesh.bridge_edge_loops"),
+        ("Bridge Faces", "allset.bridge"),
         DIVIDER,
         ("Mirror", "allset.mirror"),
         ("Extract Faces", ("mesh.separate", {"type": 'SELECTED'})),
@@ -1347,6 +1347,9 @@ MENUS = {m.name: m for m in (RMB_MESH, RMB_CURVE, RMB_LATTICE, RMB_EMPTY, PIVOT_
                              SELECT_COMPONENT, SELECT_POLYGON)}
 # The kit's own menus. MENUS is what opens: user_menus.apply (Marking Menu Editor) puts rebuilt copies of the
 # menus the user changed and the user's own menus into it; these factory objects are never changed.
+MENUS['INVIEW_ATTRIBUTES'] = MarkingMenu('INVIEW_ATTRIBUTES', 'Node Attributes',
+    'Maya In-View Editor attribute marking menu')
+
 FACTORY = dict(MENUS)
 
 # Active tool -> its options marking menu (Maya's tool hold menus).

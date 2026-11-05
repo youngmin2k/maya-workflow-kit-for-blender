@@ -349,9 +349,9 @@ MAP = {
     "Mesh/Transfer Attributes": _mod('DATA_TRANSFER'),
     "Mesh/Smooth Proxy/Subdiv Proxy": _mod('SUBSURF'),
     # --- Edit Mesh ---
-    "Edit Mesh/Add Divisions": "mesh.subdivide",
+    "Edit Mesh/Add Divisions": "allset.subdivide",
     "Edit Mesh/Bevel": ("v3d", "allset.bevel", {}),           # polyBevel3 at once, editable (#16)
-    "Edit Mesh/Bridge": "mesh.bridge_edge_loops",
+    "Edit Mesh/Bridge": "allset.bridge",
     "Edit Mesh/Collapse": "mesh.edge_collapse",
     "Edit Mesh/Connect": "allset.connect",      # = Mesh Tools > Connect
     "Edit Mesh/Extrude": ("v3d", "allset.extrude", {}),       # polyExtrudeFace
@@ -607,6 +607,7 @@ MAP.update({
     "Display/Heads Up Display/Camera Names": _kit_pref("maya_camera_names"),
     "Display/Heads Up Display/View Axis": _kit_pref("maya_view_axis"),
     "Display/Heads Up Display/ViewCube": _kit_pref("maya_viewcube"),
+    "Display/Heads Up Display/In-View Editors": _kit_pref("inview_editors"),
 })
 
 

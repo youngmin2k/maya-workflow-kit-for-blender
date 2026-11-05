@@ -168,6 +168,16 @@ class ALLSET_AddonPreferences(bpy.types.AddonPreferences):
                ('MEDIUM', "Medium", "x1"), ('FAST', "Fast", "x10")))
     cb_hyperbolic: bpy.props.BoolProperty(
         name="Hyperbolic", description="Value change accelerates with drag distance")
+    cb_manipulators: bpy.props.EnumProperty(
+        name='Manipulators', default='STANDARD',
+        items=(('STANDARD', 'Standard Manipulators', 'Show the channel manipulator and allow middle dragging'),
+               ('INVISIBLE', 'Invisible Manipulators', 'Allow middle dragging with the channel manipulator hidden'),
+               ('NONE', 'No Manipulators', 'Disable the Channel Box manipulator and middle dragging')))
+
+    inview_editors: bpy.props.BoolProperty(name="In-View Editors", default=True,
+                                          description="Show the active modeling node's attribute editor in the viewport")
+    inview_layouts: bpy.props.StringProperty(name="In-View Editor Layouts", default="{}",
+                                           description="Displayed attributes, order and placement per node type")
 
     # Create > Polygon Primitives > Interactive Creation / Exit On Completion (off / on by default, like Maya;
     # operators/interactive_create.py)

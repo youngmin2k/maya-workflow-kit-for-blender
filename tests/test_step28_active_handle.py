@@ -49,7 +49,7 @@ def test_keymaps():
     for km, _idname, mode in patches.MMB_TOOLS:
         # the emulated Alt+LMB tumble (#242) leads every MMB list and passes through otherwise
         mmb = [k for k in kc.keymaps[km].keymap_items if k.active and k.type == 'MIDDLEMOUSE' and not k.shift
-               and k.idname != "allset.emulated_tumble"]
+               and k.idname not in {"allset.emulated_tumble", "allset.inview_drag"}]
         assert [k.idname for k in mmb] == ["allset.cb_virtual_slider", "allset.manip_mmb"], (km, mmb)
         assert mmb[1].properties.mode == mode
     assert "allset.manip_press" in patches.PASS_THROUGH_FIRST

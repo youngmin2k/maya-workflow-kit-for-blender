@@ -21,6 +21,15 @@ def shot(name):
 
 
 def esc():
+    editor = import_module(MODULE + '.ui.option_editor')
+    windows = [w for w in bpy.context.window_manager.windows if w.as_pointer() in editor._sessions]
+    if windows:
+        for window in windows:
+            area = window.screen.areas[0]
+            region = next(r for r in area.regions if r.type == 'WINDOW')
+            with bpy.context.temp_override(window=window, area=area, region=region):
+                bpy.ops.allset.option_editor_action(action='CLOSE')
+        return
     ev('ESC', 'PRESS')
     ev('ESC', 'RELEASE')
 
@@ -86,7 +95,7 @@ def _window(key):
     ev('MOUSEMOVE', 'NOTHING', x=C["mid"][0], y=C["mid"][1])
     with bpy.context.temp_override(window=win()):
         res = getattr(bpy.ops.allset, "opt_" + key)('INVOKE_DEFAULT')
-    check(f"{key} option window opens", res == {'RUNNING_MODAL'})
+    check(f"{key} option window opens", res == {'FINISHED'})
 
 
 @step

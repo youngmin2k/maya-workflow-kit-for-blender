@@ -630,6 +630,11 @@ class ALLSET_GGT_xform(GizmoGroup):
             return False
         if tool_kind(context) is None or not _has_selection(context):
             return False
+        from . import channel_box
+        from .. import preferences
+        if (channel_box._slider['armed'] and channel_box._view3d_tool(context) == channel_box._slider['tool']
+                and preferences.get(context).cb_manipulators in {'INVISIBLE', 'NONE'}):
+            return False
         from . import in_view
         return not in_view.manip_visible(context)   # Maya: the extrude manipulator replaces it
 

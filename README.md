@@ -364,6 +364,10 @@ With Maya mode on. Every Maya hotkey and its Blender counterpart is listed in Ma
 | Soft select | B |
 | Smooth preview / display modes | 1 / 2 / 3 · 4 / 5 / 6 / 7 |
 | Channel Box ↔ Attribute Editor | Ctrl+A |
+| Show the selected node's editor / manipulator | T |
+| Adjust the active In-View attribute | MMB drag in the editor or viewport, Ctrl finer / Shift faster |
+| Cycle In-View attributes | Ctrl+Tab / Ctrl+Shift+Tab |
+| Adjust a numeric field in a kit editor | Ctrl+LMB / MMB / RMB drag on the field for fine / normal / coarse steps |
 | Menu sets | F2 Modeling · F3 Rigging · F4 Animation · F5 FX · F6 Rendering |
 | Undo / redo | Z or Ctrl+Z / Shift+Z |
 | Duplicate / with transform / special | Ctrl+D / Shift+D / Ctrl+Shift+D |
@@ -378,6 +382,21 @@ With Maya mode on. Every Maya hotkey and its Blender counterpart is listed in Ma
 | Save / increment and save | Ctrl+S / Ctrl+Alt+S |
 | Create Reference | Ctrl+R |
 | Switch Maya ↔ Blender | Ctrl+Alt+Shift+M |
+
+In an In-View Editor, click an attribute name to keep it active in yellow, or click its value to enter a number.
+Drag the title to move the editor and its bottom-right corner to resize it. Wheel over a long list to scroll.
+The title's **+** menu and RMB over the editor let you display, hide, reorder and reset attributes, and choose the
+same slider speed as the Channel Box. Layouts are saved per node type in the kit's user folder and travel with
+Export / Import Settings. Display > Heads Up Display > In-View Editors controls visibility.
+
+Ctrl+Shift+RMB offers the visible attributes of the active node. Selecting a Channel Box channel gives the next
+viewport middle-drag to that channel. A completed drag is one undo step and Esc restores its starting value.
+Bridge and Add Divisions use the same last-operation history as Extrude and Bevel. Each node is editable while its
+input snapshot and result are still valid.
+
+Command Options open in modeless floating editors with the same Ctrl+mouse numeric gestures, Apply, Save Settings
+and Reset Settings. Different command options can stay open together. Commands run in the editor that opened their
+options. Editable modeling nodes use the existing last-operation snapshot backend.
 
 ---
 

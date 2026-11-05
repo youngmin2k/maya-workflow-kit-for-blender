@@ -756,9 +756,14 @@ def _store_generic(rec, bm, tracked, params):
 
 def restore_pre(bm, rec):
     """Put the mesh from before the extrusion back into ``bm`` (an edit-mode bmesh)."""
+    restore_mesh(bm, rec.pre)
+
+
+def restore_mesh(bm, source):
+    """Restore a BMesh snapshot, including its custom data, after an edit or failed build."""
     me = bpy.data.meshes.new(".allset_pre")
     try:
-        rec.pre.to_mesh(me)
+        source.to_mesh(me)
         bm.clear()
         bm.from_mesh(me)
     finally:
@@ -993,10 +998,11 @@ def kind_of(bm, select_mode):
 def record_new(context, ob, bm, spec, params, unit):
     """Run ``spec`` on the selection of ``ob`` (edit mode) as a new history node; the same node again when
     Adjust Last Operation re-runs it on the same mesh. Returns the record or None."""
-    rec = _record_bm(context, ob, bm, spec, params, unit)
-    if rec is not None:
+    try:
+        return _record_bm(context, ob, bm, spec, params, unit)
+    finally:
+        # A failed build can replace the BMesh while restoring its snapshot.
         bmesh.update_edit_mesh(ob.data)
-    return rec
 
 
 def record_object(context, ob, spec, params, unit):
@@ -1025,8 +1031,16 @@ def _record_bm(context, ob, bm, spec, params, unit):
             and (not spec.pre_uv or _uv_signature(old.pre) == _uv_signature(bm))):
         name = old.name
     pre = bm.copy()
-    tracked = spec.build(bm, params, unit, **({"ob": ob} if spec.with_object else {}))
+    try:
+        tracked = spec.build(bm, params, unit, **({"ob": ob} if spec.with_object else {}))
+    except Exception:
+        try:
+            restore_mesh(bm, pre)
+        finally:
+            pre.free()
+        raise
     if not tracked:
+        restore_mesh(bm, pre)
         pre.free()
         return None
     if old is not None:
@@ -1210,9 +1224,11 @@ def set_params(context, **changes):
         return {'CANCELLED'}
     params = dict(rec.params)
     params.update(changes)
-    for k in INT_FIELDS:
-        if k in params:
-            params[k] = max(1, int(params[k]))
+    properties = getattr(bpy.ops.allset, rec.spec.edit_op).get_rna_type().properties
+    for key in rec.spec.all_fields:
+        prop = properties.get(key)
+        if prop is not None and prop.type == 'INT':
+            params[key] = max(prop.hard_min, min(prop.hard_max, int(params[key])))
     # undo=True: a Python operator call pushes no undo step by default (bpy.ops positional ``undo``)
     return getattr(bpy.ops.allset, rec.spec.edit_op)('EXEC_DEFAULT', True, **params)
 
