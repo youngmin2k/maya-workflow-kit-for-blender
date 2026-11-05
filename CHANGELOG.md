@@ -14,6 +14,8 @@ All notable changes to Maya Workflow Kit (earlier versions were called Allset fo
   command execution. Multiple command options can stay open together.
 
 ### Fixed
+- Leaving component mode closes its In-View Editor. Reopening modeling nodes in Object Mode reads the Mesh
+  anchor safely, and mode changes cancel an active attribute drag.
 - Attribute drags commit one undo step, restore on cancel and keep G on the previous modeling command.
 - Repeated In-View display queries share a short-lived validation result while edit entry points validate afresh.
 

@@ -110,14 +110,20 @@ def _pre_direction(rec):
 def cap_frame(ob, rec):
     """(world centre, world unit normal, world length of one local unit along it) of the extruded faces (edge /
     vertex extrusion: the selection it left, the mean edge / vertex normal; bevel: the bevel's vertices)."""
-    bm = bmesh.from_edit_mesh(ob.data)
-    bm.verts.ensure_lookup_table()
-    bm.faces.ensure_lookup_table()
-    verts = [bm.verts[i] for i in rec.cap_verts if i < len(bm.verts)]
+    if ob.mode == 'EDIT' and ob.data.is_editmode:
+        bm = bmesh.from_edit_mesh(ob.data)
+        bm.verts.ensure_lookup_table()
+        bm.faces.ensure_lookup_table()
+        mesh_verts, mesh_faces = bm.verts, bm.faces
+    elif ob.mode == 'OBJECT' and not ob.data.is_editmode:
+        mesh_verts, mesh_faces = ob.data.vertices, ob.data.polygons
+    else:
+        return None
+    verts = [mesh_verts[i] for i in rec.cap_verts if i < len(mesh_verts)]
     if rec.spec is not extrude.FACE:
         selected = rec.sel[0] if rec.sel is not None else ()
-        verts = [bm.verts[i] for i in selected if i < len(bm.verts)] or verts
-    faces = [bm.faces[i] for i in rec.cap_faces if i < len(bm.faces)]
+        verts = [mesh_verts[i] for i in selected if i < len(mesh_verts)] or verts
+    faces = [mesh_faces[i] for i in rec.cap_faces if i < len(mesh_faces)]
     if not verts:
         return None
     centre = sum((v.co for v in verts), Vector()) / len(verts)

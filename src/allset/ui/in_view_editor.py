@@ -32,14 +32,15 @@ def tool(context):
 def state(context, node):
     key = view_key(context)
     current = _views.get(key)
-    if current is None or current['identity'] != node.identity:
+    if current is None or current['identity'] != node.identity or current['mode'] != context.mode:
         live = {(window.as_pointer(), area.as_pointer()) for window in context.window_manager.windows
                 for area in window.screen.areas}
         for stale in set(_views)-live:
             _views.pop(stale, None)
             _model_targets.pop(stale, None)
         saved = settings(context, node)
-        current = dict(identity=node.identity, field=node.spec.fields[0], armed=True, tool=tool(context),
+        current = dict(identity=node.identity, mode=context.mode,
+                       field=node.spec.fields[0], armed=True, tool=tool(context),
                        position=saved.get('position'), width=saved.get('width') or 180.0,
                        height=saved.get('height'), scroll=0, reveal=False)
         _views[key] = current
@@ -154,9 +155,12 @@ def target(context, fresh=False):
             return None
         return node
     saved = _views.get(view_key(context))
-    if saved is None or saved['identity'][0] != ob.session_uid or saved['tool'] != tool(context):
+    if (saved is None or saved['mode'] != context.mode or saved['identity'][0] != ob.session_uid
+            or saved['tool'] != tool(context)):
         return None
     node = node_attributes.target(context, ob)
+    if isinstance(node, node_attributes.ModelingNode) and node.record.dismissed:
+        return None
     return node if node is not None and node.identity == saved['identity'] else None
 
 
@@ -379,6 +383,7 @@ def invoke_drag(operator, context, event):
     operator._view = view_key(context)
     operator._generation = _generation
     operator._scene = context.scene
+    operator._mode = context.mode
     operator._frame = context.scene.frame_current
     operator._tool = tool(context)
     operator._role = role
@@ -468,6 +473,7 @@ def modal_drag(operator, context, event):
     try:
         if (operator._generation != _generation or context.window is None or context.area is None
                 or view_key(context) != operator._view or context.scene != operator._scene
+                or context.mode != operator._mode
                 or context.scene.frame_current != operator._frame or context.active_object != operator._node.ob
                 or tool(context) != operator._tool or not operator._node.valid()):
             return finish_drag(operator, context, cancel=True)
